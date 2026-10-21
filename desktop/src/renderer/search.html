@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:">
+<title>메모 검색</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="search.css">
+</head>
+<body>
+<div id="box" class="box">
+  <label class="bar">
+    <span id="icon" class="icon" aria-hidden="true"></span>
+    <span class="sr">메모 검색</span>
+    <input id="q" type="text" placeholder="메모 검색 · 연락망도 함께 찾아요" spellcheck="false" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="res">
+    <span class="kbd">Esc</span>
+  </label>
+  <div id="res" class="res" role="listbox" aria-label="검색 결과"></div>
+  <div id="foot" class="foot" hidden><span>↑↓ 고르기</span><span>Enter 열기</span><span>Esc 닫기</span></div>
+</div>
+<script src="common.js"></script>
+<script src="search.js"></script>
+</body>
+</html>

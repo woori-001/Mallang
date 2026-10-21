@@ -206,7 +206,7 @@ function broadcast() {
 const getMemo = (id) => store.memos.find((m) => m.id === id && !m.deleting);
 
 // ───────────────────────── 창 공통 ─────────────────────────
-let host = null, side = null, widget = null, peopleWin = null, tray = null;
+let host = null, side = null, widget = null, peopleWin = null, searchWin = null, tray = null;
 const memoWins = new Map();
 const focusOnOpen = new Set();
 const anims = new WeakMap();
@@ -315,6 +315,13 @@ function createHost() {
       const wy = store.widget.y != null ? store.widget.y : wa.y + wa.height - 260;
       return { action: 'allow', overrideBrowserWindowOptions: { ...baseWinOpts, x: Math.round(wx), y: Math.round(wy), width: WIDGET_W, height: 200 } };
     }
+    if (kind === 'search') {
+      const wa = workArea();
+      return { action: 'allow', overrideBrowserWindowOptions: {
+        ...baseWinOpts, x: Math.round(wa.x + (wa.width - SEARCH_W) / 2 - P), y: Math.round(wa.y + wa.height * 0.16 - P),
+        width: SEARCH_W + 2 * P, height: 96, alwaysOnTop: true
+      } };
+    }
     if (kind === 'people') {
       return { action: 'allow', overrideBrowserWindowOptions: { ...baseWinOpts, ...peopleBounds(), alwaysOnTop: !!store.peopleWin.top } };
     }
@@ -327,6 +334,7 @@ function createHost() {
     if (kind === 'memo') setupMemoWin(win, Number(u.searchParams.get('id')));
     if (kind === 'widget') setupWidget(win);
     if (kind === 'people') setupPeople(win);
+    if (kind === 'search') setupSearch(win);
   });
   host.on('close', (e) => { if (!quitting) e.preventDefault(); });
   host.loadFile(R('host.html'));
@@ -616,6 +624,42 @@ function closeWidget() {
   setTimeout(() => { if (!w.isDestroyed()) w.close(); }, 330);
 }
 
+// ───────────────────────── 빠른 검색 (Ctrl+Alt+F) ─────────────────────────
+const SEARCH_W = 560;
+function toggleSearch() {
+  if (searchWin && !searchWin.isDestroyed()) { closeSearch(); return; }
+  hostOpen('search.html?kind=search', 'search-' + Date.now());
+}
+function setupSearch(win) {
+  searchWin = win;
+  win.setAlwaysOnTop(true, 'pop-up-menu');
+  win.once('ready-to-show', () => { if (!win.isDestroyed()) { win.show(); win.focus(); win.webContents.focus(); } });
+  // 다른 곳을 누르면 닫힘 (막 열린 직후의 흔들림은 무시)
+  const born = Date.now();
+  win.on('blur', () => { if (Date.now() - born > 400) closeSearch(win); });
+  win.on('closed', () => { if (searchWin === win) searchWin = null; });
+}
+function closeSearch(w) {
+  w = w || searchWin;
+  if (!w || w.isDestroyed()) return;
+  if (searchWin === w) searchWin = null;
+  w.close();
+}
+ipcMain.on('search:size', (e, h) => {
+  h = num(h);
+  if (!searchWin || searchWin.isDestroyed() || h == null) return;
+  const b = searchWin.getBounds();
+  searchWin.setBounds({ x: b.x, y: b.y, width: b.width, height: Math.round(Math.min(640, Math.max(60, h))) });
+});
+ipcMain.on('search:close', () => closeSearch());
+ipcMain.on('search:open', (e, id) => {
+  closeSearch();
+  const m = getMemo(id);
+  if (!m) return;
+  if (m.folded) updateMemo(id, { folded: false });
+  setTimeout(() => focusMemo(id), m.hidden ? 0 : 60);
+});
+
 // ───────────────────────── 연락망 띄우기 ─────────────────────────
 const PEOPLE_MIN_W = 260, PEOPLE_MIN_H = 180;
 function peopleBounds() {
@@ -698,6 +742,9 @@ function buildTrayMenu() {
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: '새 메모  (Ctrl+Alt+N)', click: () => createMemo() },
     { label: '목록 열기', click: openSide },
+    { label: '메모 검색  (Ctrl+Alt+F)', click: () => toggleSearch() },
+    { label: '모두 접기  (Ctrl+Alt+↑)', click: () => foldAll() },
+    { label: '모두 펴기  (Ctrl+Alt+↓)', click: () => unfoldAll() },
     { label: '숨긴 메모 모두 보이기', click: showAllHidden },
     { type: 'separator' },
     { label: '오늘 일정 위젯', type: 'checkbox', checked: !!store.settings.showToday, click: (i) => updateSettings({ showToday: i.checked }) },
@@ -1360,8 +1407,9 @@ app.whenReady().then(() => {
   createTray();
   globalShortcut.register('CommandOrControl+Alt+N', () => createMemo());
   try {
-    globalShortcut.register('CommandOrControl+Alt+Up', () => unfoldAll());
-    globalShortcut.register('CommandOrControl+Alt+Down', () => foldAll());
+    globalShortcut.register('CommandOrControl+Alt+Down', () => unfoldAll());   // 모두 펴기
+    globalShortcut.register('CommandOrControl+Alt+Up', () => foldAll());       // 모두 접기
+    globalShortcut.register('CommandOrControl+Alt+F', () => toggleSearch());
   } catch (e) { console.error('단축키 등록 실패', e); }
   screen.on('display-metrics-changed', placeSide);
   screen.on('display-added', placeSide);

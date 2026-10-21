@@ -322,8 +322,8 @@
     }
   });
   $('newMemo').addEventListener('click', () => api.create({}));
-  $('foldAll').title = '모두 접기 (Ctrl+Alt+↓)';
-  $('unfoldAll').title = '모두 펴기 (Ctrl+Alt+↑)';
+  $('foldAll').title = '모두 접기 (Ctrl+Alt+↑)';
+  $('unfoldAll').title = '모두 펴기 (Ctrl+Alt+↓)';
   $('foldAll').addEventListener('click', () => api.foldAll());
   $('unfoldAll').addEventListener('click', () => api.unfoldAll());
   $('q').addEventListener('input', (e) => { q = e.target.value.trim(); renderMemos(); });
