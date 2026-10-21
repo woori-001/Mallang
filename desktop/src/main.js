@@ -3,6 +3,9 @@
 // 메모 창, 목록바, 오늘 일정 위젯, 트레이 아이콘, 자동 저장을 관리합니다.
 const { app, BrowserWindow, ipcMain, screen, Tray, Menu, globalShortcut, nativeImage, shell, dialog, safeStorage, powerMonitor, clipboard } = require('electron');
 const Cloud = require('./cloud-core');
+const { Notification } = require('electron');
+let autoUpdater = null;
+try { autoUpdater = require('electron-updater').autoUpdater; } catch (e) { /* 개발 실행에서는 없을 수 있음 */ }
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -179,7 +182,8 @@ function snapshot() {
       deletedAt: t.deletedAt, purgeAt: t.deletedAt + TRASH_DAYS * DAY
     })),
     trashDays: TRASH_DAYS,
-    cloud: cloudInfo()
+    cloud: cloudInfo(),
+    update: { ...upd, current: app.getVersion() }
   };
 }
 function broadcast() {
@@ -631,6 +635,9 @@ function buildTrayMenu() {
     { label: '오늘 일정 위젯', type: 'checkbox', checked: !!store.settings.showToday, click: (i) => updateSettings({ showToday: i.checked }) },
     { label: '윈도우 시작 시 자동 실행', type: 'checkbox', checked: !!store.settings.autoStart, click: (i) => updateSettings({ autoStart: i.checked }) },
     { label: '메모 저장 폴더 열기', click: () => shell.openPath(dataDir) },
+    upd.state === 'ready'
+      ? { label: '새 버전 ' + upd.version + ' 지금 적용', click: applyUpdate }
+      : { label: '업데이트 확인 (지금 ' + app.getVersion() + ')', click: checkUpdateNow },
     { type: 'separator' },
     { label: '말랑메모 종료', click: () => { quitting = true; app.quit(); } }
   ]));
@@ -872,6 +879,46 @@ ipcMain.handle('backup:import', async (e, password) => {
   return { ok: true, added, skipped, events: evAdded };
 });
 
+
+// ───────────────────────── 자동 업데이트 ─────────────────────────
+// GitHub(woori-001/Mallang) Releases에서 새 버전을 찾아 조용히 받아 두고,
+// 다 받으면 알려줘요. 바로 적용하지 않아도 앱을 끌 때 자동으로 설치돼요.
+const upd = { state: 'idle', version: '', percent: 0, message: '' };
+function setUpd(p) { Object.assign(upd, p); broadcast(); buildTrayMenu(); }
+function setupUpdater() {
+  if (!autoUpdater || !app.isPackaged) return;
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.on('checking-for-update', () => setUpd({ state: 'checking', message: '' }));
+  autoUpdater.on('update-available', (i) => setUpd({ state: 'downloading', version: i.version, percent: 0 }));
+  autoUpdater.on('update-not-available', () => setUpd({ state: 'latest' }));
+  autoUpdater.on('download-progress', (p) => setUpd({ state: 'downloading', percent: Math.round(p.percent || 0) }));
+  autoUpdater.on('update-downloaded', (i) => {
+    setUpd({ state: 'ready', version: i.version, percent: 100 });
+    try {
+      const n = new Notification({ title: '말랑메모 새 버전 ' + i.version, body: '준비됐어요. 누르면 바로 적용돼요. (나중에 앱을 끌 때 자동으로 적용돼요)', icon: path.join(__dirname, 'tray@2x.png') });
+      n.on('click', applyUpdate);
+      n.show();
+    } catch (e) { /* 알림을 못 띄워도 괜찮음 */ }
+  });
+  autoUpdater.on('error', (e) => { console.error('업데이트 확인 실패', e && e.message); setUpd({ state: 'error', message: '업데이트를 확인하지 못했어요' }); });
+  const check = () => { if (upd.state !== 'downloading' && upd.state !== 'ready') autoUpdater.checkForUpdates().catch(() => {}); };
+  setTimeout(check, 15000);
+  setInterval(check, 6 * 60 * 60 * 1000);
+}
+function checkUpdateNow() {
+  if (!autoUpdater || !app.isPackaged) { setUpd({ state: 'latest' }); return; }
+  if (upd.state === 'ready') { applyUpdate(); return; }
+  autoUpdater.checkForUpdates().catch(() => {});
+}
+function applyUpdate() {
+  if (!autoUpdater || upd.state !== 'ready') return;
+  saveNow();
+  quitting = true;
+  setImmediate(() => autoUpdater.quitAndInstall(true, true));   // 조용히 설치하고 다시 켜기
+}
+ipcMain.on('update:check', checkUpdateNow);
+ipcMain.on('update:apply', applyUpdate);
 
 // ───────────────────────── 계정 · 동기화 ─────────────────────────
 // 메모 내용은 비밀번호로 만든 열쇠로 이 PC 안에서 잠근 뒤 서버에 올라갑니다.
@@ -1143,6 +1190,7 @@ app.whenReady().then(() => {
   autoPurge();
   setInterval(autoPurge, 60 * 60 * 1000);
   cloudStart().catch((e) => console.error(e));
+  setupUpdater();
   setInterval(() => scheduleSync(0), 20000);
   powerMonitor.on('resume', () => scheduleSync(2000));
   powerMonitor.on('unlock-screen', () => scheduleSync(1000));

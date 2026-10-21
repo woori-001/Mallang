@@ -104,6 +104,7 @@
     $('vCal').hidden = view !== 'cal';
     $('vStyle').hidden = view !== 'style';
     $('vAcct').hidden = view !== 'acct';
+    renderUpdate();
     if (view === 'acct') renderAcct();
     if (view === 'memo') renderMemos();
     if (view === 'cal') renderCal();
@@ -424,6 +425,19 @@
   });
   $('autoStart').addEventListener('click', () => api.setSettings({ autoStart: !S.settings.autoStart }));
   $('openData').addEventListener('click', () => api.openData());
+
+  // ───────── 업데이트 ─────────
+  function renderUpdate() {
+    const u = S.update || {};
+    $('updBar').hidden = u.state !== 'ready';
+    if (u.state === 'ready') $('updBar').textContent = '새 버전 ' + u.version + ' 준비됐어요 · 지금 적용';
+    const st = { checking: '확인 중…', downloading: '새 버전 ' + (u.version || '') + ' 받는 중 ' + (u.percent || 0) + '%', latest: '최신 버전이에요', ready: '새 버전 ' + u.version + ' 준비됨', error: u.message || '' }[u.state] || '';
+    $('verTxt').textContent = '버전 ' + (u.current || '') + (st ? ' · ' + st : '');
+    $('verCheck').textContent = u.state === 'ready' ? '지금 적용' : '업데이트 확인';
+    $('verCheck').disabled = u.state === 'checking' || u.state === 'downloading';
+  }
+  $('updBar').addEventListener('click', () => api.applyUpdate());
+  $('verCheck').addEventListener('click', () => { const u = S.update || {}; if (u.state === 'ready') api.applyUpdate(); else api.checkUpdate(); });
 
   // ───────── 계정 ─────────
   let acMode = 'login', acBusy = false;

@@ -1,6 +1,6 @@
 {
   "name": "mallang-memo",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "투명하고 말랑한 데스크톱 메모 앱",
   "main": "src/main.js",
   "scripts": {
@@ -8,7 +8,8 @@
     "fonts": "node scripts/build-fonts.js",
     "icon": "python3 scripts/make-icon.py",
     "dist": "npm run fonts && electron-builder --win nsis --x64 --publish never",
-    "web": "node scripts/copy-web.js"
+    "web": "node scripts/copy-web.js",
+    "release": "npm run fonts && electron-builder --win nsis --x64 --publish always"
   },
   "keywords": [],
   "author": "말랑메모",
@@ -35,6 +36,7 @@
     "resedit": "^3.1.0"
   },
   "dependencies": {
+    "electron-updater": "^6.8.9",
     "koffi": "^2.16.3"
   },
   "productName": "말랑메모",
@@ -80,10 +82,21 @@
       "deleteAppDataOnUninstall": false
     },
     "afterPack": "scripts/after-pack.js",
-    "publish": null,
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "woori-001",
+        "repo": "Mallang",
+        "releaseType": "release"
+      }
+    ],
     "electronLanguages": [
       "ko",
       "en-US"
     ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/woori-001/Mallang.git"
   }
 }

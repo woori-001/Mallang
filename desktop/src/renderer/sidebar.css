@@ -251,3 +251,13 @@ input[type="range"] { width: 100%; accent-color: var(--a1); }
 .syncDot.error { background: #D23B66; }
 @keyframes blink { 50% { opacity: .35; } }
 .sect[hidden], .acHero[hidden] { display: none; }
+
+/* 업데이트 */
+.updBar {
+  display: flex; align-items: center; justify-content: center; gap: 8px; height: 40px; border: none; border-radius: 14px; flex: none;
+  background: var(--accent); color: var(--on); font-size: 13px; font-weight: 700; box-shadow: 0 8px 18px var(--glow);
+  animation: fade .4s var(--ease);
+}
+.updBar[hidden] { display: none; }
+.verRow { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+.verRow .ctext { margin-top: 0; text-decoration: underline; }

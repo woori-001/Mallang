@@ -23,6 +23,8 @@
       <button id="pin" class="ib pinbtn" type="button" aria-label="목록바 고정" title="목록바 고정 (마우스를 떼도 열려 있어요)"></button>
     </header>
 
+    <button id="updBar" class="updBar soft" type="button" hidden></button>
+
     <div class="seg" role="tablist" aria-label="보기">
       <button class="segb" type="button" role="tab" data-tab="memo">메모</button>
       <button class="segb" type="button" role="tab" data-tab="cal">캘린더</button>
@@ -171,6 +173,7 @@
           <div><b>제목줄 더블클릭</b> 접기 / 펴기</div>
           <div><b>제목 클릭</b> 이름 바꾸기 · <b>오른쪽 아래 모서리</b> 크기 조절</div>
           <button id="openData" class="ctext" type="button">메모 저장 폴더 열기</button>
+          <div class="verRow"><span id="verTxt"></span><button id="verCheck" class="ctext" type="button">업데이트 확인</button></div>
         </div>
       </div>
     </section>
