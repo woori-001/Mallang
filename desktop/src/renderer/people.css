@@ -28,6 +28,10 @@ body { padding: 14px; }
 .ib.txt { width: auto; padding: 0 9px; font-size: 12px; font-weight: 700; }
 .ib.on { background: var(--accent); color: var(--on); }
 .tbl { flex: 1; min-height: 0; padding: 0 12px 14px; }
+.tbl[hidden] { display: none; }
+.gvBox { flex: 1; min-height: 0; padding: 0 12px 14px; }
+.gvBox[hidden] { display: none; }
+.card.folded .gvBox { display: none; }
 .tbl .mtbl th, .tbl .mtbl td { white-space: pre; max-width: none; }
 .tblWrap.ro .mtbl td { cursor: copy; }
 .tblWrap.ro .mtbl td:hover { background: rgba(var(--glass), .85); }

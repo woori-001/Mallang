@@ -1139,11 +1139,14 @@ function scheduleSync(delay = 1500) {
   syncTimer = setTimeout(runSync, delay);
 }
 
-// 연락망 예전 기본 머리글(직급·휴대폰 포함)이면 두 칸을 빼서 자리 내선 연락망으로
-const OLD_CONTACT_HEAD = '부서|이름|직급|내선|휴대폰|이메일';
+// 연락망 예전 기본 머리글이면 자리 내선 연락망(부서·이름·내선)으로 정리
 function fixContactRows(rows) {
-  if (!rows || !rows[0] || rows[0].join('|') !== OLD_CONTACT_HEAD) return null;
-  return rows.map((r) => r.filter((c, i) => i !== 2 && i !== 4));
+  if (!rows || !rows[0]) return null;
+  let out = rows, changed = false;
+  if (out[0].join('|') === '부서|이름|직급|내선|휴대폰|이메일') { out = out.map((r) => r.filter((c, i) => i !== 2 && i !== 4)); changed = true; }
+  // 비어 있는 이메일 칸은 빼기 (자리 내선 연락망)
+  if (out[0].join('|') === '부서|이름|내선|이메일' && out.slice(1).every((r) => !String(r[3] || '').trim())) { out = out.map((r) => r.slice(0, 3)); changed = true; }
+  return changed ? out : null;
 }
 // 표: { rows: [[머리글], [칸...]] } · 최대 500줄 × 12칸
 function sanitizeTable(t) {

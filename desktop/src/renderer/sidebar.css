@@ -289,3 +289,8 @@ input[type="range"] { width: 100%; accent-color: var(--a1); }
 .people .mtbl { font-size: 13px; }
 .people .mtbl th, .people .mtbl td { min-width: 56px; max-width: none; white-space: pre; }
 .pfoot { font-size: 11.5px; line-height: 1.5; }
+.people[hidden] { display: none; }
+.pTop { display: flex; gap: 6px; }
+.pTop .search { flex: 1; min-width: 0; }
+.pEdit { flex: none; padding: 0 14px; }
+.pEdit.on { background: var(--accent); color: var(--on); }

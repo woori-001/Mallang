@@ -40,19 +40,18 @@
   }
   $('tbl').addEventListener('focusout', () => setTimeout(() => { if (!$('tbl').contains(document.activeElement)) flush(); }, 0));
 
+  // 보기: 부서별로 묶어서
+  const gv = window.M.contactView($('gv'), {
+    store: 'mallang.people.closed',
+    onPick: (v, row, el) => {
+      api.copyText(v);
+      el.classList.add('picked');
+      setTimeout(() => el.classList.remove('picked'), 600);
+      toast('‘' + v + '’ 복사했어요');
+    }
+  });
   let toastT = null;
   function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 1300); }
-
-  // 보기 모드: 칸을 누르면 그 내용을 복사
-  $('tbl').addEventListener('click', (e) => {
-    if (editing) return;
-    const td = e.target.closest('td[data-c]');
-    if (!td || String(getSelection())) return;
-    const t = td.textContent.trim();
-    if (!t) return;
-    api.copyText(t);
-    toast('‘' + (t.length > 20 ? t.slice(0, 20) + '…' : t) + '’ 복사했어요');
-  });
 
   function setEdit(on) {
     if (!on) flush();
@@ -61,14 +60,18 @@
     $('edit').classList.toggle('on', on);
     $('edit').setAttribute('aria-pressed', String(on));
     tbl.setEditable(on);
+    $('tbl').hidden = !on;
+    $('gv').hidden = on;
     tbl.filter(q.value);
+    if (!on) { gv.setRows(tbl.getRows()); gv.filter(q.value); }
     if (on) setTimeout(() => tbl.focusFirst(), 30);
   }
   $('edit').addEventListener('click', () => setEdit(!editing));
   $('top').addEventListener('click', () => api.peopleTop(!(S && S.peopleWin && S.peopleWin.top)));
   $('close').addEventListener('click', () => { flush(); api.setSettings({ showPeople: false }); });
-  q.addEventListener('input', () => tbl.filter(q.value));
-  q.addEventListener('keydown', (e) => { if (e.key === 'Escape') { q.value = ''; tbl.filter(''); } });
+  const doFilter = () => { tbl.filter(q.value); gv.filter(q.value); };
+  q.addEventListener('input', doFilter);
+  q.addEventListener('keydown', (e) => { if (e.key === 'Escape') { q.value = ''; doFilter(); } });
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') { e.preventDefault(); if (folded()) toggleFold(); setTimeout(() => { q.focus(); q.select(); }, folded() ? 0 : 50); }
   });
@@ -87,6 +90,7 @@
     $('top').classList.toggle('on', on);
     $('top').setAttribute('aria-pressed', String(on));
     if (!dirty && Date.now() - sentAt > 800) { tbl.setRows(S.contacts || null); tbl.filter(q.value); }
+    if (!editing) gv.setRows(S.contacts || [window.M.CONTACT_HEAD]);
   }
 
   // 제목줄 끌어서 옮기기

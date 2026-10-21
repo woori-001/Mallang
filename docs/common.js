@@ -279,11 +279,14 @@
   // ───────── 표 ─────────
   // 표 데이터: { rows: [[머리글...], [칸...], ...] }  (첫 줄은 머리글)
   const TBL = { maxR: 500, maxC: 12, maxCell: 1000 };
-  const CONTACT_HEAD = ['부서', '이름', '내선', '이메일'];
+  const CONTACT_HEAD = ['부서', '이름', '내선'];
   // 예전 기본 머리글(직급·휴대폰 포함)이면 두 칸을 빼기
   function fixContactRows(rows) {
-    if (!rows || !rows[0] || rows[0].join('|') !== '부서|이름|직급|내선|휴대폰|이메일') return null;
-    return rows.map((r) => r.filter((c, i) => i !== 2 && i !== 4));
+    if (!rows || !rows[0]) return null;
+    let out = rows, changed = false;
+    if (out[0].join('|') === '부서|이름|직급|내선|휴대폰|이메일') { out = out.map((r) => r.filter((c, i) => i !== 2 && i !== 4)); changed = true; }
+    if (out[0].join('|') === '부서|이름|내선|이메일' && out.slice(1).every((r) => !String(r[3] || '').trim())) { out = out.map((r) => r.slice(0, 3)); changed = true; }
+    return changed ? out : null;
   }
   function cleanTable(t, fallbackHead) {
     let rows = t && Array.isArray(t.rows) ? t.rows : null;
@@ -548,6 +551,97 @@
     };
   }
 
+  /* 연락망 보기 (부서별로 묶어서 이름·내선을 촘촘하게)
+     el 안에 그려요. opts.onPick(값, 줄, 요소) 누를 때 · opts.store 접어 둔 부서 기억용 키 */
+  function contactView(el, opts) {
+    opts = opts || {};
+    let rows = null, query = '';
+    let closed = {};
+    try { closed = JSON.parse(localStorage.getItem(opts.store || 'mallang.gv.closed') || '{}') || {}; } catch (e) { closed = {}; }
+    const saveClosed = () => { try { localStorage.setItem(opts.store || 'mallang.gv.closed', JSON.stringify(closed)); } catch (e) { /* 무시 */ } };
+    el.classList.add('gv');
+    const findCol = (head, re, dflt) => { const i = head.findIndex((h) => re.test(h)); return i >= 0 ? i : dflt; };
+    const isMain = (name) => /^(대표|대표번호|팀\s*대표)$/.test(String(name).trim());
+    function render() {
+      if (!rows) return;
+      const head = rows[0] || [];
+      const D = findCol(head, /부서|팀|소속/, 0);
+      const N = findCol(head, /이름|성명|담당/, D === 0 ? 1 : 0);
+      const X = findCol(head, /내선|전화|번호|연락/, head.length > 2 ? 2 : head.length - 1);
+      const extra = head.map((h, i) => i).filter((i) => i !== D && i !== N && i !== X);
+      const groups = [], byName = new Map();
+      rows.slice(1).forEach((r, k) => {
+        if (!r.some((c) => String(c).trim())) return;
+        const g = String(r[D] || '').trim() || '기타';
+        if (!byName.has(g)) { const o = { name: g, main: [], people: [] }; byName.set(g, o); groups.push(o); }
+        const item = { r, k: k + 1 };
+        (isMain(r[N]) ? byName.get(g).main : byName.get(g).people).push(item);
+      });
+      const q = query;
+      let html = '', shown = 0;
+      for (const g of groups) {
+        const gHit = q && rowMatches([g.name], q);
+        const people = q && !gHit ? g.people.filter((it) => rowMatches(it.r, q)) : g.people;
+        const mains = q && !gHit ? g.main.filter((it) => rowMatches(it.r, q)) : g.main;
+        if (q && !people.length && !mains.length) continue;
+        shown += people.length + mains.length;
+        const isClosed = !q && closed[g.name];
+        // 부서 줄: [접기 · 부서 이름 · 인원] [대표번호]
+        html += '<section class="gvSec' + (isClosed ? ' closed' : '') + (people.length ? '' : ' solo') + '">' +
+          '<div class="gvHead"><button type="button" class="gvTog" data-g="' + esc(g.name) + '" aria-expanded="' + !isClosed + '"' + (people.length ? '' : ' tabindex="-1"') + '>' +
+            (people.length ? '<span class="gvChev" aria-hidden="true">' + ICONS.chev + '</span>' : '<span class="gvDot" aria-hidden="true"></span>') +
+            '<b>' + (q ? hl(g.name, q) : esc(g.name)) + '</b>' +
+            (g.people.length ? '<span class="gvCnt">' + g.people.length + '명</span>' : '') + '</button>' +
+          mains.map((it) => '<button type="button" class="gvMain" data-v="' + esc(it.r[X] || '') + '" data-k="' + it.k + '" title="대표번호 · 눌러서 복사">' +
+            '<span>대표</span><b>' + hl(it.r[X] || '', q) + '</b></button>').join('') + '</div>' +
+          (people.length ? '<div class="gvGrid">' + people.map((it) => {
+            const ex = extra.map((i) => String(it.r[i] || '').trim()).filter(Boolean).join(' · ');
+            const vacant = /^(공석|빈자리|-)$/.test(String(it.r[N] || '').trim());
+            return '<button type="button" class="gvItem' + (vacant ? ' vacant' : '') + '" data-v="' + esc(it.r[X] || '') + '" data-k="' + it.k + '" title="눌러서 복사">' +
+              '<span class="gvName">' + hl(it.r[N] || '', q) + (ex ? '<i>' + hl(ex, q) + '</i>' : '') + '</span>' +
+              '<span class="gvExt">' + hl(it.r[X] || '', q) + '</span></button>';
+          }).join('') + '</div>' : '') + '</section>';
+      }
+      if (!groups.length) html = '<div class="gvEmpty">아직 연락망이 없어요.<br>편집을 눌러 넣거나, 엑셀에서 복사해 붙여넣어 보세요.</div>';
+      else if (!shown && q) html = '<div class="gvEmpty">찾는 사람이 없어요</div>';
+      el.innerHTML = html;
+    }
+    function hl(text, q) {
+      const t = String(text || '');
+      if (!q) return esc(t);
+      const n = q.toLowerCase(), lt = t.toLowerCase();
+      let j = lt.indexOf(n);
+      if (j < 0) {
+        // 번호는 - 없이 쳐도 찾으니 강조 없이
+        return esc(t);
+      }
+      let out = '', i = 0;
+      while (j >= 0) { out += esc(t.slice(i, j)) + '<mark>' + esc(t.slice(j, j + n.length)) + '</mark>'; i = j + n.length; j = lt.indexOf(n, i); }
+      return out + esc(t.slice(i));
+    }
+    el.addEventListener('click', (e) => {
+      const h = e.target.closest('.gvTog');
+      if (h) {
+        if (query || h.closest('.solo')) return;
+        const g = h.dataset.g;
+        closed[g] = !closed[g];
+        if (!closed[g]) delete closed[g];
+        saveClosed();
+        h.closest('.gvSec').classList.toggle('closed', !!closed[g]);
+        h.setAttribute('aria-expanded', String(!closed[g]));
+        return;
+      }
+      const b = e.target.closest('.gvItem, .gvMain');
+      if (!b || !b.dataset.v) return;
+      if (opts.onPick) opts.onPick(b.dataset.v.trim(), rows[Number(b.dataset.k)], b);
+    });
+    return {
+      setRows(r) { const j = JSON.stringify(r); if (j === JSON.stringify(rows)) return; rows = r ? r.map((x) => x.slice()) : null; render(); },
+      filter(q) { query = String(q || '').trim(); render(); },
+      render
+    };
+  }
+
   // 내용이 그대로면 다시 그리지 않음 (나타나는 효과가 다시 재생되며 깜빡이는 것 방지)
   const htmlDesc = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
   function guardHTML(...els) {
@@ -562,5 +656,5 @@
     }
   }
 
-  window.M = { TBL, CONTACT_HEAD, fixContactRows, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
+  window.M = { TBL, CONTACT_HEAD, fixContactRows, contactView, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
 })();

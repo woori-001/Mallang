@@ -135,13 +135,40 @@
   }
   $('people').addEventListener('focusout', () => setTimeout(() => { if (!$('people').contains(document.activeElement)) flushPeople(); }, 0));
   $('peopleToggle').addEventListener('click', () => { flushPeople(); api.setSettings({ showPeople: !S.settings.showPeople }); });
+  let peopleEditing = false, pToastT = null;
+  const peopleGv = window.M.contactView($('peopleGv'), {
+    store: 'mallang.side.closed',
+    onPick: (v, row, el) => {
+      api.copyText(v);
+      el.classList.add('picked');
+      setTimeout(() => el.classList.remove('picked'), 600);
+      $('pFoot').textContent = '‘' + v + '’ 복사했어요';
+      clearTimeout(pToastT);
+      pToastT = setTimeout(() => { $('pFoot').textContent = footText(); }, 1500);
+    }
+  });
+  const footText = () => (peopleEditing ? '엑셀에서 복사해 붙여넣을 수 있어요 · Tab·Enter로 이동' : '누르면 번호가 복사돼요 · 부서 이름을 누르면 접혀요');
+  $('pEdit').addEventListener('click', () => {
+    peopleEditing = !peopleEditing;
+    if (!peopleEditing) flushPeople();
+    $('pEdit').textContent = peopleEditing ? '완료' : '편집';
+    $('pEdit').classList.toggle('on', peopleEditing);
+    $('pEdit').setAttribute('aria-pressed', String(peopleEditing));
+    $('people').hidden = !peopleEditing;
+    $('peopleGv').hidden = peopleEditing;
+    $('pFoot').textContent = footText();
+    if (!peopleEditing) { peopleGv.setRows(people.getRows()); peopleGv.filter($('pq').value); }
+    else setTimeout(() => people.focusFirst(), 30);
+  });
   function renderPeople() {
     $('peopleToggle').setAttribute('aria-pressed', String(!!S.settings.showPeople));
+    if (!peopleEditing) peopleGv.setRows(S.contacts || [window.M.CONTACT_HEAD]);
     // 방금 보낸 내용보다 늦게 도착한 예전 상태로 되돌아가지 않게
     if (!peopleDirty && Date.now() - peopleSent > 800) people.setRows(S.contacts || null);
   }
-  $('pq').addEventListener('input', () => people.filter($('pq').value));
-  $('pq').addEventListener('keydown', (e) => { if (e.key === 'Escape') { $('pq').value = ''; people.filter(''); } });
+  const pFilter = () => { people.filter($('pq').value); peopleGv.filter($('pq').value); };
+  $('pq').addEventListener('input', pFilter);
+  $('pq').addEventListener('keydown', (e) => { if (e.key === 'Escape') { $('pq').value = ''; pFilter(); } });
 
   // ───────── 메모 목록 ─────────
   function matches(m) {
