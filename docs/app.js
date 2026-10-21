@@ -460,39 +460,102 @@
   listEl.addEventListener('contextmenu', (e) => e.preventDefault());
 
   // ───────── 앱으로 설치 ─────────
-  let installEvt = null;
+  // 안드로이드 크롬: 설치 버튼을 누르면 바로 설치 창이 떠요.
+  // 카카오톡 등 앱 안 브라우저: 크롬/사파리로 열어 바로 설치할 수 있게 넘겨줘요.
+  // 아이폰: 애플이 직접 설치를 막아 두어서 사파리 공유 버튼으로만 추가할 수 있어요.
   const ua = navigator.userAgent;
   const isIOS = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const isAndroid = /android/i.test(ua);
+  const inApp = /KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|Line\/|DaumApps|everytimeApp|; wv\)/i.test(ua);
+  const isKakao = /KAKAOTALK/i.test(ua);
+  const iosNotSafari = isIOS && /CriOS|FxiOS|EdgiOS|Whale|NAVER/i.test(ua);
   const standalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
-  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installEvt = e; renderInstall(); });
-  window.addEventListener('appinstalled', () => { installEvt = null; prefs.installHide = true; savePrefs(); renderInstall(); toast('설치했어요. 홈 화면의 말랑메모 아이콘으로 열어 보세요'); });
-  function renderInstall() {
-    const can = !standalone() && (installEvt || isIOS || isAndroid);
-    $('install').hidden = !can || !!prefs.installHide;
-    if ($('installSet')) $('installSet').closest('.card').hidden = standalone();
+  let installed = false, installBusy = false;
+  const evt = () => window.__installEvt;
+
+  window.addEventListener('mallang-installable', renderInstall);
+  window.addEventListener('appinstalled', () => {
+    window.__installEvt = null; installed = true; renderInstall();
+    toast('설치했어요! 홈 화면의 말랑메모 아이콘으로 열어 보세요');
+  });
+  if (navigator.getInstalledRelatedApps) {
+    navigator.getInstalledRelatedApps().then((apps) => { if (apps && apps.length) { installed = true; renderInstall(); } }).catch(() => {});
   }
-  async function doInstall() {
-    if (installEvt) {
-      installEvt.prompt();
-      try { await installEvt.userChoice; } catch (e) { /* 무시 */ }
-      installEvt = null;
-      renderInstall();
+
+  function installMode() {
+    if (standalone()) return 'none';
+    if (inApp) return 'external';            // 카카오톡 등 → 크롬/사파리로 열기
+    if (evt()) return 'prompt';              // 바로 설치
+    if (installed) return 'installed';
+    if (isIOS) return iosNotSafari ? 'external' : 'ios';
+    if (isAndroid) return 'wait';            // 크롬이 준비되면 바로 설치
+    return 'none';
+  }
+  function renderInstall() {
+    const mode = installMode();
+    const show = mode !== 'none' && mode !== 'installed' && !prefs.installHide;
+    $('install').hidden = !show;
+    const sub = { prompt: '누르면 바로 설치돼요', wait: '누르면 바로 설치돼요', ios: '홈 화면에 아이콘을 만들어요', external: isIOS ? '사파리에서 설치해요' : '크롬에서 바로 설치' }[mode] || '';
+    $('installSub').textContent = sub;
+    $('installGo').textContent = installBusy ? '준비 중…' : (mode === 'external' ? (isIOS ? '사파리로' : '크롬으로') : '설치');
+    $('installGo').disabled = installBusy;
+    const card = $('installSet').closest('.card');
+    card.hidden = mode === 'none' && !installed;
+    $('installSet').textContent = installed || mode === 'installed' ? '이미 설치돼 있어요' : '설치하기';
+    $('installSet').disabled = installed || mode === 'installed';
+  }
+
+  function openExternal() {
+    const url = location.href.split('#')[0];
+    if (isKakao) { location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(url); return; }
+    if (isAndroid) {
+      location.href = 'intent://' + url.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(url) + ';end';
       return;
     }
-    const share = '<span class="shareIco">' + icon('<path d="M12 3v12M7.5 7.5L12 3l4.5 4.5"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/>', 18, 2) + '</span>';
-    const steps = isIOS
-      ? ['<b>사파리</b>로 열어 주세요 (다른 브라우저에서는 안 돼요)', '아래쪽 가운데 ' + share + ' <b>공유</b> 버튼을 눌러요', '목록을 내려 <b>홈 화면에 추가</b> → 오른쪽 위 <b>추가</b>']
-      : ['<b>크롬</b> 오른쪽 위 <b>⋮</b> 메뉴를 눌러요', '<b>홈 화면에 추가</b> 또는 <b>앱 설치</b>를 눌러요', '"안전하지 않은 앱" 같은 경고가 뜨면 <b>무시하고 설치</b>를 눌러도 괜찮아요. 플레이스토어에 올라간 앱이 아니라서 뜨는 안내예요'];
-    $('hBody').innerHTML = steps.map((t) => '<div><span>' + t + '</span></div>').join('');
-    $('howto').hidden = false;
+    // 아이폰의 다른 브라우저: 사파리로 바로 넘길 방법이 없어 주소 복사
+    if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => toast('주소를 복사했어요. 사파리에 붙여넣어 열어 주세요')).catch(() => toast('사파리에서 ' + url + ' 을 열어 주세요'));
+    else toast('사파리에서 ' + url + ' 을 열어 주세요');
+  }
+
+  async function runPrompt() {
+    const e = evt();
+    window.__installEvt = null;
+    e.prompt();
+    let choice = null;
+    try { choice = await e.userChoice; } catch (err) { /* 무시 */ }
+    if (choice && choice.outcome === 'accepted') { installed = true; }
+    renderInstall();
+  }
+
+  async function doInstall() {
+    const mode = installMode();
+    if (mode === 'prompt') return runPrompt();
+    if (mode === 'external') return openExternal();
+    if (mode === 'ios') { $('iosTip').hidden = false; return; }
+    if (mode === 'installed') { toast('이미 설치돼 있어요. 홈 화면의 말랑메모로 열어 주세요'); return; }
+    if (mode === 'wait') {
+      // 크롬이 설치 준비를 마칠 때까지 잠깐 기다렸다가 바로 설치
+      installBusy = true; renderInstall();
+      const ok = await new Promise((res) => {
+        if (evt()) return res(true);
+        const t = setTimeout(() => { window.removeEventListener('mallang-installable', on); res(false); }, 5000);
+        function on() { clearTimeout(t); res(true); }
+        window.addEventListener('mallang-installable', on, { once: true });
+      });
+      installBusy = false;
+      if (ok) return runPrompt();
+      renderInstall();
+      if (installed) toast('이미 설치돼 있어요. 홈 화면의 말랑메모로 열어 주세요');
+      else toast('크롬 오른쪽 위 ⋮ 메뉴에서 "앱 설치"를 눌러 주세요');
+    }
   }
   $('installGo').onclick = doInstall;
   $('installSet').onclick = doInstall;
   $('installX').innerHTML = icon('<path d="M6 6l12 12M18 6L6 18"/>', 16, 2.2);
   $('installX').onclick = () => { prefs.installHide = true; savePrefs(); renderInstall(); toast('설정 탭에서 언제든 설치할 수 있어요'); };
-  $('hOk').onclick = () => { $('howto').hidden = true; };
-  $('howto').addEventListener('click', (e) => { if (e.target === $('howto')) $('howto').hidden = true; });
+  $('iosTipX').innerHTML = icon('<path d="M6 6l12 12M18 6L6 18"/>', 14, 2.2);
+  $('iosTipX').onclick = () => { $('iosTip').hidden = true; };
+  $('iosShare').innerHTML = icon('<path d="M12 3v12M7.5 7.5L12 3l4.5 4.5"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/>', 16, 2.2);
   $('q').addEventListener('input', (e) => { q = e.target.value.trim(); renderMemos(); });
 
   // 캘린더

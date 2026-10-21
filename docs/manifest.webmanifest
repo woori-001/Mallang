@@ -29,5 +29,11 @@
   "id": "/Mallang/",
   "categories": [
     "productivity"
+  ],
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://woori-001.github.io/Mallang/manifest.webmanifest"
+    }
   ]
 }
