@@ -81,7 +81,7 @@
     const sk = applyTheme(S.settings).sk;
     const a = (S.settings.alpha != null ? S.settings.alpha : 60) / 100;
     // 연락망은 읽기 쉬운 게 먼저라 투명도를 조금만 적용
-    card.style.background = window.M.grad(sk, 2, Math.max(0.78, a));
+    card.style.background = sk.paper ? sk.base : window.M.grad(sk, 2, Math.max(0.78, a));
     const f = folded();
     card.classList.toggle('folded', f);
     $('fold').querySelector('.chev').style.transform = f ? 'rotate(0deg)' : 'rotate(180deg)';

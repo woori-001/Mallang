@@ -107,3 +107,6 @@
 .gvItem.picked, .gvMain.picked { background: color-mix(in srgb, var(--a1) 22%, transparent); }
 .gvItem.picked .gvExt, .gvMain.picked b { color: var(--a1); }
 .gvEmpty { padding: 24px 12px; text-align: center; color: var(--sub); font-size: 13px; line-height: 1.7; background: var(--gv-surface); border-radius: 14px; }
+html.paper .gvSec { box-shadow: 0 0 0 1px var(--paper-line); }
+html.paper .gvHead { background: transparent; }
+html.paper .gvSec:not(.closed):not(.solo) .gvHead { box-shadow: none; border-bottom: 2px dotted var(--paper-dot); }

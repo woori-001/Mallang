@@ -334,3 +334,18 @@ html.bodybg .edTbl .tblScroll { background: rgba(var(--glass), .9); }
 .peopleGv .gvGrid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; padding: 10px; }
 .peopleGv .gvItem { padding: 10px 10px; font-size: 15px; }
 .tPrev { font-size: calc(18px * var(--tf, 1) * var(--ts, 1)); font-weight: var(--title-weight, 700); }
+
+/* 종이 스킨: 투명하지 않은 업무 문서 느낌 */
+html.paper body { background: var(--base); }
+html.paper .bg { display: none; }
+html.paper { --paper-line: color-mix(in srgb, var(--ink) 13%, transparent); --paper-dot: color-mix(in srgb, var(--a1) 40%, transparent); }
+html.paper .memo { box-shadow: 0 0 0 1px var(--paper-line), 0 2px 8px rgba(30, 40, 80, .06); border-radius: 14px; }
+html.paper .memo .mTitle { padding-bottom: 8px; border-bottom: 2px dotted var(--paper-dot); }
+html.paper .search, html.paper .calCard, html.paper .card, html.paper .tabs, html.paper .iconBtn, html.paper .install,
+html.paper .evList > *, html.paper .toggleRow, html.paper .pEdit:not(.on) { background: #fff; box-shadow: 0 0 0 1px var(--paper-line); }
+html.paper .editor .edTop { max-width: none; width: auto; background: var(--tint); margin: calc(-10px - var(--safe-t)) -16px 0; padding: calc(10px + var(--safe-t)) 16px 10px; border-bottom: 2px dotted var(--paper-dot); }
+html.paper .edText {
+  background-image: linear-gradient(to bottom, transparent calc(1.75em - 1px), color-mix(in srgb, var(--a1) 10%, transparent) 0);
+  background-size: 100% 1.75em; background-position: 0 4px; background-attachment: local;
+}
+html.paper .peopleGv .gvSec { box-shadow: 0 0 0 1px var(--paper-line); }

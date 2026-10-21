@@ -83,7 +83,7 @@
     const st = document.documentElement.style;
     st.setProperty('--sun', sk.sun);
     st.setProperty('--sat', sk.sat);
-    panel.style.background = 'rgba(var(--glass),' + ((S.settings.sideAlpha != null ? S.settings.sideAlpha : 55) / 100) + ')';
+    panel.style.background = sk.paper ? sk.base : 'rgba(var(--glass),' + ((S.settings.sideAlpha != null ? S.settings.sideAlpha : 55) / 100) + ')';
     const d = new Date();
     const c = S.cloud || {};
     const dateTxt = (d.getMonth() + 1) + '월 ' + d.getDate() + '일 ' + WD[d.getDay()] + '요일';
@@ -505,7 +505,7 @@
   $('alpha').addEventListener('input', (e) => { $('alphaV').textContent = e.target.value + '%'; api.setSettings({ alpha: Number(e.target.value) }); });
   $('sideAlpha').addEventListener('input', (e) => {
     $('sideAlphaV').textContent = e.target.value + '%';
-    panel.style.background = 'rgba(var(--glass),' + (Number(e.target.value) / 100) + ')';
+    if (!sk || !sk.paper) panel.style.background = 'rgba(var(--glass),' + (Number(e.target.value) / 100) + ')';
     api.setSettings({ sideAlpha: Number(e.target.value) });
   });
   $('bodyBg').addEventListener('click', () => api.setSettings({ bodyBg: !S.settings.bodyBg }));

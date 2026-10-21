@@ -204,3 +204,22 @@ body { padding: 14px; }
 /* 표 메모 */
 .tblArea { flex: 1; min-height: 0; padding: 2px 12px 14px; }
 .card.bodybg .tblArea { padding: 8px 8px 12px; }
+
+/* 종이 스킨: 흰 종이 + 색 머리띠 + 점선 */
+html.paper .card {
+  border-radius: 12px; box-shadow: 0 0 0 1px var(--paper-line), 0 3px 10px rgba(30, 40, 80, .10);
+}
+html.paper .card:hover { box-shadow: 0 0 0 1px var(--paper-line), 0 6px 16px rgba(30, 40, 80, .14); }
+html.paper .card .head { background: var(--tint); border-radius: 12px 12px 0 0; border-bottom: 2px dotted var(--paper-dot); }
+html.paper .card.folded { border-radius: 9px; }
+html.paper .card.folded .head { border-bottom: none; border-radius: 9px; }
+html.paper .title:not([readonly]) { background: rgba(255, 255, 255, .8); }
+html.paper .text {
+  padding-top: 8px;
+  background-image: linear-gradient(to bottom, transparent calc(1.7em - 1px), color-mix(in srgb, var(--a1) 9%, transparent) 0);
+  background-size: 100% 1.7em; background-position: 0 8px; background-attachment: local;
+}
+html.paper .card.bodybg .body { margin: 0; border-radius: 0; background: transparent; box-shadow: none; }
+html.paper .tools { box-shadow: 0 0 0 1px var(--paper-line), 0 8px 18px rgba(30, 40, 80, .14); background: #fff; }
+html.paper .tblScroll { background: #fff; }
+html.paper .chip { background: var(--tint); }

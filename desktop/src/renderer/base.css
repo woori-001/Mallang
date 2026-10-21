@@ -53,3 +53,7 @@ input, textarea { font-family: inherit; color: inherit; }
   35% { transform: scale(1.035); }
   100% { transform: scale(1); }
 }
+
+/* ───────── 종이 스킨 (투명하지 않은 업무 문서 느낌) ───────── */
+html.paper { --paper-line: color-mix(in srgb, var(--ink) 13%, transparent); --paper-dot: color-mix(in srgb, var(--a1) 40%, transparent); }
+html.paper .ib:hover { background: color-mix(in srgb, var(--a1) 10%, transparent); }

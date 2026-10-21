@@ -737,7 +737,8 @@
     const m = ed();
     if (!m) return;
     const sk = skin();
-    $('editor').style.background = 'linear-gradient(160deg,' + rgba(sk.pal[(m.slot || 0) % 5][0], 1) + ',' + rgba(sk.pal[(m.slot || 0) % 5][1], 1) + ')';
+    $('editor').style.setProperty('--tint', rgba(sk.pal[(m.slot || 0) % 5][0], 1));
+    $('editor').style.background = sk.paper ? '#FFFFFF' : 'linear-gradient(160deg,' + rgba(sk.pal[(m.slot || 0) % 5][0], 1) + ',' + rgba(sk.pal[(m.slot || 0) % 5][1], 1) + ')';
     $('edMarkIcon').innerHTML = m.mark ? markSvg(m.mark, m.markColor || '#E8456B', 22) : '';
     const typing = document.activeElement && $('editor').contains(document.activeElement) && document.activeElement.tagName !== 'BUTTON';
     if (fromRemote && typing) return;

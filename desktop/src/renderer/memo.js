@@ -44,7 +44,12 @@
     if (!memo || !settings) return;
     sk = applyTheme(settings).sk;
     const a = (settings.alpha != null ? settings.alpha : 60) / 100;
-    card.style.background = grad(sk, memo.slot || 0, a);
+    if (sk.paper) {
+      // 종이 스킨: 흰 종이 + 메모 색 머리띠 (투명도 없음)
+      const p = sk.pal[(memo.slot || 0) % 5][0];
+      card.style.setProperty('--tint', 'rgb(' + p.join(',') + ')');
+      card.style.background = memo.folded ? 'var(--tint)' : '#FFFFFF';
+    } else card.style.background = grad(sk, memo.slot || 0, a);
     card.classList.toggle('folded', !!memo.folded);
     card.classList.toggle('bodybg', !!settings.bodyBg);
     const w = memo.folded ? FOLD_W : (localSize ? localSize.w : memo.w);
