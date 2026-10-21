@@ -50,50 +50,56 @@
 .tblWrap.ro .tblBar { display: none; }
 .tblWrap.ro .mtbl td, .tblWrap.ro .mtbl th { cursor: auto; }
 
-/* 연락망 보기: 부서별 묶음 */
-.gv { overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-family: var(--memo-font); }
+/* 연락망 보기: 부서별 카드 · 이름과 내선을 촘촘한 목록으로 */
+.gv {
+  --gv-line: color-mix(in srgb, var(--ink) 9%, transparent);
+  --gv-surface: rgba(var(--glass), .9);
+  overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-family: var(--ui);
+  padding-bottom: 2px;
+}
 .gv[hidden] { display: none; }
-.gvHead {
-  position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 6px;
-  border-radius: 11px; padding: 3px 4px 3px 0;
-  background: color-mix(in srgb, var(--a1) 12%, rgb(var(--glass)));
+.gvSec {
+  background: var(--gv-surface); border-radius: 14px;
+  box-shadow: 0 0 0 1px var(--gv-line), 0 2px 6px rgba(40, 40, 90, .05);
 }
+.gvHead { display: flex; align-items: center; gap: 8px; padding: 0 10px 0 0; min-height: 38px; }
+.gvSec:not(.closed):not(.solo) .gvHead { box-shadow: inset 0 -1px 0 var(--gv-line); }
 .gvTog {
-  flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; border: none; background: transparent;
-  padding: 3px 4px 3px 10px; font-size: 13px; color: var(--ink); text-align: left; font-family: inherit;
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 7px; border: none; background: transparent;
+  padding: 9px 4px 9px 12px; font-size: 13px; color: var(--ink); text-align: left; font-family: inherit;
 }
-.gvTog b { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gvTog b { font-weight: 700; letter-spacing: -.1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gvTog::before { content: ''; width: 3px; height: 14px; border-radius: 2px; background: var(--a1); flex: none; margin-right: 2px; }
 .solo .gvTog { cursor: default; }
-.gvChev { display: inline-flex; color: var(--a1); transition: transform .3s var(--spring); flex: none; }
-.gvChev svg { width: 13px; height: 13px; }
-.gvDot { width: 13px; display: inline-flex; justify-content: center; flex: none; }
-.gvDot::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--a1); opacity: .6; }
+.gvChev { display: inline-flex; color: var(--sub); transition: transform .3s var(--spring); flex: none; order: 3; margin-left: -2px; }
+.gvChev svg { width: 12px; height: 12px; }
 .gvSec.closed .gvChev { transform: rotate(-90deg); }
-.gvCnt { font-size: 11.5px; color: var(--sub); margin-left: auto; flex: none; }
+.gvDot { display: none; }
+.gvCnt { font-size: 11px; font-weight: 600; color: var(--sub); flex: none; order: 2; }
 .gvMain {
-  flex: none; display: inline-flex; align-items: center; gap: 5px; border: none; border-radius: 9px; padding: 3px 9px;
-  background: var(--accent); color: var(--on); font-size: 12.5px; font-family: inherit; cursor: copy;
-  transition: transform .2s var(--spring), box-shadow .2s ease;
+  flex: none; display: inline-flex; align-items: baseline; gap: 6px; border: none; background: transparent;
+  border-radius: 8px; padding: 4px 6px; font-family: inherit; color: var(--ink); cursor: copy;
+  transition: background .15s ease;
 }
-.gvMain span { font-size: 10.5px; opacity: .85; }
-.gvMain b { font-variant-numeric: tabular-nums; letter-spacing: .2px; }
-.gvMain:hover { box-shadow: 0 4px 10px var(--glow); }
-.gvGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 4px; margin-top: 5px; }
+.gvMain span { font-size: 10.5px; font-weight: 700; color: var(--a1); }
+.gvMain b { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: .2px; }
+.gvMain:hover { background: color-mix(in srgb, var(--a1) 10%, transparent); }
+.gvGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 4px; padding: 8px; }
 .gvSec.closed .gvGrid { display: none; }
-.gvItem.vacant { opacity: .5; }
-.gvSec.solo + .gvSec.solo { margin-top: -3px; }
 .gvItem {
-  display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0;
-  border: none; border-radius: 10px; padding: 6px 10px; background: rgba(var(--glass), .55);
+  display: flex; align-items: baseline; justify-content: space-between; gap: 8px; min-width: 0;
+  border: none; border-radius: 8px; padding: 6px 9px; background: color-mix(in srgb, var(--ink) 4.5%, transparent);
   font-size: 13px; color: var(--ink); text-align: left; font-family: inherit; cursor: copy;
-  transition: background .15s ease, transform .2s var(--spring);
+  transition: background .15s ease;
 }
-.gvItem:hover { background: rgba(var(--glass), .92); }
-.gvItem:active, .gvMain:active { transform: scale(.96); }
-.gvName { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
-.gvName i { display: block; font-style: normal; font-weight: 400; font-size: 11px; color: var(--sub); overflow: hidden; text-overflow: ellipsis; }
-.gvExt { flex: none; font-variant-numeric: tabular-nums; font-weight: 700; color: var(--a1); }
-.gv mark { background: color-mix(in srgb, var(--a1) 26%, transparent); color: inherit; border-radius: 3px; }
-.gvItem.picked, .gvMain.picked { background: var(--accent); color: var(--on); }
-.gvItem.picked .gvExt { color: var(--on); }
-.gvEmpty { padding: 24px 12px; text-align: center; color: var(--sub); font-size: 13px; line-height: 1.7; }
+.gvItem:hover { background: color-mix(in srgb, var(--a1) 13%, transparent); }
+.gvName { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.gvName i { display: block; font-style: normal; font-size: 11px; color: var(--sub); overflow: hidden; text-overflow: ellipsis; }
+.gvExt { flex: none; font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: .2px; }
+.gvItem.vacant { background: transparent; box-shadow: inset 0 0 0 1px var(--gv-line); }
+.gvItem.vacant .gvName { color: var(--sub); font-weight: 400; }
+.gvItem.vacant .gvExt { color: var(--sub); font-weight: 500; }
+.gv mark { background: color-mix(in srgb, var(--a1) 24%, transparent); color: inherit; border-radius: 3px; }
+.gvItem.picked, .gvMain.picked { background: color-mix(in srgb, var(--a1) 22%, transparent); }
+.gvItem.picked .gvExt, .gvMain.picked b { color: var(--a1); }
+.gvEmpty { padding: 24px 12px; text-align: center; color: var(--sub); font-size: 13px; line-height: 1.7; background: var(--gv-surface); border-radius: 14px; }

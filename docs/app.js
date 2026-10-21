@@ -858,7 +858,7 @@
   // ───────── 연락망 ─────────
   let peopleEditing = false;
   const people = window.M.tableEditor($('people'), {
-    head: window.M.CONTACT_HEAD, callable: true, editable: false, copy: copyText,
+    head: window.M.CONTACT_HEAD, editable: false, copy: copyText,
     onChange: (rows) => {
       const prev = (st.contacts && st.contacts.mt) || 0;
       st.contacts = { rows, mt: Math.max(Date.now(), prev + 1), dirty: true };
@@ -869,8 +869,6 @@
   const peopleGv = window.M.contactView($('peopleGv'), {
     store: 'mallang.people.closed',
     onPick: (v, row, el) => {
-      const d = v.replace(/[^0-9+]/g, '');
-      if (d.replace('+', '').length >= 8) { location.href = 'tel:' + d; return; }
       el.classList.add('picked'); setTimeout(() => el.classList.remove('picked'), 600);
       (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject(new Error('x'))).then(() => toast('‘' + v + '’ 복사했어요'), () => toast(v));
     }
@@ -882,7 +880,7 @@
     $('people').hidden = !peopleEditing;
     $('peopleGv').hidden = peopleEditing;
     if (!peopleEditing) { peopleGv.setRows((st.contacts && st.contacts.rows) || [window.M.CONTACT_HEAD]); peopleGv.filter($('pq').value); }
-    $('pHint').textContent = peopleEditing ? '엑셀에서 복사해 붙여넣을 수 있어요. 첫 줄은 머리글(부서 · 이름 · 내선)이에요.' : '내선을 누르면 복사, 대표번호를 누르면 바로 전화해요. 부서 이름을 누르면 접혀요.';
+    $('pHint').textContent = peopleEditing ? '엑셀에서 복사해 붙여넣을 수 있어요. 첫 줄은 머리글(부서 · 이름 · 내선)이에요.' : '번호를 누르면 복사돼요 · 부서 이름을 누르면 접혀요';
   }
   function setPeopleEdit(on) {
     peopleEditing = on;

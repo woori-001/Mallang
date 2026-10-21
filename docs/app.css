@@ -326,9 +326,10 @@ html.bodybg .edTbl .tblScroll { background: rgba(var(--glass), .9); }
 .people .mtbl th, .people .mtbl td { white-space: pre; max-width: none; padding: 10px 11px; }
 .peopleGv { margin-bottom: 8px; }
 .peopleGv[hidden], .people[hidden] { display: none; }
-.peopleGv .gvHead { top: calc(var(--safe-t, 0px)); }
-.peopleGv .gvTog { font-size: 15px; padding: 7px 6px 7px 12px; }
-.peopleGv .gvMain { font-size: 14px; padding: 6px 11px; }
-.peopleGv .gvGrid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; margin-top: 6px; }
-.peopleGv .gvItem { padding: 11px 12px; font-size: 15px; border-radius: 12px; }
 .peopleGv.gv { overflow: visible; gap: 10px; }
+.peopleGv .gvHead { min-height: 46px; }
+.peopleGv .gvTog { font-size: 15px; padding: 12px 6px 12px 14px; }
+.peopleGv .gvMain b { font-size: 15px; }
+.peopleGv .gvMain span { font-size: 12px; }
+.peopleGv .gvGrid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; padding: 10px; }
+.peopleGv .gvItem { padding: 10px 10px; font-size: 15px; }
