@@ -25,7 +25,7 @@
   $('calNext').innerHTML = ICONS.right;
   $('addEv').innerHTML = ICONS.plus.replace('width="15" height="15"', 'width="13" height="13"') + '<span>일정 추가</span>';
 
-  window.M.guardHTML($('list'), $('grid'), $('evList'), $('skins'), $('fonts'), $('today'), $('trashBtn'), $('acState'), $('mFoot'));
+  window.M.guardHTML($('list'), $('grid'), $('evList'), $('skins'), $('today'), $('trashBtn'), $('acState'), $('mFoot'));
 
   // ───────── 열기 / 닫기 ─────────
   let ignoring = true, closeTimer = null;
@@ -462,17 +462,17 @@
     const s = S.settings;
     $('skins').innerHTML = Object.keys(SKINS).map((id) => {
       const k = SKINS[id];
-      return '<button class="skin soft' + (s.skin === id ? ' on' : '') + '" type="button" data-skin="' + id + '" aria-pressed="' + (s.skin === id) + '" style="--sc:' + k.a1 + ';--sg:' + k.glow + '">' +
-        '<span class="prev" style="background:linear-gradient(135deg,' + k.b[0] + ',' + k.b[1] + ' 55%,' + k.b[2] + ')">' +
-          '<i style="background:' + rgba(k.pal[0][0], 0.85) + '"></i><i style="background:' + rgba(k.pal[1][1], 0.85) + '"></i><b style="background:' + k.a1 + '"></b>' +
-        '</span><span>' + k.name + '</span></button>';
+      return '<button class="skin' + (s.skin === id ? ' on' : '') + '" type="button" data-skin="' + id + '" aria-pressed="' + (s.skin === id) + '" title="' + esc(k.name) + '" style="--sc:' + k.a1 + '">' +
+        '<span class="sw" style="background:linear-gradient(135deg,' + k.b[0] + ',' + k.b[2] + ')"><b style="background:linear-gradient(135deg,' + k.a1 + ',' + k.a2 + ')"></b></span>' +
+        '<span class="sn">' + esc(k.name) + '</span></button>';
     }).join('');
-    $('fonts').innerHTML = FONTS.map((f) =>
-      '<button class="font soft' + (s.font === f.id ? ' on' : '') + '" type="button" data-font="' + f.id + '" aria-pressed="' + (s.font === f.id) + '">' +
-        '<span class="fs"><span style="font-family:' + f.fam.replace(/"/g, '') + ';font-size:' + f.size + 'px">오늘의 메모, 가나다</span><span class="fn">' + f.name + '</span></span>' +
-        (s.font === f.id ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg>' : '') +
-      '</button>'
-    ).join('');
+    if (document.activeElement !== $('fontSel')) {
+      $('fontSel').innerHTML = FONTS.map((f) => '<option value="' + f.id + '"' + (s.font === f.id ? ' selected' : '') + '>' + esc(f.name) + '</option>').join('');
+    }
+    const tsv = s.titleScale || 100;
+    if (document.activeElement !== $('titleScale')) $('titleScale').value = tsv;
+    $('titleScaleV').textContent = tsv + '%';
+    $('titleBold').setAttribute('aria-pressed', String(s.titleBold !== false));
     if (document.activeElement !== $('alpha')) $('alpha').value = s.alpha;
     if (document.activeElement !== $('sideAlpha')) $('sideAlpha').value = s.sideAlpha;
     const fsv = s.fontScale || 100;
@@ -488,16 +488,14 @@
     $('bodyBg').setAttribute('aria-pressed', String(!!s.bodyBg));
   }
   $('skins').addEventListener('click', (e) => { const b = e.target.closest('[data-skin]'); if (b) api.setSettings({ skin: b.dataset.skin }); });
-  $('fonts').addEventListener('click', (e) => { const b = e.target.closest('[data-font]'); if (b) api.setSettings({ font: b.dataset.font }); });
+  $('fontSel').addEventListener('change', (e) => api.setSettings({ font: e.target.value }));
+  $('titleScale').addEventListener('input', (e) => { $('titleScaleV').textContent = e.target.value + '%'; api.setSettings({ titleScale: Number(e.target.value) }); });
+  $('titleBold').addEventListener('click', () => api.setSettings({ titleBold: S.settings.titleBold === false }));
   const setFs = (v) => { v = Math.min(170, Math.max(70, v)); $('fontScale').value = v; $('fontScaleV').textContent = v + '%'; api.setSettings({ fontScale: v }); };
   $('fontScale').addEventListener('input', (e) => setFs(Number(e.target.value)));
-  $('fsDown').addEventListener('click', () => setFs((S.settings.fontScale || 100) - 10));
-  $('fsUp').addEventListener('click', () => setFs((S.settings.fontScale || 100) + 10));
   $('calFont').addEventListener('change', (e) => api.setSettings({ calFont: e.target.value }));
   const setCs = (v) => { v = Math.min(150, Math.max(70, v)); $('calScale').value = v; $('calScaleV').textContent = v + '%'; api.setSettings({ calScale: v }); };
   $('calScale').addEventListener('input', (e) => setCs(Number(e.target.value)));
-  $('csDown').addEventListener('click', () => setCs((S.settings.calScale || 100) - 10));
-  $('csUp').addEventListener('click', () => setCs((S.settings.calScale || 100) + 10));
   $('alpha').addEventListener('input', (e) => { $('alphaV').textContent = e.target.value + '%'; api.setSettings({ alpha: Number(e.target.value) }); });
   $('sideAlpha').addEventListener('input', (e) => {
     $('sideAlphaV').textContent = e.target.value + '%';

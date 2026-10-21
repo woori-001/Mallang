@@ -70,9 +70,10 @@
 }
 .gvTog b { font-weight: 700; letter-spacing: -.1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gvIco {
-  width: 22px; height: 22px; border-radius: 7px; flex: none; display: inline-flex; align-items: center; justify-content: center;
-  color: var(--a1); background: color-mix(in srgb, var(--a1) 14%, transparent);
+  width: 24px; height: 24px; border-radius: 9px; flex: none; display: inline-flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--a1) 22%, rgb(var(--glass)));
 }
+.gvIco img { width: 19px; height: 19px; object-fit: contain; margin-top: 1px; filter: drop-shadow(0 1px 1.5px rgba(60, 40, 80, .25)); }
 .solo .gvTog { cursor: default; }
 .gvChev { display: inline-flex; color: var(--sub); transition: transform .3s var(--spring); flex: none; order: 3; margin-left: -2px; }
 .gvChev svg { width: 12px; height: 12px; }

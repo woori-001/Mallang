@@ -690,6 +690,9 @@
     $('bodyBg').setAttribute('aria-pressed', String(!!prefs.bodyBg));
     if (document.activeElement !== $('fontScale')) $('fontScale').value = prefs.fontScale || 100;
     $('fontScaleV').textContent = (prefs.fontScale || 100) + '%';
+    if (document.activeElement !== $('titleScale')) $('titleScale').value = prefs.titleScale || 100;
+    $('titleScaleV').textContent = (prefs.titleScale || 100) + '%';
+    $('titleBold').setAttribute('aria-pressed', String(prefs.titleBold !== false));
     $('calFont').innerHTML = window.M.calFontOptions(prefs).map((o) => '<option value="' + o.id + '"' + ((prefs.calFont || 'same') === o.id ? ' selected' : '') + '>' + esc(o.name) + '</option>').join('');
     if (document.activeElement !== $('calScale')) $('calScale').value = prefs.calScale || 100;
     $('calScaleV').textContent = (prefs.calScale || 100) + '%';
@@ -707,6 +710,8 @@
   $('skins').addEventListener('click', (e) => { const b = e.target.closest('[data-skin]'); if (!b) return; prefs.skin = b.dataset.skin; savePrefs(); applyPrefs(); renderSet(); });
   const setFs = (v) => { prefs.fontScale = Math.min(170, Math.max(70, v)); savePrefs(); applyPrefs(); $('fontScale').value = prefs.fontScale; $('fontScaleV').textContent = prefs.fontScale + '%'; };
   $('fontScale').addEventListener('input', (e) => setFs(Number(e.target.value)));
+  $('titleScale').addEventListener('input', (e) => { prefs.titleScale = Number(e.target.value); savePrefs(); applyPrefs(); $('titleScaleV').textContent = prefs.titleScale + '%'; });
+  $('titleBold').onclick = () => { prefs.titleBold = prefs.titleBold === false; savePrefs(); applyPrefs(); renderSet(); };
   $('fsDown').onclick = () => setFs((prefs.fontScale || 100) - 10);
   $('fsUp').onclick = () => setFs((prefs.fontScale || 100) + 10);
   $('calFont').addEventListener('change', (e) => { prefs.calFont = e.target.value; savePrefs(); applyPrefs(); });

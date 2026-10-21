@@ -141,7 +141,11 @@
     // 제목도 고른 글꼴로 (작게 그려지는 글꼴은 그만큼 키움)
     const tf = f.size / 14;
     r.setProperty('--tf', String(Math.round(tf * 100) / 100));
-    r.setProperty('--memo-title-size', Math.round(14 * tf * Math.min(scale, 1.4) * 10) / 10 + 'px');
+    const ts = (settings.titleScale || 100) / 100;                 // 제목 크기 (본문과 따로)
+    r.setProperty('--memo-title-size', Math.round(14 * tf * ts * 10) / 10 + 'px');
+    r.setProperty('--ts', String(ts));
+    r.setProperty('--fold-title-size', Math.round(13 * tf * Math.min(ts, 1.25) * 10) / 10 + 'px');   // 접힌 바는 높이가 정해져 있어 조금만
+    r.setProperty('--title-weight', settings.titleBold === false ? '400' : '700');
     return { sk, f };
   }
 
@@ -556,7 +560,7 @@
 
   /* 연락망 보기 (부서별로 묶어서 이름·내선을 촘촘하게)
      el 안에 그려요. opts.onPick(값, 줄, 요소) 누를 때 · opts.store 접어 둔 부서 기억용 키 */
-  const DEPT_ICON = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M15.8 5.6a3 3 0 0 1 0 5.6M17.6 14.3a5 5 0 0 1 2.9 4.7"/></svg>';
+  const DEPT_ICON = '<img src="bunny.png" alt="" width="18" height="18" draggable="false">';
   function contactView(el, opts) {
     opts = opts || {};
     let rows = null, query = '';

@@ -148,55 +148,38 @@
     <!-- 꾸미기 -->
     <section id="vStyle" class="view" hidden>
       <div class="scroll">
-        <div class="sect">
-          <div class="slabel">스킨</div>
+        <div class="box">
+          <div class="bhead">스킨</div>
           <div id="skins" class="skins"></div>
         </div>
-        <div class="sect">
-          <div class="slabel">글꼴</div>
-          <div id="fonts" class="fonts"></div>
+
+        <div class="box">
+          <div class="bhead">메모 글자</div>
+          <div id="fsPreview" class="memoPrev" aria-hidden="true"><b>오늘 할 일</b><span>3시 팀 회의 · 보고서 정리</span></div>
+          <div class="line"><label for="fontSel">글꼴</label><select id="fontSel" class="sel"></select></div>
+          <div class="line"><label for="fontScale">내용 크기</label><input id="fontScale" type="range" min="70" max="170" step="5"><span id="fontScaleV" class="sval"></span></div>
+          <div class="line"><label for="titleScale">제목 크기</label><input id="titleScale" type="range" min="70" max="170" step="5"><span id="titleScaleV" class="sval"></span></div>
+          <button id="titleBold" class="toggle mini" type="button" aria-pressed="true"><span>제목 굵게</span><span class="track"><span class="knob"></span></span></button>
+          <button id="bodyBg" class="toggle mini" type="button" aria-pressed="false"><span>내용 칸 흰 배경</span><span class="track"><span class="knob"></span></span></button>
         </div>
-        <div class="sect">
-          <div class="srow"><label for="fontScale" class="slabel">글자 크기 (모든 메모)</label><span id="fontScaleV" class="sval"></span></div>
-          <div class="fsRow">
-            <button id="fsDown" class="ib fsBtn" type="button" aria-label="글자 작게">가</button>
-            <input id="fontScale" type="range" min="70" max="170" step="5">
-            <button id="fsUp" class="ib fsBtn big" type="button" aria-label="글자 크게">가</button>
-          </div>
-          <div id="fsPreview" class="fsPreview">오늘 할 일 · 3시 팀 회의</div>
-        </div>
-        <div class="sect">
-          <label for="calFont" class="slabel">캘린더 글꼴</label>
-          <select id="calFont" class="sel"></select>
-          <div class="srow"><label for="calScale" class="slabel">캘린더 글자 크기</label><span id="calScaleV" class="sval"></span></div>
-          <div class="fsRow">
-            <button id="csDown" class="ib fsBtn" type="button" aria-label="캘린더 글자 작게">가</button>
-            <input id="calScale" type="range" min="70" max="150" step="5">
-            <button id="csUp" class="ib fsBtn big" type="button" aria-label="캘린더 글자 크게">가</button>
-          </div>
+
+        <div class="box">
+          <div class="bhead">캘린더 글자</div>
           <div class="calPrev" aria-hidden="true"><b>21</b><i>OCTOBER</i><span>10:00 팀 회의</span></div>
+          <div class="line"><label for="calFont">글꼴</label><select id="calFont" class="sel"></select></div>
+          <div class="line"><label for="calScale">크기</label><input id="calScale" type="range" min="70" max="150" step="5"><span id="calScaleV" class="sval"></span></div>
         </div>
-        <div class="sect">
-          <div class="srow"><label for="alpha" class="slabel">메모 투명도</label><span id="alphaV" class="sval"></span></div>
-          <input id="alpha" type="range" min="25" max="95" step="1">
+
+        <div class="box">
+          <div class="bhead">투명도</div>
+          <div class="line"><label for="alpha">메모</label><input id="alpha" type="range" min="25" max="95" step="1"><span id="alphaV" class="sval"></span></div>
+          <div class="line"><label for="sideAlpha">목록바</label><input id="sideAlpha" type="range" min="15" max="95" step="1"><span id="sideAlphaV" class="sval"></span></div>
         </div>
-        <div class="sect">
-          <div class="srow"><label for="sideAlpha" class="slabel">목록바 투명도</label><span id="sideAlphaV" class="sval"></span></div>
-          <input id="sideAlpha" type="range" min="15" max="95" step="1">
-        </div>
-        <div class="sect">
-          <button id="bodyBg" class="toggle soft" type="button" aria-pressed="false">
-            <span>메모 내용 흰 배경</span><span class="track"><span class="knob"></span></span>
-          </button>
-        </div>
-        <div class="sect">
-          <button id="autoStart" class="toggle soft" type="button" aria-pressed="false">
-            <span>윈도우 시작 시 자동 실행</span><span class="track"><span class="knob"></span></span>
-          </button>
-        </div>
-        <div class="sect">
-          <div class="slabel">백업</div>
-          <div class="bkInfo">메모와 일정을 비밀번호로 잠근 파일로 내보내요. PC를 바꾸거나 고장 났을 때 이 파일과 비밀번호로 되살릴 수 있어요.</div>
+
+        <div class="box">
+          <div class="bhead">시작 · 백업</div>
+          <button id="autoStart" class="toggle mini" type="button" aria-pressed="false"><span>윈도우 시작 시 자동 실행</span><span class="track"><span class="knob"></span></span></button>
+          <div class="bkInfo">메모·일정·연락망을 비밀번호로 잠근 파일로 내보내요. PC를 바꿀 때 되살릴 수 있어요.</div>
           <div class="row2">
             <button id="bkExportBtn" class="pill soft" type="button">백업 내보내기</button>
             <button id="bkImportBtn" class="pill soft" type="button">백업 가져오기</button>
@@ -213,7 +196,9 @@
           </form>
           <div id="bkMsg" class="bkMsg" role="status" aria-live="polite"></div>
         </div>
-        <div class="sect help">
+
+        <div class="box help">
+          <div class="bhead">단축키 · 정보</div>
           <div><b>Ctrl + Alt + N</b> 어디서나 새 메모</div>
           <div><b>Ctrl + Alt + ↑ / ↓</b> 모두 접기 / 모두 펴기</div>
           <div><b>Ctrl + Alt + F</b> 어디서나 메모 검색</div>
