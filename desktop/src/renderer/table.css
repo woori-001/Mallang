@@ -69,7 +69,10 @@
   padding: 9px 4px 9px 12px; font-size: 13px; color: var(--ink); text-align: left; font-family: inherit;
 }
 .gvTog b { font-weight: 700; letter-spacing: -.1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.gvTog::before { content: ''; width: 3px; height: 14px; border-radius: 2px; background: var(--a1); flex: none; margin-right: 2px; }
+.gvIco {
+  width: 22px; height: 22px; border-radius: 7px; flex: none; display: inline-flex; align-items: center; justify-content: center;
+  color: var(--a1); background: color-mix(in srgb, var(--a1) 14%, transparent);
+}
 .solo .gvTog { cursor: default; }
 .gvChev { display: inline-flex; color: var(--sub); transition: transform .3s var(--spring); flex: none; order: 3; margin-left: -2px; }
 .gvChev svg { width: 12px; height: 12px; }

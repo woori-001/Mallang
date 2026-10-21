@@ -138,7 +138,10 @@
     const calFactor = cf === 'poppins' ? 1 : cfObj.size / 14;          // 글자가 작게 그려지는 글꼴은 키워서 맞춤
     r.setProperty('--cal-font', calFam);
     r.setProperty('--cs', String(Math.round((settings.calScale || 100) / 100 * calFactor * 100) / 100));
-    r.setProperty('--memo-title-size', Math.round(14 * Math.min(scale, 1.4) * 10) / 10 + 'px');
+    // 제목도 고른 글꼴로 (작게 그려지는 글꼴은 그만큼 키움)
+    const tf = f.size / 14;
+    r.setProperty('--tf', String(Math.round(tf * 100) / 100));
+    r.setProperty('--memo-title-size', Math.round(14 * tf * Math.min(scale, 1.4) * 10) / 10 + 'px');
     return { sk, f };
   }
 
@@ -553,6 +556,7 @@
 
   /* 연락망 보기 (부서별로 묶어서 이름·내선을 촘촘하게)
      el 안에 그려요. opts.onPick(값, 줄, 요소) 누를 때 · opts.store 접어 둔 부서 기억용 키 */
+  const DEPT_ICON = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M15.8 5.6a3 3 0 0 1 0 5.6M17.6 14.3a5 5 0 0 1 2.9 4.7"/></svg>';
   function contactView(el, opts) {
     opts = opts || {};
     let rows = null, query = '';
@@ -589,7 +593,8 @@
         // 부서 줄: [접기 · 부서 이름 · 인원] [대표번호]
         html += '<section class="gvSec' + (isClosed ? ' closed' : '') + (people.length ? '' : ' solo') + '">' +
           '<div class="gvHead"><button type="button" class="gvTog" data-g="' + esc(g.name) + '" aria-expanded="' + !isClosed + '"' + (people.length ? '' : ' tabindex="-1"') + '>' +
-            (people.length ? '<span class="gvChev" aria-hidden="true">' + ICONS.chev + '</span>' : '<span class="gvDot" aria-hidden="true"></span>') +
+            '<span class="gvIco" aria-hidden="true">' + DEPT_ICON + '</span>' +
+            (people.length ? '<span class="gvChev" aria-hidden="true">' + ICONS.chev + '</span>' : '') +
             '<b>' + (q ? hl(g.name, q) : esc(g.name)) + '</b>' +
             (g.people.length ? '<span class="gvCnt">' + g.people.length + '명</span>' : '') + '</button>' +
           mains.map((it) => '<button type="button" class="gvMain" data-v="' + esc(it.r[X] || '') + '" data-k="' + it.k + '" title="대표번호 · 눌러서 복사">' +

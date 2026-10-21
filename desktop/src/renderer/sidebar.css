@@ -83,7 +83,7 @@ body.open .tabArrow { transform: rotate(180deg); }
   display: flex; flex-direction: column; gap: 1px; border-radius: 10px;
 }
 .rtitle { display: flex; align-items: center; gap: 5px; font-size: 14px; font-weight: 600; min-width: 0; }
-.rtitle span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rtitle span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: var(--memo-font); font-size: calc(14px * var(--tf, 1)); }
 .rmeta { font-size: 11px; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .row .ib { width: 30px; height: 30px; border-radius: 15px; }
 .row .del.confirm { background: #E8456B; color: var(--on); }
