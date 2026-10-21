@@ -47,6 +47,16 @@ jobs:
         run: npm ci
       - name: 빌드하고 Releases에 올리기
         if: steps.ver.outputs.skip == 'false'
-        run: npm run release
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run release 2>&1 | tee build.log
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 실패 원인 남기기
+        if: failure()
+        shell: bash
+        run: |
+          tail -n 40 build.log | grep -v '^\s*$' | tail -n 25 | while IFS= read -r line; do
+            echo "::error::$(echo "$line" | cut -c1-300)"
+          done
