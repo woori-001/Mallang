@@ -192,13 +192,15 @@
     $('trashBtn').innerHTML = ICONS.trash.replace('width="15" height="15"', 'width="13" height="13"') + '<span>휴지통 ' + tn + '</span>';
     $('trashBtn').hidden = trashMode;
     if (trashMode) { renderTrash(); return; }
+    // 그룹 이름을 고치는 중이면 목록을 다시 그리지 않음 (쓰던 글자가 날아가지 않게)
+    if (renamingGroup && document.activeElement && document.activeElement.classList.contains('gname-in')) return;
     const memos = S.memos.filter(matches).slice().sort(memoOrder);
     const listEl = $('list');
     if (!memos.length) {
       const c0 = S.cloud || {};
       listEl.innerHTML = '<div class="empty">' + (q ? '찾는 메모가 없어요' : (!c0.signedIn && c0.username ? '로그아웃 상태예요. 계정 탭에서 다시 로그인하면 메모가 돌아와요' : '메모가 없어요. 새 메모를 만들어 보세요')) + '</div>';
     } else {
-      listEl.innerHTML = memos.map((m) => {
+      const rowOf = (m) => {
         const a = m.hidden ? 0.4 : 0.92;
         return '<div class="row' + (m.hidden ? ' hidden' : '') + '" data-id="' + m.id + '" style="background:' + grad(sk, m.slot || 0, a) + '">' +
           '<button class="ib" type="button" data-act="fold" aria-label="' + (m.folded ? '펼치기' : '접기') + '" aria-expanded="' + !m.folded + '" title="' + (m.folded ? '펼치기' : '접기') + '">' +
@@ -210,7 +212,38 @@
           '<button class="ib" type="button" data-act="hide" aria-label="' + (m.hidden ? '다시 보이기' : '숨기기') + '" title="' + (m.hidden ? '다시 보이기' : '숨기기') + '">' + (m.hidden ? ICONS.eyeOff : ICONS.eye) + '</button>' +
           '<button class="ib del" type="button" data-act="del" aria-label="삭제" title="삭제">' + ICONS.trash + '</button>' +
         '</div>';
-      }).join('');
+      };
+      // 그룹별로 묶어서 보여주기 (그룹 없는 메모는 아래에)
+      const groups = S.groups || [];
+      const C = window.M.GROUP_COLORS;
+      let html = '';
+      for (const g of groups) {
+        const mem = memos.filter((m) => m.group === g.id);
+        if (q && !mem.length) continue;
+        const allHidden = mem.length > 0 && mem.every((m) => m.hidden);
+        const allFolded = mem.length > 0 && mem.filter((m) => !m.hidden).every((m) => m.folded);
+        const closed = !!collapsedGroups[g.id] && !q;
+        html += '<div class="grp' + (closed ? ' closed' : '') + (allHidden ? ' ghidden' : '') + '" data-g="' + esc(g.id) + '" style="--gc:' + C[g.color % C.length] + '">' +
+          '<div class="ghead">' +
+            '<button class="ib gtog" type="button" data-gact="toggle" aria-expanded="' + !closed + '" title="목록 접기/펴기">' + ICONS.chev.replace('class="chev"', 'class="chev" style="transform:rotate(' + (closed ? 90 : 180) + 'deg)"') + '</button>' +
+            '<i class="gdot"></i>' +
+            (renamingGroup === g.id
+              ? '<input class="gname-in" data-gact="rename-in" value="' + esc(g.name) + '" maxlength="40" spellcheck="false">'
+              : '<span class="gname" data-gact="rename" title="더블클릭해서 이름 바꾸기">' + esc(g.name) + '</span>') +
+            '<span class="gcnt">' + mem.length + '</span>' +
+            '<button class="ib" type="button" data-gact="fold" title="' + (allFolded ? '그룹 모두 펴기' : '그룹 모두 접기') + '" aria-label="' + (allFolded ? '그룹 모두 펴기' : '그룹 모두 접기') + '">' + (allFolded ? ICONS.unfoldAll : ICONS.foldAll) + '</button>' +
+            '<button class="ib" type="button" data-gact="hide" title="' + (allHidden ? '그룹 보이기' : '그룹 숨기기') + '" aria-label="' + (allHidden ? '그룹 보이기' : '그룹 숨기기') + '">' + (allHidden ? ICONS.eyeOff : ICONS.eye) + '</button>' +
+            '<button class="ib" type="button" data-gact="remove" title="그룹 풀기 (메모는 그대로)" aria-label="그룹 풀기">' + ICONS.x + '</button>' +
+          '</div>' +
+          '<div class="gbody">' + (mem.length ? mem.map(rowOf).join('') : '<div class="gempty">메모 ⋯ 메뉴의 폴더 버튼으로 이 그룹에 넣을 수 있어요</div>') + '</div>' +
+        '</div>';
+      }
+      const rest = memos.filter((m) => !m.group || !groups.some((g) => g.id === m.group));
+      if (groups.length && rest.length) html += '<div class="nogrp">그룹 없음</div>';
+      html += rest.map(rowOf).join('');
+      listEl.innerHTML = html;
+      const gi = listEl.querySelector('.gname-in');
+      if (gi && document.activeElement !== gi) { gi.focus(); gi.select(); }
     }
     const hidden = S.memos.filter((m) => m.hidden).length;
     const folded = S.memos.filter((m) => m.folded).length;
@@ -270,7 +303,50 @@
     if (await askConfirm('휴지통을 비울까요?', '메모 ' + n + '개가 PC에서도 완전히 지워져요. 되돌릴 수 없어요.', '모두 영구 삭제')) api.emptyTrash();
   });
 
+  // ───────── 그룹 ─────────
+  const collapsedGroups = {};
+  let renamingGroup = null;
+  $('newGroup').innerHTML = ICONS.folder + '<span>새 그룹</span>';
+  $('newGroup').addEventListener('click', async () => {
+    const gid = await api.groupCreate('');
+    renamingGroup = gid;
+    renderMemos();
+  });
+  function finishRename(input, ok) {
+    const gid = renamingGroup;
+    renamingGroup = null;
+    if (ok && gid && input.value.trim()) api.groupRename(gid, input.value.trim());
+    renderMemos();
+  }
+  $('list').addEventListener('keydown', (e) => {
+    const inp = e.target.closest('.gname-in');
+    if (!inp || e.isComposing || e.keyCode === 229) return;
+    if (e.key === 'Enter') { e.preventDefault(); finishRename(inp, true); }
+    if (e.key === 'Escape') { e.preventDefault(); finishRename(inp, false); }
+  });
+  $('list').addEventListener('focusout', (e) => { const inp = e.target.closest && e.target.closest('.gname-in'); if (inp && renamingGroup) finishRename(inp, true); });
+  $('list').addEventListener('dblclick', (e) => {
+    const n = e.target.closest('.gname');
+    if (!n) return;
+    renamingGroup = n.closest('.grp').dataset.g;
+    renderMemos();
+  });
   $('list').addEventListener('click', (e) => {
+    const gb = e.target.closest('[data-gact]');
+    if (gb && gb.tagName === 'BUTTON') {
+      const grp = gb.closest('.grp');
+      const gid = grp.dataset.g;
+      const mem = S.memos.filter((m) => m.group === gid);
+      const act = gb.dataset.gact;
+      if (act === 'toggle') { collapsedGroups[gid] = !collapsedGroups[gid]; renderMemos(); }
+      if (act === 'hide') api.groupHide(gid, !(mem.length && mem.every((m) => m.hidden)));
+      if (act === 'fold') api.groupFold(gid, !(mem.length && mem.filter((m) => !m.hidden).every((m) => m.folded)));
+      if (act === 'remove') {
+        const g = (S.groups || []).find((x) => x.id === gid);
+        askConfirm('그룹을 풀까요?', '"' + ((g && g.name) || '그룹') + '" 그룹만 없어지고, 안에 있던 메모는 그대로 남아요.', '그룹 풀기').then((ok) => { if (ok) api.groupRemove(gid); });
+      }
+      return;
+    }
     const b = e.target.closest('button');
     if (!b) return;
     const trow = b.closest('.trow');
@@ -283,6 +359,7 @@
       }
       return;
     }
+    if (!b.closest('.row')) return;
     const id = Number(b.closest('.row').dataset.id);
     const m = S.memos.find((x) => x.id === id);
     if (!m) return;

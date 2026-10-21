@@ -13,6 +13,7 @@
 <div id="card" class="card enter">
   <div id="head" class="head">
     <button id="fold" class="ib fold" type="button" aria-label="접기" title="접기 (제목줄 더블클릭)"></button>
+    <span id="grpDot" class="grpDot" hidden></span>
     <span id="markIcon" class="markIcon"></span>
     <input id="title" class="title" type="text" readonly spellcheck="false" aria-label="메모 제목" maxlength="80">
     <span id="clipBadge" class="clipBadge" hidden aria-hidden="true"></span>
@@ -24,6 +25,8 @@
       <button id="bMark" class="ib" type="button" aria-label="중요 표시와 색" title="중요 표시 · 메모 색"></button>
       <button id="bType" class="ib" type="button" aria-label="체크리스트 전환" title="체크리스트 ↔ 일반 메모"></button>
       <button id="bTable" class="ib" type="button" aria-label="표 전환" title="표 ↔ 일반 메모"></button>
+      <button id="bGroup" class="ib" type="button" aria-label="그룹" title="그룹 (함께 옮기고 함께 숨기기)"></button>
+      <button id="bSplit" class="ib" type="button" aria-label="고른 부분을 새 메모로 분리" title="드래그한 부분을 새 메모로 분리"></button>
       <button id="bDiv" class="ib" type="button" aria-label="구분선 넣기" title="구분선 넣기 (Ctrl+Enter)"></button>
       <button id="bTop" class="ib" type="button" aria-label="맨 앞으로" title="맨 앞 (항상 위)"></button>
       <button id="bBottom" class="ib" type="button" aria-label="맨 뒤로" title="맨 뒤 (창 아래로)"></button>
@@ -40,6 +43,12 @@
     <div id="pSlots" class="prow"></div>
   </div>
 
+  <div id="gpicker" class="picker gpicker" hidden>
+    <div class="plabel">그룹 — 같은 그룹 메모는 함께 옮겨지고 함께 숨겨져요</div>
+    <div id="gList" class="glist"></div>
+    <form id="gNew" class="gnew"><input id="gName" type="text" maxlength="40" placeholder="새 그룹 이름" spellcheck="false"><button type="submit" class="gadd">만들기</button></form>
+  </div>
+
   <div id="body" class="body">
     <div id="text" class="text" data-placeholder="여기에 바로 입력 · Ctrl+Enter 구분선" aria-label="메모 내용"></div>
     <div id="tbl" class="tblArea" hidden></div>
@@ -49,6 +58,8 @@
     </div>
   </div>
   <div id="chip" class="chip" hidden></div>
+  <button id="splitChip" class="splitChip" type="button" hidden></button>
+  <div id="hint" class="hint" role="status" aria-live="polite"></div>
   <div id="confirm" class="confirm" hidden role="alertdialog" aria-modal="true" aria-labelledby="cTitle" aria-describedby="cDesc">
     <div class="cbox">
       <div id="cTitle" class="ctitle">이 메모를 삭제할까요?</div>

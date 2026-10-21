@@ -51,6 +51,7 @@ function defaults() {
     tombs: [],
     evMeta: {},
     contacts: null,
+    groups: [],
     cloud: {},
     widget: { x: null, y: null },
     peopleWin: { x: null, y: null, w: 430, h: 380, top: false }
@@ -89,6 +90,8 @@ function load() {
   const fixed = store.contacts && fixContactRows(store.contacts.rows);
   if (fixed) store.contacts = { rows: fixed, mt: Math.max(Date.now(), (store.contacts.mt || 0) + 1), dirty: true };
   store.cloud = store.cloud && typeof store.cloud === 'object' ? store.cloud : {};
+  store.groups = Array.isArray(store.groups) ? store.groups.filter((g) => g && typeof g.id === 'string').map((g) => ({ id: g.id, name: String(g.name || '그룹').slice(0, 40), color: Number(g.color) || 0 })) : [];
+  { const gids = new Set(store.groups.map((g) => g.id)); for (const m of store.memos) if (m.group && !gids.has(m.group)) delete m.group; }
   store.nextId = Math.max(store.nextId || 1, ...store.memos.map((m) => m.id + 1), ...store.trash.map((m) => m.id + 1), 1);
 }
 
@@ -183,6 +186,7 @@ function snapshot() {
     memos: store.memos.filter((m) => !m.deleting),
     events: store.events,
     contacts: store.contacts ? store.contacts.rows : null,
+    groups: store.groups,
     peopleWin: store.peopleWin,
     trash: store.trash.map((t) => ({
       id: t.id, title: t.title, slot: t.slot, mark: t.mark, markColor: t.markColor, type: t.type,
@@ -402,7 +406,7 @@ function applyLayer(id) {
   }
 }
 
-const ALLOWED = ['title', 'text', 'items', 'table', 'type', 'layer', 'hidden', 'folded', 'mark', 'markColor', 'slot', 'ord', 'clip'];  // clip: 드래그해 둔 부분 (이 PC에만)
+const ALLOWED = ['title', 'text', 'items', 'table', 'type', 'layer', 'hidden', 'folded', 'mark', 'markColor', 'slot', 'ord', 'clip', 'group'];  // group: 이 PC에서 묶은 그룹  // clip: 드래그해 둔 부분 (이 PC에만)
 // 기기끼리 맞추는 내용 (위치·크기·접힘·맨앞/맨뒤·숨김은 기기마다 따로)
 const CONTENT = ['title', 'text', 'items', 'table', 'type', 'mark', 'markColor', 'slot', 'ord'];
 function touch(m) {
@@ -418,6 +422,7 @@ function updateMemo(id, patch) {
   for (const k of ALLOWED) if (k in patch) m[k] = patch[k];
   if (!['text', 'check', 'table'].includes(m.type)) m.type = 'text';
   if ('table' in patch) m.table = patch.table ? sanitizeTable(patch.table) : null;
+  if ('group' in patch && (!patch.group || !store.groups.some((g) => g.id === patch.group))) delete m.group;
   if (m.layer !== 'top' && m.layer !== 'bottom') m.layer = 'normal';
   m.updated = Date.now();
   if (CONTENT.some((k) => k in patch && JSON.stringify(prev[k]) !== JSON.stringify(m[k]))) touch(m);
@@ -457,12 +462,17 @@ function createMemo(opts = {}) {
   const id = store.nextId++;
   const near = opts.near != null ? getMemo(opts.near) : null;
   const m = {
-    id, slot: opts.slot != null ? opts.slot : (id - 1) % 5,
+    id, slot: opts.slot != null ? opts.slot : (near ? near.slot : (id - 1) % 5),
     x: near ? near.x + 34 : null, y: near ? near.y + 34 : null,
-    w: 260, h: 220, type: 'text', title: '새 메모', text: '', items: [],
+    w: near && opts.text ? near.w : 260, h: 220, type: 'text',
+    title: typeof opts.title === 'string' ? opts.title.slice(0, 200) : '새 메모',
+    text: typeof opts.text === 'string' ? opts.text.slice(0, 200000) : '', items: [],
     layer: 'normal', hidden: false, folded: false, mark: null, markColor: '#E8456B', created: Date.now(),
     uid: Cloud.uid(), mt: Date.now(), dirty: true
   };
+  // 같은 그룹의 메모에서 만들면 그 그룹에 넣기
+  const grp = opts.group !== undefined ? opts.group : (near && near.group);
+  if (grp && store.groups.some((g) => g.id === grp)) m.group = grp;
   // 순서를 직접 정해 둔 상태면 새 메모는 맨 위로
   const ords = store.memos.map((x) => x.ord).filter((v) => typeof v === 'number');
   if (ords.length) m.ord = Math.min(...ords) - 1;
@@ -810,11 +820,11 @@ ipcMain.on('memo:unfoldAll', unfoldAll);
 // ───────── 자석 정렬: 옮길 때 다른 메모·화면 가장자리에 착 붙음 ─────────
 const SNAP = 14;   // 이 거리(px) 안에 들어오면 붙음
 const GAP = 6;     // 붙었을 때 메모 사이 간격
-function snapPos(m, x, y) {
+function snapPos(m, x, y, skip) {
   const w = m.folded ? FOLD_W : m.w;
   const h = m.folded ? FOLD_H : m.h;
   const disp = screen.getDisplayMatching({ x: Math.round(x), y: Math.round(y), width: Math.round(w), height: Math.round(h) }).workArea;
-  const others = store.memos.filter((o) => o.id !== m.id && !o.hidden && !o.deleting && o.x != null).map((o) => ({
+  const others = store.memos.filter((o) => o.id !== m.id && !o.hidden && !o.deleting && o.x != null && !(skip && skip.has(o))).map((o) => ({
     x: o.x, y: o.y, w: o.folded ? FOLD_W : o.w, h: o.folded ? FOLD_H : o.h
   }));
   let bx = null, by = null, dx = SNAP + 1, dy = SNAP + 1;
@@ -848,15 +858,53 @@ ipcMain.on('memo:move', (e, id, x, y, done) => {
   const win = memoWins.get(id);
   x = num(x); y = num(y);
   if (!m || !win || win.isDestroyed() || x == null || y == null) return;
-  const sp = snapPos(m, x + P, y + P);
+  const mates = m.group ? store.memos.filter((o) => o !== m && o.group === m.group && !o.hidden && !o.deleting && o.x != null) : [];
+  const sp = snapPos(m, x + P, y + P, new Set(mates));
   win.setPosition(Math.round(sp.x - P), Math.round(sp.y - P));
+  const dx = Math.round(sp.x) - m.x, dy = Math.round(sp.y) - m.y;
   m.x = Math.round(sp.x);
   m.y = Math.round(sp.y);
+  // 같은 그룹 메모는 함께 이동
+  for (const o of mates) {
+    o.x += dx; o.y += dy;
+    const ow = memoWins.get(o.id);
+    if (ow && !ow.isDestroyed() && (dx || dy)) ow.setPosition(Math.round(o.x - P), Math.round(o.y - P));
+    if (done) { delete o.ox; delete o.oy; }
+  }
   if (done) {
     delete m.ox; delete m.oy;   // 직접 옮긴 자리를 기억
     save();
     broadcast();
   }
+});
+// ───────── 그룹: 이 PC에서 메모를 묶어 함께 옮기고, 함께 숨기고, 함께 접기 ─────────
+const GROUP_COLORS = 6;
+ipcMain.handle('group:create', (e, name, memoId) => {
+  const used = new Set(store.groups.map((g) => g.color));
+  let color = 0; while (used.has(color) && color < GROUP_COLORS) color++;
+  const g = { id: 'g' + Cloud.uid().replace(/-/g, '').slice(0, 10), name: String(name || '').trim().slice(0, 40) || '새 그룹 ' + (store.groups.length + 1), color: color % GROUP_COLORS };
+  store.groups.push(g);
+  const m = memoId != null ? getMemo(memoId) : null;
+  if (m) m.group = g.id;
+  save(); broadcast();
+  return g.id;
+});
+ipcMain.on('group:rename', (e, gid, name) => {
+  const g = store.groups.find((x) => x.id === gid);
+  if (!g || typeof name !== 'string' || !name.trim()) return;
+  g.name = name.trim().slice(0, 40);
+  save(); broadcast();
+});
+ipcMain.on('group:remove', (e, gid) => {
+  store.groups = store.groups.filter((x) => x.id !== gid);
+  for (const m of [...store.memos, ...store.trash]) if (m.group === gid) delete m.group;
+  save(); broadcast();
+});
+ipcMain.on('group:hide', (e, gid, hidden) => {
+  for (const m of store.memos.filter((x) => x.group === gid && !x.deleting && !!x.hidden !== !!hidden)) updateMemo(m.id, { hidden: !!hidden });
+});
+ipcMain.on('group:fold', (e, gid, folded) => {
+  for (const m of store.memos.filter((x) => x.group === gid && !x.deleting && !x.hidden && !!x.folded !== !!folded)) updateMemo(m.id, { folded: !!folded });
 });
 ipcMain.on('memo:resize', (e, id, w, h, done) => {
   const m = getMemo(id);
@@ -1255,7 +1303,7 @@ function applyRemote(item) {
       n = { id: store.nextId++, uid: u, x: null, y: null, w: 260, h: 220, layer: 'normal', hidden: false, folded: false, created: Date.now(), ...c, ...meta };
       const lay = store.layoutCache && store.layoutCache[u];
       if (lay) {
-        for (const k of ['x', 'y', 'w', 'h', 'folded', 'layer', 'hidden', 'ox', 'oy']) if (lay[k] !== undefined && lay[k] !== null) n[k] = lay[k];
+        for (const k of ['x', 'y', 'w', 'h', 'folded', 'layer', 'hidden', 'ox', 'oy', 'group']) if (lay[k] !== undefined && lay[k] !== null) n[k] = lay[k];
         delete store.layoutCache[u];
       }
     }
@@ -1376,7 +1424,7 @@ async function cloudSignOut(force) {
   store.layoutCache = store.layoutCache || {};
   for (const m of store.memos) {
     if (!m.uid || m.deleting) continue;
-    store.layoutCache[m.uid] = { x: m.x, y: m.y, w: m.w, h: m.h, folded: !!m.folded, layer: m.layer, hidden: !!m.hidden, ox: m.ox, oy: m.oy };
+    store.layoutCache[m.uid] = { x: m.x, y: m.y, w: m.w, h: m.h, folded: !!m.folded, layer: m.layer, hidden: !!m.hidden, ox: m.ox, oy: m.oy, group: m.group };
   }
   for (const m of store.memos) closeMemoWin(m.id);
   store.memos = [];

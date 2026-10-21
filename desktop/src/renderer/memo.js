@@ -11,7 +11,7 @@
   const checks = $('checks'), itemsEl = $('items'), chip = $('chip'), picker = $('picker'), grip = $('grip');
   const FOLD_W = 180, FOLD_H = 32, MIN_W = 180, MIN_H = 110;
 
-  let memo = null, settings = null, sk = null;
+  let memo = null, settings = null, sk = null, groups = [];
   let items = [];
   let localSize = null;
 
@@ -21,6 +21,9 @@
   $('more').innerHTML = ICONS.dots;
   $('bType').innerHTML = ICONS.list;
   $('bTable').innerHTML = ICONS.table;
+  $('bGroup').innerHTML = ICONS.folder;
+  $('bSplit').innerHTML = ICONS.scissors;
+  $('splitChip').innerHTML = ICONS.scissors + '<span>새 메모로 분리</span>';
   $('bTop').innerHTML = ICONS.front;
   $('bBottom').innerHTML = ICONS.back;
   $('bHide').innerHTML = ICONS.eyeOff;
@@ -40,6 +43,7 @@
   }
 
   // ───────── 그리기 ─────────
+  const setOn = (el, on) => { el.classList.toggle('on', on); el.setAttribute('aria-pressed', String(on)); };
   function render(first) {
     if (!memo || !settings) return;
     sk = applyTheme(settings).sk;
@@ -63,10 +67,15 @@
     fold.setAttribute('aria-expanded', String(!memo.folded));
     head.title = memo.folded ? '더블클릭하면 펼쳐져요' : '';
 
+    const g = memo.group && groups.find((x) => x.id === memo.group);
+    const gd = $('grpDot');
+    gd.hidden = !g;
+    if (g) { gd.style.background = window.M.GROUP_COLORS[g.color % window.M.GROUP_COLORS.length]; gd.title = '그룹: ' + g.name; }
+    setOn($('bGroup'), !gpicker.hidden);
+    if (!gpicker.hidden && document.activeElement !== $('gName')) renderGroups();
     $('markIcon').innerHTML = memo.mark ? markSvg(memo.mark, memo.markColor || '#E8456B', 18) : '';
     if (document.activeElement !== title) title.value = memo.title || '';
 
-    const setOn = (el, on) => { el.classList.toggle('on', on); el.setAttribute('aria-pressed', String(on)); };
     setOn($('bTop'), memo.layer === 'top');
     setOn($('bBottom'), memo.layer === 'bottom');
     setOn($('bType'), memo.type === 'check');
@@ -302,6 +311,7 @@
   function closeTools() {
     if (tools.hidden) return;
     closePicker();
+    gpicker.hidden = true;
     tools.hidden = true;
     more.classList.remove('on');
     more.setAttribute('aria-expanded', 'false');
@@ -413,7 +423,84 @@
   document.addEventListener('pointerdown', (e) => {
     const t = e.target;
     if (!picker.hidden && !picker.contains(t) && !$('bMark').contains(t)) { closePicker(); render(); }
-    if (!tools.hidden && !tools.contains(t) && !more.contains(t) && !picker.contains(t) && !$('confirm').contains(t)) { closeTools(); render(); }
+    if (!gpicker.hidden && !gpicker.contains(t) && !$('bGroup').contains(t)) { closeGroups(); render(); }
+    if (!tools.hidden && !tools.contains(t) && !more.contains(t) && !picker.contains(t) && !gpicker.contains(t) && !$('confirm').contains(t)) { closeTools(); render(); }
+  });
+
+  // ───────── 그룹 ─────────
+  const gpicker = $('gpicker');
+  function renderGroups() {
+    const C = window.M.GROUP_COLORS;
+    $('gList').innerHTML = groups.map((g) =>
+      '<button type="button" class="gopt' + (memo.group === g.id ? ' on' : '') + '" data-g="' + esc(g.id) + '" aria-pressed="' + (memo.group === g.id) + '">' +
+        '<i style="background:' + C[g.color % C.length] + '"></i><span>' + esc(g.name) + '</span></button>').join('') +
+      (memo.group ? '<button type="button" class="ptext" data-g="">그룹에서 빼기</button>' : '') +
+      (groups.length ? '' : '<span class="gnone">아직 그룹이 없어요. 아래에서 만들어 보세요</span>');
+  }
+  function closeGroups() { if (!gpicker.hidden) { gpicker.hidden = true; } }
+  $('bGroup').addEventListener('click', () => {
+    closePicker();
+    if (gpicker.hidden) { gpicker.hidden = false; renderGroups(); } else closeGroups();
+    render();
+  });
+  $('gList').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-g]');
+    if (!b) return;
+    const gid = b.dataset.g || null;
+    send({ group: memo.group === gid ? null : gid });
+    if (!gid) delete memo.group;
+    renderGroups(); render();
+  });
+  $('gNew').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = $('gName').value.trim();
+    const gid = await api.groupCreate(name, id);
+    $('gName').value = '';
+    memo.group = gid;
+    showHint('그룹을 만들고 이 메모를 넣었어요');
+  });
+
+  // ───────── 분리: 드래그한 부분을 새 메모로 ─────────
+  let hintT = null;
+  function showHint(t) { const h = $('hint'); h.textContent = t; h.classList.add('show'); clearTimeout(hintT); hintT = setTimeout(() => h.classList.remove('show'), 1800); }
+  function textRange() {
+    const sel = getSelection();
+    if (!sel.rangeCount || sel.isCollapsed) return null;
+    const r = sel.getRangeAt(0);
+    return text.contains(r.commonAncestorContainer) || r.commonAncestorContainer === text ? r : null;
+  }
+  function splitSelection() {
+    if (memo.type !== 'text') { showHint('일반 글 메모에서 쓸 수 있어요'); return; }
+    const r = textRange();
+    const part = r ? String(getSelection()).replace(/\u00A0/g, ' ').replace(/^\n+|\n+$/g, '') : '';
+    if (!part.trim()) { showHint('분리할 내용을 먼저 드래그해 주세요'); return; }
+    const before = ed.getText().split('\n');
+    r.deleteContents();
+    getSelection().removeAllRanges();
+    // 줄을 통째로 고른 경우 남는 빈 줄 하나를 정리
+    const after = ed.getText().split('\n');
+    const empties = (arr) => arr.filter((l) => !l.trim()).length;
+    let extra = empties(after) - empties(before);
+    if (extra > 0) {
+      let k = 0; while (k < after.length && after[k] === before[k]) k++;
+      while (extra > 0 && k < after.length && !after[k].trim()) { after.splice(k, 1); extra--; }
+    }
+    const rest = after.join('\n').replace(/^\n+|\n+$/g, '');
+    ed.setText(rest);
+    memo.text = rest;
+    saveText.flush();
+    const first = part.split('\n').map((l) => l.trim()).find((l) => l && l !== window.M.DIVIDER) || '';
+    api.create({ near: id, title: first.length > 24 ? first.slice(0, 24) + '…' : (first || '분리한 메모'), text: part });
+    $('splitChip').hidden = true;
+    closeTools(); render();
+    showHint('새 메모로 분리했어요');
+  }
+  $('bSplit').addEventListener('click', splitSelection);
+  $('splitChip').addEventListener('pointerdown', (e) => e.preventDefault());   // 누를 때 선택이 풀리지 않게
+  $('splitChip').addEventListener('click', splitSelection);
+  document.addEventListener('selectionchange', () => {
+    const r = memo && memo.type === 'text' && !memo.folded ? textRange() : null;
+    $('splitChip').hidden = !(r && String(getSelection()).trim());
   });
 
   // ───────── 크기 조절 ─────────
@@ -509,6 +596,7 @@
       return;
     }
     if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === 'n') { e.preventDefault(); api.create({ near: id }); }
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && !e.altKey && (e.key.toLowerCase() === 'x' || e.code === 'KeyX')) { e.preventDefault(); splitSelection(); }
   });
 
   // ───────── 메인과 연결 ─────────
@@ -523,6 +611,7 @@
   });
   api.onState((s) => {
     settings = s.settings;
+    groups = s.groups || [];
     const m = s.memos.find((x) => x.id === id);
     if (!m) return;
     memo = { ...m };
@@ -530,6 +619,7 @@
   });
   api.init().then((s) => {
     settings = s.settings;
+    groups = s.groups || [];
     const m = s.memos.find((x) => x.id === id);
     if (!m) return;
     memo = { ...m };

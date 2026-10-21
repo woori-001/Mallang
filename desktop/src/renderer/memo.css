@@ -223,3 +223,40 @@ html.paper .card.bodybg .body { margin: 0; border-radius: 0; background: transpa
 html.paper .tools { box-shadow: 0 0 0 1px var(--paper-line), 0 8px 18px rgba(30, 40, 80, .14); background: #fff; }
 html.paper .tblScroll { background: #fff; }
 html.paper .chip { background: var(--tint); }
+
+/* 그룹 */
+.grpDot { width: 8px; height: 8px; border-radius: 50%; flex: none; margin: 0 3px 0 4px; box-shadow: 0 0 0 2px rgba(var(--glass), .8); }
+.grpDot[hidden] { display: none; }
+.gpicker { gap: 8px; }
+.glist { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.gopt {
+  display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 11px 0 9px; border: none; border-radius: 15px;
+  background: rgba(80, 80, 140, .07); font-size: 12px; font-weight: 600; color: var(--ink); max-width: 100%;
+  transition: background .2s ease, box-shadow .2s ease;
+}
+.gopt i { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.gopt span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gopt:hover { background: rgba(80, 80, 140, .12); }
+.gopt.on { background: rgba(var(--glass), 1); box-shadow: inset 0 0 0 1.5px var(--a1); }
+.gnone { font-size: 12px; color: var(--sub); }
+.gnew { display: flex; gap: 6px; }
+.gnew input { flex: 1; min-width: 0; height: 30px; border: 1px solid var(--line-soft, rgba(80, 80, 140, .18)); border-radius: 10px; padding: 0 10px; font-size: 12px; outline: none; background: rgba(var(--glass), .9); user-select: text; }
+.gnew input:focus { border-color: var(--a1); }
+.gadd { height: 30px; border: none; border-radius: 10px; padding: 0 12px; font-size: 12px; font-weight: 700; background: var(--accent); color: var(--on); }
+
+/* 분리 */
+.splitChip {
+  position: absolute; left: 12px; bottom: 10px; z-index: 4; display: inline-flex; align-items: center; gap: 5px;
+  height: 28px; padding: 0 11px 0 9px; border: none; border-radius: 14px; font-size: 12px; font-weight: 700;
+  background: var(--accent); color: var(--on); box-shadow: 0 4px 12px var(--glow); animation: fade .25s var(--ease);
+}
+.splitChip[hidden] { display: none; }
+.card.folded .splitChip { display: none; }
+.hint {
+  position: absolute; left: 50%; bottom: 12px; transform: translate(-50%, 6px); opacity: 0; pointer-events: none; z-index: 7;
+  font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 12px; white-space: nowrap;
+  background: rgba(var(--glass), .96); color: var(--ink); box-shadow: 0 6px 16px rgba(60, 50, 140, .2);
+  transition: opacity .2s ease, transform .3s var(--ease);
+}
+.hint.show { opacity: 1; transform: translate(-50%, 0); }
+.card.folded .hint { display: none; }
