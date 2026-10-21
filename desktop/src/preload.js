@@ -25,6 +25,7 @@ contextBridge.exposeInMainWorld('api', {
   widgetMove: (x, y, done) => ipcRenderer.send('widget:move', x, y, !!done),
   widgetSize: (h) => ipcRenderer.send('widget:size', h),
   openData: () => ipcRenderer.send('open:data'),
+  copyText: (t) => ipcRenderer.send('clip:write', t),
 
   restore: (id) => ipcRenderer.send('trash:restore', id),
   purge: (id) => ipcRenderer.send('trash:purge', id),

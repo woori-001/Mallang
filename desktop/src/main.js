@@ -378,7 +378,7 @@ function applyLayer(id) {
   }
 }
 
-const ALLOWED = ['title', 'text', 'items', 'type', 'layer', 'hidden', 'folded', 'mark', 'markColor', 'slot', 'ord'];
+const ALLOWED = ['title', 'text', 'items', 'type', 'layer', 'hidden', 'folded', 'mark', 'markColor', 'slot', 'ord', 'clip'];  // clip: 드래그해 둔 부분 (이 PC에만)
 // 기기끼리 맞추는 내용 (위치·크기·접힘·맨앞/맨뒤·숨김은 기기마다 따로)
 const CONTENT = ['title', 'text', 'items', 'type', 'mark', 'markColor', 'slot', 'ord'];
 function touch(m) {
@@ -753,6 +753,7 @@ ipcMain.on('widget:size', (e, h) => {
   widget.setBounds({ x: b.x, y: b.y, width: WIDGET_W, height: Math.round(Math.min(600, Math.max(80, h))) });
 });
 ipcMain.on('open:data', () => shell.openPath(dataDir));
+ipcMain.on('clip:write', (e, t) => { if (typeof t === 'string' && t) clipboard.writeText(t.slice(0, 200000)); });
 
 // ───────────────────────── 백업 내보내기 / 가져오기 (비밀번호 암호화) ─────────────────────────
 const BK_FORMAT = 'mallang-memo-backup';

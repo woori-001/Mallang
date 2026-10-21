@@ -82,6 +82,8 @@
     chip.textContent = memo.layer === 'top' ? '항상 위' : '맨 뒤';
     if (!picker.hidden && document.activeElement !== $('customColor')) renderPicker();
     if (memo.hidden) card.classList.add('leaving');
+    if (memo.clip && !fullText().includes(memo.clip)) { memo.clip = null; api.update(id, { clip: null }); }
+    renderClip();
   }
 
   // ───────── 체크리스트 ─────────
@@ -400,8 +402,58 @@
     render();
   });
 
+  // ───────── 드래그해 둔 부분 기억 ─────────
+  // 메모에서 글자를 드래그하면 기억해 두고, 접힌 상태에서 메모를 누르고 Ctrl+C 하면 그 부분을 복사해요.
+  const clipBadge = $('clipBadge');
+  clipBadge.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="3"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>';
+  function fullText() { return [memo.title || '', memo.text || '', ...(memo.items || []).map((x) => x.t)].join('\n'); }
+  function remember(str) {
+    if (!str || !str.trim() || !memo || str === memo.clip) return;
+    memo.clip = str;
+    api.update(id, { clip: str });
+    renderClip();
+  }
+  function renderClip() {
+    const c = memo && memo.clip;
+    clipBadge.hidden = !c;
+    if (c) {
+      const short = c.replace(/\s+/g, ' ').trim();
+      head.title = (memo.folded ? '더블클릭하면 펼쳐져요 · ' : '') + 'Ctrl+C 로 "' + (short.length > 30 ? short.slice(0, 30) + '…' : short) + '" 복사';
+    }
+  }
+  function selFrom(el) {
+    if (!el || el.selectionStart == null || el.selectionEnd <= el.selectionStart) return '';
+    return el.value.slice(el.selectionStart, el.selectionEnd);
+  }
+  function liveSelection() {
+    const a = document.activeElement;
+    if (a && (a.tagName === 'TEXTAREA' || a.tagName === 'INPUT')) { const s = selFrom(a); if (s) return s; }
+    const s = window.getSelection ? String(window.getSelection()) : '';
+    return s;
+  }
+  const watchSel = (e) => { const el = e.target; if (el && (el === text || el === title || el.classList.contains('itxt'))) { const s = selFrom(el); if (s) remember(s); } };
+  for (const ev of ['select', 'mouseup', 'keyup']) document.addEventListener(ev, watchSel, true);
+  document.addEventListener('copy', () => { const s = liveSelection(); if (s) remember(s); });
+  let copiedT = null;
+  function flashCopied() {
+    const el = $('copied');
+    el.textContent = '복사했어요';
+    el.classList.add('show');
+    card.classList.remove('copyflash'); void card.offsetWidth; card.classList.add('copyflash');
+    clearTimeout(copiedT);
+    copiedT = setTimeout(() => el.classList.remove('show'), 1200);
+  }
+
   // ───────── 단축키 ─────────
   document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && (e.key.toLowerCase() === 'c' || e.code === 'KeyC') && !e.isComposing) {
+      if (!liveSelection() && memo && memo.clip) {
+        e.preventDefault();
+        api.copyText(memo.clip);
+        flashCopied();
+      }
+      return;
+    }
     if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === 'n') { e.preventDefault(); api.create({ near: id }); }
   });
 

@@ -170,3 +170,16 @@ body { padding: 14px; }
 .cyes { background: #D23B66; color: #fff; }
 .cyes:hover { background: #BC2C56; }
 @keyframes cfade { from { opacity: 0; } }
+
+/* 드래그해 둔 부분 기억 → 접힌 상태에서 Ctrl+C */
+.clipBadge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; flex: none; color: var(--sub); opacity: .55; }
+.card:not(.folded) .clipBadge { display: none; }
+.copied {
+  position: absolute; right: 10px; top: 7px; z-index: 8; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 10px;
+  background: var(--accent); color: var(--on); opacity: 0; transform: translateY(-4px) scale(.9); pointer-events: none;
+  transition: opacity .2s ease, transform .3s var(--spring);
+}
+.copied.show { opacity: 1; transform: none; }
+.card.folded .copied { top: 6px; right: 8px; }
+.card.copyflash { animation: copyflash .5s var(--ease); }
+@keyframes copyflash { 30% { transform: scale(1.04); } }
