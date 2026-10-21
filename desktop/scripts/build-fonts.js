@@ -24,6 +24,7 @@ const pick = {
   'hi-melody': ['400'],
   'poor-story': ['400'],
   'poppins': ['400', '500', '600', '700'],
+  'noto-sans-kr': ['400', '700'],
 };
 let css = '';
 for (const [pkg, weights] of Object.entries(pick)) {

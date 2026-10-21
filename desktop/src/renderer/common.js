@@ -57,6 +57,7 @@
   const FONTS = [
     { id: 'gowun', name: '고운돋움', fam: "'Gowun Dodum', sans-serif", size: 14 },
     { id: 'plex', name: 'IBM Plex Sans KR · 단정한 고딕', fam: "'IBM Plex Sans KR', sans-serif", size: 14 },
+    { id: 'notosans', name: 'Noto Sans KR · 깔끔한 고딕', fam: "'Noto Sans KR', sans-serif", size: 14 },
     { id: 'nanumgothic', name: '나눔고딕', fam: "'Nanum Gothic', sans-serif", size: 14 },
     { id: 'sunflower', name: '해바라기 · 또렷한 고딕', fam: "'Sunflower', sans-serif", size: 14 },
     { id: 'dohyeon', name: '도현 · 굵은 제목체', fam: "'Do Hyeon', sans-serif", size: 15 },
