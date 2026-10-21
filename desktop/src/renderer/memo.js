@@ -73,6 +73,7 @@
     gd.hidden = !g;
     if (g) { gd.title = '그룹: ' + g.name; gd.setAttribute('aria-label', '그룹 ' + g.name); }
     setOn($('bGroup'), !gpicker.hidden);
+    $('bUnsplit').hidden = !memo.splitFrom;
     if (!gpicker.hidden && document.activeElement !== $('gName')) renderGroups();
     $('markIcon').innerHTML = memo.mark ? markSvg(memo.mark, memo.markColor || '#E8456B', 18) : '';
     if (document.activeElement !== title) title.value = memo.title || '';
@@ -475,7 +476,8 @@
     const r = textRange();
     const part = r ? String(getSelection()).replace(/\u00A0/g, ' ').replace(/^\n+|\n+$/g, '') : '';
     if (!part.trim()) { showHint('분리할 내용을 먼저 드래그해 주세요'); return; }
-    const before = ed.getText().split('\n');
+    const beforeText = ed.getText();
+    const before = beforeText.split('\n');
     r.deleteContents();
     getSelection().removeAllRanges();
     // 줄을 통째로 고른 경우 남는 빈 줄 하나를 정리
@@ -491,11 +493,33 @@
     memo.text = rest;
     saveText.flush();
     const first = part.split('\n').map((l) => l.trim()).find((l) => l && l !== window.M.DIVIDER) || '';
-    api.create({ near: id, title: first.length > 24 ? first.slice(0, 24) + '…' : (first || '분리한 메모'), text: part });
+    api.create({ near: id, title: first.length > 24 ? first.slice(0, 24) + '…' : (first || '분리한 메모'), text: part, splitFrom: { uid: memo.uid, before: beforeText, after: rest } })
+      .then((nid) => { lastSplit = nid; showUndo(); });
     $('splitChip').hidden = true;
     closeTools(); render();
-    showHint('새 메모로 분리했어요');
   }
+  // 분리 되돌리기: 분리한 직후 원래 메모에 10초간 '되돌리기', 분리된 메모의 ⋯ 메뉴에는 계속
+  let lastSplit = null, undoT = null;
+  function showUndo() {
+    const u = $('undoChip');
+    u.hidden = false;
+    clearTimeout(undoT);
+    undoT = setTimeout(() => { u.hidden = true; lastSplit = null; }, 10000);
+  }
+  async function undoSplit(nid) {
+    const r = await api.unsplit(nid);
+    if (r && r.ok) showHint('분리를 되돌렸어요');
+    else if (r && r.error === 'gone') showHint('원래 메모가 없어서 되돌릴 수 없어요');
+    else showHint('되돌릴 수 없어요');
+  }
+  $('undoChip').innerHTML = '<span>새 메모로 분리했어요</span><b>되돌리기</b>';
+  $('undoChip').addEventListener('click', () => {
+    $('undoChip').hidden = true; clearTimeout(undoT);
+    if (lastSplit != null) undoSplit(lastSplit);
+    lastSplit = null;
+  });
+  $('bUnsplit').innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>';
+  $('bUnsplit').addEventListener('click', () => { closeTools(); render(); undoSplit(id); });
   $('bSplit').addEventListener('click', splitSelection);
   $('splitChip').addEventListener('pointerdown', (e) => e.preventDefault());   // 누를 때 선택이 풀리지 않게
   $('splitChip').addEventListener('click', splitSelection);
@@ -598,12 +622,15 @@
     }
     if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === 'n') { e.preventDefault(); api.create({ near: id }); }
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && !e.altKey && (e.key.toLowerCase() === 'x' || e.code === 'KeyX')) { e.preventDefault(); splitSelection(); }
+    // 분리 직후 Ctrl+Z = 분리 되돌리기
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && (e.key.toLowerCase() === 'z' || e.code === 'KeyZ') && lastSplit != null && !$('undoChip').hidden) { e.preventDefault(); $('undoChip').click(); }
   });
 
   // ───────── 메인과 연결 ─────────
   card.addEventListener('animationend', () => card.classList.remove('enter', 'flash'));
   api.onCmd((c) => {
     if (c.type === 'leave') card.classList.add('leaving');
+    if (c.type === 'settext' && typeof c.text === 'string') { memo.text = c.text; ed.setText(c.text); }
     if (c.type === 'flash') {
       card.classList.remove('flash', 'enter');
       void card.offsetWidth;

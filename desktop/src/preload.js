@@ -12,6 +12,8 @@ contextBridge.exposeInMainWorld('api', {
   create: (opts) => ipcRenderer.invoke('memo:create', opts || {}),
   remove: (id) => ipcRenderer.send('memo:delete', id),
   focus: (id) => ipcRenderer.send('memo:focus', id),
+  unsplit: (id) => ipcRenderer.invoke('memo:unsplit', id),
+  layoutPushAll: () => ipcRenderer.send('layout:pushAll'),
   groupCreate: (name, memoId) => ipcRenderer.invoke('group:create', name, memoId),
   groupRename: (gid, name) => ipcRenderer.send('group:rename', gid, name),
   groupRemove: (gid) => ipcRenderer.send('group:remove', gid),

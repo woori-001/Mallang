@@ -262,3 +262,14 @@ html.paper .chip { background: var(--tint); }
 }
 .hint.show { opacity: 1; transform: translate(-50%, 0); }
 .card.folded .hint { display: none; }
+
+/* 분리 되돌리기 */
+.undoChip {
+  position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 8; display: inline-flex; align-items: center; gap: 10px;
+  height: 32px; padding: 0 6px 0 14px; border: none; border-radius: 16px; white-space: nowrap; font-size: 12px; font-weight: 600;
+  background: rgba(40, 40, 60, .9); color: #fff; box-shadow: 0 6px 16px rgba(0, 0, 0, .2); animation: fade .25s var(--ease);
+}
+.undoChip b { background: var(--accent); color: var(--on); border-radius: 12px; padding: 5px 10px; }
+.undoChip[hidden] { display: none; }
+.card.folded .undoChip { display: none; }
+#bUnsplit[hidden] { display: none; }

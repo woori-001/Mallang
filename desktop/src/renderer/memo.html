@@ -26,6 +26,7 @@
       <button id="bType" class="ib" type="button" aria-label="체크리스트 전환" title="체크리스트 ↔ 일반 메모"></button>
       <button id="bTable" class="ib" type="button" aria-label="표 전환" title="표 ↔ 일반 메모"></button>
       <button id="bGroup" class="ib" type="button" aria-label="그룹" title="그룹 (함께 옮기고 함께 숨기기)"></button>
+      <button id="bUnsplit" class="ib" type="button" aria-label="분리 되돌리기" title="원래 메모로 되돌리기 (분리 취소)" hidden></button>
       <button id="bSplit" class="ib" type="button" aria-label="고른 부분을 새 메모로 분리" title="드래그한 부분을 새 메모로 분리"></button>
       <button id="bDiv" class="ib" type="button" aria-label="구분선 넣기" title="구분선 넣기 (Ctrl+Enter)"></button>
       <button id="bTop" class="ib" type="button" aria-label="맨 앞으로" title="맨 앞 (항상 위)"></button>
@@ -59,6 +60,7 @@
   </div>
   <div id="chip" class="chip" hidden></div>
   <button id="splitChip" class="splitChip" type="button" hidden></button>
+  <button id="undoChip" class="undoChip" type="button" hidden></button>
   <div id="hint" class="hint" role="status" aria-live="polite"></div>
   <div id="confirm" class="confirm" hidden role="alertdialog" aria-modal="true" aria-labelledby="cTitle" aria-describedby="cDesc">
     <div class="cbox">

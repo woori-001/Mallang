@@ -92,6 +92,7 @@ function load() {
   if (fixed) store.contacts = { rows: fixed, mt: Math.max(Date.now(), (store.contacts.mt || 0) + 1), dirty: true };
   store.cloud = store.cloud && typeof store.cloud === 'object' ? store.cloud : {};
   store.shared = store.shared && typeof store.shared === 'object' ? store.shared : {};
+  store.layoutSync = store.layoutSync && typeof store.layoutSync === 'object' ? store.layoutSync : { mt: 0, dirty: false };
   if (store.shared.contacts && !Array.isArray(store.shared.contacts)) delete store.shared.contacts;
   store.groups = Array.isArray(store.groups) ? store.groups.filter((g) => g && typeof g.id === 'string').map((g) => ({ id: g.id, name: String(g.name || '그룹').slice(0, 40), color: Number(g.color) || 0 })) : [];
   { const gids = new Set(store.groups.map((g) => g.id)); for (const m of store.memos) if (m.group && !gids.has(m.group)) delete m.group; }
@@ -428,10 +429,11 @@ function updateMemo(id, patch) {
   if (!['text', 'check', 'table'].includes(m.type)) m.type = 'text';
   if ('table' in patch) m.table = patch.table ? sanitizeTable(patch.table) : null;
   if ('group' in patch && (!patch.group || !store.groups.some((g) => g.id === patch.group))) delete m.group;
-  if (m.group && m.group !== prev.group) stackIntoGroup(m);
+  if (m.group && m.group !== prev.group && !applyingLayout) stackIntoGroup(m);
   if (m.layer !== 'top' && m.layer !== 'bottom') m.layer = 'normal';
   m.updated = Date.now();
   if (CONTENT.some((k) => k in patch && JSON.stringify(prev[k]) !== JSON.stringify(m[k]))) touch(m);
+  if (['layer', 'hidden', 'folded', 'group', 'x', 'y'].some((k) => prev[k] !== m[k])) layoutTouched(m);
 
   // 접힌 메모를 펼 때 예전 '모두 접어 정리' 이전 자리로 돌아가기
   if ('folded' in patch && prev.folded && !m.folded && m.ox != null) {
@@ -474,8 +476,13 @@ function createMemo(opts = {}) {
     title: typeof opts.title === 'string' ? opts.title.slice(0, 200) : '새 메모',
     text: typeof opts.text === 'string' ? opts.text.slice(0, 200000) : '', items: [],
     layer: 'normal', hidden: false, folded: false, mark: null, markColor: '#E8456B', created: Date.now(),
-    uid: Cloud.uid(), mt: Date.now(), dirty: true
+    uid: Cloud.uid(), mt: Date.now(), dirty: true, lt: Date.now()
   };
+  markLayout();
+  // 분리해서 만든 메모: 원래 메모로 되돌릴 수 있게 기억 (이 PC에만)
+  if (opts.splitFrom && typeof opts.splitFrom.uid === 'string') {
+    m.splitFrom = { uid: opts.splitFrom.uid, part: typeof opts.text === 'string' ? opts.text : '', before: String(opts.splitFrom.before || '').slice(0, 200000), after: String(opts.splitFrom.after || '').slice(0, 200000) };
+  }
   // 같은 그룹의 메모에서 만들면 그 그룹에 넣기
   const grp = opts.group !== undefined ? opts.group : (near && near.group);
   if (grp && store.groups.some((g) => g.id === grp)) m.group = grp;
@@ -564,6 +571,7 @@ function foldAll() {
   const list = store.memos.filter((m) => !m.hidden && !m.deleting && !m.folded);
   if (!list.length) return;
   for (const m of list) m.folded = true;
+  layoutTouched(null, list);
   save();
   broadcast();
   // 내용이 먼저 접히고 나서 창 크기 맞추기
@@ -584,6 +592,7 @@ function unfoldAll() {
     if (m.ox != null) { m.x = m.ox; m.y = m.oy; }
     delete m.ox; delete m.oy;
   }
+  layoutTouched(null, list);
   save();
   broadcast();
   for (const m of list) {
@@ -758,6 +767,7 @@ function updateSettings(patch) {
   if ('fontScale' in patch) patch.fontScale = Math.min(170, Math.max(70, Number(patch.fontScale) || 100));
   for (const k of keys) if (k in patch) store.settings[k] = patch[k];
   const s = store.settings;
+  if (!applyingLayout && SYNC_SETTINGS.some((k) => JSON.stringify(prev[k]) !== JSON.stringify(s[k]))) { store.layoutSync.settingsT = Date.now(); markLayout(); }
   if (s.autoStart !== prev.autoStart) {
     try { app.setLoginItemSettings({ openAtLogin: !!s.autoStart }); } catch (e) { console.error(e); }
   }
@@ -879,6 +889,7 @@ ipcMain.on('memo:move', (e, id, x, y, done) => {
   }
   if (done) {
     delete m.ox; delete m.oy;   // 직접 옮긴 자리를 기억
+    layoutTouched(m, mates);
     save();
     broadcast();
   }
@@ -912,19 +923,19 @@ ipcMain.handle('group:create', (e, name, memoId) => {
   store.groups.push(g);
   const m = memoId != null ? getMemo(memoId) : null;
   if (m) m.group = g.id;
-  save(); broadcast();
+  groupsTouched(); save(); broadcast();
   return g.id;
 });
 ipcMain.on('group:rename', (e, gid, name) => {
   const g = store.groups.find((x) => x.id === gid);
   if (!g || typeof name !== 'string' || !name.trim()) return;
   g.name = name.trim().slice(0, 40);
-  save(); broadcast();
+  groupsTouched(); save(); broadcast();
 });
 ipcMain.on('group:remove', (e, gid) => {
   store.groups = store.groups.filter((x) => x.id !== gid);
   for (const m of [...store.memos, ...store.trash]) if (m.group === gid) delete m.group;
-  save(); broadcast();
+  groupsTouched(); save(); broadcast();
 });
 ipcMain.on('group:hide', (e, gid, hidden) => {
   for (const m of store.memos.filter((x) => x.group === gid && !x.deleting && !!x.hidden !== !!hidden)) updateMemo(m.id, { hidden: !!hidden });
@@ -940,7 +951,7 @@ ipcMain.on('memo:resize', (e, id, w, h, done) => {
   m.w = Math.round(Math.min(MAX_W, Math.max(MIN_W, w)));
   m.h = Math.round(Math.min(MAX_H, Math.max(MIN_H, h)));
   setB(win, boundsFor(m));
-  if (done) { save(); broadcast(); }
+  if (done) { layoutTouched(m); save(); broadcast(); }
 });
 ipcMain.on('settings:update', (e, patch) => { if (patch && typeof patch === 'object') updateSettings(patch); });
 ipcMain.on('events:set', (e, key, list) => {
@@ -1220,6 +1231,129 @@ async function cloudStart() {
   scheduleSync(500);
 }
 
+// ───────── 배치·꾸미기 맞추기 (같은 계정이면 어느 PC에서든 같은 배치) ─────────
+// 메모마다 배치 시각(lt)을 따로 두어, 한 PC에서 옮긴 메모만 다른 PC에 반영돼요.
+const LAYOUT_KEYS = ['x', 'y', 'w', 'h', 'folded', 'layer', 'hidden', 'group', 'ox', 'oy'];
+const SYNC_SETTINGS = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha'];
+let applyingLayout = false;
+function markLayout() {
+  if (applyingLayout || !store.layoutSync) return;
+  store.layoutSync.mt = Math.max(Date.now(), (store.layoutSync.mt || 0) + 1);
+  store.layoutSync.dirty = true;
+  if (cloudKey && holder.session) scheduleSync(4000);
+}
+function layoutTouched(m, more) {
+  if (applyingLayout) return;
+  const now = Date.now();
+  if (m) m.lt = now;
+  for (const o of more || []) o.lt = now;
+  markLayout();
+}
+function groupsTouched() { if (!applyingLayout) { store.layoutSync.groupsT = Date.now(); markLayout(); } }
+function layoutPayload() {
+  const memos = {};
+  for (const m of store.memos) {
+    if (!m.uid || m.deleting) continue;
+    const l = { t: m.lt || 0 };
+    for (const k of LAYOUT_KEYS) if (m[k] !== undefined && m[k] !== null) l[k] = m[k];
+    memos[m.uid] = l;
+  }
+  const settings = {};
+  for (const k of SYNC_SETTINGS) settings[k] = store.settings[k];
+  return { memos, groups: store.groups, groupsT: store.layoutSync.groupsT || 0, settings, settingsT: store.layoutSync.settingsT || 0 };
+}
+function cleanLayout(l) {
+  const o = {};
+  for (const k of ['x', 'y', 'w', 'h', 'ox', 'oy']) if (typeof l[k] === 'number' && isFinite(l[k])) o[k] = Math.round(l[k]);
+  if (o.w != null) o.w = Math.min(MAX_W, Math.max(MIN_W, o.w));
+  if (o.h != null) o.h = Math.min(MAX_H, Math.max(MIN_H, o.h));
+  o.folded = !!l.folded; o.hidden = !!l.hidden;
+  o.layer = ['top', 'bottom'].includes(l.layer) ? l.layer : 'normal';
+  o.group = typeof l.group === 'string' ? l.group : null;
+  return o;
+}
+function applyLayout(d) {
+  if (!d || typeof d !== 'object') return;
+  applyingLayout = true;
+  try {
+    if (Array.isArray(d.groups) && (d.groupsT || 0) > (store.layoutSync.groupsT || 0)) {
+      store.groups = d.groups.filter((g) => g && typeof g.id === 'string').map((g) => ({ id: g.id, name: String(g.name || '그룹').slice(0, 40), color: Number(g.color) || 0 }));
+      store.layoutSync.groupsT = d.groupsT;
+    }
+    if (d.settings && (d.settingsT || 0) > (store.layoutSync.settingsT || 0)) {
+      const p = {};
+      for (const k of SYNC_SETTINGS) if (d.settings[k] !== undefined) p[k] = d.settings[k];
+      updateSettings(p);
+      store.layoutSync.settingsT = d.settingsT;
+    }
+    const gids = new Set(store.groups.map((g) => g.id));
+    for (const [uid, raw] of Object.entries(d.memos || {})) {
+      if (!raw || !(raw.t > 0)) continue;
+      const l = cleanLayout(raw);
+      if (l.group && !gids.has(l.group)) l.group = null;
+      const m = store.memos.find((x) => x.uid === uid && !x.deleting);
+      if (!m) {
+        // 아직 이 PC에 없는 메모: 도착하면 이 자리에 나타나게
+        const lc = store.layoutCache = store.layoutCache || {};
+        if (!lc[uid] || (lc[uid].t || 0) < raw.t) lc[uid] = { ...l, t: raw.t };
+        continue;
+      }
+      if ((m.lt || 0) >= raw.t) continue;
+      m.lt = raw.t;
+      const moved = l.x != null && (l.x !== m.x || l.y !== m.y || l.w !== m.w || l.h !== m.h);
+      if (l.x != null) { m.x = l.x; m.y = l.y; }
+      if (l.w != null) { m.w = l.w; m.h = l.h; }
+      if (l.ox != null) { m.ox = l.ox; m.oy = l.oy; } else { delete m.ox; delete m.oy; }
+      ensurePos(m);
+      updateMemo(m.id, { folded: l.folded, layer: l.layer, hidden: l.hidden, group: l.group });
+      const win = memoWins.get(m.id);
+      if (moved && win && !win.isDestroyed() && !m.hidden) animateTo(win, boundsFor(m), 380);
+    }
+  } finally { applyingLayout = false; }
+  save();
+  broadcast();
+}
+
+// 분리 되돌리기: 분리한 내용을 원래 메모의 원래 자리로 돌려놓고, 분리된 메모는 없앰
+ipcMain.handle('memo:unsplit', (e, id) => {
+  const m = getMemo(id);
+  if (!m || !m.splitFrom) return { error: 'none' };
+  const src = store.memos.find((x) => x.uid === m.splitFrom.uid && !x.deleting);
+  if (!src) return { error: 'gone' };
+  const part = m.type === 'check' ? (m.items || []).map((x) => x.t).join('\n') : (m.text || '');
+  let text;
+  if ((src.text || '') === m.splitFrom.after && part === m.splitFrom.part) {
+    text = m.splitFrom.before;            // 그대로면 분리 전 글로 정확히 되돌림
+  } else {
+    text = (src.text ? src.text + '\n' : '') + part;   // 원래 메모가 그 사이 바뀌었으면 맨 끝에 붙임
+  }
+  if (src.type === 'text') updateMemo(src.id, { text });
+  else return { error: 'type' };
+  // 원래 메모 창에 글을 바로 다시 그리게 (쓰던 중이어도)
+  const sw = memoWins.get(src.id);
+  if (sw && !sw.isDestroyed()) sw.webContents.send('cmd', { type: 'settext', text });
+  // 분리된 메모는 휴지통을 거치지 않고 바로 없앰 (내용은 원래 메모로 돌아갔으니)
+  m.deleting = true;
+  closeMemoWin(id);
+  setTimeout(() => {
+    store.memos = store.memos.filter((x) => x.id !== id);
+    store.tombs.push({ uid: m.uid, ts: Math.max(Date.now(), (m.mt || 0) + 1) });
+    save(); broadcast(); scheduleSync();
+  }, 340);
+  focusMemo(src.id);
+  return { ok: true, src: src.id };
+});
+
+ipcMain.on('layout:pushAll', () => {
+  const now = Date.now();
+  for (const m of store.memos) if (!m.deleting) m.lt = now;
+  store.layoutSync.groupsT = now;
+  store.layoutSync.settingsT = now;
+  markLayout();
+  save();
+  scheduleSync(0);
+});
+
 // 회사 공통 연락망 받아오기 (관리자는 고친 것을 먼저 올림)
 async function syncShared() {
   try {
@@ -1314,6 +1448,10 @@ function applyRemote(item) {
     }
     return;
   }
+  if (item.kind === 'layout') {
+    if (item.id === 'pc' && !item.deleted) applyLayout(item.data);
+    return;
+  }
   if (item.kind === 'contact') {
     if (item.id !== 'main') return;
     const rows = item.deleted ? null : sanitizeTable(item.data).rows;
@@ -1363,6 +1501,8 @@ function applyRemote(item) {
       const lay = store.layoutCache && store.layoutCache[u];
       if (lay) {
         for (const k of ['x', 'y', 'w', 'h', 'folded', 'layer', 'hidden', 'ox', 'oy', 'group']) if (lay[k] !== undefined && lay[k] !== null) n[k] = lay[k];
+        if (n.group && !store.groups.some((g) => g.id === n.group)) delete n.group;
+        if (lay.t) n.lt = lay.t;
         delete store.layoutCache[u];
       }
     }
@@ -1375,6 +1515,7 @@ function applyRemote(item) {
 function localTs(kind, id) {
   if (kind === 'event') return (store.evMeta[id] && !store.evMeta[id].merge && store.evMeta[id].mt) || 0;
   if (kind === 'contact') return (store.contacts && store.contacts.mt) || 0;
+  if (kind === 'layout') return 0;   // 배치는 메모마다 시각을 비교해 합침
   const m = store.memos.find((x) => x.uid === id) || store.trash.find((x) => x.uid === id);
   if (m) return m.mt || 0;
   const tomb = store.tombs.find((x) => x.uid === id);
@@ -1390,11 +1531,13 @@ function dirtyList() {
     if (meta && meta.dirty && !meta.merge) out.push({ kind: 'event', id: k, ts: meta.mt, data: { list: store.events[k] || [] } });
   }
   if (store.contacts && store.contacts.dirty) out.push({ kind: 'contact', id: 'main', ts: store.contacts.mt, data: { rows: store.contacts.rows } });
+  if (store.layoutSync && store.layoutSync.dirty) out.push({ kind: 'layout', id: 'pc', ts: store.layoutSync.mt, data: layoutPayload() });
   return out;
 }
 
 function markPushed(kind, id, ts) {
   if (kind === 'contact') { if (store.contacts && store.contacts.mt === ts) store.contacts.dirty = false; return; }
+  if (kind === 'layout') { if (store.layoutSync && store.layoutSync.mt === ts) store.layoutSync.dirty = false; return; }
   if (kind === 'event') {
     const meta = store.evMeta[id];
     if (meta && meta.mt === ts) meta.dirty = false;
@@ -1456,6 +1599,8 @@ async function cloudSignIn(mode, username, password) {
     for (const tb of store.tombs) tb.done = false;
     for (const k2 of Object.keys(store.events)) store.evMeta[k2] = { mt: 0, dirty: true, merge: true };
     if (store.contacts) store.contacts.dirty = true;
+    // 배치: 다른 PC에서 정한 배치를 먼저 받고, 이 PC에서 옮긴 메모는 그 뒤에 올림
+    store.layoutSync = { mt: 0, dirty: false, groupsT: 0, settingsT: 0 };
     save();
     setCloud('idle');
     scheduleSync(100);

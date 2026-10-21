@@ -715,6 +715,14 @@
     renderAcct();
   });
   $('acSync').addEventListener('click', () => api.cloudSync());
+  $('acLayout').addEventListener('click', () => {
+    askConfirm('이 PC 배치를 적용할까요?', '같은 아이디로 로그인한 다른 PC의 메모 자리·크기·접힘·그룹·꾸미기가 이 PC와 똑같이 바뀌어요.', '적용').then((ok) => {
+      if (!ok) return;
+      api.layoutPushAll();
+      $('acLayout').textContent = '적용했어요 · 다른 PC는 몇 분 안에 바뀌어요';
+      setTimeout(() => { $('acLayout').textContent = '이 PC 배치를 다른 PC에 적용'; }, 4000);
+    });
+  });
   $('acLogout').addEventListener('click', async () => {
     if (!(await askConfirm('로그아웃할까요?', '이 PC에서 메모와 일정이 사라져요. 같은 아이디로 다시 로그인하면 그대로 돌아와요.', '로그아웃'))) return;
     $('acLogout').textContent = '올리는 중…';
