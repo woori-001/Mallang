@@ -16,7 +16,7 @@
   let localSize = null;
 
   $('fold').innerHTML = ICONS.chev;
-  $('bNew').innerHTML = ICONS.plus;
+  $('hNew').innerHTML = ICONS.plus;
   $('bMark').innerHTML = ICONS.starLine;
   $('more').innerHTML = ICONS.dots;
   $('bType').innerHTML = ICONS.list;
@@ -325,7 +325,7 @@
 
   // ───────── 버튼 ─────────
   $('fold').addEventListener('click', toggleFold);
-  $('bNew').addEventListener('click', () => { closeTools(); render(); api.create({ near: id }); });
+  $('hNew').addEventListener('click', () => { closeTools(); render(); api.create({ near: id }); });
   const currentText = () => (memo.type === 'check' ? items.map((x) => x.t).filter((t) => t.trim()).join('\n')
     : memo.type === 'table' ? window.M.tableToText(tbl.getRows()) : ed.getText());
   $('bTable').addEventListener('click', () => {
