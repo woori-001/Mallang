@@ -544,6 +544,7 @@ function focusMemo(id) {
 
 // 모두 접기: 지금 자리 그대로 접기만 (배치는 바꾸지 않음)
 function foldAll() {
+  if (peopleWin && !peopleWin.isDestroyed()) setPeopleFolded(true);
   const list = store.memos.filter((m) => !m.hidden && !m.deleting && !m.folded);
   if (!list.length) return;
   for (const m of list) m.folded = true;
@@ -560,6 +561,7 @@ function foldAll() {
 }
 
 function unfoldAll() {
+  if (peopleWin && !peopleWin.isDestroyed()) setPeopleFolded(false);
   const list = store.memos.filter((m) => m.folded && !m.hidden && !m.deleting);
   for (const m of list) {
     m.folded = false;
@@ -664,8 +666,8 @@ ipcMain.on('search:open', (e, id) => {
 const PEOPLE_MIN_W = 260, PEOPLE_MIN_H = 180;
 function peopleBounds() {
   const p = store.peopleWin, wa = workArea();
-  const w = Math.max(PEOPLE_MIN_W, p.w || 430), h = Math.max(PEOPLE_MIN_H, p.h || 380);
-  const x = p.x != null ? p.x : wa.x + wa.width - w - 430;
+  const w = p.folded ? FOLD_W : Math.max(PEOPLE_MIN_W, p.w || 430), h = p.folded ? FOLD_H : Math.max(PEOPLE_MIN_H, p.h || 380);
+  const x = p.x != null ? p.x : wa.x + wa.width - Math.max(PEOPLE_MIN_W, p.w || 430) - 430;
   const y = p.y != null ? p.y : wa.y + 90;
   return { x: Math.round(x - P), y: Math.round(y - P), width: w + 2 * P, height: h + 2 * P };
 }
@@ -700,13 +702,26 @@ ipcMain.on('people:move', (e, x, y, done) => {
 });
 ipcMain.on('people:resize', (e, w, h, done) => {
   w = num(w); h = num(h);
-  if (!peopleWin || peopleWin.isDestroyed() || w == null || h == null) return;
+  if (!peopleWin || peopleWin.isDestroyed() || w == null || h == null || store.peopleWin.folded) return;
   w = Math.round(Math.min(1400, Math.max(PEOPLE_MIN_W, w)));
   h = Math.round(Math.min(1200, Math.max(PEOPLE_MIN_H, h)));
   const b = peopleWin.getBounds();
   peopleWin.setBounds({ x: b.x, y: b.y, width: w + 2 * P, height: h + 2 * P });
   if (done) { store.peopleWin.w = w; store.peopleWin.h = h; save(); broadcast(); }
 });
+// 연락망 창 접기/펴기 (메모처럼: 접을 땐 내용 먼저, 펼 땐 창 먼저)
+function setPeopleFolded(on) {
+  on = !!on;
+  if (!!store.peopleWin.folded === on) return;
+  store.peopleWin.folded = on;
+  save();
+  broadcast();
+  const w = peopleWin;
+  if (!w || w.isDestroyed()) return;
+  if (on) setTimeout(() => { if (!w.isDestroyed() && store.peopleWin.folded) setB(w, peopleBounds()); }, 320);
+  else setB(w, peopleBounds());
+}
+ipcMain.on('people:fold', (e, on) => setPeopleFolded(on));
 ipcMain.on('people:top', (e, on) => {
   store.peopleWin.top = !!on;
   if (peopleWin && !peopleWin.isDestroyed()) peopleWin.setAlwaysOnTop(!!on, 'floating');

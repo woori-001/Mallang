@@ -11,6 +11,21 @@
   $('sIcon').innerHTML = ICONS.search.replace('width="16" height="16"', 'width="14" height="14"');
   $('top').innerHTML = ICONS.pin.replace('width="17" height="17"', 'width="15" height="15"');
   $('close').innerHTML = ICONS.x;
+  $('fold').innerHTML = ICONS.chev;
+  const folded = () => !!(S && S.peopleWin && S.peopleWin.folded);
+  function toggleFold() {
+    if (!S) return;
+    flush();
+    if (editing) setEdit(false);
+    try { getSelection().removeAllRanges(); } catch (e) { /* 무시 */ }
+    if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
+    const on = !folded();
+    S.peopleWin = { ...S.peopleWin, folded: on };
+    render();
+    api.peopleFold(on);
+  }
+  $('fold').addEventListener('click', toggleFold);
+  head.addEventListener('dblclick', (e) => { if (!e.target.closest('button, input, label')) toggleFold(); });
 
   const tbl = window.M.tableEditor($('tbl'), {
     head: window.M.CONTACT_HEAD, editable: false,
@@ -55,7 +70,7 @@
   q.addEventListener('input', () => tbl.filter(q.value));
   q.addEventListener('keydown', (e) => { if (e.key === 'Escape') { q.value = ''; tbl.filter(''); } });
   document.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') { e.preventDefault(); q.focus(); q.select(); }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') { e.preventDefault(); if (folded()) toggleFold(); setTimeout(() => { q.focus(); q.select(); }, folded() ? 0 : 50); }
   });
 
   function render() {
@@ -63,6 +78,11 @@
     const sk = applyTheme(S.settings).sk;
     const a = (S.settings.alpha != null ? S.settings.alpha : 60) / 100;
     card.style.background = window.M.grad(sk, 2, a);
+    const f = folded();
+    card.classList.toggle('folded', f);
+    $('fold').querySelector('.chev').style.transform = f ? 'rotate(0deg)' : 'rotate(180deg)';
+    $('fold').setAttribute('aria-label', f ? '펼치기' : '접기');
+    $('fold').setAttribute('aria-expanded', String(!f));
     const on = !!(S.peopleWin && S.peopleWin.top);
     $('top').classList.toggle('on', on);
     $('top').setAttribute('aria-pressed', String(on));

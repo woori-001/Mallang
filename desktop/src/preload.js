@@ -28,6 +28,7 @@ contextBridge.exposeInMainWorld('api', {
   peopleMove: (x, y, done) => ipcRenderer.send('people:move', x, y, !!done),
   peopleResize: (w, h, done) => ipcRenderer.send('people:resize', w, h, !!done),
   peopleTop: (on) => ipcRenderer.send('people:top', !!on),
+  peopleFold: (on) => ipcRenderer.send('people:fold', !!on),
   searchSize: (h) => ipcRenderer.send('search:size', h),
   searchClose: () => ipcRenderer.send('search:close'),
   searchOpen: (id) => ipcRenderer.send('search:open', id),

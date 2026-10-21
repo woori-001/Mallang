@@ -1,14 +1,22 @@
 body { padding: 14px; }
 .card {
-  position: absolute; inset: 14px; border-radius: 22px;
+  position: absolute; left: 14px; top: 14px; width: calc(100% - 28px); height: calc(100% - 28px); border-radius: 22px;
   box-shadow: 0 6px 14px rgba(70, 60, 150, .16);
   display: flex; flex-direction: column; overflow: hidden;
-  transition: opacity .32s var(--ease), transform .4s var(--ease), background .6s ease, box-shadow .3s ease;
+  transition: width .32s var(--ease), height .32s var(--ease), border-radius .32s ease,
+    opacity .32s var(--ease), transform .4s var(--ease), background .6s ease, box-shadow .3s ease;
 }
+/* 접힌 연락망: 메모처럼 제목만 */
+.card.folded { width: 180px; height: 32px; border-radius: 16px; }
+.card.folded .head { height: 32px; padding: 0 14px 0 12px; }
+.card.folded .search, .card.folded .ib, .card.folded .tbl, .card.folded .grip, .card.folded .toast { display: none; }
+.card.folded .htitle { font-size: 13px; }
+.card.folded .hIcon svg { width: 15px; height: 15px; }
+.fold { margin-left: -6px; }
 .card:hover { box-shadow: 0 8px 16px rgba(70, 60, 150, .22); }
 .card.enter { animation: pop .5s var(--ease); }
 .card.leaving { opacity: 0; transform: translateY(10px) scale(.92); pointer-events: none; }
-.head { flex: none; height: 46px; display: flex; align-items: center; gap: 4px; padding: 0 8px 0 14px; cursor: grab; }
+.head { flex: none; height: 46px; transition: height .32s var(--ease); display: flex; align-items: center; gap: 4px; padding: 0 8px 0 14px; cursor: grab; }
 .head:active { cursor: grabbing; }
 .hIcon { display: inline-flex; color: var(--a1); }
 .htitle { font-weight: 700; font-size: 14px; margin-right: 6px; white-space: nowrap; }
