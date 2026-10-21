@@ -70,7 +70,8 @@
     { id: 'gamja', name: '감자꽃 · 손글씨', fam: "'Gamja Flower', cursive", size: 17 },
     { id: 'himelody', name: '하이멜로디 · 손글씨', fam: "'Hi Melody', cursive", size: 17 },
     { id: 'poorstory', name: '푸어스토리 · 손글씨', fam: "'Poor Story', cursive", size: 16 },
-    { id: 'pen', name: '나눔손글씨 펜', fam: "'Nanum Pen Script', cursive", size: 20 }
+    { id: 'pen', name: '나눔손글씨 펜', fam: "'Nanum Pen Script', cursive", size: 20 },
+    { id: 'poppins', name: 'Poppins · 영문·숫자 (한글은 고운돋움)', fam: "'Poppins', 'Gowun Dodum', sans-serif", size: 14 }
   ];
 
   const MARKS = {
@@ -88,6 +89,13 @@
     alert: '1.6 1.6 20.8 20.8',
     check: '1.6 1.6 20.8 20.8'
   };
+  // 캘린더 글꼴 고르기 목록
+  function calFontOptions(settings) {
+    const f = FONTS.find((x) => x.id === settings.font) || FONTS[0];
+    return [{ id: 'same', name: '메모 글꼴과 같게 (지금: ' + f.name.split(' · ')[0] + ')' }, { id: 'poppins', name: 'Poppins 숫자·영문 + 메모 글꼴 한글' }]
+      .concat(FONTS.filter((x) => x.id !== 'poppins').map((x) => ({ id: x.id, name: x.name })));
+  }
+
   const MARK_NAMES = { heart: '하트', star: '별', flag: '깃발', alert: '느낌표', check: '체크' };
   const MARK_COLORS = [
     { hex: '#E8456B', name: '빨강' }, { hex: '#F5A524', name: '주황' }, { hex: '#2FA57C', name: '초록' },
@@ -122,6 +130,13 @@
     r.setProperty('--memo-font', f.fam);
     const scale = (settings.fontScale || 100) / 100;              // 글자 크기 (모든 메모에 한 번에)
     r.setProperty('--memo-size', Math.round(f.size * scale * 10) / 10 + 'px');
+    // 캘린더 글꼴: 'same' = 메모 글꼴과 같게, 'poppins' = 숫자·영문은 Poppins + 한글은 메모 글꼴, 그 밖 = 고른 글꼴
+    const cf = settings.calFont || 'same';
+    const cfObj = cf === 'same' ? f : (cf === 'poppins' ? null : (FONTS.find((x) => x.id === cf) || f));
+    const calFam = cf === 'poppins' ? "'Poppins', " + f.fam : cfObj.fam;
+    const calFactor = cf === 'poppins' ? 1 : cfObj.size / 14;          // 글자가 작게 그려지는 글꼴은 키워서 맞춤
+    r.setProperty('--cal-font', calFam);
+    r.setProperty('--cs', String(Math.round((settings.calScale || 100) / 100 * calFactor * 100) / 100));
     r.setProperty('--memo-title-size', Math.round(14 * Math.min(scale, 1.4) * 10) / 10 + 'px');
     return { sk, f };
   }
@@ -171,5 +186,5 @@
     }
   }
 
-  window.M = { guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
+  window.M = { calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
 })();

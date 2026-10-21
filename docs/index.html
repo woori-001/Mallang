@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Dongle&family=Gaegu:wght@400;700&family=Gamja+Flower&family=Gowun+Batang&family=Gowun+Dodum&family=Hi+Melody&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Jua&family=Nanum+Gothic:wght@400;700&family=Nanum+Myeongjo&family=Nanum+Pen+Script&family=Noto+Serif+KR:wght@400;600&family=Poor+Story&family=Single+Day&family=Sunflower:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Dongle&family=Gaegu:wght@400;700&family=Gamja+Flower&family=Gowun+Batang&family=Gowun+Dodum&family=Hi+Melody&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Jua&family=Nanum+Gothic:wght@400;700&family=Nanum+Myeongjo&family=Nanum+Pen+Script&family=Noto+Serif+KR:wght@400;600&family=Poor+Story&family=Poppins:wght@400;500;600;700&family=Single+Day&family=Sunflower:wght@500&display=swap">
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
@@ -108,6 +108,15 @@
       <button id="fsUp" class="fsBtn big" type="button" aria-label="글자 크게">가</button>
     </div>
     <div class="fsPreview">오늘 할 일 · 3시 팀 회의</div>
+    <h2><label for="calFont">캘린더 글꼴</label></h2>
+    <select id="calFont" class="sel"></select>
+    <h2 class="h2row"><label for="calScale">캘린더 글자 크기</label><span id="calScaleV" class="sval"></span></h2>
+    <div class="fsRow">
+      <button id="csDown" class="fsBtn" type="button" aria-label="캘린더 글자 작게">가</button>
+      <input id="calScale" type="range" min="70" max="150" step="5">
+      <button id="csUp" class="fsBtn big" type="button" aria-label="캘린더 글자 크게">가</button>
+    </div>
+    <div class="calPrev" aria-hidden="true"><b>21</b><i>OCTOBER</i><span>10:00 팀 회의</span></div>
     <h2>앱으로 설치하기</h2>
     <div class="card small">홈 화면에 아이콘을 만들어 앱처럼 쓸 수 있어요.<button id="installSet" class="primary primaryWide" type="button">설치하기</button></div>
     <button id="logout" class="ghostBtn" type="button">로그아웃</button>

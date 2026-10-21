@@ -146,6 +146,17 @@
           <div id="fsPreview" class="fsPreview">오늘 할 일 · 3시 팀 회의</div>
         </div>
         <div class="sect">
+          <label for="calFont" class="slabel">캘린더 글꼴</label>
+          <select id="calFont" class="sel"></select>
+          <div class="srow"><label for="calScale" class="slabel">캘린더 글자 크기</label><span id="calScaleV" class="sval"></span></div>
+          <div class="fsRow">
+            <button id="csDown" class="ib fsBtn" type="button" aria-label="캘린더 글자 작게">가</button>
+            <input id="calScale" type="range" min="70" max="150" step="5">
+            <button id="csUp" class="ib fsBtn big" type="button" aria-label="캘린더 글자 크게">가</button>
+          </div>
+          <div class="calPrev" aria-hidden="true"><b>21</b><i>OCTOBER</i><span>10:00 팀 회의</span></div>
+        </div>
+        <div class="sect">
           <div class="srow"><label for="alpha" class="slabel">메모 투명도</label><span id="alphaV" class="sval"></span></div>
           <input id="alpha" type="range" min="25" max="95" step="1">
         </div>

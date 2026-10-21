@@ -415,6 +415,10 @@
     const fsv = s.fontScale || 100;
     if (document.activeElement !== $('fontScale')) $('fontScale').value = fsv;
     $('fontScaleV').textContent = fsv + '%';
+    $('calFont').innerHTML = window.M.calFontOptions(s).map((o) => '<option value="' + o.id + '"' + ((s.calFont || 'same') === o.id ? ' selected' : '') + '>' + esc(o.name) + '</option>').join('');
+    const csv = s.calScale || 100;
+    if (document.activeElement !== $('calScale')) $('calScale').value = csv;
+    $('calScaleV').textContent = csv + '%';
     $('alphaV').textContent = s.alpha + '%';
     $('sideAlphaV').textContent = s.sideAlpha + '%';
     $('autoStart').setAttribute('aria-pressed', String(!!s.autoStart));
@@ -425,6 +429,11 @@
   $('fontScale').addEventListener('input', (e) => setFs(Number(e.target.value)));
   $('fsDown').addEventListener('click', () => setFs((S.settings.fontScale || 100) - 10));
   $('fsUp').addEventListener('click', () => setFs((S.settings.fontScale || 100) + 10));
+  $('calFont').addEventListener('change', (e) => api.setSettings({ calFont: e.target.value }));
+  const setCs = (v) => { v = Math.min(150, Math.max(70, v)); $('calScale').value = v; $('calScaleV').textContent = v + '%'; api.setSettings({ calScale: v }); };
+  $('calScale').addEventListener('input', (e) => setCs(Number(e.target.value)));
+  $('csDown').addEventListener('click', () => setCs((S.settings.calScale || 100) - 10));
+  $('csUp').addEventListener('click', () => setCs((S.settings.calScale || 100) + 10));
   $('alpha').addEventListener('input', (e) => { $('alphaV').textContent = e.target.value + '%'; api.setSettings({ alpha: Number(e.target.value) }); });
   $('sideAlpha').addEventListener('input', (e) => {
     $('sideAlphaV').textContent = e.target.value + '%';

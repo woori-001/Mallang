@@ -23,6 +23,7 @@ const pick = {
   'gamja-flower': ['400'],
   'hi-melody': ['400'],
   'poor-story': ['400'],
+  'poppins': ['400', '500', '600', '700'],
 };
 let css = '';
 for (const [pkg, weights] of Object.entries(pick)) {
@@ -31,7 +32,7 @@ for (const [pkg, weights] of Object.entries(pick)) {
     let c = fs.readFileSync(path.join(dir, w + '.css'), 'utf8');
     // 한글/라틴 외 서브셋(키릴, 베트남어 등)은 제외
     c = c.replace(/\/\*[^*]*\*\/\s*@font-face\s*{[^}]*}/g, (block) => {
-      if (/(cyrillic|vietnamese|greek)/.test(block)) return '';
+      if (/(cyrillic|vietnamese|greek|devanagari)/.test(block)) return '';
       return block;
     });
     c = c.replace(/, url\([^)]*\.woff\) format\('woff'\)/g, '');

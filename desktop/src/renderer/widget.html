@@ -19,12 +19,13 @@ body { padding: 14px; }
 .w:active { cursor: grabbing; }
 .w.leaving { opacity: 0; transform: translateY(10px) scale(.92); }
 .top { display: flex; align-items: baseline; gap: 8px; font-family: var(--ui); }
-.big { font-size: 34px; font-weight: 700; line-height: 1; color: var(--a1); }
-.mon { font-size: 12px; font-weight: 600; letter-spacing: 1px; color: var(--a1); }
-.sub { font-size: 12px; color: var(--sub); }
-.ev { display: flex; align-items: center; gap: 10px; font-size: var(--memo-size); animation: fade .4s var(--ease); }
+.top, .ev, .t { font-family: var(--cal-font) !important; }
+.big { font-size: calc(34px * var(--cs, 1)); font-weight: 700; line-height: 1; color: var(--a1); }
+.mon { font-size: calc(12px * var(--cs, 1)); font-weight: 600; letter-spacing: 1px; color: var(--a1); }
+.sub { font-size: calc(12px * var(--cs, 1)); color: var(--sub); }
+.ev { display: flex; align-items: center; gap: 10px; font-size: calc(14px * var(--cs, 1)); animation: fade .4s var(--ease); }
 .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
-.t { font-size: 12px; color: var(--sub); width: 40px; flex: none; font-family: var(--ui); }
+.t { font-size: calc(12px * var(--cs, 1)); color: var(--sub); width: calc(40px * max(1, var(--cs, 1))); flex: none; font-family: var(--ui); }
 .n { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .none { font-size: 13px; color: var(--sub); }
 </style>

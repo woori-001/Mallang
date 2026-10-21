@@ -281,3 +281,18 @@ html.dark .memo, html.dark .tabs, html.dark .authCard { box-shadow: 0 8px 24px r
 .fsBtn { width: 40px; height: 40px; border: none; border-radius: 12px; background: rgba(var(--glass), .65); font-size: 13px; font-weight: 700; }
 .fsBtn.big { font-size: 20px; }
 .fsPreview { margin-top: 10px; border-radius: 14px; background: rgba(var(--glass), .6); padding: 12px 14px; font-family: var(--memo-font); font-size: var(--memo-size); line-height: 1.6; }
+
+/* 캘린더 글꼴·크기 (설정에서 메모와 따로 정함) */
+.calCard, .selRow, .evList, .evList input { font-family: var(--cal-font); }
+.calNum { font-size: calc(32px * var(--cs, 1)); }
+.calEn { font-size: calc(13px * var(--cs, 1)); }
+.wdays { font-size: calc(12px * var(--cs, 1)); }
+.day { font-size: calc(15px * var(--cs, 1)); height: calc(48px * max(1, var(--cs, 1))); }
+.selLabel { font-size: calc(16px * var(--cs, 1)); }
+.evt { font-size: calc(14px * var(--cs, 1)); width: calc(96px * max(1, var(--cs, 1))); }
+.evn { font-size: calc(16px * var(--cs, 1)); }
+.sel { width: 100%; height: 46px; border-radius: 14px; border: 1px solid var(--line-soft, rgba(80, 80, 140, .18)); background: rgba(var(--glass), .75); color: var(--ink); padding: 0 12px; font-size: 15px; }
+.calPrev { margin-top: 10px; border-radius: 14px; background: rgba(var(--glass), .6); padding: 12px 14px; font-family: var(--cal-font); display: flex; align-items: baseline; gap: 8px; }
+.calPrev b { font-size: calc(30px * var(--cs, 1)); color: var(--a1); line-height: 1; }
+.calPrev i { font-style: normal; font-size: calc(13px * var(--cs, 1)); font-weight: 600; letter-spacing: 1px; color: var(--a1); }
+.calPrev span { font-size: calc(15px * var(--cs, 1)); }

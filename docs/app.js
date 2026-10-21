@@ -668,6 +668,9 @@
     $('acctName').textContent = (session && session.username) || '';
     if (document.activeElement !== $('fontScale')) $('fontScale').value = prefs.fontScale || 100;
     $('fontScaleV').textContent = (prefs.fontScale || 100) + '%';
+    $('calFont').innerHTML = window.M.calFontOptions(prefs).map((o) => '<option value="' + o.id + '"' + ((prefs.calFont || 'same') === o.id ? ' selected' : '') + '>' + esc(o.name) + '</option>').join('');
+    if (document.activeElement !== $('calScale')) $('calScale').value = prefs.calScale || 100;
+    $('calScaleV').textContent = (prefs.calScale || 100) + '%';
     $('avatar').textContent = ((session && session.username) || '?').slice(0, 1).toUpperCase();
     $('skins').innerHTML = Object.keys(SKINS).map((id) => {
       const k = SKINS[id];
@@ -684,6 +687,11 @@
   $('fontScale').addEventListener('input', (e) => setFs(Number(e.target.value)));
   $('fsDown').onclick = () => setFs((prefs.fontScale || 100) - 10);
   $('fsUp').onclick = () => setFs((prefs.fontScale || 100) + 10);
+  $('calFont').addEventListener('change', (e) => { prefs.calFont = e.target.value; savePrefs(); applyPrefs(); });
+  const setCs = (v) => { prefs.calScale = Math.min(150, Math.max(70, v)); savePrefs(); applyPrefs(); $('calScale').value = prefs.calScale; $('calScaleV').textContent = prefs.calScale + '%'; };
+  $('calScale').addEventListener('input', (e) => setCs(Number(e.target.value)));
+  $('csDown').onclick = () => setCs((prefs.calScale || 100) - 10);
+  $('csUp').onclick = () => setCs((prefs.calScale || 100) + 10);
   $('fonts').addEventListener('click', (e) => { const b = e.target.closest('[data-font]'); if (!b) return; prefs.font = b.dataset.font; savePrefs(); applyPrefs(); renderSet(); });
   $('logout').onclick = () => logout(false);
 
