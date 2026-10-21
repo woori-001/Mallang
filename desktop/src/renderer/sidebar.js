@@ -24,6 +24,8 @@
   $('calNext').innerHTML = ICONS.right;
   $('addEv').innerHTML = ICONS.plus.replace('width="15" height="15"', 'width="13" height="13"') + '<span>일정 추가</span>';
 
+  window.M.guardHTML($('list'), $('grid'), $('evList'), $('skins'), $('fonts'), $('today'), $('trashBtn'), $('acState'), $('mFoot'));
+
   // ───────── 열기 / 닫기 ─────────
   let ignoring = true, closeTimer = null;
   const isOpen = () => body.classList.contains('open');

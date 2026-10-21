@@ -155,5 +155,19 @@
     return (b.mt || 0) - (a.mt || 0);
   }
 
-  window.M = { memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
+  // 내용이 그대로면 다시 그리지 않음 (나타나는 효과가 다시 재생되며 깜빡이는 것 방지)
+  const htmlDesc = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+  function guardHTML(...els) {
+    for (const el of els) {
+      if (!el || el.__guarded) continue;
+      el.__guarded = true;
+      Object.defineProperty(el, 'innerHTML', {
+        configurable: true,
+        get() { return htmlDesc.get.call(el); },
+        set(v) { v = String(v); if (el.__h === v) return; el.__h = v; htmlDesc.set.call(el, v); }
+      });
+    }
+  }
+
+  window.M = { guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
 })();

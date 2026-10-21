@@ -26,6 +26,8 @@
     check: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg>'
   };
 
+  window.M.guardHTML($('list'), $('trashList'), $('grid'), $('evList'), $('skins'), $('fonts'));
+
   // ───────── 저장 ─────────
   function blankState() {
     return { memos: [], trash: [], tombs: [], events: {}, evMeta: {}, cursor: null };
