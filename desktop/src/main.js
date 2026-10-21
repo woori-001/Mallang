@@ -39,7 +39,7 @@ let dataDir, dataFile, store, saveTimer, quitting = false;
 function defaults() {
   return {
     version: 1,
-    settings: { skin: 'lav', font: 'gowun', fontScale: 100, calFont: 'same', calScale: 100, bodyBg: false, alpha: 60, sideAlpha: 55, showToday: true, pinned: false, autoStart: false },
+    settings: { skin: 'lav', font: 'gowun', fontScale: 100, calFont: 'same', calScale: 100, bodyBg: false, alpha: 60, sideAlpha: 55, showToday: true, showPeople: false, pinned: false, autoStart: false },
     nextId: 2,
     memos: [{
       id: 1, slot: 0, x: null, y: null, w: 290, h: 240, type: 'text', title: '말랑메모 시작하기',
@@ -52,7 +52,8 @@ function defaults() {
     evMeta: {},
     contacts: null,
     cloud: {},
-    widget: { x: null, y: null }
+    widget: { x: null, y: null },
+    peopleWin: { x: null, y: null, w: 430, h: 380, top: false }
   };
 }
 
@@ -70,7 +71,7 @@ function load() {
   }
   const d = defaults();
   store = s
-    ? { ...d, ...s, settings: { ...d.settings, ...(s.settings || {}) }, widget: { ...d.widget, ...(s.widget || {}) }, events: s.events || {} }
+    ? { ...d, ...s, settings: { ...d.settings, ...(s.settings || {}) }, widget: { ...d.widget, ...(s.widget || {}) }, peopleWin: { ...d.peopleWin, ...(s.peopleWin || {}) }, events: s.events || {} }
     : d;
   store.memos = store.memos.filter((m) => m && typeof m.id === 'number').map((m) => ({
     slot: 0, w: 260, h: 220, type: 'text', title: '', text: '', items: [], layer: 'normal', hidden: false, folded: false, ...m, deleting: false
@@ -85,6 +86,8 @@ function load() {
   store.evMeta = store.evMeta && typeof store.evMeta === 'object' ? store.evMeta : {};
   store.contacts = store.contacts && Array.isArray(store.contacts.rows) ? { ...store.contacts, rows: sanitizeTable(store.contacts).rows } : null;
   for (const m of [...store.memos, ...store.trash]) if (m.type === 'table') m.table = sanitizeTable(m.table);
+  const fixed = store.contacts && fixContactRows(store.contacts.rows);
+  if (fixed) store.contacts = { rows: fixed, mt: Math.max(Date.now(), (store.contacts.mt || 0) + 1), dirty: true };
   store.cloud = store.cloud && typeof store.cloud === 'object' ? store.cloud : {};
   store.nextId = Math.max(store.nextId || 1, ...store.memos.map((m) => m.id + 1), ...store.trash.map((m) => m.id + 1), 1);
 }
@@ -180,6 +183,7 @@ function snapshot() {
     memos: store.memos.filter((m) => !m.deleting),
     events: store.events,
     contacts: store.contacts ? store.contacts.rows : null,
+    peopleWin: store.peopleWin,
     trash: store.trash.map((t) => ({
       id: t.id, title: t.title, slot: t.slot, mark: t.mark, markColor: t.markColor, type: t.type,
       preview: t.type === 'table' ? ((t.table && t.table.rows) || []).slice(1).map((r) => r.filter(Boolean).join(' ')).find((x) => x.trim()) || '표' : t.type === 'check' ? (t.items || []).map((x) => x.t).filter(Boolean).slice(0, 3).join(', ') : (t.text || '').split('\n').find((l) => l.trim() && l !== '\u2E3B') || '',
@@ -202,7 +206,7 @@ function broadcast() {
 const getMemo = (id) => store.memos.find((m) => m.id === id && !m.deleting);
 
 // ───────────────────────── 창 공통 ─────────────────────────
-let host = null, side = null, widget = null, tray = null;
+let host = null, side = null, widget = null, peopleWin = null, tray = null;
 const memoWins = new Map();
 const focusOnOpen = new Set();
 const anims = new WeakMap();
@@ -311,6 +315,9 @@ function createHost() {
       const wy = store.widget.y != null ? store.widget.y : wa.y + wa.height - 260;
       return { action: 'allow', overrideBrowserWindowOptions: { ...baseWinOpts, x: Math.round(wx), y: Math.round(wy), width: WIDGET_W, height: 200 } };
     }
+    if (kind === 'people') {
+      return { action: 'allow', overrideBrowserWindowOptions: { ...baseWinOpts, ...peopleBounds(), alwaysOnTop: !!store.peopleWin.top } };
+    }
     return { action: 'deny' };
   });
   host.webContents.on('did-create-window', (win, details) => {
@@ -319,6 +326,7 @@ function createHost() {
     win.removeMenu();
     if (kind === 'memo') setupMemoWin(win, Number(u.searchParams.get('id')));
     if (kind === 'widget') setupWidget(win);
+    if (kind === 'people') setupPeople(win);
   });
   host.on('close', (e) => { if (!quitting) e.preventDefault(); });
   host.loadFile(R('host.html'));
@@ -612,13 +620,66 @@ function closeWidget() {
   setTimeout(() => { if (!w.isDestroyed()) w.close(); }, 330);
 }
 
+// ───────────────────────── 연락망 띄우기 ─────────────────────────
+const PEOPLE_MIN_W = 260, PEOPLE_MIN_H = 180;
+function peopleBounds() {
+  const p = store.peopleWin, wa = workArea();
+  const w = Math.max(PEOPLE_MIN_W, p.w || 430), h = Math.max(PEOPLE_MIN_H, p.h || 380);
+  const x = p.x != null ? p.x : wa.x + wa.width - w - 430;
+  const y = p.y != null ? p.y : wa.y + 90;
+  return { x: Math.round(x - P), y: Math.round(y - P), width: w + 2 * P, height: h + 2 * P };
+}
+function openPeople() {
+  if (peopleWin && !peopleWin.isDestroyed()) { peopleWin.show(); peopleWin.focus(); return; }
+  hostOpen('people.html?kind=people', 'people-' + Date.now());
+}
+function setupPeople(win) {
+  peopleWin = win;
+  win.once('ready-to-show', () => { if (!win.isDestroyed()) win.show(); });
+  win.on('closed', () => {
+    if (peopleWin === win) peopleWin = null;
+    if (!win.__intentional && !quitting && store.settings.showPeople) {
+      store.settings.showPeople = false; save(); broadcast(); buildTrayMenu();
+    }
+  });
+}
+function closePeople() {
+  if (!peopleWin || peopleWin.isDestroyed()) return;
+  const w = peopleWin;
+  w.__intentional = true;
+  peopleWin = null;
+  w.webContents.send('cmd', { type: 'leave' });
+  setTimeout(() => { if (!w.isDestroyed()) w.close(); }, 330);
+}
+ipcMain.on('people:move', (e, x, y, done) => {
+  x = num(x); y = num(y);
+  if (!peopleWin || peopleWin.isDestroyed() || x == null || y == null) return;
+  const b = peopleWin.getBounds();
+  peopleWin.setBounds({ x: Math.round(x), y: Math.round(y), width: b.width, height: b.height });
+  if (done) { store.peopleWin.x = Math.round(x) + P; store.peopleWin.y = Math.round(y) + P; save(); }
+});
+ipcMain.on('people:resize', (e, w, h, done) => {
+  w = num(w); h = num(h);
+  if (!peopleWin || peopleWin.isDestroyed() || w == null || h == null) return;
+  w = Math.round(Math.min(1400, Math.max(PEOPLE_MIN_W, w)));
+  h = Math.round(Math.min(1200, Math.max(PEOPLE_MIN_H, h)));
+  const b = peopleWin.getBounds();
+  peopleWin.setBounds({ x: b.x, y: b.y, width: w + 2 * P, height: h + 2 * P });
+  if (done) { store.peopleWin.w = w; store.peopleWin.h = h; save(); broadcast(); }
+});
+ipcMain.on('people:top', (e, on) => {
+  store.peopleWin.top = !!on;
+  if (peopleWin && !peopleWin.isDestroyed()) peopleWin.setAlwaysOnTop(!!on, 'floating');
+  save(); broadcast();
+});
+
 // ───────────────────────── 설정 / 트레이 ─────────────────────────
 function updateSettings(patch) {
   const prev = { ...store.settings };
   if ('calScale' in patch) patch.calScale = Math.min(150, Math.max(70, Number(patch.calScale) || 100));
   if ('calFont' in patch && typeof patch.calFont !== 'string') delete patch.calFont;
   if ('bodyBg' in patch) patch.bodyBg = !!patch.bodyBg;
-  const keys = ['skin', 'font', 'fontScale', 'calFont', 'calScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'pinned', 'autoStart'];
+  const keys = ['skin', 'font', 'fontScale', 'calFont', 'calScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'showPeople', 'pinned', 'autoStart'];
   if ('fontScale' in patch) patch.fontScale = Math.min(170, Math.max(70, Number(patch.fontScale) || 100));
   for (const k of keys) if (k in patch) store.settings[k] = patch[k];
   const s = store.settings;
@@ -626,6 +687,7 @@ function updateSettings(patch) {
     try { app.setLoginItemSettings({ openAtLogin: !!s.autoStart }); } catch (e) { console.error(e); }
   }
   if (s.showToday !== prev.showToday) { if (s.showToday) openWidget(); else closeWidget(); }
+  if (s.showPeople !== prev.showPeople) { if (s.showPeople) openPeople(); else closePeople(); buildTrayMenu(); }
   save();
   broadcast();
   buildTrayMenu();
@@ -643,6 +705,7 @@ function buildTrayMenu() {
     { label: '숨긴 메모 모두 보이기', click: showAllHidden },
     { type: 'separator' },
     { label: '오늘 일정 위젯', type: 'checkbox', checked: !!store.settings.showToday, click: (i) => updateSettings({ showToday: i.checked }) },
+    { label: '연락망 띄우기', type: 'checkbox', checked: !!store.settings.showPeople, click: (i) => updateSettings({ showPeople: i.checked }) },
     { label: '윈도우 시작 시 자동 실행', type: 'checkbox', checked: !!store.settings.autoStart, click: (i) => updateSettings({ autoStart: i.checked }) },
     { label: '메모 저장 폴더 열기', click: () => shell.openPath(dataDir) },
     upd.state === 'ready'
@@ -671,6 +734,7 @@ ipcMain.handle('init', () => snapshot());
 ipcMain.on('host:ready', () => {
   for (const m of store.memos) if (!m.hidden && !m.deleting) openMemoWin(m);
   if (store.settings.showToday) openWidget();
+  if (store.settings.showPeople) openPeople();
 });
 ipcMain.on('memo:update', (e, id, patch) => updateMemo(id, patch));
 ipcMain.handle('memo:create', (e, opts) => createMemo(opts || {}));
@@ -1017,6 +1081,12 @@ function scheduleSync(delay = 1500) {
   syncTimer = setTimeout(runSync, delay);
 }
 
+// 연락망 예전 기본 머리글(직급·휴대폰 포함)이면 두 칸을 빼서 자리 내선 연락망으로
+const OLD_CONTACT_HEAD = '부서|이름|직급|내선|휴대폰|이메일';
+function fixContactRows(rows) {
+  if (!rows || !rows[0] || rows[0].join('|') !== OLD_CONTACT_HEAD) return null;
+  return rows.map((r) => r.filter((c, i) => i !== 2 && i !== 4));
+}
 // 표: { rows: [[머리글], [칸...]] } · 최대 500줄 × 12칸
 function sanitizeTable(t) {
   let rows = t && Array.isArray(t.rows) ? t.rows : [];
@@ -1075,7 +1145,8 @@ function applyRemote(item) {
   if (item.kind === 'contact') {
     if (item.id !== 'main') return;
     const rows = item.deleted ? null : sanitizeTable(item.data).rows;
-    store.contacts = rows ? { rows, mt: item.ts, dirty: false } : null;
+    const fixed = fixContactRows(rows);
+    store.contacts = fixed ? { rows: fixed, mt: item.ts + 1, dirty: true } : rows ? { rows, mt: item.ts, dirty: false } : null;
     return;
   }
   if (item.kind !== 'memo') return;

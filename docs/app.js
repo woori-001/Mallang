@@ -35,6 +35,7 @@
   }
   function loadJSON(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v || d; } catch (e) { return d; } }
   let st = Object.assign(blankState(), loadJSON(LS_STATE, {}));
+  if (st.contacts && window.M.fixContactRows(st.contacts.rows)) st.contacts = { rows: window.M.fixContactRows(st.contacts.rows), mt: Math.max(Date.now(), (st.contacts.mt || 0) + 1), dirty: true };
   let prefs = Object.assign({ skin: 'lav', font: 'gowun' }, loadJSON(LS_PREFS, {}));
   let saveT = null;
   function saveState() { clearTimeout(saveT); saveT = setTimeout(saveStateNow, 200); }
@@ -188,7 +189,9 @@
   function apply(item) {
     if (item.kind === 'contact') {
       if (item.id !== 'main') return;
-      st.contacts = item.deleted ? null : { rows: window.M.cleanTable(item.data, window.M.CONTACT_HEAD).rows, mt: item.ts, dirty: false };
+      const rows = item.deleted ? null : window.M.cleanTable(item.data, window.M.CONTACT_HEAD).rows;
+      const fixed = window.M.fixContactRows(rows);
+      st.contacts = fixed ? { rows: fixed, mt: item.ts + 1, dirty: true } : rows ? { rows, mt: item.ts, dirty: false } : null;
       if (view === 'people') renderPeople(true);
       return;
     }

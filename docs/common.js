@@ -279,7 +279,12 @@
   // ───────── 표 ─────────
   // 표 데이터: { rows: [[머리글...], [칸...], ...] }  (첫 줄은 머리글)
   const TBL = { maxR: 500, maxC: 12, maxCell: 1000 };
-  const CONTACT_HEAD = ['부서', '이름', '직급', '내선', '휴대폰', '이메일'];
+  const CONTACT_HEAD = ['부서', '이름', '내선', '이메일'];
+  // 예전 기본 머리글(직급·휴대폰 포함)이면 두 칸을 빼기
+  function fixContactRows(rows) {
+    if (!rows || !rows[0] || rows[0].join('|') !== '부서|이름|직급|내선|휴대폰|이메일') return null;
+    return rows.map((r) => r.filter((c, i) => i !== 2 && i !== 4));
+  }
   function cleanTable(t, fallbackHead) {
     let rows = t && Array.isArray(t.rows) ? t.rows : null;
     if (!rows || !rows.length) {
@@ -557,5 +562,5 @@
     }
   }
 
-  window.M = { TBL, CONTACT_HEAD, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
+  window.M = { TBL, CONTACT_HEAD, fixContactRows, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
 })();

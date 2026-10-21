@@ -134,7 +134,9 @@
     api.setContacts(people.getRows());
   }
   $('people').addEventListener('focusout', () => setTimeout(() => { if (!$('people').contains(document.activeElement)) flushPeople(); }, 0));
+  $('peopleToggle').addEventListener('click', () => { flushPeople(); api.setSettings({ showPeople: !S.settings.showPeople }); });
   function renderPeople() {
+    $('peopleToggle').setAttribute('aria-pressed', String(!!S.settings.showPeople));
     // 방금 보낸 내용보다 늦게 도착한 예전 상태로 되돌아가지 않게
     if (!peopleDirty && Date.now() - peopleSent > 800) people.setRows(S.contacts || null);
   }
