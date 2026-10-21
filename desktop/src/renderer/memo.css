@@ -69,8 +69,8 @@ body { padding: 14px; }
 .text:empty::before { content: attr(data-placeholder); color: var(--sub); opacity: .6; pointer-events: none; }
 /* 구분선: 스킨 포인트색으로 얇게 */
 .text .dv {
-  height: 1.5px; margin: .55em 0; border-radius: 1px; user-select: none; cursor: default;
-  background: linear-gradient(90deg, transparent, var(--a1) 12%, var(--a2) 88%, transparent); opacity: .45;
+  height: 1px; margin: .55em 0; border-radius: 1px; user-select: none; cursor: default;
+  background: var(--a1); opacity: .45;
 }
 .text .dv:hover { opacity: .7; }
 
