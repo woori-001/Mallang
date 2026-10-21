@@ -138,6 +138,11 @@
     const calFactor = cf === 'poppins' ? 1 : cfObj.size / 14;          // 글자가 작게 그려지는 글꼴은 키워서 맞춤
     r.setProperty('--cal-font', calFam);
     r.setProperty('--cs', String(Math.round((settings.calScale || 100) / 100 * calFactor * 100) / 100));
+    // 연락망 글꼴·크기 (캘린더처럼 따로 정함)
+    const pf = settings.peopleFont || 'same';
+    const pfObj = pf === 'same' ? f : (pf === 'poppins' ? null : (FONTS.find((x) => x.id === pf) || f));
+    r.setProperty('--pp-font', pf === 'poppins' ? "'Poppins', " + f.fam : pfObj.fam);
+    r.setProperty('--pps', String(Math.round((settings.peopleScale || 100) / 100 * (pf === 'poppins' ? 1 : pfObj.size / 14) * 100) / 100));
     // 제목도 고른 글꼴로 (작게 그려지는 글꼴은 그만큼 키움)
     const tf = f.size / 14;
     r.setProperty('--tf', String(Math.round(tf * 100) / 100));

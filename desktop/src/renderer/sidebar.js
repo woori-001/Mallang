@@ -479,6 +479,10 @@
     if (document.activeElement !== $('fontScale')) $('fontScale').value = fsv;
     $('fontScaleV').textContent = fsv + '%';
     $('calFont').innerHTML = window.M.calFontOptions(s).map((o) => '<option value="' + o.id + '"' + ((s.calFont || 'same') === o.id ? ' selected' : '') + '>' + esc(o.name) + '</option>').join('');
+    if (document.activeElement !== $('peopleFont')) $('peopleFont').innerHTML = window.M.calFontOptions(s).map((o) => '<option value="' + o.id + '"' + ((s.peopleFont || 'same') === o.id ? ' selected' : '') + '>' + esc(o.name) + '</option>').join('');
+    const ppv = s.peopleScale || 100;
+    if (document.activeElement !== $('peopleScale')) $('peopleScale').value = ppv;
+    $('peopleScaleV').textContent = ppv + '%';
     const csv = s.calScale || 100;
     if (document.activeElement !== $('calScale')) $('calScale').value = csv;
     $('calScaleV').textContent = csv + '%';
@@ -494,6 +498,8 @@
   const setFs = (v) => { v = Math.min(170, Math.max(70, v)); $('fontScale').value = v; $('fontScaleV').textContent = v + '%'; api.setSettings({ fontScale: v }); };
   $('fontScale').addEventListener('input', (e) => setFs(Number(e.target.value)));
   $('calFont').addEventListener('change', (e) => api.setSettings({ calFont: e.target.value }));
+  $('peopleFont').addEventListener('change', (e) => api.setSettings({ peopleFont: e.target.value }));
+  $('peopleScale').addEventListener('input', (e) => { $('peopleScaleV').textContent = e.target.value + '%'; api.setSettings({ peopleScale: Number(e.target.value) }); });
   const setCs = (v) => { v = Math.min(150, Math.max(70, v)); $('calScale').value = v; $('calScaleV').textContent = v + '%'; api.setSettings({ calScale: v }); };
   $('calScale').addEventListener('input', (e) => setCs(Number(e.target.value)));
   $('alpha').addEventListener('input', (e) => { $('alphaV').textContent = e.target.value + '%'; api.setSettings({ alpha: Number(e.target.value) }); });

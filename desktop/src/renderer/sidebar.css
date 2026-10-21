@@ -307,3 +307,10 @@ input[type="range"] { width: 100%; accent-color: var(--a1); }
 .box .calPrev { background: rgba(var(--glass), .8); }
 .box .bkInfo { font-size: 12px; }
 .box .row2 { margin-top: -2px; }
+.ppPrev {
+  border-radius: 12px; background: rgba(var(--glass), .8); padding: 9px 12px; display: flex; align-items: baseline; gap: 10px;
+  font-family: var(--pp-font); font-size: calc(13px * var(--pps, 1)); color: var(--ink);
+}
+.ppPrev b { font-weight: 700; }
+.ppPrev span { margin-left: auto; font-weight: 500; }
+.ppPrev em { font-style: normal; font-weight: 700; font-variant-numeric: tabular-nums; }

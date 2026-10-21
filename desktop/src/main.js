@@ -39,7 +39,7 @@ let dataDir, dataFile, store, saveTimer, quitting = false;
 function defaults() {
   return {
     version: 1,
-    settings: { skin: 'lav', font: 'gowun', fontScale: 100, titleScale: 100, titleBold: true, calFont: 'same', calScale: 100, bodyBg: false, alpha: 60, sideAlpha: 55, showToday: true, showPeople: false, pinned: false, autoStart: false },
+    settings: { skin: 'lav', font: 'gowun', fontScale: 100, titleScale: 100, titleBold: true, calFont: 'same', calScale: 100, peopleFont: 'same', peopleScale: 100, bodyBg: false, alpha: 60, sideAlpha: 55, showToday: true, showPeople: false, pinned: false, autoStart: false },
     nextId: 2,
     memos: [{
       id: 1, slot: 0, x: null, y: null, w: 290, h: 240, type: 'text', title: '말랑메모 시작하기',
@@ -733,10 +733,12 @@ function updateSettings(patch) {
   const prev = { ...store.settings };
   if ('calScale' in patch) patch.calScale = Math.min(150, Math.max(70, Number(patch.calScale) || 100));
   if ('calFont' in patch && typeof patch.calFont !== 'string') delete patch.calFont;
+  if ('peopleFont' in patch && typeof patch.peopleFont !== 'string') delete patch.peopleFont;
+  if ('peopleScale' in patch) patch.peopleScale = Math.min(160, Math.max(70, Number(patch.peopleScale) || 100));
   if ('bodyBg' in patch) patch.bodyBg = !!patch.bodyBg;
   if ('titleBold' in patch) patch.titleBold = !!patch.titleBold;
   if ('titleScale' in patch) patch.titleScale = Math.min(170, Math.max(70, Number(patch.titleScale) || 100));
-  const keys = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'showPeople', 'pinned', 'autoStart'];
+  const keys = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'showPeople', 'pinned', 'autoStart'];
   if ('fontScale' in patch) patch.fontScale = Math.min(170, Math.max(70, Number(patch.fontScale) || 100));
   for (const k of keys) if (k in patch) store.settings[k] = patch[k];
   const s = store.settings;
