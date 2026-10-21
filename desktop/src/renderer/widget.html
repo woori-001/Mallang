@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'">
+<title>오늘 일정</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="base.css">
+<style>
+body { padding: 14px; }
+.w {
+  border-radius: 22px; border: none;
+  box-shadow: 0 6px 14px rgba(70, 60, 150, .16);
+  padding: 16px 18px; display: flex; flex-direction: column; gap: 10px;
+  font-family: var(--memo-font); cursor: grab;
+  animation: pop .5s var(--ease);
+  transition: opacity .32s var(--ease), transform .4s var(--ease), background .6s ease;
+}
+.w:active { cursor: grabbing; }
+.w.leaving { opacity: 0; transform: translateY(10px) scale(.92); }
+.top { display: flex; align-items: baseline; gap: 8px; font-family: var(--ui); }
+.big { font-size: 34px; font-weight: 700; line-height: 1; color: var(--a1); }
+.mon { font-size: 12px; font-weight: 600; letter-spacing: 1px; color: var(--a1); }
+.sub { font-size: 12px; color: var(--sub); }
+.ev { display: flex; align-items: center; gap: 10px; font-size: var(--memo-size); animation: fade .4s var(--ease); }
+.dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.t { font-size: 12px; color: var(--sub); width: 40px; flex: none; font-family: var(--ui); }
+.n { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.none { font-size: 13px; color: var(--sub); }
+</style>
+</head>
+<body>
+<div id="w" class="w" title="끌어서 옮길 수 있어요">
+  <div class="top">
+    <div id="big" class="big"></div>
+    <div><div id="mon" class="mon"></div><div id="sub" class="sub"></div></div>
+  </div>
+  <div id="list"></div>
+</div>
+<script src="common.js"></script>
+<script src="widget.js"></script>
+</body>
+</html>

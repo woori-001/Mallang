@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:">
+<title>말랑메모 목록</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="sidebar.css">
+</head>
+<body>
+<div id="slider" class="slider">
+  <button id="tab" class="tab" type="button" aria-label="메모 목록 열기·닫기" aria-expanded="false" title="마우스를 올리면 열려요 · 클릭하면 열기/닫기">
+    <svg class="tabArrow" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M8.5 1.5v9L2.5 6z" fill="currentColor"/></svg>
+  </button>
+
+  <aside id="panel" class="panel" aria-label="메모 목록">
+    <header class="phead">
+      <div>
+        <div class="appname">말랑메모</div>
+        <div id="today" class="todaytxt"></div>
+      </div>
+      <button id="pin" class="ib pinbtn" type="button" aria-label="목록바 고정" title="목록바 고정 (마우스를 떼도 열려 있어요)"></button>
+    </header>
+
+    <div class="seg" role="tablist" aria-label="보기">
+      <button class="segb" type="button" role="tab" data-tab="memo">메모</button>
+      <button class="segb" type="button" role="tab" data-tab="cal">캘린더</button>
+      <button class="segb" type="button" role="tab" data-tab="style">꾸미기</button>
+      <button class="segb" type="button" role="tab" data-tab="acct">계정</button>
+    </div>
+
+    <!-- 메모 -->
+    <section id="vMemo" class="view">
+      <div id="memoTools" class="memoTools">
+        <button id="newMemo" class="primary soft" type="button"></button>
+        <label class="search">
+          <span id="searchIcon"></span>
+          <span class="sr">메모 검색</span>
+          <input id="q" type="text" placeholder="메모 검색" spellcheck="false">
+        </label>
+        <div class="row2">
+          <button id="foldAll" class="pill soft" type="button"></button>
+          <button id="unfoldAll" class="pill soft" type="button"></button>
+        </div>
+      </div>
+      <div id="trashHead" class="trashHead" hidden>
+        <div class="thTop">
+          <button id="trashBack" class="pill soft backb" type="button"></button>
+          <button id="emptyTrash" class="pill soft dangerPill" type="button">휴지통 비우기</button>
+        </div>
+        <div class="thInfo">삭제한 메모는 <b>7일</b> 동안 여기 있다가 자동으로 <b>영구 삭제</b>돼요. 영구 삭제하면 PC의 저장 파일에서도 바로 지워져요.</div>
+      </div>
+      <div id="list" class="list"></div>
+      <div class="footrow">
+        <span id="mFoot" class="foot"></span>
+        <button id="trashBtn" class="ctext trashBtn" type="button"></button>
+      </div>
+    </section>
+
+    <!-- 캘린더 -->
+    <section id="vCal" class="view" hidden>
+      <div class="calcard">
+        <div class="calhead">
+          <div class="calttl"><span id="calNum" class="calnum"></span><span id="calEn" class="calen"></span></div>
+          <div class="calnav">
+            <button id="calToday" class="ctext" type="button">오늘</button>
+            <button id="calPrev" class="ib navb" type="button" aria-label="이전 달"></button>
+            <button id="calNext" class="ib navb" type="button" aria-label="다음 달"></button>
+          </div>
+        </div>
+        <div class="wdays" aria-hidden="true"><span class="sun">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span class="sat">토</span></div>
+        <div id="grid" class="grid"></div>
+      </div>
+      <div class="selrow">
+        <div id="selLabel" class="sellabel"></div>
+        <button id="addEv" class="smallprimary soft" type="button"></button>
+      </div>
+      <div id="evList" class="evlist"></div>
+      <button id="todayToggle" class="toggle soft" type="button" aria-pressed="false">
+        <span>바탕화면에 오늘 일정 띄우기</span><span class="track"><span class="knob"></span></span>
+      </button>
+    </section>
+
+    <!-- 계정 -->
+    <section id="vAcct" class="view" hidden>
+      <div class="scroll">
+        <div id="acOut" class="sect">
+          <div class="acHero">
+            <div class="acTitle">어디서든 내 메모</div>
+            <div class="acDesc">아이디로 로그인하면 이 PC와 휴대폰의 메모·일정이 자동으로 맞춰져요. 메모 내용은 내 비밀번호로 잠근 뒤 올라가서, 서버에서도 아무도 읽을 수 없어요.</div>
+          </div>
+          <div class="acSeg" role="tablist" aria-label="로그인 또는 가입">
+            <button id="acModeLogin" class="acSegb" type="button" role="tab">로그인</button>
+            <button id="acModeSignup" class="acSegb" type="button" role="tab">새로 가입</button>
+          </div>
+          <form id="acForm" class="bkForm acForm">
+            <label class="bkField"><span>아이디</span><input id="acUser" type="text" autocomplete="username" spellcheck="false" autocapitalize="off" maxlength="20" placeholder="영어 소문자·숫자·밑줄 3~20자"></label>
+            <label class="bkField"><span>비밀번호</span><input id="acPw" type="password" autocomplete="current-password" spellcheck="false" placeholder="8자 이상"></label>
+            <label id="acPw2Wrap" class="bkField" hidden><span>비밀번호 확인</span><input id="acPw2" type="password" autocomplete="new-password" spellcheck="false"></label>
+            <div id="acWarn" class="bkHint" hidden>비밀번호를 잊으면 서버의 메모를 되찾을 방법이 없어요. 꼭 기억해 두세요. (이 PC의 메모는 그대로 남아요)</div>
+            <button id="acGo" class="primary soft" type="submit">로그인</button>
+          </form>
+          <div id="acMsg" class="bkMsg" role="status" aria-live="polite"></div>
+        </div>
+        <div id="acIn" class="sect" hidden>
+          <div class="acCard">
+            <div class="acRow"><span class="acAvatar" id="acAvatar"></span><div><div class="acName" id="acName"></div><div class="acState" id="acState"></div></div></div>
+            <div class="row2">
+              <button id="acSync" class="pill soft" type="button">지금 맞추기</button>
+              <button id="acLogout" class="pill soft" type="button">로그아웃</button>
+            </div>
+          </div>
+          <div class="slabel">휴대폰에서 쓰기</div>
+          <div class="bkInfo">휴대폰 브라우저에서 아래 주소를 열고 같은 아이디로 로그인하세요. 메뉴의 <b>홈 화면에 추가</b>를 누르면 앱처럼 쓸 수 있어요.</div>
+          <div class="acUrl"><span id="acUrl"></span></div>
+          <div class="row2">
+            <button id="acCopy" class="pill soft" type="button">주소 복사</button>
+            <button id="acOpen" class="pill soft" type="button">브라우저로 열기</button>
+          </div>
+          <div class="bkInfo">로그아웃해도 이 PC의 메모는 그대로 남아요. 맞추기만 멈춰요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 꾸미기 -->
+    <section id="vStyle" class="view" hidden>
+      <div class="scroll">
+        <div class="sect">
+          <div class="slabel">스킨</div>
+          <div id="skins" class="skins"></div>
+        </div>
+        <div class="sect">
+          <div class="slabel">글꼴</div>
+          <div id="fonts" class="fonts"></div>
+        </div>
+        <div class="sect">
+          <div class="srow"><label for="alpha" class="slabel">메모 투명도</label><span id="alphaV" class="sval"></span></div>
+          <input id="alpha" type="range" min="25" max="95" step="1">
+        </div>
+        <div class="sect">
+          <div class="srow"><label for="sideAlpha" class="slabel">목록바 투명도</label><span id="sideAlphaV" class="sval"></span></div>
+          <input id="sideAlpha" type="range" min="15" max="95" step="1">
+        </div>
+        <div class="sect">
+          <button id="autoStart" class="toggle soft" type="button" aria-pressed="false">
+            <span>윈도우 시작 시 자동 실행</span><span class="track"><span class="knob"></span></span>
+          </button>
+        </div>
+        <div class="sect">
+          <div class="slabel">백업</div>
+          <div class="bkInfo">메모와 일정을 비밀번호로 잠근 파일로 내보내요. PC를 바꾸거나 고장 났을 때 이 파일과 비밀번호로 되살릴 수 있어요.</div>
+          <div class="row2">
+            <button id="bkExportBtn" class="pill soft" type="button">백업 내보내기</button>
+            <button id="bkImportBtn" class="pill soft" type="button">백업 가져오기</button>
+          </div>
+          <form id="bkForm" class="bkForm" hidden>
+            <div id="bkTitle" class="bkTitle"></div>
+            <label class="bkField"><span>비밀번호</span><input id="bkPw" type="password" autocomplete="new-password" spellcheck="false"></label>
+            <label id="bkPw2Wrap" class="bkField"><span>비밀번호 확인</span><input id="bkPw2" type="password" autocomplete="new-password" spellcheck="false"></label>
+            <div id="bkHint" class="bkHint"></div>
+            <div class="bkBtns">
+              <button id="bkCancel" class="ctext" type="button">취소</button>
+              <button id="bkGo" class="smallprimary soft" type="submit"></button>
+            </div>
+          </form>
+          <div id="bkMsg" class="bkMsg" role="status" aria-live="polite"></div>
+        </div>
+        <div class="sect help">
+          <div><b>Ctrl + Alt + N</b> 어디서나 새 메모</div>
+          <div><b>제목줄 더블클릭</b> 접기 / 펴기</div>
+          <div><b>제목 클릭</b> 이름 바꾸기 · <b>오른쪽 아래 모서리</b> 크기 조절</div>
+          <button id="openData" class="ctext" type="button">메모 저장 폴더 열기</button>
+        </div>
+      </div>
+    </section>
+    <div id="sConfirm" class="sconfirm" hidden role="alertdialog" aria-modal="true" aria-labelledby="scTitle" aria-describedby="scDesc">
+      <div class="scbox">
+        <div id="scTitle" class="sctitle"></div>
+        <div id="scDesc" class="scdesc"></div>
+        <div class="scbtns">
+          <button id="scNo" class="scno" type="button">취소</button>
+          <button id="scYes" class="scyes" type="button"></button>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+<script src="common.js"></script>
+<script src="sidebar.js"></script>
+</body>
+</html>

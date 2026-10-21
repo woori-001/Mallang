@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:">
+<title>메모</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="memo.css">
+</head>
+<body>
+<div id="card" class="card enter">
+  <div id="head" class="head">
+    <button id="fold" class="ib fold" type="button" aria-label="접기" title="접기 (제목줄 더블클릭)"></button>
+    <span id="markIcon" class="markIcon"></span>
+    <input id="title" class="title" type="text" readonly spellcheck="false" aria-label="메모 제목" maxlength="80">
+    <button id="more" class="ib more" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="tools" title="메뉴"></button>
+  </div>
+  <div id="tools" class="tools" role="toolbar" aria-label="메모 도구" hidden>
+      <button id="bNew" class="ib" type="button" aria-label="새 메모" title="새 메모"></button>
+      <button id="bMark" class="ib" type="button" aria-label="중요 표시와 색" title="중요 표시 · 메모 색"></button>
+      <button id="bType" class="ib" type="button" aria-label="체크리스트 전환" title="체크리스트 ↔ 일반 메모"></button>
+      <button id="bTop" class="ib" type="button" aria-label="맨 앞으로" title="맨 앞 (항상 위)"></button>
+      <button id="bBottom" class="ib" type="button" aria-label="맨 뒤로" title="맨 뒤 (창 아래로)"></button>
+      <button id="bHide" class="ib" type="button" aria-label="숨기기" title="숨기기 (목록에서 다시 보이기)"></button>
+      <button id="bDel" class="ib del" type="button" aria-label="삭제" title="삭제"></button>
+  </div>
+
+  <div id="picker" class="picker" hidden>
+    <div class="plabel">기호</div>
+    <div id="pMarks" class="prow"></div>
+    <div class="plabel">기호 색</div>
+    <div id="pColors" class="prow"></div>
+    <div class="plabel">메모 색</div>
+    <div id="pSlots" class="prow"></div>
+  </div>
+
+  <div id="body" class="body">
+    <textarea id="text" class="text" spellcheck="false" placeholder="여기에 바로 입력" aria-label="메모 내용"></textarea>
+    <div id="checks" class="checks" hidden>
+      <div id="items"></div>
+      <button id="addItem" class="addItem" type="button"></button>
+    </div>
+  </div>
+  <div id="chip" class="chip" hidden></div>
+  <div id="confirm" class="confirm" hidden role="alertdialog" aria-modal="true" aria-labelledby="cTitle" aria-describedby="cDesc">
+    <div class="cbox">
+      <div id="cTitle" class="ctitle">이 메모를 삭제할까요?</div>
+      <div id="cDesc" class="cdesc">휴지통에서 7일 동안 되살릴 수 있어요.</div>
+      <div class="cbtns">
+        <button id="cNo" class="cno" type="button">취소</button>
+        <button id="cYes" class="cyes" type="button">삭제</button>
+      </div>
+    </div>
+  </div>
+  <div id="grip" class="grip" title="크기 조절" aria-hidden="true"></div>
+</div>
+<script src="common.js"></script>
+<script src="memo.js"></script>
+</body>
+</html>

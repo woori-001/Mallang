@@ -1,0 +1,79 @@
+{
+  "name": "mallang-memo",
+  "version": "1.2.0",
+  "description": "투명하고 말랑한 데스크톱 메모 앱",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "fonts": "node scripts/build-fonts.js",
+    "icon": "python3 scripts/make-icon.py",
+    "dist": "npm run fonts && electron-builder --win nsis --x64 --publish never",
+    "web": "node scripts/copy-web.js"
+  },
+  "keywords": [],
+  "author": "말랑메모",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "electron": "^38.8.6",
+    "electron-builder": "^26.15.3",
+    "resedit": "^3.1.0",
+    "@fontsource/gaegu": "^5.3.0",
+    "@fontsource/gowun-dodum": "^5.3.0",
+    "@fontsource/ibm-plex-sans-kr": "^5.3.0",
+    "@fontsource/jua": "^5.3.0",
+    "@fontsource/nanum-pen-script": "^5.3.0",
+    "@fontsource/noto-serif-kr": "^5.3.1"
+  },
+  "dependencies": {
+    "koffi": "^2.16.3"
+  },
+  "productName": "말랑메모",
+  "build": {
+    "appId": "com.mallang.memo",
+    "productName": "말랑메모",
+    "copyright": "말랑메모",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "package.json",
+      "!node_modules/koffi/{src,vendor,doc}/**",
+      "!node_modules/koffi/build/koffi/{darwin*,freebsd*,linux*,openbsd*,musl*,win32_ia32,win32_arm64}/**"
+    ],
+    "asarUnpack": [
+      "node_modules/koffi/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false,
+      "artifactName": "MallangMemo-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "말랑메모",
+      "runAfterFinish": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "deleteAppDataOnUninstall": false
+    },
+    "afterPack": "scripts/after-pack.js",
+    "publish": null,
+    "electronLanguages": [
+      "ko",
+      "en-US"
+    ]
+  }
+}
