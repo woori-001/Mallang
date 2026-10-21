@@ -304,7 +304,7 @@
     r.setProperty('--base', sk.base);
     r.setProperty('--b0', sk.b[0]); r.setProperty('--b1', sk.b[1]); r.setProperty('--b2', sk.b[2]); r.setProperty('--b3', sk.b[3]);
     r.setProperty('--sun', sk.sun); r.setProperty('--sat', sk.sat);
-    r.setProperty('--memo-size', (t.f.size + 1) + 'px');
+    r.setProperty('--memo-size', Math.round((t.f.size + 1) * (prefs.fontScale || 100) / 10) / 10 + 'px');
     document.querySelector('meta[name="theme-color"]').setAttribute('content', sk.base);
     return t;
   }
@@ -666,6 +666,8 @@
   // 설정
   function renderSet() {
     $('acctName').textContent = (session && session.username) || '';
+    if (document.activeElement !== $('fontScale')) $('fontScale').value = prefs.fontScale || 100;
+    $('fontScaleV').textContent = (prefs.fontScale || 100) + '%';
     $('avatar').textContent = ((session && session.username) || '?').slice(0, 1).toUpperCase();
     $('skins').innerHTML = Object.keys(SKINS).map((id) => {
       const k = SKINS[id];
@@ -678,6 +680,10 @@
     ).join('');
   }
   $('skins').addEventListener('click', (e) => { const b = e.target.closest('[data-skin]'); if (!b) return; prefs.skin = b.dataset.skin; savePrefs(); applyPrefs(); renderSet(); });
+  const setFs = (v) => { prefs.fontScale = Math.min(170, Math.max(70, v)); savePrefs(); applyPrefs(); $('fontScale').value = prefs.fontScale; $('fontScaleV').textContent = prefs.fontScale + '%'; };
+  $('fontScale').addEventListener('input', (e) => setFs(Number(e.target.value)));
+  $('fsDown').onclick = () => setFs((prefs.fontScale || 100) - 10);
+  $('fsUp').onclick = () => setFs((prefs.fontScale || 100) + 10);
   $('fonts').addEventListener('click', (e) => { const b = e.target.closest('[data-font]'); if (!b) return; prefs.font = b.dataset.font; savePrefs(); applyPrefs(); renderSet(); });
   $('logout').onclick = () => logout(false);
 

@@ -134,7 +134,8 @@
     const memos = S.memos.filter(matches).slice().sort(memoOrder);
     const listEl = $('list');
     if (!memos.length) {
-      listEl.innerHTML = '<div class="empty">' + (q ? '찾는 메모가 없어요' : '메모가 없어요. 새 메모를 만들어 보세요') + '</div>';
+      const c0 = S.cloud || {};
+      listEl.innerHTML = '<div class="empty">' + (q ? '찾는 메모가 없어요' : (!c0.signedIn && c0.username ? '로그아웃 상태예요. 계정 탭에서 다시 로그인하면 메모가 돌아와요' : '메모가 없어요. 새 메모를 만들어 보세요')) + '</div>';
     } else {
       listEl.innerHTML = memos.map((m) => {
         const a = m.hidden ? 0.4 : 0.92;
@@ -411,12 +412,19 @@
     ).join('');
     if (document.activeElement !== $('alpha')) $('alpha').value = s.alpha;
     if (document.activeElement !== $('sideAlpha')) $('sideAlpha').value = s.sideAlpha;
+    const fsv = s.fontScale || 100;
+    if (document.activeElement !== $('fontScale')) $('fontScale').value = fsv;
+    $('fontScaleV').textContent = fsv + '%';
     $('alphaV').textContent = s.alpha + '%';
     $('sideAlphaV').textContent = s.sideAlpha + '%';
     $('autoStart').setAttribute('aria-pressed', String(!!s.autoStart));
   }
   $('skins').addEventListener('click', (e) => { const b = e.target.closest('[data-skin]'); if (b) api.setSettings({ skin: b.dataset.skin }); });
   $('fonts').addEventListener('click', (e) => { const b = e.target.closest('[data-font]'); if (b) api.setSettings({ font: b.dataset.font }); });
+  const setFs = (v) => { v = Math.min(170, Math.max(70, v)); $('fontScale').value = v; $('fontScaleV').textContent = v + '%'; api.setSettings({ fontScale: v }); };
+  $('fontScale').addEventListener('input', (e) => setFs(Number(e.target.value)));
+  $('fsDown').addEventListener('click', () => setFs((S.settings.fontScale || 100) - 10));
+  $('fsUp').addEventListener('click', () => setFs((S.settings.fontScale || 100) + 10));
   $('alpha').addEventListener('input', (e) => { $('alphaV').textContent = e.target.value + '%'; api.setSettings({ alpha: Number(e.target.value) }); });
   $('sideAlpha').addEventListener('input', (e) => {
     $('sideAlphaV').textContent = e.target.value + '%';
@@ -504,7 +512,16 @@
   });
   $('acSync').addEventListener('click', () => api.cloudSync());
   $('acLogout').addEventListener('click', async () => {
-    if (await askConfirm('로그아웃할까요?', '이 PC의 메모는 그대로 남아요. 휴대폰과 맞추기만 멈춰요.', '로그아웃')) api.cloudLogout();
+    if (!(await askConfirm('로그아웃할까요?', '이 PC에서 메모와 일정이 사라져요. 같은 아이디로 다시 로그인하면 그대로 돌아와요.', '로그아웃'))) return;
+    $('acLogout').textContent = '올리는 중…';
+    let r = await api.cloudLogout(false);
+    if (r && r.unsynced) {
+      $('acLogout').textContent = '로그아웃';
+      const ok = await askConfirm('아직 올라가지 않은 변경이 있어요', '인터넷 연결 문제로 ' + r.unsynced + '개가 서버에 올라가지 못했어요. 지금 로그아웃하면 이 변경은 사라져요.', '그래도 로그아웃');
+      if (!ok) return;
+      r = await api.cloudLogout(true);
+    }
+    $('acLogout').textContent = '로그아웃';
   });
   $('acCopy').addEventListener('click', () => {
     api.copyMobileUrl();

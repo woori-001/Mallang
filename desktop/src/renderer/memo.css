@@ -23,7 +23,7 @@ body { padding: 14px; }
 }
 .head:active { cursor: grabbing; }
 .card.folded .head { height: 32px; padding: 0 14px 0 12px; }
-.card.folded .title { font-size: 13px; padding: 2px 0; }
+.card.folded .title { font-size: 13px; padding: 2px 0; }  /* 접힌 바는 높이가 정해져 있어 글자 크기 고정 */
 .card.folded .markIcon svg { width: 16px; height: 16px; }
 .card.folded .fold, .card.folded .more, .card.folded .tools { display: none; }
 
@@ -32,7 +32,7 @@ body { padding: 14px; }
 
 .title {
   flex: 1; min-width: 0; border: none; outline: none; background: transparent;
-  font-size: 14px; font-weight: 700; padding: 4px 2px; border-radius: 8px;
+  font-size: var(--memo-title-size, 14px); font-weight: 700; padding: 4px 2px; border-radius: 8px;
   text-overflow: ellipsis; cursor: inherit;
 }
 .title[readonly] { pointer-events: auto; }

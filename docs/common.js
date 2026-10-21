@@ -120,7 +120,9 @@
     r.setProperty('--line-soft', sk.dark ? 'rgba(255,255,255,.12)' : 'rgba(80,80,140,.18)');
     document.documentElement.classList.toggle('dark', !!sk.dark);
     r.setProperty('--memo-font', f.fam);
-    r.setProperty('--memo-size', f.size + 'px');
+    const scale = (settings.fontScale || 100) / 100;              // 글자 크기 (모든 메모에 한 번에)
+    r.setProperty('--memo-size', Math.round(f.size * scale * 10) / 10 + 'px');
+    r.setProperty('--memo-title-size', Math.round(14 * Math.min(scale, 1.4) * 10) / 10 + 'px');
     return { sk, f };
   }
 

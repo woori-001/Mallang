@@ -36,7 +36,7 @@ contextBridge.exposeInMainWorld('api', {
   importBackup: (pw) => ipcRenderer.invoke('backup:import', pw),
 
   cloudSignIn: (mode, username, password) => ipcRenderer.invoke('cloud:signin', mode, username, password),
-  cloudLogout: () => ipcRenderer.send('cloud:logout'),
+  cloudLogout: (force) => ipcRenderer.invoke('cloud:logout', !!force),
   cloudSync: () => ipcRenderer.send('cloud:sync'),
   copyMobileUrl: () => ipcRenderer.send('cloud:copyUrl'),
   openMobileUrl: () => ipcRenderer.send('cloud:openUrl')

@@ -120,7 +120,7 @@
             <button id="acCopy" class="pill soft" type="button">주소 복사</button>
             <button id="acOpen" class="pill soft" type="button">브라우저로 열기</button>
           </div>
-          <div class="bkInfo">로그아웃해도 이 PC의 메모는 그대로 남아요. 맞추기만 멈춰요.</div>
+          <div class="bkInfo">로그아웃하면 이 PC에서 메모와 일정이 사라지고, 다시 로그인하면 그대로 돌아와요.</div>
         </div>
       </div>
     </section>
@@ -135,6 +135,15 @@
         <div class="sect">
           <div class="slabel">글꼴</div>
           <div id="fonts" class="fonts"></div>
+        </div>
+        <div class="sect">
+          <div class="srow"><label for="fontScale" class="slabel">글자 크기 (모든 메모)</label><span id="fontScaleV" class="sval"></span></div>
+          <div class="fsRow">
+            <button id="fsDown" class="ib fsBtn" type="button" aria-label="글자 작게">가</button>
+            <input id="fontScale" type="range" min="70" max="170" step="5">
+            <button id="fsUp" class="ib fsBtn big" type="button" aria-label="글자 크게">가</button>
+          </div>
+          <div id="fsPreview" class="fsPreview">오늘 할 일 · 3시 팀 회의</div>
         </div>
         <div class="sect">
           <div class="srow"><label for="alpha" class="slabel">메모 투명도</label><span id="alphaV" class="sval"></span></div>

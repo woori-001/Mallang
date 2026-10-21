@@ -39,7 +39,7 @@ let dataDir, dataFile, store, saveTimer, quitting = false;
 function defaults() {
   return {
     version: 1,
-    settings: { skin: 'lav', font: 'gowun', alpha: 60, sideAlpha: 55, showToday: true, pinned: false, autoStart: false },
+    settings: { skin: 'lav', font: 'gowun', fontScale: 100, alpha: 60, sideAlpha: 55, showToday: true, pinned: false, autoStart: false },
     nextId: 2,
     memos: [{
       id: 1, slot: 0, x: null, y: null, w: 290, h: 240, type: 'text', title: '말랑메모 시작하기',
@@ -609,7 +609,8 @@ function closeWidget() {
 // ───────────────────────── 설정 / 트레이 ─────────────────────────
 function updateSettings(patch) {
   const prev = { ...store.settings };
-  const keys = ['skin', 'font', 'alpha', 'sideAlpha', 'showToday', 'pinned', 'autoStart'];
+  const keys = ['skin', 'font', 'fontScale', 'alpha', 'sideAlpha', 'showToday', 'pinned', 'autoStart'];
+  if ('fontScale' in patch) patch.fontScale = Math.min(170, Math.max(70, Number(patch.fontScale) || 100));
   for (const k of keys) if (k in patch) store.settings[k] = patch[k];
   const s = store.settings;
   if (s.autoStart !== prev.autoStart) {
@@ -1066,6 +1067,11 @@ function applyRemote(item) {
       n = { ...rest, ...c, ...meta, hidden: false, deleting: false };
     } else {
       n = { id: store.nextId++, uid: u, x: null, y: null, w: 260, h: 220, layer: 'normal', hidden: false, folded: false, created: Date.now(), ...c, ...meta };
+      const lay = store.layoutCache && store.layoutCache[u];
+      if (lay) {
+        for (const k of ['x', 'y', 'w', 'h', 'folded', 'layer', 'hidden', 'ox', 'oy']) if (lay[k] !== undefined && lay[k] !== null) n[k] = lay[k];
+        delete store.layoutCache[u];
+      }
     }
     store.memos.push(n);
     ensurePos(n);
@@ -1161,6 +1167,39 @@ async function cloudSignIn(mode, username, password) {
   }
 }
 
+// 진행 중인 맞추기가 끝날 때까지 기다린 뒤 한 번 더 맞춤
+async function syncAndWait() {
+  for (let i = 0; i < 100 && syncing; i++) await new Promise((r) => setTimeout(r, 100));
+  clearTimeout(syncTimer);
+  await runSync();
+  for (let i = 0; i < 100 && syncing; i++) await new Promise((r) => setTimeout(r, 100));
+}
+
+// 로그아웃: 서버에 다 올린 뒤 이 PC에서 메모·일정을 지움 (다시 로그인하면 서버에서 돌아옴)
+// 메모 자리·크기·접힘 같은 배치 정보만 남겨 두어, 돌아올 때 원래 자리에 나타남 (내용은 남기지 않음)
+async function cloudSignOut(force) {
+  if (cloudKey && holder.session) {
+    try { await syncAndWait(); } catch (e) { /* 아래에서 남은 개수로 판단 */ }
+  }
+  const left = cloudKey ? dirtyList().length : 0;
+  if (left && !force) return { unsynced: left };
+  store.layoutCache = store.layoutCache || {};
+  for (const m of store.memos) {
+    if (!m.uid || m.deleting) continue;
+    store.layoutCache[m.uid] = { x: m.x, y: m.y, w: m.w, h: m.h, folded: !!m.folded, layer: m.layer, hidden: !!m.hidden, ox: m.ox, oy: m.oy };
+  }
+  for (const m of store.memos) closeMemoWin(m.id);
+  store.memos = [];
+  store.trash = [];
+  store.tombs = [];
+  store.events = {};
+  store.evMeta = {};
+  cloudLogout(true);
+  saveSecure();
+  broadcast();
+  return { ok: true };
+}
+
 function cloudLogout(keepName) {
   clearTimeout(syncTimer);
   const name = store.cloud.username;
@@ -1174,7 +1213,7 @@ function cloudLogout(keepName) {
 }
 
 ipcMain.handle('cloud:signin', (e, mode, username, password) => cloudSignIn(mode === 'signup' ? 'signup' : 'login', username, password));
-ipcMain.on('cloud:logout', () => cloudLogout(false));
+ipcMain.handle('cloud:logout', (e, force) => cloudSignOut(!!force));
 ipcMain.on('cloud:sync', () => scheduleSync(0));
 ipcMain.on('cloud:copyUrl', () => clipboard.writeText(MOBILE_URL));
 ipcMain.on('cloud:openUrl', () => shell.openExternal(MOBILE_URL));
@@ -1204,7 +1243,7 @@ app.whenReady().then(() => {
   // 개발용 점검 스크립트 (일반 실행에서는 동작하지 않음)
   if (process.env.MALLANG_DEBUG_SCRIPT) {
     try {
-      require(process.env.MALLANG_DEBUG_SCRIPT)({ store, side: () => side, memoWins, createMemo, updateMemo, foldAll, unfoldAll, updateSettings, ipcMain, deleteMemo, restoreMemo, purgeMemos, encryptBackup, decryptBackup, dataFile: () => dataFile, cloudSignIn, runSync, Cloud, cloudInfo });
+      require(process.env.MALLANG_DEBUG_SCRIPT)({ store, side: () => side, memoWins, createMemo, updateMemo, foldAll, unfoldAll, updateSettings, ipcMain, deleteMemo, restoreMemo, purgeMemos, encryptBackup, decryptBackup, dataFile: () => dataFile, cloudSignIn, cloudSignOut, runSync, Cloud, cloudInfo });
     } catch (e) { console.error(e); }
   }
 });

@@ -273,3 +273,11 @@ html.dark .memo, html.dark .tabs, html.dark .authCard { box-shadow: 0 8px 24px r
 .iosTip { animation: tipIn .45s var(--spring), bob 1.6s ease-in-out .5s infinite; }
 @keyframes tipIn { from { opacity: 0; transform: translate(-50%, 20px); } }
 @keyframes bob { 50% { transform: translate(-50%, 6px); } }
+
+.h2row { display: flex; justify-content: space-between; align-items: center; }
+.sval { font-size: 13px; font-weight: 500; color: var(--sub); }
+.fsRow { display: flex; align-items: center; gap: 10px; }
+.fsRow input { flex: 1; accent-color: var(--a1); }
+.fsBtn { width: 40px; height: 40px; border: none; border-radius: 12px; background: rgba(var(--glass), .65); font-size: 13px; font-weight: 700; }
+.fsBtn.big { font-size: 20px; }
+.fsPreview { margin-top: 10px; border-radius: 14px; background: rgba(var(--glass), .6); padding: 12px 14px; font-family: var(--memo-font); font-size: var(--memo-size); line-height: 1.6; }
