@@ -299,6 +299,7 @@
 
   function applyPrefs() {
     const t = applyTheme(prefs);
+    document.documentElement.classList.toggle('bodybg', !!prefs.bodyBg);
     const r = document.documentElement.style;
     const sk = t.sk;
     r.setProperty('--base', sk.base);
@@ -666,6 +667,7 @@
   // 설정
   function renderSet() {
     $('acctName').textContent = (session && session.username) || '';
+    $('bodyBg').setAttribute('aria-pressed', String(!!prefs.bodyBg));
     if (document.activeElement !== $('fontScale')) $('fontScale').value = prefs.fontScale || 100;
     $('fontScaleV').textContent = (prefs.fontScale || 100) + '%';
     $('calFont').innerHTML = window.M.calFontOptions(prefs).map((o) => '<option value="' + o.id + '"' + ((prefs.calFont || 'same') === o.id ? ' selected' : '') + '>' + esc(o.name) + '</option>').join('');
@@ -694,6 +696,7 @@
   $('csUp').onclick = () => setCs((prefs.calScale || 100) + 10);
   $('fonts').addEventListener('click', (e) => { const b = e.target.closest('[data-font]'); if (!b) return; prefs.font = b.dataset.font; savePrefs(); applyPrefs(); renderSet(); });
   $('logout').onclick = () => logout(false);
+  $('bodyBg').onclick = () => { prefs.bodyBg = !prefs.bodyBg; savePrefs(); applyPrefs(); renderSet(); };
 
   // ───────── 메모 편집 ─────────
   let editing = null;

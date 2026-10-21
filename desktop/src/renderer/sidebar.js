@@ -422,6 +422,7 @@
     $('alphaV').textContent = s.alpha + '%';
     $('sideAlphaV').textContent = s.sideAlpha + '%';
     $('autoStart').setAttribute('aria-pressed', String(!!s.autoStart));
+    $('bodyBg').setAttribute('aria-pressed', String(!!s.bodyBg));
   }
   $('skins').addEventListener('click', (e) => { const b = e.target.closest('[data-skin]'); if (b) api.setSettings({ skin: b.dataset.skin }); });
   $('fonts').addEventListener('click', (e) => { const b = e.target.closest('[data-font]'); if (b) api.setSettings({ font: b.dataset.font }); });
@@ -440,6 +441,7 @@
     panel.style.background = 'rgba(var(--glass),' + (Number(e.target.value) / 100) + ')';
     api.setSettings({ sideAlpha: Number(e.target.value) });
   });
+  $('bodyBg').addEventListener('click', () => api.setSettings({ bodyBg: !S.settings.bodyBg }));
   $('autoStart').addEventListener('click', () => api.setSettings({ autoStart: !S.settings.autoStart }));
   $('openData').addEventListener('click', () => api.openData());
 

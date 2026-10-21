@@ -39,7 +39,7 @@ let dataDir, dataFile, store, saveTimer, quitting = false;
 function defaults() {
   return {
     version: 1,
-    settings: { skin: 'lav', font: 'gowun', fontScale: 100, calFont: 'same', calScale: 100, alpha: 60, sideAlpha: 55, showToday: true, pinned: false, autoStart: false },
+    settings: { skin: 'lav', font: 'gowun', fontScale: 100, calFont: 'same', calScale: 100, bodyBg: false, alpha: 60, sideAlpha: 55, showToday: true, pinned: false, autoStart: false },
     nextId: 2,
     memos: [{
       id: 1, slot: 0, x: null, y: null, w: 290, h: 240, type: 'text', title: '말랑메모 시작하기',
@@ -611,7 +611,8 @@ function updateSettings(patch) {
   const prev = { ...store.settings };
   if ('calScale' in patch) patch.calScale = Math.min(150, Math.max(70, Number(patch.calScale) || 100));
   if ('calFont' in patch && typeof patch.calFont !== 'string') delete patch.calFont;
-  const keys = ['skin', 'font', 'fontScale', 'calFont', 'calScale', 'alpha', 'sideAlpha', 'showToday', 'pinned', 'autoStart'];
+  if ('bodyBg' in patch) patch.bodyBg = !!patch.bodyBg;
+  const keys = ['skin', 'font', 'fontScale', 'calFont', 'calScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'pinned', 'autoStart'];
   if ('fontScale' in patch) patch.fontScale = Math.min(170, Math.max(70, Number(patch.fontScale) || 100));
   for (const k of keys) if (k in patch) store.settings[k] = patch[k];
   const s = store.settings;

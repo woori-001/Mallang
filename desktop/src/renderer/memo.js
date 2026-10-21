@@ -45,6 +45,7 @@
     const a = (settings.alpha != null ? settings.alpha : 60) / 100;
     card.style.background = grad(sk, memo.slot || 0, a);
     card.classList.toggle('folded', !!memo.folded);
+    card.classList.toggle('bodybg', !!settings.bodyBg);
     const w = memo.folded ? FOLD_W : (localSize ? localSize.w : memo.w);
     const h = memo.folded ? FOLD_H : (localSize ? localSize.h : memo.h);
     card.style.width = w + 'px';
