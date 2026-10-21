@@ -19,7 +19,7 @@
   $('newMemo').innerHTML = ICONS.plus + '<span>새 메모</span>';
   $('searchIcon').innerHTML = ICONS.search;
   $('pSearchIcon').innerHTML = ICONS.search;
-  $('foldAll').innerHTML = ICONS.foldAll + '<span>모두 접어 정리</span>';
+  $('foldAll').innerHTML = ICONS.foldAll + '<span>모두 접기</span>';
   $('unfoldAll').innerHTML = ICONS.unfoldAll + '<span>모두 펴기</span>';
   $('calPrev').innerHTML = ICONS.left;
   $('calNext').innerHTML = ICONS.right;
@@ -322,6 +322,8 @@
     }
   });
   $('newMemo').addEventListener('click', () => api.create({}));
+  $('foldAll').title = '모두 접기 (Ctrl+Alt+↓)';
+  $('unfoldAll').title = '모두 펴기 (Ctrl+Alt+↑)';
   $('foldAll').addEventListener('click', () => api.foldAll());
   $('unfoldAll').addEventListener('click', () => api.unfoldAll());
   $('q').addEventListener('input', (e) => { q = e.target.value.trim(); renderMemos(); });

@@ -414,7 +414,7 @@ function updateMemo(id, patch) {
   m.updated = Date.now();
   if (CONTENT.some((k) => k in patch && JSON.stringify(prev[k]) !== JSON.stringify(m[k]))) touch(m);
 
-  // 접힌 메모를 펼 때 '모두 접어 정리' 이전 자리로 돌아가기
+  // 접힌 메모를 펼 때 예전 '모두 접어 정리' 이전 자리로 돌아가기
   if ('folded' in patch && prev.folded && !m.folded && m.ox != null) {
     m.x = m.ox; m.y = m.oy; delete m.ox; delete m.oy;
   }
@@ -534,25 +534,21 @@ function focusMemo(id) {
   win.webContents.send('cmd', { type: 'flash' });
 }
 
+// 모두 접기: 지금 자리 그대로 접기만 (배치는 바꾸지 않음)
 function foldAll() {
-  const wa = workArea();
-  const cols = Math.max(1, Math.floor((wa.width - 120) / (FOLD_W + 6)));
-  const list = store.memos.filter((m) => !m.hidden && !m.deleting).sort((a, b) => a.id - b.id);
-  list.forEach((m, k) => {
-    if (!m.folded || m.ox == null) { m.ox = m.x; m.oy = m.y; }
-    m.folded = true;
-    m.x = wa.x + 24 + (k % cols) * (FOLD_W + 6);
-    m.y = wa.y + 16 + Math.floor(k / cols) * (FOLD_H + 6);
-  });
+  const list = store.memos.filter((m) => !m.hidden && !m.deleting && !m.folded);
+  if (!list.length) return;
+  for (const m of list) m.folded = true;
   save();
   broadcast();
+  // 내용이 먼저 접히고 나서 창 크기 맞추기
   setTimeout(() => {
     for (const m of list) {
       const win = memoWins.get(m.id);
       const mm = getMemo(m.id);
-      if (win && mm && mm.folded) animateTo(win, boundsFor(mm), 420);
+      if (win && !win.isDestroyed() && mm && mm.folded) setB(win, boundsFor(mm));
     }
-  }, 300);
+  }, 320);
 }
 
 function unfoldAll() {
@@ -1363,6 +1359,10 @@ app.whenReady().then(() => {
   createSide();
   createTray();
   globalShortcut.register('CommandOrControl+Alt+N', () => createMemo());
+  try {
+    globalShortcut.register('CommandOrControl+Alt+Up', () => unfoldAll());
+    globalShortcut.register('CommandOrControl+Alt+Down', () => foldAll());
+  } catch (e) { console.error('단축키 등록 실패', e); }
   screen.on('display-metrics-changed', placeSide);
   screen.on('display-added', placeSide);
   screen.on('display-removed', placeSide);
