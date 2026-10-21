@@ -283,3 +283,9 @@ input[type="range"] { width: 100%; accent-color: var(--a1); }
 .calPrev b { font-size: calc(26px * var(--cs, 1)); color: var(--a1); line-height: 1; }
 .calPrev i { font-style: normal; font-size: calc(12px * var(--cs, 1)); font-weight: 600; letter-spacing: 1px; color: var(--a1); }
 .calPrev span { font-size: calc(13px * var(--cs, 1)); }
+
+/* 연락망 */
+.people { flex: 1; min-height: 0; }
+.people .mtbl { font-size: 13px; }
+.people .mtbl th, .people .mtbl td { min-width: 56px; max-width: none; white-space: pre; }
+.pfoot { font-size: 11.5px; line-height: 1.5; }

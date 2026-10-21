@@ -20,6 +20,7 @@
   $('bMark').innerHTML = ICONS.starLine;
   $('more').innerHTML = ICONS.dots;
   $('bType').innerHTML = ICONS.list;
+  $('bTable').innerHTML = ICONS.table;
   $('bTop').innerHTML = ICONS.front;
   $('bBottom').innerHTML = ICONS.back;
   $('bHide').innerHTML = ICONS.eyeOff;
@@ -64,12 +65,18 @@
     setOn($('bTop'), memo.layer === 'top');
     setOn($('bBottom'), memo.layer === 'bottom');
     setOn($('bType'), memo.type === 'check');
+    setOn($('bTable'), memo.type === 'table');
     setOn($('bMark'), !picker.hidden);
 
-    const isCheck = memo.type === 'check';
-    text.hidden = isCheck;
+    const isCheck = memo.type === 'check', isTable = memo.type === 'table';
+    text.hidden = isCheck || isTable;
     checks.hidden = !isCheck;
-    if (!isCheck && !text.contains(document.activeElement) && document.activeElement !== text && ed.getText() !== (memo.text || '')) ed.setText(memo.text || '');
+    tblEl.hidden = !isTable;
+    $('bDiv').hidden = isCheck || isTable;
+    // 아직 저장 안 한 표 내용이 있으면 화면 것을 그대로 둠
+    if (isTable && (tablePending || tbl.isEditing())) memo.table = { rows: tbl.getRows() };
+    else if (isTable) tbl.setRows((memo.table && memo.table.rows) || null);
+    if (!isCheck && !isTable && !text.contains(document.activeElement) && document.activeElement !== text && ed.getText() !== (memo.text || '')) ed.setText(memo.text || '');
     if (isCheck) {
       const incoming = memo.items || [];
       const focusedIn = itemsEl.contains(document.activeElement);
@@ -83,7 +90,7 @@
     chip.textContent = memo.layer === 'top' ? '항상 위' : '맨 뒤';
     if (!picker.hidden && document.activeElement !== $('customColor')) renderPicker();
     if (memo.hidden) card.classList.add('leaving');
-    if (memo.clip && !fullText().includes(memo.clip)) { memo.clip = null; api.update(id, { clip: null }); }
+    if (memo.clip && !squash(fullText()).includes(squash(memo.clip))) { memo.clip = null; api.update(id, { clip: null }); }
     renderClip();
   }
 
@@ -168,13 +175,28 @@
     saveItems();
   });
 
+  // ───────── 표 ─────────
+  const tblEl = $('tbl');
+  let tablePending = false;
+  const saveTable = debounce(() => {
+    if (!tablePending || !memo) return;
+    tablePending = false;
+    const rows = tbl.getRows();
+    api.update(id, { table: { rows }, text: window.M.tableToText(rows) });
+  }, 300);
+  const tbl = window.M.tableEditor(tblEl, {
+    onChange: (rows) => { tablePending = true; memo.table = { rows }; memo.text = window.M.tableToText(rows); saveTable(); },
+    copy: (t) => api.copyText(t)
+  });
+  tblEl.addEventListener('focusout', () => saveTable.flush());
+
   // ───────── 본문 ─────────
   const saveText = debounce(() => api.update(id, { text: memo.text }), 250);
   const ed = window.M.lineEditor(text, () => { memo.text = ed.getText(); saveText(); });
   text.addEventListener('blur', () => saveText.flush());
   $('bDiv').innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 12h18"/><path d="M8 6h8M8 18h8" opacity=".45"/></svg>';
   $('bDiv').addEventListener('click', () => {
-    if (memo.type === 'check') return;
+    if (memo.type !== 'text') return;
     closeTools(); render();
     ed.insertDivider();
   });
@@ -240,6 +262,7 @@
       title.blur();
       if (!memo.folded) {
         if (memo.type === 'check') renderItemsFocus(0);
+        else if (memo.type === 'table') tbl.focusFirst();
         else ed.focusEnd();
       }
     }
@@ -286,11 +309,25 @@
   // ───────── 버튼 ─────────
   $('fold').addEventListener('click', toggleFold);
   $('bNew').addEventListener('click', () => { closeTools(); render(); api.create({ near: id }); });
+  const currentText = () => (memo.type === 'check' ? items.map((x) => x.t).filter((t) => t.trim()).join('\n')
+    : memo.type === 'table' ? window.M.tableToText(tbl.getRows()) : ed.getText());
+  $('bTable').addEventListener('click', () => {
+    if (memo.type === 'table') saveTable.flush();
+    if (memo.type === 'table') send({ type: 'text', text: window.M.tableToText(tbl.getRows()), table: null });
+    else {
+      const t = window.M.textToTable(currentText());
+      send({ type: 'table', table: t, text: window.M.tableToText(t.rows) });
+    }
+    // 표는 넓게 쓰는 경우가 많아 창이 작으면 조금 넓혀요
+    if (memo.type === 'table' && memo.w < 340 && !memo.folded) { memo.w = 340; memo.h = Math.max(memo.h, 240); api.resize(id, memo.w, memo.h, true); }
+    render(true);
+    if (memo.type === 'table') setTimeout(() => tbl.focusFirst(), 60);
+  });
   $('bType').addEventListener('click', () => {
     if (memo.type === 'check') {
-      send({ type: 'text', text: items.map((x) => x.t).filter((t) => t.trim()).join('\n') });
+      send({ type: 'text', text: currentText() });
     } else {
-      const lines = window.M.stripDividers(ed.getText()).split('\n').filter((l) => l.trim());
+      const lines = window.M.stripDividers(currentText()).split('\n').filter((l) => l.trim());
       send({ type: 'check', items: lines.length ? lines.map((t) => ({ t, d: false })) : [{ t: '', d: false }] });
     }
     render(true);
@@ -318,6 +355,7 @@
   $('cNo').addEventListener('click', () => { closeConfirm(); closeTools(); render(); });
   $('cYes').addEventListener('click', () => {
     saveText.flush();
+    if (memo.type === 'table') saveTable.flush();
     confirmEl.hidden = true;
     card.classList.add('leaving');
     api.remove(id);
@@ -413,6 +451,7 @@
   // 메모에서 글자를 드래그하면 기억해 두고, 접힌 상태에서 메모를 누르고 Ctrl+C 하면 그 부분을 복사해요.
   const clipBadge = $('clipBadge');
   clipBadge.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="3"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>';
+  const squash = (x) => String(x).replace(/[\s|]+/g, '');
   function fullText() { return [memo.title || '', memo.text || '', ...(memo.items || []).map((x) => x.t)].join('\n'); }
   function remember(str) {
     if (!str || !str.trim() || !memo || str === memo.clip) return;
@@ -438,7 +477,7 @@
     const s = window.getSelection ? String(window.getSelection()) : '';
     return s;
   }
-  const watchSel = (e) => { const el = e.target; if (el && text.contains(el)) { const s = String(getSelection()).replace(/\u00A0/g, ' '); if (s) remember(s); return; } if (el && (el === title || el.classList.contains('itxt'))) { const s = selFrom(el); if (s) remember(s); } };
+  const watchSel = (e) => { const el = e.target; if (el && (text.contains(el) || tblEl.contains(el))) { const s = String(getSelection()).replace(/\u00A0/g, ' '); if (s) remember(s); return; } if (el && (el === title || el.classList.contains('itxt'))) { const s = selFrom(el); if (s) remember(s); } };
   for (const ev of ['select', 'mouseup', 'keyup']) document.addEventListener(ev, watchSel, true);
   document.addEventListener('copy', () => { const s = liveSelection(); if (s) remember(s); });
   let copiedT = null;
@@ -490,6 +529,7 @@
     if (wantFocus) {
       setTimeout(() => {
         if (memo.type === 'check') renderItemsFocus(items.length - 1);
+        else if (memo.type === 'table') tbl.focusFirst();
         else if (!memo.text && memo.title === '새 메모') startEdit();
         else ed.focusEnd();
       }, 120);

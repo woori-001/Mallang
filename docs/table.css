@@ -1,0 +1,51 @@
+/* 표 (메모 · 연락망 공용) */
+.tblWrap { display: flex; flex-direction: column; min-height: 0; gap: 6px; }
+.tblWrap[hidden] { display: none; }
+.tblScroll {
+  flex: 1; min-height: 0; overflow: auto; border-radius: 12px;
+  background: rgba(var(--glass), .38);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--a1) 16%, transparent);
+}
+.mtbl {
+  border-collapse: separate; border-spacing: 0; min-width: 100%;
+  font-family: var(--memo-font); font-size: var(--memo-size); line-height: 1.45; color: var(--ink);
+}
+.mtbl th, .mtbl td {
+  min-width: 58px; max-width: 240px; padding: 6px 9px; text-align: left; vertical-align: top;
+  white-space: pre-wrap; word-break: keep-all; overflow-wrap: anywhere; outline: none; cursor: text; user-select: text;
+  border-bottom: 1px solid color-mix(in srgb, var(--a1) 14%, transparent);
+  border-right: 1px solid color-mix(in srgb, var(--a1) 10%, transparent);
+  transition: background .18s ease, box-shadow .18s ease;
+}
+.mtbl tr > :last-child { border-right: none; }
+.mtbl tbody tr:last-child > * { border-bottom: none; }
+.mtbl th {
+  position: sticky; top: 0; z-index: 1; font-weight: 700;
+  background: color-mix(in srgb, var(--a1) 15%, rgb(var(--glass)));
+  color: var(--ink);
+}
+.mtbl th:empty::before { content: attr(data-ph); color: var(--sub); opacity: .5; font-weight: 500; }
+.mtbl tbody tr:hover > td { background: rgba(var(--glass), .4); }
+.mtbl .cur, .mtbl [data-c]:focus {
+  background: rgba(var(--glass), .82) !important;
+  box-shadow: inset 0 0 0 1.5px var(--a1);
+  border-radius: 4px;
+}
+.mtbl .tel { color: var(--a1); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+.mtbl .tel svg { flex: none; }
+.tblWrap.noMatch .tblScroll::after {
+  content: '찾는 내용이 없어요'; display: block; padding: 16px; text-align: center; color: var(--sub); font-size: 13px;
+}
+.tblBar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; flex: none; }
+.tblBar .tbGap { flex: 1; }
+.tblBar .tb {
+  border: none; border-radius: 9px; padding: 4px 9px; font-size: 11.5px; font-weight: 600;
+  background: rgba(var(--glass), .62); color: var(--ink);
+  transition: background .2s ease, opacity .2s ease, transform .2s var(--spring);
+}
+.tblBar .tb:hover:not(:disabled) { background: rgba(var(--glass), .9); }
+.tblBar .tb:active:not(:disabled) { transform: scale(.94); }
+.tblBar .tb:disabled { opacity: .38; cursor: default; }
+.tblBar .tb.done { background: var(--accent); color: var(--on); }
+.tblWrap.ro .tblBar { display: none; }
+.tblWrap.ro .mtbl td, .tblWrap.ro .mtbl th { cursor: auto; }

@@ -18,6 +18,7 @@
   $('pin').innerHTML = ICONS.pin;
   $('newMemo').innerHTML = ICONS.plus + '<span>새 메모</span>';
   $('searchIcon').innerHTML = ICONS.search;
+  $('pSearchIcon').innerHTML = ICONS.search;
   $('foldAll').innerHTML = ICONS.foldAll + '<span>모두 접어 정리</span>';
   $('unfoldAll').innerHTML = ICONS.unfoldAll + '<span>모두 펴기</span>';
   $('calPrev').innerHTML = ICONS.left;
@@ -102,14 +103,43 @@
     });
     $('vMemo').hidden = view !== 'memo';
     $('vCal').hidden = view !== 'cal';
+    $('vPeople').hidden = view !== 'people';
     $('vStyle').hidden = view !== 'style';
     $('vAcct').hidden = view !== 'acct';
     renderUpdate();
     if (view === 'acct') renderAcct();
     if (view === 'memo') renderMemos();
     if (view === 'cal') renderCal();
+    if (view === 'people') renderPeople();
     if (view === 'style') renderStyle();
   }
+
+  // ───────── 연락망 ─────────
+  let peopleTimer = null, peopleDirty = false, peopleSent = 0;
+  const people = window.M.tableEditor($('people'), {
+    head: window.M.CONTACT_HEAD,
+    copy: (t) => api.copyText(t),
+    onChange: (rows) => {
+      peopleDirty = true;
+      clearTimeout(peopleTimer);
+      peopleTimer = setTimeout(flushPeople, 400);
+      people.filter($('pq').value);
+    }
+  });
+  function flushPeople() {
+    clearTimeout(peopleTimer);
+    if (!peopleDirty) return;
+    peopleDirty = false;
+    peopleSent = Date.now();
+    api.setContacts(people.getRows());
+  }
+  $('people').addEventListener('focusout', () => setTimeout(() => { if (!$('people').contains(document.activeElement)) flushPeople(); }, 0));
+  function renderPeople() {
+    // 방금 보낸 내용보다 늦게 도착한 예전 상태로 되돌아가지 않게
+    if (!peopleDirty && Date.now() - peopleSent > 800) people.setRows(S.contacts || null);
+  }
+  $('pq').addEventListener('input', () => people.filter($('pq').value));
+  $('pq').addEventListener('keydown', (e) => { if (e.key === 'Escape') { $('pq').value = ''; people.filter(''); } });
 
   // ───────── 메모 목록 ─────────
   function matches(m) {
@@ -118,7 +148,9 @@
     return hay.includes(q.toLowerCase());
   }
   function metaOf(m) {
-    const kind = m.type === 'check'
+    const kind = m.type === 'table'
+      ? '표 · ' + Math.max(0, ((m.table && m.table.rows) || []).length - 1) + '줄'
+      : m.type === 'check'
       ? '체크리스트 ' + (m.items || []).filter((x) => x.d).length + '/' + (m.items || []).length
       : ((m.text || '').split('\n').find((l) => l.trim() && l !== window.M.DIVIDER) || '빈 메모').slice(0, 40);
     const where = m.hidden ? '숨김' : (m.layer === 'top' ? '항상 위' : (m.layer === 'bottom' ? '맨 뒤' : (m.folded ? '접힘' : '')));

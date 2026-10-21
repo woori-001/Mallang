@@ -200,3 +200,7 @@ body { padding: 14px; }
 .card.bodybg .text { padding-top: 10px; }
 .card.bodybg .checks { padding-top: 6px; }
 .card.bodybg .chip { bottom: 16px; right: 18px; }
+
+/* 표 메모 */
+.tblArea { flex: 1; min-height: 0; padding: 2px 12px 14px; }
+.card.bodybg .tblArea { padding: 8px 8px 12px; }

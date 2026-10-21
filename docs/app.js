@@ -9,7 +9,7 @@
   const MONTH_EN = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
   const WD = ['일', '월', '화', '수', '목', '금', '토'];
   const EV_ORDER = ['lav', 'mint', 'pink', 'sky'];
-  const CONTENT = ['title', 'text', 'items', 'type', 'mark', 'markColor', 'slot', 'ord'];
+  const CONTENT = ['title', 'text', 'items', 'table', 'type', 'mark', 'markColor', 'slot', 'ord'];
 
   const icon = (path, size, sw) => '<svg width="' + (size || 22) + '" height="' + (size || 22) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (sw || 2) + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + path + '</svg>';
   const I = {
@@ -23,6 +23,7 @@
     left: icon('<path d="M15 5l-7 7 7 7"/>', 16, 2.2),
     right: icon('<path d="M9 5l7 7-7 7"/>', 16, 2.2),
     x: icon('<path d="M6 6l12 12M18 6L6 18"/>', 16, 2.2),
+    people: icon('<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5a5.5 5.5 0 0 1 11 0"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6M17.5 14.2a5 5 0 0 1 3 5.3"/>'),
     check: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg>'
   };
 
@@ -30,7 +31,7 @@
 
   // ───────── 저장 ─────────
   function blankState() {
-    return { memos: [], trash: [], tombs: [], events: {}, evMeta: {}, cursor: null };
+    return { memos: [], trash: [], tombs: [], events: {}, evMeta: {}, contacts: null, cursor: null };
   }
   function loadJSON(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v || d; } catch (e) { return d; } }
   let st = Object.assign(blankState(), loadJSON(LS_STATE, {}));
@@ -166,6 +167,7 @@
   const findMemo = (u) => st.memos.find((m) => m.uid === u) || st.trash.find((m) => m.uid === u);
   function localTs(kind, id) {
     if (kind === 'event') return (st.evMeta[id] && st.evMeta[id].mt) || 0;
+    if (kind === 'contact') return (st.contacts && st.contacts.mt) || 0;
     const m = findMemo(id);
     if (m) return m.mt || 0;
     const t = st.tombs.find((x) => x.uid === id);
@@ -175,7 +177,8 @@
   function contentOf(d) {
     return {
       title: String(d.title || ''), text: String(d.text || ''), items: cleanItems(d.items),
-      type: d.type === 'check' ? 'check' : 'text',
+      type: ['check', 'table'].includes(d.type) ? d.type : 'text',
+      table: d.type === 'table' || d.table ? window.M.cleanTable(d.table) : null,
       mark: MARKS[d.mark] ? d.mark : null,
       markColor: /^#[0-9a-fA-F]{6}$/.test(d.markColor || '') ? d.markColor : '#E8456B',
       slot: Number.isInteger(d.slot) ? ((d.slot % 5) + 5) % 5 : 0,
@@ -183,6 +186,13 @@
     };
   }
   function apply(item) {
+    if (item.kind === 'contact') {
+      if (item.id !== 'main') return;
+      st.contacts = item.deleted ? null : { rows: window.M.cleanTable(item.data, window.M.CONTACT_HEAD).rows, mt: item.ts, dirty: false };
+      if (view === 'people') renderPeople(true);
+      return;
+    }
+    if (item.kind !== 'memo' && item.kind !== 'event') return;
     if (item.kind === 'event') {
       const list = item.deleted ? [] : (item.data && Array.isArray(item.data.list) ? item.data.list : []);
       if (list.length) st.events[item.id] = list.map((e) => ({ t: String(e.t || ''), title: String(e.title || ''), c: EV_ORDER.includes(e.c) ? e.c : 'lav' }));
@@ -225,9 +235,11 @@
     for (const m of st.trash) if (m.dirty) out.push({ kind: 'memo', id: m.uid, ts: m.mt, data: payload(m, true) });
     for (const t of st.tombs) if (!t.done) out.push({ kind: 'memo', id: t.uid, ts: t.ts, deleted: true });
     for (const [k, meta] of Object.entries(st.evMeta)) if (meta && meta.dirty) out.push({ kind: 'event', id: k, ts: meta.mt, data: { list: st.events[k] || [] } });
+    if (st.contacts && st.contacts.dirty) out.push({ kind: 'contact', id: 'main', ts: st.contacts.mt, data: { rows: st.contacts.rows } });
     return out;
   }
   function pushed(kind, id, ts) {
+    if (kind === 'contact') { if (st.contacts && st.contacts.mt === ts) st.contacts.dirty = false; return; }
     if (kind === 'event') { const m = st.evMeta[id]; if (m && m.mt === ts) m.dirty = false; return; }
     const m = findMemo(id);
     if (m && m.mt === ts) m.dirty = false;
@@ -335,6 +347,7 @@
     $('vMemos').hidden = view !== 'memos';
     $('vCal').hidden = view !== 'cal';
     $('vTrash').hidden = view !== 'trash';
+    $('vPeople').hidden = view !== 'people';
     $('vSet').hidden = view !== 'set';
     $('fab').hidden = view !== 'memos';
     renderSync();
@@ -342,9 +355,12 @@
     if (view === 'cal') renderCal();
     if (view === 'trash') renderTrash();
     if (view === 'set') renderSet();
+    if (view === 'people') renderPeople();
+    if (view !== 'people' && peopleEditing) setPeopleEdit(false);
   }
 
   function preview(m) {
+    if (m.type === 'table') return ((m.table && m.table.rows) || []).filter((r) => r.some((c) => c.trim())).slice(0, 4).map((r) => r.filter((c) => c.trim()).join(' · ')).join('\n');
     if (m.type === 'check') return (m.items || []).map((x) => (x.d ? '✓ ' : '○ ') + x.t).filter((x) => x.length > 2).slice(0, 4).join('\n');
     return m.text || '';
   }
@@ -363,7 +379,8 @@
       return;
     }
     $('list').innerHTML = list.map((m, i) => {
-      const done = m.type === 'check' ? (m.items || []).filter((x) => x.d).length + '/' + (m.items || []).length + ' 완료' : '';
+      const done = m.type === 'check' ? (m.items || []).filter((x) => x.d).length + '/' + (m.items || []).length + ' 완료'
+        : m.type === 'table' ? '표 · ' + Math.max(0, ((m.table && m.table.rows) || []).length - 1) + '줄' : '';
       return '<button class="memo" type="button" data-uid="' + esc(m.uid) + '" style="background:' + grad(sk, m.slot || 0, 0.82) + ';animation-delay:' + Math.min(i * 30, 300) + 'ms">' +
         '<span class="mTitle">' + (m.mark ? markSvg(m.mark, m.markColor || '#E8456B', 18) : '') + '<span>' + esc(m.title || '제목 없음') + '</span></span>' +
         (preview(m) ? '<span class="mBody">' + (m.type === 'check' ? esc(preview(m)) : window.M.previewHTML(preview(m))) + '</span>' : '') +
@@ -717,20 +734,23 @@
     const typing = document.activeElement && $('editor').contains(document.activeElement) && document.activeElement.tagName !== 'BUTTON';
     if (fromRemote && typing) return;
     $('edTitle').value = m.title || '';
-    const chk = m.type === 'check';
+    const chk = m.type === 'check', tb = m.type === 'table';
     $('edType').classList.toggle('on', chk);
     $('edType').setAttribute('aria-pressed', String(chk));
-    $('edText').hidden = chk;
+    $('edTableBtn').classList.toggle('on', tb);
+    $('edTableBtn').setAttribute('aria-pressed', String(tb));
+    $('edText').hidden = chk || tb;
     $('edChecks').hidden = !chk;
-    $('edDiv').hidden = chk;
-    if (chk) renderItems(); else edBody.setText(m.text || '');
+    $('edTbl').hidden = !tb;
+    $('edDiv').hidden = chk || tb;
+    if (chk) renderItems(); else if (tb) edTable.setRows((m.table && m.table.rows) || null); else edBody.setText(m.text || '');
     if (!$('edPicker').hidden) renderPicker();
   }
   function closeEditor(silent) {
     if ($('editor').hidden) return;
     const m = ed();
     // 아무것도 안 쓴 새 메모는 남기지 않음
-    if (m && !m.title && !m.text && !(m.items || []).some((x) => x.t) && m.isNew) {
+    if (m && !m.title && !m.text && !(m.items || []).some((x) => x.t) && !(m.table && m.table.rows.some((r) => r.some((c) => c.trim()))) && m.isNew) {
       st.memos = st.memos.filter((x) => x !== m);
       st.tombs.push({ uid: m.uid, ts: Date.now() + 1 });
       saveState();
@@ -757,7 +777,20 @@
   $('edDiv').innerHTML = icon('<path d="M3 12h18"/><path d="M8 6h8M8 18h8" opacity=".45"/>', 21, 2);
   $('edDiv').addEventListener('pointerdown', (e) => e.preventDefault());   // 누를 때 글자 칸 커서를 잃지 않게
   $('edDiv').onclick = () => edBody.insertDivider();
-  $('edTitle').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); const m = ed(); if (m && m.type === 'check') focusItem(0); else edBody.focusEnd(); } });
+  $('edTitle').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); const m = ed(); if (m && m.type === 'check') focusItem(0); else if (m && m.type === 'table') edTable.focusFirst(); else edBody.focusEnd(); } });
+  const copyText = (t) => (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject(new Error('no clipboard'))).then(() => toast('표를 복사했어요'), () => toast('복사하지 못했어요'));
+  const edTable = window.M.tableEditor($('edTbl'), {
+    copy: copyText,
+    onChange: (rows) => { const m = ed(); if (m) { m.table = { rows }; m.text = window.M.tableToText(rows); touch(m); } }
+  });
+  const memoText = (m) => (m.type === 'check' ? (m.items || []).map((x) => x.t).filter((t) => t.trim()).join('\n') : m.text || '');
+  $('edTableBtn').onclick = () => {
+    const m = ed(); if (!m) return;
+    if (m.type === 'table') { m.type = 'text'; m.text = window.M.tableToText((m.table && m.table.rows) || []); m.table = null; }
+    else { m.table = window.M.textToTable(memoText(m)); m.text = window.M.tableToText(m.table.rows); m.type = 'table'; }
+    touch(m); fillEditor();
+    if (m.type === 'table') setTimeout(() => edTable.focusFirst(), 60);
+  };
 
   function renderItems(focusIdx, caret) {
     const m = ed(); if (!m) return;
@@ -813,11 +846,39 @@
   $('edAddItem').onclick = () => { const m = ed(); m.items.push({ t: '', d: false }); renderItems(m.items.length - 1); touch(m); };
   $('edType').onclick = () => {
     const m = ed(); if (!m) return;
-    if (m.type === 'check') { m.type = 'text'; m.text = m.items.map((x) => x.t).filter((t) => t.trim()).join('\n'); }
+    if (m.type === 'check') { m.type = 'text'; m.text = memoText(m); }
     else { const lines = window.M.stripDividers(m.text).split('\n').filter((l) => l.trim()); m.type = 'check'; m.items = lines.length ? lines.map((t) => ({ t, d: false })) : [{ t: '', d: false }]; }
     touch(m); fillEditor();
     if (m.type === 'check' && !m.items[0].t) focusItem(0);
   };
+
+  // ───────── 연락망 ─────────
+  let peopleEditing = false;
+  const people = window.M.tableEditor($('people'), {
+    head: window.M.CONTACT_HEAD, callable: true, editable: false, copy: copyText,
+    onChange: (rows) => {
+      const prev = (st.contacts && st.contacts.mt) || 0;
+      st.contacts = { rows, mt: Math.max(Date.now(), prev + 1), dirty: true };
+      saveState(); scheduleSync();
+      people.filter($('pq').value);
+    }
+  });
+  function renderPeople(fromRemote) {
+    if (fromRemote && people.isEditing()) return;
+    people.setRows((st.contacts && st.contacts.rows) || null);
+    people.filter($('pq').value);
+    $('pHint').hidden = !!(st.contacts && st.contacts.rows.length > 2) && !peopleEditing;
+  }
+  function setPeopleEdit(on) {
+    peopleEditing = on;
+    $('pEdit').textContent = on ? '완료' : '편집';
+    $('pEdit').classList.toggle('on', on);
+    $('pEdit').setAttribute('aria-pressed', String(on));
+    people.setEditable(on);
+    if (view === 'people') renderPeople();
+  }
+  $('pEdit').onclick = () => setPeopleEdit(!peopleEditing);
+  $('pq').addEventListener('input', () => people.filter($('pq').value));
   $('edDel').onclick = async () => {
     const m = ed(); if (!m) return;
     if (!(await ask('이 메모를 삭제할까요?', '휴지통에서 7일 동안 되살릴 수 있어요.', '삭제'))) return;
@@ -878,6 +939,8 @@
   $('syncBtn').innerHTML = I.sync;
   $('syncBtn').onclick = () => scheduleSync(0);
   $('searchIcon').innerHTML = ICONS.search;
+  $('pSearchIcon').innerHTML = ICONS.search;
+  $('edTableBtn').innerHTML = ICONS.table.replace('width="15" height="15"', 'width="21" height="21"');
   $('calPrev').innerHTML = I.left; $('calNext').innerHTML = I.right;
   $('edBack').innerHTML = I.back;
   $('edMark').innerHTML = ICONS.starLine.replace('width="15" height="15"', 'width="21" height="21"');

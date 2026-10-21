@@ -160,6 +160,8 @@
     right: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>',
     foldAll: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4l5 5 5-5M7 20l5-5 5 5"/></svg>',
     dots: '<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
+    table: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><path d="M3.5 10h17M3.5 15h17M10 4.5v15"/></svg>',
+    phone: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"/></svg>',
     unfoldAll: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg>'
   };
   const markSvg = (mark, color, size) =>
@@ -274,6 +276,273 @@
   }
   const stripDividers = (text) => String(text || '').split('\n').filter((l) => l !== DIVIDER).join('\n');
 
+  // ───────── 표 ─────────
+  // 표 데이터: { rows: [[머리글...], [칸...], ...] }  (첫 줄은 머리글)
+  const TBL = { maxR: 500, maxC: 12, maxCell: 1000 };
+  const CONTACT_HEAD = ['부서', '이름', '직급', '내선', '휴대폰', '이메일'];
+  function cleanTable(t, fallbackHead) {
+    let rows = t && Array.isArray(t.rows) ? t.rows : null;
+    if (!rows || !rows.length) {
+      const h = fallbackHead || ['', '', ''];
+      rows = [h.slice(), h.map(() => ''), h.map(() => '')];
+    }
+    rows = rows.slice(0, TBL.maxR).map((r) => (Array.isArray(r) ? r : []).slice(0, TBL.maxC).map((c) => String(c == null ? '' : c).slice(0, TBL.maxCell)));
+    const n = Math.max(1, ...rows.map((r) => r.length));
+    rows = rows.map((r) => (r.length < n ? r.concat(Array(n - r.length).fill('')) : r));
+    if (rows.length < 2) rows.push(Array(n).fill(''));
+    return { rows };
+  }
+  // 예전 버전·목록 미리보기용 글자
+  const tableToText = (rows) => (rows || []).filter((r) => r.some((c) => c.trim())).map((r) => r.map((c) => c.replace(/\s*\n\s*/g, ' ')).join(' | ')).join('\n');
+  function textToTable(text) {
+    const lines = stripDividers(text).split('\n').filter((l) => l.trim());
+    if (!lines.length) return cleanTable(null);
+    const sep = lines.some((l) => l.includes('\t')) ? '\t' : lines.some((l) => l.includes(' | ')) ? ' | ' : null;
+    let rows = lines.map((l) => (sep ? l.split(sep) : [l]).map((c) => c.trim()));
+    if (!sep) rows = [['내용']].concat(rows);
+    return cleanTable({ rows });
+  }
+  // 엑셀에서 복사한 글자(탭 구분, 따옴표 안 줄바꿈 포함) → 칸 배열
+  function parseTSV(s) {
+    s = String(s || '').replace(/\r\n?/g, '\n');
+    if (s.endsWith('\n')) s = s.slice(0, -1);
+    const rows = []; let row = [], cell = '', q = false;
+    for (let i = 0; i < s.length; i++) {
+      const ch = s[i];
+      if (q) {
+        if (ch === '"' && s[i + 1] === '"') { cell += '"'; i++; }
+        else if (ch === '"') q = false;
+        else cell += ch;
+      } else if (ch === '"' && cell === '') q = true;
+      else if (ch === '\t') { row.push(cell); cell = ''; }
+      else if (ch === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
+      else cell += ch;
+    }
+    row.push(cell); rows.push(row);
+    return rows;
+  }
+  const toTSV = (rows) => rows.map((r) => r.map((c) => (/[\t\n"]/.test(c) ? '"' + c.replace(/"/g, '""') + '"' : c)).join('\t')).join('\n');
+  const digits = (s) => String(s).replace(/[^0-9]/g, '');
+  function rowMatches(r, q) {
+    if (!q) return true;
+    const ql = q.toLowerCase(), qd = digits(q);
+    return r.some((c) => c.toLowerCase().includes(ql) || (qd.length >= 2 && qd.length === q.replace(/[\s-]/g, '').length && digits(c).includes(qd)));
+  }
+
+  /* 표 편집기
+     wrap 안에 표와 아래쪽 버튼(+줄, +칸, 지우기, 복사)을 만들어요.
+     opts.onChange(rows) 바뀔 때마다 · opts.copy(text) 복사 · opts.head 기본 머리글 · opts.callable 보기 모드에서 번호·메일 누르면 연결 · opts.editable false 면 보기 모드로 시작 */
+  function tableEditor(wrap, opts) {
+    opts = opts || {};
+    let rows = cleanTable(null, opts.head).rows;
+    let cur = null, query = '', canEdit = opts.editable !== false;
+    wrap.classList.add('tblWrap');
+    wrap.innerHTML =
+      '<div class="tblScroll"><table class="mtbl"><thead></thead><tbody></tbody></table></div>' +
+      '<div class="tblBar" role="toolbar" aria-label="표 도구">' +
+        '<button type="button" class="tb" data-op="row" title="아래에 줄 추가">+ 줄</button>' +
+        '<button type="button" class="tb" data-op="col" title="오른쪽에 칸 추가">+ 칸</button>' +
+        '<button type="button" class="tb" data-op="delrow" title="고른 줄 지우기">줄 지우기</button>' +
+        '<button type="button" class="tb" data-op="delcol" title="고른 칸 지우기">칸 지우기</button>' +
+        '<span class="tbGap"></span>' +
+        '<button type="button" class="tb" data-op="copy" title="표 전체 복사 (엑셀에 붙여넣기 가능)">복사</button>' +
+      '</div>';
+    const table = wrap.querySelector('table'), thead = table.tHead, tbody = table.tBodies[0], bar = wrap.querySelector('.tblBar');
+    const editable = (() => { const d = document.createElement('div'); d.contentEditable = 'plaintext-only'; return d.contentEditable === 'plaintext-only' ? 'plaintext-only' : 'true'; })();
+    const isPhone = (v) => /^\+?[0-9][0-9\s-]{6,}$/.test(v.trim()) && digits(v).length >= 8;
+    const isMail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+    function cellInner(v, r) {
+      // 보기 모드(휴대폰 연락망): 번호는 눌러서 전화, 메일은 눌러서 메일
+      if (!canEdit && opts.callable && r > 0) {
+        if (isPhone(v)) return '<a class="tel" href="tel:' + digits(v) + '">' + ICONS.phone + esc(v) + '</a>';
+        if (isMail(v)) return '<a class="tel" href="mailto:' + esc(v.trim()) + '">' + esc(v) + '</a>';
+      }
+      return esc(v);
+    }
+    const cellHTML = (tag, v, r, c) => '<' + tag + (canEdit ? ' contenteditable="' + editable + '"' : '') + ' spellcheck="false" data-r="' + r + '" data-c="' + c + '"' +
+      (r === 0 && canEdit ? ' data-ph="머리글"' : '') + '>' + cellInner(v, r) + '</' + tag + '>';
+    function cellText(td) {
+      let t = td.innerText.replace(/ /g, ' ');
+      if (t.endsWith('\n')) t = t.slice(0, -1);
+      return t === '\n' ? '' : t;
+    }
+    function render(focus) {
+      thead.innerHTML = '<tr>' + rows[0].map((v, c) => cellHTML('th', v, 0, c)).join('') + '</tr>';
+      tbody.innerHTML = rows.slice(1).map((r, i) => '<tr data-r="' + (i + 1) + '">' + r.map((v, c) => cellHTML('td', v, i + 1, c)).join('') + '</tr>').join('');
+      applyFilter();
+      if (focus) focusCell(focus.r, focus.c, focus.end !== false);
+      syncBar();
+    }
+    function cellAt(r, c) { return table.querySelector('[data-r="' + r + '"][data-c="' + c + '"]'); }
+    function focusCell(r, c, atEnd) {
+      const el = cellAt(r, c);
+      if (!el) return;
+      el.focus();
+      const rg = document.createRange(); rg.selectNodeContents(el); rg.collapse(!atEnd);
+      const sel = getSelection(); sel.removeAllRanges(); sel.addRange(rg);
+      el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
+    function changed() { opts.onChange && opts.onChange(rows.map((r) => r.slice())); }
+    function syncBar() {
+      const has = !!cur;
+      bar.querySelector('[data-op="delrow"]').disabled = !has || cur.r === 0 || rows.length <= 2;
+      bar.querySelector('[data-op="delcol"]').disabled = !has || rows[0].length <= 1;
+      bar.querySelector('[data-op="row"]').disabled = rows.length >= TBL.maxR;
+      bar.querySelector('[data-op="col"]').disabled = rows[0].length >= TBL.maxC;
+      table.querySelectorAll('.cur').forEach((x) => x.classList.remove('cur'));
+      if (has) { const el = cellAt(cur.r, cur.c); if (el) el.classList.add('cur'); }
+    }
+    function addRow(after) {
+      if (rows.length >= TBL.maxR) return false;
+      const at = after == null ? rows.length : Math.max(1, after + 1);
+      rows.splice(at, 0, Array(rows[0].length).fill(''));
+      return at;
+    }
+    function applyFilter() {
+      let shown = 0;
+      for (const tr of tbody.rows) {
+        const ok = rowMatches(rows[Number(tr.dataset.r)] || [], query);
+        tr.hidden = !ok;
+        if (ok) shown++;
+      }
+      wrap.classList.toggle('noMatch', !!query && !shown);
+      return shown;
+    }
+    table.addEventListener('focusin', (e) => {
+      const el = e.target.closest('[data-r]');
+      if (!el || el.dataset.c == null) return;
+      cur = { r: Number(el.dataset.r), c: Number(el.dataset.c) };
+      syncBar();
+    });
+    table.addEventListener('input', (e) => {
+      const el = e.target.closest('[data-c]');
+      if (!el) return;
+      rows[Number(el.dataset.r)][Number(el.dataset.c)] = cellText(el).slice(0, TBL.maxCell);
+      changed();
+    });
+    table.addEventListener('keydown', (e) => {
+      const el = e.target.closest('[data-c]');
+      if (!el || e.isComposing || e.keyCode === 229) return;
+      const r = Number(el.dataset.r), c = Number(el.dataset.c), C = rows[0].length;
+      const visible = (rr) => rr === 0 || !(tbody.rows[rr - 1] && tbody.rows[rr - 1].hidden);
+      const nextRow = (rr, d) => { let x = rr + d; while (x > 0 && x < rows.length && !visible(x)) x += d; return x; };
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        let nr = r, nc = c + (e.shiftKey ? -1 : 1);
+        if (nc >= C) { nc = 0; nr = nextRow(r, 1); }
+        if (nc < 0) { nc = C - 1; nr = nextRow(r, -1); }
+        if (nr < 0) return;
+        if (nr >= rows.length) { if (addRow() === false) return; render({ r: rows.length - 1, c: 0 }); changed(); return; }
+        focusCell(nr, nc, true);
+      } else if (e.key === 'Enter' && !e.shiftKey && !e.altKey) {
+        e.preventDefault();
+        const nr = nextRow(r, 1);
+        if (nr >= rows.length || (e.ctrlKey || e.metaKey)) {
+          const at = addRow((e.ctrlKey || e.metaKey) ? r : null);
+          if (at === false) return;
+          render({ r: at, c }); changed(); return;
+        }
+        focusCell(nr, c, true);
+      } else if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && !e.shiftKey && !cellText(el).includes('\n')) {
+        const nr = nextRow(r, e.key === 'ArrowUp' ? -1 : 1);
+        if (nr >= 0 && nr < rows.length) { e.preventDefault(); focusCell(nr, c, true); }
+      } else if (e.key === 'Escape') {
+        el.blur(); cur = null; syncBar();
+      }
+    });
+    table.addEventListener('paste', (e) => {
+      const el = e.target.closest('[data-c]');
+      if (!el) return;
+      e.preventDefault();
+      const t = (e.clipboardData && e.clipboardData.getData('text/plain')) || '';
+      if (!/[\t\n]/.test(t.replace(/\n$/, ''))) { document.execCommand('insertText', false, t.replace(/\n$/, '')); return; }
+      // 여러 칸 붙여넣기: 고른 칸부터 채우고 모자라면 줄·칸을 늘려요
+      const grid = parseTSV(t);
+      const r0 = Number(el.dataset.r), c0 = Number(el.dataset.c);
+      const needC = Math.min(TBL.maxC, c0 + Math.max(...grid.map((g) => g.length)));
+      while (rows[0].length < needC) rows.forEach((row) => row.push(''));
+      grid.forEach((g, i) => {
+        const rr = r0 + i;
+        if (rr >= TBL.maxR) return;
+        while (rows.length <= rr) rows.push(Array(rows[0].length).fill(''));
+        g.forEach((v, j) => { if (c0 + j < rows[0].length) rows[rr][c0 + j] = v.slice(0, TBL.maxCell); });
+      });
+      render({ r: Math.min(rows.length - 1, r0 + grid.length - 1), c: c0 });
+      changed();
+    });
+    table.addEventListener('drop', (e) => e.preventDefault());
+    // 버튼을 눌러도 칸 선택이 풀리지 않게
+    bar.addEventListener('pointerdown', (e) => { if (e.target.closest('button')) e.preventDefault(); });
+    bar.addEventListener('click', (e) => {
+      const b = e.target.closest('button');
+      if (!b || b.disabled) return;
+      const op = b.dataset.op;
+      const c = cur ? cur.c : rows[0].length - 1;
+      if (op === 'row') {
+        const at = addRow(cur ? cur.r : null);
+        if (at === false) return;
+        render({ r: at, c: cur ? cur.c : 0 });
+      } else if (op === 'col') {
+        if (rows[0].length >= TBL.maxC) return;
+        rows.forEach((row) => row.splice(c + 1, 0, ''));
+        render({ r: 0, c: c + 1 });
+      } else if (op === 'delrow') {
+        if (!cur || cur.r === 0 || rows.length <= 2) return;
+        rows.splice(cur.r, 1);
+        render({ r: Math.min(cur.r, rows.length - 1), c: cur.c });
+      } else if (op === 'delcol') {
+        if (!cur || rows[0].length <= 1) return;
+        rows.forEach((row) => row.splice(cur.c, 1));
+        render({ r: cur.r, c: Math.min(cur.c, rows[0].length - 1) });
+      } else if (op === 'copy') {
+        const out = toTSV(rows.filter((r, i) => i === 0 || (r.some((x) => x.trim()) && rowMatches(r, query))));
+        Promise.resolve(opts.copy ? opts.copy(out) : navigator.clipboard.writeText(out)).then(() => {
+          b.textContent = '복사했어요'; b.classList.add('done');
+          setTimeout(() => { b.textContent = '복사'; b.classList.remove('done'); }, 1300);
+        }).catch(() => {});
+        return;
+      }
+      changed();
+    });
+    wrap.addEventListener('focusout', () => setTimeout(() => {
+      if (!wrap.contains(document.activeElement)) { cur = null; syncBar(); }
+    }, 0));
+    function setRows(next) {
+      const clean = cleanTable({ rows: next }, opts.head).rows;
+      if (JSON.stringify(clean) === JSON.stringify(rows)) return;
+      const a = document.activeElement;
+      const editing = a && table.contains(a) && a.dataset.c != null;
+      if (editing && clean.length === rows.length && clean[0].length === rows[0].length) {
+        // 쓰고 있는 칸은 그대로 두고 나머지만 바꾸기
+        const ar = Number(a.dataset.r), ac = Number(a.dataset.c);
+        clean.forEach((row, r) => row.forEach((v, c) => {
+          if (r === ar && c === ac) { clean[r][c] = rows[r][c]; return; }
+          if (rows[r][c] !== v) { const el = cellAt(r, c); if (el) el.innerHTML = cellInner(v, r); }
+        }));
+        rows = clean;
+        applyFilter();
+        return;
+      }
+      rows = clean;
+      render(editing && cur ? { r: Math.min(cur.r, rows.length - 1), c: Math.min(cur.c, rows[0].length - 1) } : null);
+    }
+    function setEditable(v) {
+      canEdit = !!v;
+      wrap.classList.toggle('ro', !canEdit);
+      cur = null;
+      render();
+    }
+    wrap.classList.toggle('ro', !canEdit);
+    render();
+    return {
+      setRows, setEditable,
+      getRows: () => rows.map((r) => r.slice()),
+      filter(q) { query = String(q || '').trim(); return applyFilter(); },
+      focusFirst() { focusCell(rows.length > 1 && !rows[1].some((x) => x) ? 1 : 0, 0, true); },
+      isEditing: () => table.contains(document.activeElement)
+    };
+  }
+
   // 내용이 그대로면 다시 그리지 않음 (나타나는 효과가 다시 재생되며 깜빡이는 것 방지)
   const htmlDesc = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
   function guardHTML(...els) {
@@ -288,5 +557,5 @@
     }
   }
 
-  window.M = { DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
+  window.M = { TBL, CONTACT_HEAD, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
 })();

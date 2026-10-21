@@ -50,6 +50,7 @@ function defaults() {
     trash: [],
     tombs: [],
     evMeta: {},
+    contacts: null,
     cloud: {},
     widget: { x: null, y: null }
   };
@@ -82,6 +83,8 @@ function load() {
   }
   store.tombs = Array.isArray(store.tombs) ? store.tombs : [];
   store.evMeta = store.evMeta && typeof store.evMeta === 'object' ? store.evMeta : {};
+  store.contacts = store.contacts && Array.isArray(store.contacts.rows) ? { ...store.contacts, rows: sanitizeTable(store.contacts).rows } : null;
+  for (const m of [...store.memos, ...store.trash]) if (m.type === 'table') m.table = sanitizeTable(m.table);
   store.cloud = store.cloud && typeof store.cloud === 'object' ? store.cloud : {};
   store.nextId = Math.max(store.nextId || 1, ...store.memos.map((m) => m.id + 1), ...store.trash.map((m) => m.id + 1), 1);
 }
@@ -176,9 +179,10 @@ function snapshot() {
     settings: store.settings,
     memos: store.memos.filter((m) => !m.deleting),
     events: store.events,
+    contacts: store.contacts ? store.contacts.rows : null,
     trash: store.trash.map((t) => ({
       id: t.id, title: t.title, slot: t.slot, mark: t.mark, markColor: t.markColor, type: t.type,
-      preview: t.type === 'check' ? (t.items || []).map((x) => x.t).filter(Boolean).slice(0, 3).join(', ') : (t.text || '').split('\n').find((l) => l.trim() && l !== '\u2E3B') || '',
+      preview: t.type === 'table' ? ((t.table && t.table.rows) || []).slice(1).map((r) => r.filter(Boolean).join(' ')).find((x) => x.trim()) || '표' : t.type === 'check' ? (t.items || []).map((x) => x.t).filter(Boolean).slice(0, 3).join(', ') : (t.text || '').split('\n').find((l) => l.trim() && l !== '\u2E3B') || '',
       deletedAt: t.deletedAt, purgeAt: t.deletedAt + TRASH_DAYS * DAY
     })),
     trashDays: TRASH_DAYS,
@@ -382,9 +386,9 @@ function applyLayer(id) {
   }
 }
 
-const ALLOWED = ['title', 'text', 'items', 'type', 'layer', 'hidden', 'folded', 'mark', 'markColor', 'slot', 'ord', 'clip'];  // clip: 드래그해 둔 부분 (이 PC에만)
+const ALLOWED = ['title', 'text', 'items', 'table', 'type', 'layer', 'hidden', 'folded', 'mark', 'markColor', 'slot', 'ord', 'clip'];  // clip: 드래그해 둔 부분 (이 PC에만)
 // 기기끼리 맞추는 내용 (위치·크기·접힘·맨앞/맨뒤·숨김은 기기마다 따로)
-const CONTENT = ['title', 'text', 'items', 'type', 'mark', 'markColor', 'slot', 'ord'];
+const CONTENT = ['title', 'text', 'items', 'table', 'type', 'mark', 'markColor', 'slot', 'ord'];
 function touch(m) {
   m.mt = Math.max(Date.now(), (m.mt || 0) + 1);
   m.dirty = true;
@@ -396,6 +400,8 @@ function updateMemo(id, patch) {
   if (!m || !patch || typeof patch !== 'object') return;
   const prev = { ...m };
   for (const k of ALLOWED) if (k in patch) m[k] = patch[k];
+  if (!['text', 'check', 'table'].includes(m.type)) m.type = 'text';
+  if ('table' in patch) m.table = patch.table ? sanitizeTable(patch.table) : null;
   if (m.layer !== 'top' && m.layer !== 'bottom') m.layer = 'normal';
   m.updated = Date.now();
   if (CONTENT.some((k) => k in patch && JSON.stringify(prev[k]) !== JSON.stringify(m[k]))) touch(m);
@@ -747,6 +753,16 @@ ipcMain.on('events:set', (e, key, list) => {
   save();
   broadcast();
 });
+ipcMain.on('contacts:set', (e, rows) => {
+  if (!Array.isArray(rows)) return;
+  const clean = sanitizeTable({ rows }).rows;
+  if (store.contacts && JSON.stringify(store.contacts.rows) === JSON.stringify(clean)) return;
+  const prev = (store.contacts && store.contacts.mt) || 0;
+  store.contacts = { rows: clean, mt: Math.max(Date.now(), prev + 1), dirty: true };
+  scheduleSync();
+  save();
+  broadcast();
+});
 ipcMain.on('side:ignore', (e, ignore) => {
   if (side && !side.isDestroyed()) side.setIgnoreMouseEvents(!!ignore, { forward: true });
 });
@@ -813,7 +829,8 @@ ipcMain.handle('backup:export', async (e, password) => {
     const payload = {
       app: '말랑메모', exported: Date.now(),
       memos: store.memos.filter((m) => !m.deleting).map(({ deleting, dirty, ...m }) => m),
-      events: store.events, settings: store.settings
+      events: store.events, settings: store.settings,
+      contacts: store.contacts ? store.contacts.rows : null
     };
     fs.writeFileSync(r.filePath, encryptBackup(payload, password));
     return { ok: true, file: path.basename(r.filePath), count: payload.memos.length };
@@ -842,7 +859,7 @@ ipcMain.handle('backup:import', async (e, password) => {
   if (!data || !Array.isArray(data.memos)) return { error: '백업 파일 내용을 읽지 못했어요' };
 
   // 지금 메모는 그대로 두고, 백업의 메모를 추가합니다 (같은 메모는 건너뜀)
-  const sig = (m) => [m.title || '', m.type, m.text || '', JSON.stringify(m.items || [])].join('\u0001');
+  const sig = (m) => [m.title || '', m.type, m.text || '', JSON.stringify(m.items || []), JSON.stringify((m.table && m.table.rows) || [])].join('\u0001');
   const have = new Set(store.memos.map(sig));
   let added = 0, skipped = 0;
   for (const src of data.memos) {
@@ -853,7 +870,8 @@ ipcMain.handle('backup:import', async (e, password) => {
       ...src, id: store.nextId++, hidden: false, deleting: false, uid: Cloud.uid(), mt: Date.now(), dirty: true
     };
     delete m.ox; delete m.oy;
-    if (m.type !== 'check') m.type = 'text';
+    if (!['check', 'table'].includes(m.type)) m.type = 'text';
+    m.table = m.type === 'table' ? sanitizeTable(m.table) : null;
     store.memos.push(m);
     have.add(sig(m));
     ensurePos(m);
@@ -875,6 +893,18 @@ ipcMain.handle('backup:import', async (e, password) => {
         markEvent(k);
       }
       if (cur.length) store.events[k] = cur;
+    }
+  }
+  // 연락망: 없는 줄만 덧붙임 (머리글이 같을 때)
+  if (Array.isArray(data.contacts) && data.contacts.length > 1) {
+    const inc = sanitizeTable({ rows: data.contacts }).rows;
+    if (!store.contacts) store.contacts = { rows: inc, mt: Date.now(), dirty: true };
+    else {
+      const have2 = new Set(store.contacts.rows.map((r) => JSON.stringify(r)));
+      const add = inc.slice(1).filter((r) => r.some((c) => c.trim()) && !have2.has(JSON.stringify(r)));
+      if (add.length && store.contacts.rows[0].length === inc[0].length) {
+        store.contacts = { rows: sanitizeTable({ rows: store.contacts.rows.concat(add) }).rows, mt: Math.max(Date.now(), store.contacts.mt + 1), dirty: true };
+      }
     }
   }
   save();
@@ -987,6 +1017,16 @@ function scheduleSync(delay = 1500) {
   syncTimer = setTimeout(runSync, delay);
 }
 
+// 표: { rows: [[머리글], [칸...]] } · 최대 500줄 × 12칸
+function sanitizeTable(t) {
+  let rows = t && Array.isArray(t.rows) ? t.rows : [];
+  rows = rows.slice(0, 500).map((r) => (Array.isArray(r) ? r : []).slice(0, 12).map((c) => String(c == null ? '' : c).slice(0, 1000)));
+  if (!rows.length) rows = [['', '', '']];
+  const n = Math.max(1, ...rows.map((r) => r.length));
+  rows = rows.map((r) => (r.length < n ? r.concat(Array(n - r.length).fill('')) : r));
+  if (rows.length < 2) rows.push(Array(n).fill(''));
+  return { rows };
+}
 const sanitizeItems = (a) => (Array.isArray(a) ? a.slice(0, 500).map((x) => ({ t: String((x && x.t) || '').slice(0, 2000), d: !!(x && x.d) })) : []);
 const sanitizeEvents = (a) => (Array.isArray(a) ? a.slice(0, 50).map((ev) => ({
   t: String((ev && ev.t) || '').slice(0, 10), title: String((ev && ev.title) || '').slice(0, 200),
@@ -997,7 +1037,8 @@ function contentOf(d) {
     title: String(d.title || '').slice(0, 200),
     text: String(d.text || '').slice(0, 200000),
     items: sanitizeItems(d.items),
-    type: d.type === 'check' ? 'check' : 'text',
+    type: ['check', 'table'].includes(d.type) ? d.type : 'text',
+    table: d.type === 'table' || d.table ? sanitizeTable(d.table) : null,
     mark: ['heart', 'star', 'flag', 'alert', 'check'].includes(d.mark) ? d.mark : null,
     markColor: /^#[0-9a-fA-F]{6}$/.test(d.markColor || '') ? d.markColor : '#E8456B',
     slot: Number.isInteger(d.slot) ? ((d.slot % 5) + 5) % 5 : 0,
@@ -1029,6 +1070,12 @@ function applyRemote(item) {
       if (incoming.length) store.events[k] = incoming; else delete store.events[k];
       store.evMeta[k] = { mt: item.ts, dirty: false };
     }
+    return;
+  }
+  if (item.kind === 'contact') {
+    if (item.id !== 'main') return;
+    const rows = item.deleted ? null : sanitizeTable(item.data).rows;
+    store.contacts = rows ? { rows, mt: item.ts, dirty: false } : null;
     return;
   }
   if (item.kind !== 'memo') return;
@@ -1084,6 +1131,7 @@ function applyRemote(item) {
 
 function localTs(kind, id) {
   if (kind === 'event') return (store.evMeta[id] && !store.evMeta[id].merge && store.evMeta[id].mt) || 0;
+  if (kind === 'contact') return (store.contacts && store.contacts.mt) || 0;
   const m = store.memos.find((x) => x.uid === id) || store.trash.find((x) => x.uid === id);
   if (m) return m.mt || 0;
   const tomb = store.tombs.find((x) => x.uid === id);
@@ -1098,10 +1146,12 @@ function dirtyList() {
   for (const [k, meta] of Object.entries(store.evMeta)) {
     if (meta && meta.dirty && !meta.merge) out.push({ kind: 'event', id: k, ts: meta.mt, data: { list: store.events[k] || [] } });
   }
+  if (store.contacts && store.contacts.dirty) out.push({ kind: 'contact', id: 'main', ts: store.contacts.mt, data: { rows: store.contacts.rows } });
   return out;
 }
 
 function markPushed(kind, id, ts) {
+  if (kind === 'contact') { if (store.contacts && store.contacts.mt === ts) store.contacts.dirty = false; return; }
   if (kind === 'event') {
     const meta = store.evMeta[id];
     if (meta && meta.mt === ts) meta.dirty = false;
@@ -1161,6 +1211,7 @@ async function cloudSignIn(mode, username, password) {
     for (const m of [...store.memos, ...store.trash]) m.dirty = true;
     for (const tb of store.tombs) tb.done = false;
     for (const k2 of Object.keys(store.events)) store.evMeta[k2] = { mt: 0, dirty: true, merge: true };
+    if (store.contacts) store.contacts.dirty = true;
     save();
     setCloud('idle');
     scheduleSync(100);
@@ -1197,6 +1248,7 @@ async function cloudSignOut(force) {
   store.tombs = [];
   store.events = {};
   store.evMeta = {};
+  store.contacts = null;
   cloudLogout(true);
   saveSecure();
   broadcast();

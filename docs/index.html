@@ -18,6 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Dongle&family=Gaegu:wght@400;700&family=Gamja+Flower&family=Gowun+Batang&family=Gowun+Dodum&family=Hi+Melody&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Jua&family=Nanum+Gothic:wght@400;700&family=Nanum+Myeongjo&family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@400;600&family=Poor+Story&family=Poppins:wght@400;500;600;700&family=Single+Day&family=Sunflower:wght@500&display=swap">
+<link rel="stylesheet" href="table.css">
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
@@ -86,6 +87,16 @@
     <div id="evList" class="evList"></div>
   </section>
 
+  <section id="vPeople" class="view" hidden>
+    <div class="peopleTop">
+      <label class="search"><span id="pSearchIcon" aria-hidden="true"></span><span class="sr">연락망 검색</span>
+        <input id="pq" type="search" placeholder="이름 · 부서 · 번호로 찾기" autocomplete="off"></label>
+      <button id="pEdit" class="textBtn pEdit" type="button" aria-pressed="false">편집</button>
+    </div>
+    <div id="people" class="people"></div>
+    <p id="pHint" class="small center">편집을 누르면 칸을 고치고 줄을 더할 수 있어요. 번호를 누르면 바로 전화해요.</p>
+  </section>
+
   <section id="vTrash" class="view" hidden>
     <div class="info">지운 메모는 <b>7일</b> 동안 여기 있다가 자동으로 영구 삭제돼요. 영구 삭제하면 PC와 서버에서도 바로 지워져요.</div>
     <div id="trashList" class="list"></div>
@@ -129,6 +140,7 @@
   <nav class="tabs" aria-label="화면">
     <button class="tab" type="button" data-view="memos"><span class="ti" data-icon="memo"></span><span>메모</span></button>
     <button class="tab" type="button" data-view="cal"><span class="ti" data-icon="cal"></span><span>캘린더</span></button>
+    <button class="tab" type="button" data-view="people"><span class="ti" data-icon="people"></span><span>연락망</span></button>
     <button class="tab" type="button" data-view="trash"><span class="ti" data-icon="trash"></span><span>휴지통</span></button>
     <button class="tab" type="button" data-view="set"><span class="ti" data-icon="set"></span><span>설정</span></button>
   </nav>
@@ -142,6 +154,7 @@
       <button id="edMark" class="iconBtn" type="button" aria-label="중요 표시와 색"></button>
       <button id="edDiv" class="iconBtn" type="button" aria-label="구분선 넣기"></button>
       <button id="edType" class="iconBtn" type="button" aria-label="체크리스트 전환"></button>
+      <button id="edTableBtn" class="iconBtn" type="button" aria-label="표 전환"></button>
       <button id="edDel" class="iconBtn" type="button" aria-label="삭제"></button>
     </div>
   </div>
@@ -153,6 +166,7 @@
   <div class="edTitleRow"><span id="edMarkIcon" class="edMarkIcon"></span>
     <input id="edTitle" class="edTitle" type="text" placeholder="제목" maxlength="80" aria-label="제목"></div>
   <div id="edText" class="edText" data-placeholder="여기에 바로 입력" aria-label="내용"></div>
+  <div id="edTbl" class="edTbl" hidden></div>
   <div id="edChecks" class="edChecks" hidden>
     <div id="edItems"></div>
     <button id="edAddItem" class="addItem" type="button">+ 항목 추가</button>

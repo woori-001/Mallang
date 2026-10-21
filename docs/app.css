@@ -310,3 +310,17 @@ html.bodybg .edText, html.bodybg .edChecks { background: rgba(var(--glass), .9);
 /* 구분선: 스킨 포인트색으로 얇게 */
 .edText .dv, .dvp { display: block; height: 1px; margin: .55em 0; background: var(--a1); opacity: .45; }
 .dvp { margin: .35em 0; }
+
+/* 표 메모 · 연락망 */
+.edTbl { flex: 1; min-height: 0; margin-top: 10px; max-width: 560px; width: 100%; margin-left: auto; margin-right: auto; }
+.edTbl .mtbl { font-size: calc(var(--memo-size) + 1px); }
+.edTbl .mtbl th, .edTbl .mtbl td { padding: 9px 10px; min-width: 72px; }
+.tblBar .tb { padding: 8px 12px; font-size: 13px; border-radius: 11px; }
+html.bodybg .edTbl .tblScroll { background: rgba(var(--glass), .9); }
+.peopleTop { display: flex; gap: 8px; align-items: flex-start; }
+.peopleTop .search { flex: 1; }
+.pEdit { height: 46px; padding: 0 16px; border-radius: 16px; background: rgba(var(--glass), .65); color: var(--ink); font-weight: 700; }
+.pEdit.on { background: var(--accent); color: var(--on); }
+.people .tblScroll { max-height: calc(100dvh - 300px - var(--safe-t, 0px) - var(--safe-b, 0px)); }
+.people .mtbl { font-size: 14px; }
+.people .mtbl th, .people .mtbl td { white-space: pre; max-width: none; padding: 10px 11px; }
