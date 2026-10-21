@@ -1,6 +1,6 @@
 # PC 앱 설치 파일을 만들어 Releases에 올립니다.
 # desktop/package.json 의 version 을 올려서 main 에 푸시하면 실행돼요.
-# 이미 올라간 버전이면 건너뛰어요. 설치된 PC 앱은 여기 올라온 새 버전을 찾아 자동으로 업데이트해요.
+# 이미 제대로 올라간 버전이면 건너뛰어요. 설치된 PC 앱은 여기 올라온 새 버전을 찾아 자동으로 업데이트해요.
 name: PC 앱 빌드·배포
 
 on:
@@ -22,21 +22,26 @@ jobs:
     defaults:
       run:
         working-directory: desktop
+        shell: bash
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - name: 이미 올라간 버전인지 확인
         id: ver
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           v=$(node -p "require('./package.json').version")
           echo "version=$v" >> "$GITHUB_OUTPUT"
+          skip=false
           if gh release view "v$v" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "v$v 는 이미 올라가 있어서 건너뛰어요"; echo "skip=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
+            if gh release view "v$v" --repo "$GITHUB_REPOSITORY" --json assets -q '.assets[].name' | grep -qx 'latest.yml'; then
+              echo "v$v 는 이미 올라가 있어서 건너뛰어요"; skip=true
+            else
+              echo "v$v 가 덜 올라가 있어서 지우고 다시 만들어요"
+              gh release delete "v$v" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag
+            fi
           fi
+          echo "skip=$skip" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v4
         if: steps.ver.outputs.skip == 'false'
         with:
@@ -45,18 +50,25 @@ jobs:
           cache-dependency-path: desktop/package-lock.json
       - if: steps.ver.outputs.skip == 'false'
         run: npm ci
-      - name: 빌드하고 Releases에 올리기
+      - name: 설치 파일 만들기
         if: steps.ver.outputs.skip == 'false'
-        shell: bash
         run: |
           set -o pipefail
-          npm run release 2>&1 | tee build.log
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          npm run dist 2>&1 | tee build.log
+          ls -la dist
+      - name: Releases에 올리기
+        if: steps.ver.outputs.skip == 'false'
+        run: |
+          set -o pipefail
+          v="${{ steps.ver.outputs.version }}"
+          gh release create "v$v" \
+            "dist/MallangMemo-Setup-$v.exe" "dist/MallangMemo-Setup-$v.exe.blockmap" "dist/latest.yml" \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "말랑메모 $v" --latest \
+            --notes "PC 앱 $v. 설치된 말랑메모는 이 버전을 자동으로 받아 업데이트해요." 2>&1 | tee -a build.log
       - name: 실패 원인 남기기
         if: failure()
-        shell: bash
         run: |
+          [ -f build.log ] || exit 0
           tail -n 40 build.log | grep -v '^\s*$' | tail -n 25 | while IFS= read -r line; do
             echo "::error::$(echo "$line" | cut -c1-300)"
           done
