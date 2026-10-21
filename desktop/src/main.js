@@ -178,7 +178,7 @@ function snapshot() {
     events: store.events,
     trash: store.trash.map((t) => ({
       id: t.id, title: t.title, slot: t.slot, mark: t.mark, markColor: t.markColor, type: t.type,
-      preview: t.type === 'check' ? (t.items || []).map((x) => x.t).filter(Boolean).slice(0, 3).join(', ') : (t.text || '').split('\n').find((l) => l.trim()) || '',
+      preview: t.type === 'check' ? (t.items || []).map((x) => x.t).filter(Boolean).slice(0, 3).join(', ') : (t.text || '').split('\n').find((l) => l.trim() && l !== '\u2E3B') || '',
       deletedAt: t.deletedAt, purgeAt: t.deletedAt + TRASH_DAYS * DAY
     })),
     trashDays: TRASH_DAYS,

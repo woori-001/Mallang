@@ -69,7 +69,7 @@
     const isCheck = memo.type === 'check';
     text.hidden = isCheck;
     checks.hidden = !isCheck;
-    if (!isCheck && document.activeElement !== text && text.value !== (memo.text || '')) text.value = memo.text || '';
+    if (!isCheck && !text.contains(document.activeElement) && document.activeElement !== text && ed.getText() !== (memo.text || '')) ed.setText(memo.text || '');
     if (isCheck) {
       const incoming = memo.items || [];
       const focusedIn = itemsEl.contains(document.activeElement);
@@ -169,9 +169,15 @@
   });
 
   // ───────── 본문 ─────────
-  const saveText = debounce(() => api.update(id, { text: text.value }), 250);
-  text.addEventListener('input', () => { memo.text = text.value; saveText(); });
+  const saveText = debounce(() => api.update(id, { text: memo.text }), 250);
+  const ed = window.M.lineEditor(text, () => { memo.text = ed.getText(); saveText(); });
   text.addEventListener('blur', () => saveText.flush());
+  $('bDiv').innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 12h18"/><path d="M8 6h8M8 18h8" opacity=".45"/></svg>';
+  $('bDiv').addEventListener('click', () => {
+    if (memo.type === 'check') return;
+    closeTools(); render();
+    ed.insertDivider();
+  });
 
   // ───────── 제목줄: 드래그 이동 / 클릭해서 제목 편집 / 더블클릭 접기 ─────────
   let drag = null, editTimer = null, movePending = null, moveRaf = 0;
@@ -234,7 +240,7 @@
       title.blur();
       if (!memo.folded) {
         if (memo.type === 'check') renderItemsFocus(0);
-        else text.focus();
+        else ed.focusEnd();
       }
     }
     if (e.key === 'Escape') { title.value = memo.title || ''; title.blur(); }
@@ -284,7 +290,7 @@
     if (memo.type === 'check') {
       send({ type: 'text', text: items.map((x) => x.t).filter((t) => t.trim()).join('\n') });
     } else {
-      const lines = (text.value || '').split('\n').filter((l) => l.trim());
+      const lines = window.M.stripDividers(ed.getText()).split('\n').filter((l) => l.trim());
       send({ type: 'check', items: lines.length ? lines.map((t) => ({ t, d: false })) : [{ t: '', d: false }] });
     }
     render(true);
@@ -432,7 +438,7 @@
     const s = window.getSelection ? String(window.getSelection()) : '';
     return s;
   }
-  const watchSel = (e) => { const el = e.target; if (el && (el === text || el === title || el.classList.contains('itxt'))) { const s = selFrom(el); if (s) remember(s); } };
+  const watchSel = (e) => { const el = e.target; if (el && text.contains(el)) { const s = String(getSelection()).replace(/\u00A0/g, ' '); if (s) remember(s); return; } if (el && (el === title || el.classList.contains('itxt'))) { const s = selFrom(el); if (s) remember(s); } };
   for (const ev of ['select', 'mouseup', 'keyup']) document.addEventListener(ev, watchSel, true);
   document.addEventListener('copy', () => { const s = liveSelection(); if (s) remember(s); });
   let copiedT = null;
@@ -485,7 +491,7 @@
       setTimeout(() => {
         if (memo.type === 'check') renderItemsFocus(items.length - 1);
         else if (!memo.text && memo.title === '새 메모') startEdit();
-        else text.focus();
+        else ed.focusEnd();
       }, 120);
     }
   });

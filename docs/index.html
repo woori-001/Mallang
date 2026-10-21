@@ -140,6 +140,7 @@
     <button id="edBack" class="iconBtn" type="button" aria-label="목록으로"></button>
     <div class="edTools">
       <button id="edMark" class="iconBtn" type="button" aria-label="중요 표시와 색"></button>
+      <button id="edDiv" class="iconBtn" type="button" aria-label="구분선 넣기"></button>
       <button id="edType" class="iconBtn" type="button" aria-label="체크리스트 전환"></button>
       <button id="edDel" class="iconBtn" type="button" aria-label="삭제"></button>
     </div>
@@ -151,7 +152,7 @@
   </div>
   <div class="edTitleRow"><span id="edMarkIcon" class="edMarkIcon"></span>
     <input id="edTitle" class="edTitle" type="text" placeholder="제목" maxlength="80" aria-label="제목"></div>
-  <textarea id="edText" class="edText" placeholder="여기에 바로 입력" aria-label="내용"></textarea>
+  <div id="edText" class="edText" data-placeholder="여기에 바로 입력" aria-label="내용"></div>
   <div id="edChecks" class="edChecks" hidden>
     <div id="edItems"></div>
     <button id="edAddItem" class="addItem" type="button">+ 항목 추가</button>

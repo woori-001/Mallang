@@ -120,7 +120,7 @@
   function metaOf(m) {
     const kind = m.type === 'check'
       ? '체크리스트 ' + (m.items || []).filter((x) => x.d).length + '/' + (m.items || []).length
-      : ((m.text || '').split('\n').find((l) => l.trim()) || '빈 메모').slice(0, 40);
+      : ((m.text || '').split('\n').find((l) => l.trim() && l !== window.M.DIVIDER) || '빈 메모').slice(0, 40);
     const where = m.hidden ? '숨김' : (m.layer === 'top' ? '항상 위' : (m.layer === 'bottom' ? '맨 뒤' : (m.folded ? '접힘' : '')));
     return where ? where + ' · ' + kind : kind;
   }

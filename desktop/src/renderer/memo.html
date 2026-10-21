@@ -22,6 +22,7 @@
       <button id="bNew" class="ib" type="button" aria-label="새 메모" title="새 메모"></button>
       <button id="bMark" class="ib" type="button" aria-label="중요 표시와 색" title="중요 표시 · 메모 색"></button>
       <button id="bType" class="ib" type="button" aria-label="체크리스트 전환" title="체크리스트 ↔ 일반 메모"></button>
+      <button id="bDiv" class="ib" type="button" aria-label="구분선 넣기" title="구분선 넣기 (Ctrl+Enter)"></button>
       <button id="bTop" class="ib" type="button" aria-label="맨 앞으로" title="맨 앞 (항상 위)"></button>
       <button id="bBottom" class="ib" type="button" aria-label="맨 뒤로" title="맨 뒤 (창 아래로)"></button>
       <button id="bHide" class="ib" type="button" aria-label="숨기기" title="숨기기 (목록에서 다시 보이기)"></button>
@@ -38,7 +39,7 @@
   </div>
 
   <div id="body" class="body">
-    <textarea id="text" class="text" spellcheck="false" placeholder="여기에 바로 입력" aria-label="메모 내용"></textarea>
+    <div id="text" class="text" data-placeholder="여기에 바로 입력 · Ctrl+Enter 구분선" aria-label="메모 내용"></div>
     <div id="checks" class="checks" hidden>
       <div id="items"></div>
       <button id="addItem" class="addItem" type="button"></button>

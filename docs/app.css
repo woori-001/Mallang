@@ -189,7 +189,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px
 .edMarkIcon { display: flex; }
 .edMarkIcon:empty { display: none; }
 .edTitle { flex: 1; min-width: 0; border: none; outline: none; background: transparent; font-size: 22px; font-weight: 700; padding: 6px 0; }
-.edText { flex: 1; margin-top: 8px; border: none; outline: none; resize: none; background: transparent; font-family: var(--memo-font); font-size: calc(var(--memo-size) + 1px); line-height: 1.75; padding: 4px; }
+.edText { flex: 1; margin-top: 8px; border: none; outline: none; resize: none; background: transparent; overflow-y: auto; white-space: pre-wrap; word-break: break-word; -webkit-user-select: text; user-select: text; font-family: var(--memo-font); font-size: calc(var(--memo-size) + 1px); line-height: 1.75; padding: 4px; }
 .edText::placeholder, .edTitle::placeholder { color: var(--sub); opacity: .7; }
 .edChecks { flex: 1; overflow: auto; margin-top: 8px; }
 .item { display: flex; align-items: center; gap: 10px; padding: 2px 4px; border-radius: 12px; }
@@ -305,3 +305,8 @@ html.dark .memo, html.dark .tabs, html.dark .authCard { box-shadow: 0 8px 24px r
 .toggleRow[aria-pressed="true"] .knob { transform: translateX(20px); }
 html.bodybg .mBody { display: block; background: rgba(var(--glass), .9); border-radius: 14px; padding: 10px 12px; margin: 10px -6px 0; opacity: 1; }
 html.bodybg .edText, html.bodybg .edChecks { background: rgba(var(--glass), .9); border-radius: 18px; padding: 12px 14px; }
+
+.edText:empty::before { content: attr(data-placeholder); color: var(--sub); opacity: .6; pointer-events: none; }
+/* 구분선: 스킨 포인트색으로 얇게 */
+.edText .dv, .dvp { display: block; height: 1.5px; margin: .55em 0; border-radius: 1px; background: linear-gradient(90deg, transparent, var(--a1) 12%, var(--a2) 88%, transparent); opacity: .45; }
+.dvp { margin: .35em 0; }

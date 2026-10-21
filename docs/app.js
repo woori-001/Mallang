@@ -366,7 +366,7 @@
       const done = m.type === 'check' ? (m.items || []).filter((x) => x.d).length + '/' + (m.items || []).length + ' 완료' : '';
       return '<button class="memo" type="button" data-uid="' + esc(m.uid) + '" style="background:' + grad(sk, m.slot || 0, 0.82) + ';animation-delay:' + Math.min(i * 30, 300) + 'ms">' +
         '<span class="mTitle">' + (m.mark ? markSvg(m.mark, m.markColor || '#E8456B', 18) : '') + '<span>' + esc(m.title || '제목 없음') + '</span></span>' +
-        (preview(m) ? '<span class="mBody">' + esc(preview(m)) + '</span>' : '') +
+        (preview(m) ? '<span class="mBody">' + (m.type === 'check' ? esc(preview(m)) : window.M.previewHTML(preview(m))) + '</span>' : '') +
         (done ? '<span class="mMeta">' + done + '</span>' : '') +
       '</button>';
     }).join('');
@@ -722,7 +722,8 @@
     $('edType').setAttribute('aria-pressed', String(chk));
     $('edText').hidden = chk;
     $('edChecks').hidden = !chk;
-    if (chk) renderItems(); else $('edText').value = m.text || '';
+    $('edDiv').hidden = chk;
+    if (chk) renderItems(); else edBody.setText(m.text || '');
     if (!$('edPicker').hidden) renderPicker();
   }
   function closeEditor(silent) {
@@ -752,8 +753,11 @@
     setTimeout(() => $('edTitle').focus(), 80);
   };
   $('edTitle').addEventListener('input', () => { const m = ed(); if (m) { m.title = $('edTitle').value; touch(m); } });
-  $('edText').addEventListener('input', () => { const m = ed(); if (m) { m.text = $('edText').value; touch(m); } });
-  $('edTitle').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); const m = ed(); if (m && m.type === 'check') focusItem(0); else $('edText').focus(); } });
+  const edBody = window.M.lineEditor($('edText'), () => { const m = ed(); if (m) { m.text = edBody.getText(); touch(m); } });
+  $('edDiv').innerHTML = icon('<path d="M3 12h18"/><path d="M8 6h8M8 18h8" opacity=".45"/>', 21, 2);
+  $('edDiv').addEventListener('pointerdown', (e) => e.preventDefault());   // 누를 때 글자 칸 커서를 잃지 않게
+  $('edDiv').onclick = () => edBody.insertDivider();
+  $('edTitle').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); const m = ed(); if (m && m.type === 'check') focusItem(0); else edBody.focusEnd(); } });
 
   function renderItems(focusIdx, caret) {
     const m = ed(); if (!m) return;
@@ -810,7 +814,7 @@
   $('edType').onclick = () => {
     const m = ed(); if (!m) return;
     if (m.type === 'check') { m.type = 'text'; m.text = m.items.map((x) => x.t).filter((t) => t.trim()).join('\n'); }
-    else { const lines = (m.text || '').split('\n').filter((l) => l.trim()); m.type = 'check'; m.items = lines.length ? lines.map((t) => ({ t, d: false })) : [{ t: '', d: false }]; }
+    else { const lines = window.M.stripDividers(m.text).split('\n').filter((l) => l.trim()); m.type = 'check'; m.items = lines.length ? lines.map((t) => ({ t, d: false })) : [{ t: '', d: false }]; }
     touch(m); fillEditor();
     if (m.type === 'check' && !m.items[0].t) focusItem(0);
   };

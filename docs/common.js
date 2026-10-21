@@ -173,6 +173,107 @@
     return (b.mt || 0) - (a.mt || 0);
   }
 
+  // ───────── 메모 내용 편집 칸 ─────────
+  // 내용은 지금처럼 글자로 저장하고, 구분선은 '⸻' 한 줄로 저장해서 화면에서는 얇은 선으로 보여줘요.
+  const DIVIDER = '⸻';
+  function lineEditor(el, onChange) {
+    el.contentEditable = 'true';
+    el.spellcheck = false;
+    el.setAttribute('role', 'textbox');
+    el.setAttribute('aria-multiline', 'true');
+    const isDv = (n) => n && n.nodeType === 1 && n.classList.contains('dv');
+    function lineEl(t) {
+      const d = document.createElement('div');
+      if (t === DIVIDER) {
+        d.className = 'dv';
+        d.contentEditable = 'false';
+        d.setAttribute('role', 'separator');
+        return d;
+      }
+      if (t) d.textContent = t; else d.appendChild(document.createElement('br'));
+      return d;
+    }
+    function blockText(n) {
+      let s = '';
+      for (const c of n.childNodes) {
+        if (c.nodeType === 3) s += c.nodeValue;
+        else if (c.nodeName === 'BR') s += '\n';
+        else if (isDv(c)) s += (s && !s.endsWith('\n') ? '\n' : '') + DIVIDER + '\n';
+        else {
+          const t = blockText(c);
+          s += (s && !s.endsWith('\n') ? '\n' : '') + t;
+        }
+      }
+      return s.replace(/\n$/, '');
+    }
+    function getText() {
+      const out = [];
+      let buf = null;
+      for (const n of el.childNodes) {
+        if (n.nodeType === 3) { buf = (buf || '') + n.nodeValue; continue; }
+        if (n.nodeName === 'BR') { out.push(buf || ''); buf = null; continue; }
+        if (buf !== null) { out.push(buf); buf = null; }
+        out.push(isDv(n) ? DIVIDER : blockText(n));
+      }
+      if (buf !== null) out.push(buf);
+      const t = out.join('\n').replace(/ /g, ' ');
+      return t.trim() === '' ? '' : t;
+    }
+    function setText(text) {
+      text = String(text || '');
+      if (!text) { el.replaceChildren(); return; }
+      el.replaceChildren(...text.split('\n').map(lineEl));
+    }
+    function caretTo(node, atEnd) {
+      const r = document.createRange();
+      r.selectNodeContents(node);
+      r.collapse(!atEnd);
+      const sel = getSelection();
+      sel.removeAllRanges();
+      sel.addRange(r);
+    }
+    function focusEnd() {
+      el.focus();
+      const last = el.lastChild;
+      if (last) caretTo(isDv(last) ? el : last, true);
+    }
+    function insertDivider() {
+      el.focus();
+      const sel = getSelection();
+      let node = sel.rangeCount ? sel.getRangeAt(0).startContainer : null;
+      if (!node || !el.contains(node)) node = null;
+      while (node && node.parentNode !== el) node = node.parentNode;
+      if (node && node.nodeType === 3) {          // 맨 앞 줄이 감싸지지 않은 글자면 줄로 감싸기
+        const d = document.createElement('div');
+        node.replaceWith(d);
+        d.appendChild(node);
+        node = d;
+      }
+      const dv = lineEl(DIVIDER), nl = lineEl('');
+      if (!node || node === el) el.append(dv, nl);
+      else if (!isDv(node) && (node.textContent || '') === '') { node.replaceWith(dv); dv.after(nl); }
+      else { node.after(dv); dv.after(nl); }
+      caretTo(nl, false);
+      onChange();
+    }
+    el.addEventListener('input', () => { if (getText() === '' && el.childNodes.length && !el.querySelector('.dv')) el.replaceChildren(); onChange(); });
+    el.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const t = (e.clipboardData && e.clipboardData.getData('text/plain')) || '';
+      document.execCommand('insertText', false, t);
+    });
+    el.addEventListener('drop', (e) => e.preventDefault());
+    el.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !e.isComposing) { e.preventDefault(); insertDivider(); }
+    });
+    return { getText, setText, insertDivider, focusEnd };
+  }
+  // 목록 미리보기 등에서 구분선을 선으로 바꿔 보여주기
+  function previewHTML(text) {
+    return String(text || '').split('\n').map((l) => (l === DIVIDER ? '<span class="dvp" aria-hidden="true"></span>' : esc(l))).join('\n');
+  }
+  const stripDividers = (text) => String(text || '').split('\n').filter((l) => l !== DIVIDER).join('\n');
+
   // 내용이 그대로면 다시 그리지 않음 (나타나는 효과가 다시 재생되며 깜빡이는 것 방지)
   const htmlDesc = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
   function guardHTML(...els) {
@@ -187,5 +288,5 @@
     }
   }
 
-  window.M = { calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
+  window.M = { DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
 })();
