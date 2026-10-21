@@ -2,14 +2,14 @@
 (function () {
   'use strict';
   const C = window.MallangCloud;
-  const { SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, grad, rgba, esc, dateKey, applyTheme, markSvg } = window.M;
+  const { SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, grad, rgba, esc, dateKey, applyTheme, markSvg, memoOrder } = window.M;
   const $ = (id) => document.getElementById(id);
   const TRASH_DAYS = 7, DAY = 86400000;
   const LS_STATE = 'mallang.state.v1', LS_SESSION = 'mallang.session.v1', LS_PREFS = 'mallang.prefs.v1';
   const MONTH_EN = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
   const WD = ['일', '월', '화', '수', '목', '금', '토'];
   const EV_ORDER = ['lav', 'mint', 'pink', 'sky'];
-  const CONTENT = ['title', 'text', 'items', 'type', 'mark', 'markColor', 'slot'];
+  const CONTENT = ['title', 'text', 'items', 'type', 'mark', 'markColor', 'slot', 'ord'];
 
   const icon = (path, size, sw) => '<svg width="' + (size || 22) + '" height="' + (size || 22) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (sw || 2) + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + path + '</svg>';
   const I = {
@@ -176,7 +176,8 @@
       type: d.type === 'check' ? 'check' : 'text',
       mark: MARKS[d.mark] ? d.mark : null,
       markColor: /^#[0-9a-fA-F]{6}$/.test(d.markColor || '') ? d.markColor : '#E8456B',
-      slot: Number.isInteger(d.slot) ? ((d.slot % 5) + 5) % 5 : 0
+      slot: Number.isInteger(d.slot) ? ((d.slot % 5) + 5) % 5 : 0,
+      ord: typeof d.ord === 'number' && isFinite(d.ord) ? d.ord : null
     };
   }
   function apply(item) {
@@ -344,12 +345,16 @@
     if (m.type === 'check') return (m.items || []).map((x) => (x.d ? '✓ ' : '○ ') + x.t).filter((x) => x.length > 2).slice(0, 4).join('\n');
     return m.text || '';
   }
+  let shown = [];
   function renderMemos() {
     const sk = skin();
     const lower = q.toLowerCase();
     const list = st.memos
       .filter((m) => !lower || [m.title, m.text, ...(m.items || []).map((x) => x.t)].join(' ').toLowerCase().includes(lower))
-      .sort((a, b) => (b.mt || 0) - (a.mt || 0));
+      .sort(memoOrder);
+    shown = list;
+    $('sortHint').hidden = !!q || list.length < 2 || !!prefs.sortHintSeen;
+    renderInstall();
     if (!list.length) {
       $('list').innerHTML = '<div class="empty">' + (q ? '찾는 메모가 없어요' : '아직 메모가 없어요.<br>오른쪽 아래 + 를 눌러 써 보세요') + '</div>';
       return;
@@ -363,7 +368,131 @@
       '</button>';
     }).join('');
   }
-  $('list').addEventListener('click', (e) => { const b = e.target.closest('.memo'); if (b) openEditor(b.dataset.uid); });
+  $('list').addEventListener('click', (e) => { if (suppressClick) return; const b = e.target.closest('.memo'); if (b) openEditor(b.dataset.uid); });
+
+  // ───────── 꾹 눌러 순서 바꾸기 ─────────
+  const listEl = $('list');
+  let press = null, drag = null, suppressClick = false, autoRaf = 0;
+  const pt = (e) => { const t = e.touches ? e.touches[0] : e; return { x: t.clientX, y: t.clientY }; };
+  function startPress(e) {
+    if (q || drag) return;
+    const card = e.target.closest('.memo');
+    if (!card || (e.type === 'mousedown' && e.button !== 0)) return;
+    const p = pt(e);
+    press = { card, x: p.x, y: p.y, timer: setTimeout(() => beginDrag(card, p), 420) };
+  }
+  function beginDrag(card, p) {
+    press = null;
+    const cards = [...listEl.querySelectorAll('.memo')];
+    const idx = cards.indexOf(card);
+    if (idx < 0 || cards.length < 2) return;
+    const rects = cards.map((c) => c.getBoundingClientRect());
+    drag = { card, cards, idx, to: idx, rects, startY: p.y, lastY: p.y, scroll0: window.scrollY, step: rects[idx].height + 10 };
+    card.classList.add('lift');
+    listEl.classList.add('sorting');
+    suppressClick = true;
+    if (navigator.vibrate) navigator.vibrate(12);
+    autoRaf = requestAnimationFrame(autoScroll);
+  }
+  function updateDrag() {
+    const dy = drag.lastY - drag.startY + (window.scrollY - drag.scroll0);
+    drag.card.style.transform = 'translateY(' + dy + 'px) scale(1.03)';
+    const r0 = drag.rects[drag.idx];
+    const top = r0.top + dy, bottom = top + r0.height;
+    let to = drag.idx;
+    drag.cards.forEach((c, i) => {
+      if (i === drag.idx) return;
+      const r = drag.rects[i];
+      const mid = r.top + r.height / 2;
+      let shift = 0;
+      if (i > drag.idx && bottom > mid) { shift = -drag.step; to = Math.max(to, i); }
+      else if (i < drag.idx && top < mid) { shift = drag.step; to = Math.min(to, i); }
+      c.style.transform = shift ? 'translateY(' + shift + 'px)' : '';
+    });
+    drag.to = to;
+  }
+  function autoScroll() {
+    if (!drag) return;
+    const h = window.innerHeight;
+    let v = 0;
+    if (drag.lastY < 90) v = -Math.ceil((90 - drag.lastY) / 8);
+    else if (drag.lastY > h - 160) v = Math.ceil((drag.lastY - (h - 160)) / 8);
+    if (v) { window.scrollBy(0, v); updateDrag(); }
+    autoRaf = requestAnimationFrame(autoScroll);
+  }
+  function movePress(e) {
+    if (press) {
+      const p = pt(e);
+      if (Math.abs(p.x - press.x) + Math.abs(p.y - press.y) > 10) { clearTimeout(press.timer); press = null; }
+      return;
+    }
+    if (!drag) return;
+    if (e.cancelable) e.preventDefault();
+    drag.lastY = pt(e).y;
+    updateDrag();
+  }
+  function endPress() {
+    if (press) { clearTimeout(press.timer); press = null; }
+    if (!drag) return;
+    cancelAnimationFrame(autoRaf);
+    const { idx, to, cards } = drag;
+    drag.card.classList.remove('lift');
+    listEl.classList.remove('sorting');
+    cards.forEach((c) => { c.style.transform = ''; });
+    drag = null;
+    if (to !== idx) {
+      const order = shown.slice();
+      const [m] = order.splice(idx, 1);
+      order.splice(to, 0, m);
+      order.forEach((x, i) => { if (x.ord !== i) { x.ord = i; touch(x); } });
+      if (!prefs.sortHintSeen) { prefs.sortHintSeen = true; savePrefs(); }
+    }
+    renderMemos();
+    setTimeout(() => { suppressClick = false; }, 80);
+  }
+  listEl.addEventListener('touchstart', startPress, { passive: true });
+  listEl.addEventListener('mousedown', startPress);
+  document.addEventListener('touchmove', movePress, { passive: false });
+  document.addEventListener('mousemove', movePress);
+  document.addEventListener('touchend', endPress);
+  document.addEventListener('touchcancel', endPress);
+  document.addEventListener('mouseup', endPress);
+  listEl.addEventListener('contextmenu', (e) => e.preventDefault());
+
+  // ───────── 앱으로 설치 ─────────
+  let installEvt = null;
+  const ua = navigator.userAgent;
+  const isIOS = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isAndroid = /android/i.test(ua);
+  const standalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installEvt = e; renderInstall(); });
+  window.addEventListener('appinstalled', () => { installEvt = null; prefs.installHide = true; savePrefs(); renderInstall(); toast('설치했어요. 홈 화면의 말랑메모 아이콘으로 열어 보세요'); });
+  function renderInstall() {
+    const can = !standalone() && (installEvt || isIOS || isAndroid);
+    $('install').hidden = !can || !!prefs.installHide;
+    if ($('installSet')) $('installSet').closest('.card').hidden = standalone();
+  }
+  async function doInstall() {
+    if (installEvt) {
+      installEvt.prompt();
+      try { await installEvt.userChoice; } catch (e) { /* 무시 */ }
+      installEvt = null;
+      renderInstall();
+      return;
+    }
+    const share = '<span class="shareIco">' + icon('<path d="M12 3v12M7.5 7.5L12 3l4.5 4.5"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/>', 18, 2) + '</span>';
+    const steps = isIOS
+      ? ['<b>사파리</b>로 열어 주세요 (다른 브라우저에서는 안 돼요)', '아래쪽 가운데 ' + share + ' <b>공유</b> 버튼을 눌러요', '목록을 내려 <b>홈 화면에 추가</b> → 오른쪽 위 <b>추가</b>']
+      : ['<b>크롬</b> 오른쪽 위 <b>⋮</b> 메뉴를 눌러요', '<b>홈 화면에 추가</b> 또는 <b>앱 설치</b>를 눌러요', '"안전하지 않은 앱" 같은 경고가 뜨면 <b>무시하고 설치</b>를 눌러도 괜찮아요. 플레이스토어에 올라간 앱이 아니라서 뜨는 안내예요'];
+    $('hBody').innerHTML = steps.map((t) => '<div><span>' + t + '</span></div>').join('');
+    $('howto').hidden = false;
+  }
+  $('installGo').onclick = doInstall;
+  $('installSet').onclick = doInstall;
+  $('installX').innerHTML = icon('<path d="M6 6l12 12M18 6L6 18"/>', 16, 2.2);
+  $('installX').onclick = () => { prefs.installHide = true; savePrefs(); renderInstall(); toast('설정 탭에서 언제든 설치할 수 있어요'); };
+  $('hOk').onclick = () => { $('howto').hidden = true; };
+  $('howto').addEventListener('click', (e) => { if (e.target === $('howto')) $('howto').hidden = true; });
   $('q').addEventListener('input', (e) => { q = e.target.value.trim(); renderMemos(); });
 
   // 캘린더
@@ -533,6 +662,8 @@
   $('edBack').onclick = () => closeEditor();
   $('fab').onclick = () => {
     const m = { uid: C.uid(), title: '', text: '', items: [], type: 'text', mark: null, markColor: '#E8456B', slot: st.memos.length % 5, isNew: true };
+    const ords = st.memos.map((x) => x.ord).filter((v) => typeof v === 'number');
+    if (ords.length) m.ord = Math.min(...ords) - 1;
     st.memos.push(m);
     touch(m);
     openEditor(m.uid);

@@ -16,7 +16,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Jua&family=Nanum+Pen+Script&family=Noto+Serif+KR:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Dongle&family=Gaegu:wght@400;700&family=Gamja+Flower&family=Gowun+Batang&family=Gowun+Dodum&family=Hi+Melody&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Jua&family=Nanum+Gothic:wght@400;700&family=Nanum+Myeongjo&family=Nanum+Pen+Script&family=Noto+Serif+KR:wght@400;600&family=Poor+Story&family=Single+Day&family=Sunflower:wght@500&display=swap">
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
@@ -59,6 +59,13 @@
   <section id="vMemos" class="view">
     <label class="search"><span id="searchIcon" aria-hidden="true"></span><span class="sr">메모 검색</span>
       <input id="q" type="search" placeholder="메모 검색" autocomplete="off"></label>
+    <div id="install" class="install" hidden>
+      <img src="icons/icon-192.png" alt="">
+      <div class="it"><b>앱으로 설치하기</b>홈 화면에서 바로 열기</div>
+      <button id="installGo" class="go" type="button">설치</button>
+      <button id="installX" class="x" type="button" aria-label="닫기"></button>
+    </div>
+    <div id="sortHint" class="sortHint">메모를 꾹 누르고 끌면 순서를 바꿀 수 있어요</div>
     <div id="list" class="list"></div>
   </section>
 
@@ -94,8 +101,8 @@
     <div id="skins" class="skins"></div>
     <h2>글꼴</h2>
     <div id="fonts" class="fonts"></div>
-    <h2>홈 화면에 추가하기</h2>
-    <div class="card small">아이폰: 사파리 아래쪽 <b>공유</b> 버튼 → <b>홈 화면에 추가</b><br>안드로이드: 크롬 오른쪽 위 <b>⋮</b> → <b>홈 화면에 추가</b> (또는 앱 설치)</div>
+    <h2>앱으로 설치하기</h2>
+    <div class="card small">홈 화면에 아이콘을 만들어 앱처럼 쓸 수 있어요.<button id="installSet" class="primary primaryWide" type="button">설치하기</button></div>
     <button id="logout" class="ghostBtn" type="button">로그아웃</button>
     <p class="small center">로그아웃하면 이 휴대폰에 저장된 메모가 지워져요. 메모는 서버와 PC에 그대로 있어요.</p>
   </section>
@@ -140,6 +147,13 @@
     <div id="cTitle" class="mTitle"></div>
     <div id="cDesc" class="mDesc"></div>
     <div class="mBtns"><button id="cNo" class="mNo" type="button">취소</button><button id="cYes" class="mYes" type="button"></button></div>
+  </div>
+</div>
+<div id="howto" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="hTitle">
+  <div class="mbox">
+    <div id="hTitle" class="mTitle">홈 화면에 추가하기</div>
+    <div id="hBody" class="howto"></div>
+    <div class="mBtns"><button id="hOk" class="mNo" type="button">알겠어요</button></div>
   </div>
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>

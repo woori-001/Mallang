@@ -10,6 +10,8 @@
   --accent: linear-gradient(135deg, #5F67DE, #8E6FE6);
   --memo-font: 'Gowun Dodum', sans-serif;
   --memo-size: 14px;
+  --glass: 255, 255, 255;
+  --on: #fff;
 }
 * { box-sizing: border-box; }
 html, body {
@@ -30,9 +32,9 @@ input, textarea { font-family: inherit; color: inherit; }
   display: inline-flex; align-items: center; justify-content: center; padding: 0; flex: none;
   transition: background .2s ease, transform .2s var(--spring), color .2s ease;
 }
-.ib:hover { background: rgba(255, 255, 255, .75); }
+.ib:hover { background: rgba(var(--glass), .75); }
 .ib:active { transform: scale(.88); }
-.ib.on { background: rgba(255, 255, 255, .85); box-shadow: 0 2px 6px rgba(80, 80, 140, .12); }
+.ib.on { background: rgba(var(--glass), .85); box-shadow: 0 2px 6px rgba(80, 80, 140, .12); }
 .ib:focus-visible, button:focus-visible { outline: 2px solid var(--a1); outline-offset: 1px; }
 
 .soft { transition: transform .28s var(--ease), box-shadow .28s ease, background .4s ease, color .3s ease; }

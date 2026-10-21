@@ -1,7 +1,7 @@
 // 오른쪽 가장자리 목록바
 (function () {
   const api = window.api;
-  const { SKINS, FONTS, ICONS, EVENT_COLORS, grad, rgba, esc, dateKey, applyTheme, markSvg } = window.M;
+  const { SKINS, FONTS, ICONS, EVENT_COLORS, grad, rgba, esc, dateKey, applyTheme, markSvg, memoOrder } = window.M;
   const $ = (s) => document.getElementById(s);
   const body = document.body, tab = $('tab'), panel = $('panel');
   const MONTH_EN = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
@@ -80,7 +80,7 @@
     const st = document.documentElement.style;
     st.setProperty('--sun', sk.sun);
     st.setProperty('--sat', sk.sat);
-    panel.style.background = 'rgba(255,255,255,' + ((S.settings.sideAlpha != null ? S.settings.sideAlpha : 55) / 100) + ')';
+    panel.style.background = 'rgba(var(--glass),' + ((S.settings.sideAlpha != null ? S.settings.sideAlpha : 55) / 100) + ')';
     const d = new Date();
     const c = S.cloud || {};
     const dateTxt = (d.getMonth() + 1) + '월 ' + d.getDate() + '일 ' + WD[d.getDay()] + '요일';
@@ -128,7 +128,7 @@
     $('trashBtn').innerHTML = ICONS.trash.replace('width="15" height="15"', 'width="13" height="13"') + '<span>휴지통 ' + tn + '</span>';
     $('trashBtn').hidden = trashMode;
     if (trashMode) { renderTrash(); return; }
-    const memos = S.memos.filter(matches);
+    const memos = S.memos.filter(matches).slice().sort(memoOrder);
     const listEl = $('list');
     if (!memos.length) {
       listEl.innerHTML = '<div class="empty">' + (q ? '찾는 메모가 없어요' : '메모가 없어요. 새 메모를 만들어 보세요') + '</div>';
@@ -417,7 +417,7 @@
   $('alpha').addEventListener('input', (e) => { $('alphaV').textContent = e.target.value + '%'; api.setSettings({ alpha: Number(e.target.value) }); });
   $('sideAlpha').addEventListener('input', (e) => {
     $('sideAlphaV').textContent = e.target.value + '%';
-    panel.style.background = 'rgba(255,255,255,' + (Number(e.target.value) / 100) + ')';
+    panel.style.background = 'rgba(var(--glass),' + (Number(e.target.value) / 100) + ')';
     api.setSettings({ sideAlpha: Number(e.target.value) });
   });
   $('autoStart').addEventListener('click', () => api.setSettings({ autoStart: !S.settings.autoStart }));

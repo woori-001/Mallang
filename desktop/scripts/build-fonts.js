@@ -13,6 +13,16 @@ const pick = {
   'jua': ['400'],
   'gaegu': ['400', '700'],
   'nanum-pen-script': ['400'],
+  'nanum-gothic': ['400', '700'],
+  'nanum-myeongjo': ['400'],
+  'gowun-batang': ['400'],
+  'do-hyeon': ['400'],
+  'sunflower': ['500'],
+  'dongle': ['400'],
+  'single-day': ['400'],
+  'gamja-flower': ['400'],
+  'hi-melody': ['400'],
+  'poor-story': ['400'],
 };
 let css = '';
 for (const [pkg, weights] of Object.entries(pick)) {

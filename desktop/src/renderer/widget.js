@@ -11,7 +11,7 @@
     if (!S) return;
     applyTheme(S.settings);
     const a = (S.settings.alpha != null ? S.settings.alpha : 60) / 100;
-    w.style.background = 'rgba(255,255,255,' + Math.max(0.2, a - 0.1) + ')';
+    w.style.background = 'rgba(var(--glass),' + Math.max(0.2, a - 0.1) + ')';
     const d = new Date();
     const evs = (S.events[dateKey(d)] || []).slice().sort((x, y) => (x.t || '').localeCompare(y.t || ''));
     document.getElementById('big').textContent = d.getDate();

@@ -36,7 +36,7 @@ body { padding: 14px; }
   text-overflow: ellipsis; cursor: inherit;
 }
 .title[readonly] { pointer-events: auto; }
-.title:not([readonly]) { cursor: text; background: rgba(255, 255, 255, .6); user-select: text; }
+.title:not([readonly]) { cursor: text; background: rgba(var(--glass), .6); user-select: text; }
 
 /* ⋯ 버튼: 평소엔 은은하게, 마우스를 올리면 또렷하게 */
 .more { width: 28px; height: 28px; border-radius: 14px; opacity: .45; transition: opacity .2s ease, background .2s ease, transform .2s var(--spring); }
@@ -47,7 +47,7 @@ body { padding: 14px; }
 .tools {
   position: absolute; top: 40px; left: 8px; right: 8px; z-index: 6;
   display: flex; flex-wrap: wrap; justify-content: space-around; gap: 2px; padding: 4px;
-  border-radius: 14px; background: rgba(255, 255, 255, .9);
+  border-radius: 14px; background: rgba(var(--glass), .9);
   box-shadow: 0 8px 20px rgba(70, 60, 150, .18);
   transform-origin: top right; animation: drop .28s var(--ease);
 }
@@ -73,9 +73,9 @@ body { padding: 14px; }
   display: flex; align-items: center; gap: 8px; padding: 2px 4px 2px 6px; border-radius: 10px;
   transition: background .2s ease;
 }
-.item:hover { background: rgba(255, 255, 255, .35); }
+.item:hover { background: rgba(var(--glass), .35); }
 .chk {
-  width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--sub); background: rgba(255, 255, 255, .6);
+  width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--sub); background: rgba(var(--glass), .6);
   display: inline-flex; align-items: center; justify-content: center; padding: 0; flex: none;
   transition: background .25s ease, border-color .25s ease, transform .3s var(--spring);
 }
@@ -94,11 +94,11 @@ body { padding: 14px; }
   display: flex; align-items: center; gap: 8px; border: none; background: transparent; padding: 6px 8px;
   border-radius: 10px; font-size: 13px; color: var(--sub); transition: background .2s ease;
 }
-.addItem:hover { background: rgba(255, 255, 255, .5); }
+.addItem:hover { background: rgba(var(--glass), .5); }
 
 .chip {
   position: absolute; right: 12px; bottom: 10px; font-size: 11px; font-weight: 600;
-  background: rgba(255, 255, 255, .72); border-radius: 10px; padding: 3px 9px; pointer-events: none;
+  background: rgba(var(--glass), .72); border-radius: 10px; padding: 3px 9px; pointer-events: none;
 }
 .grip {
   position: absolute; right: 2px; bottom: 2px; width: 18px; height: 18px; cursor: nwse-resize;
@@ -113,7 +113,7 @@ body { padding: 14px; }
 
 .picker {
   position: absolute; left: 10px; right: 10px; top: 84px; z-index: 5;
-  border-radius: 16px; background: rgba(255, 255, 255, .95);
+  border-radius: 16px; background: rgba(var(--glass), .95);
   box-shadow: 0 10px 24px rgba(70, 60, 150, .2);
   padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 6px;
   max-height: calc(100% - 90px); overflow-y: auto;
@@ -147,12 +147,12 @@ body { padding: 14px; }
 /* 삭제 확인 팝업 */
 .confirm {
   position: absolute; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center;
-  padding: 12px; background: rgba(255, 255, 255, .45); backdrop-filter: blur(6px);
+  padding: 12px; background: rgba(var(--glass), .45); backdrop-filter: blur(6px);
   border-radius: inherit; animation: cfade .25s ease;
 }
 .confirm[hidden] { display: none; }
 .cbox {
-  width: 100%; max-width: 230px; background: rgba(255, 255, 255, .96); border-radius: 18px;
+  width: 100%; max-width: 230px; background: rgba(var(--glass), .96); border-radius: 18px;
   box-shadow: 0 10px 26px rgba(70, 60, 150, .22); padding: 14px 14px 12px;
   display: flex; flex-direction: column; gap: 4px; text-align: center;
   animation: pop .35s var(--ease);

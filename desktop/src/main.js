@@ -378,9 +378,9 @@ function applyLayer(id) {
   }
 }
 
-const ALLOWED = ['title', 'text', 'items', 'type', 'layer', 'hidden', 'folded', 'mark', 'markColor', 'slot'];
+const ALLOWED = ['title', 'text', 'items', 'type', 'layer', 'hidden', 'folded', 'mark', 'markColor', 'slot', 'ord'];
 // 기기끼리 맞추는 내용 (위치·크기·접힘·맨앞/맨뒤·숨김은 기기마다 따로)
-const CONTENT = ['title', 'text', 'items', 'type', 'mark', 'markColor', 'slot'];
+const CONTENT = ['title', 'text', 'items', 'type', 'mark', 'markColor', 'slot', 'ord'];
 function touch(m) {
   m.mt = Math.max(Date.now(), (m.mt || 0) + 1);
   m.dirty = true;
@@ -437,6 +437,9 @@ function createMemo(opts = {}) {
     layer: 'normal', hidden: false, folded: false, mark: null, markColor: '#E8456B', created: Date.now(),
     uid: Cloud.uid(), mt: Date.now(), dirty: true
   };
+  // 순서를 직접 정해 둔 상태면 새 메모는 맨 위로
+  const ords = store.memos.map((x) => x.ord).filter((v) => typeof v === 'number');
+  if (ords.length) m.ord = Math.min(...ords) - 1;
   store.memos.push(m);
   scheduleSync();
   focusOnOpen.add(id);
@@ -945,7 +948,8 @@ function contentOf(d) {
     type: d.type === 'check' ? 'check' : 'text',
     mark: ['heart', 'star', 'flag', 'alert', 'check'].includes(d.mark) ? d.mark : null,
     markColor: /^#[0-9a-fA-F]{6}$/.test(d.markColor || '') ? d.markColor : '#E8456B',
-    slot: Number.isInteger(d.slot) ? ((d.slot % 5) + 5) % 5 : 0
+    slot: Number.isInteger(d.slot) ? ((d.slot % 5) + 5) % 5 : 0,
+    ord: typeof d.ord === 'number' && isFinite(d.ord) ? d.ord : null
   };
 }
 function payloadOf(m, trashed) {
