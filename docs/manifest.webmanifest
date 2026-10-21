@@ -1,0 +1,16 @@
+{
+  "name": "말랑메모",
+  "short_name": "말랑메모",
+  "description": "PC와 휴대폰에서 같이 쓰는 말랑한 메모",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#EEF0FB",
+  "theme_color": "#EEF0FB",
+  "lang": "ko",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

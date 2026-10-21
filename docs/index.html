@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://omdyyvqkxxigilxjysbz.supabase.co; manifest-src 'self'; worker-src 'self'">
+<meta name="theme-color" content="#EEF0FB">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="말랑메모">
+<meta name="description" content="어디서든 열어 쓰는 말랑메모">
+<title>말랑메모</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Jua&family=Nanum+Pen+Script&family=Noto+Serif+KR:wght@400;600&display=swap">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="bg" aria-hidden="true"><i class="b0"></i><i class="b1"></i><i class="b2"></i><i class="b3"></i></div>
+
+<!-- 로그인 -->
+<main id="auth" class="auth" hidden>
+  <div class="authCard">
+    <img class="logo" src="icons/icon-192.png" alt="" width="64" height="64">
+    <h1>말랑메모</h1>
+    <p class="lead">PC와 휴대폰에서 같은 메모를 써요.<br>메모는 내 비밀번호로 잠겨서 올라가요.</p>
+    <div class="seg" role="tablist" aria-label="로그인 또는 가입">
+      <button id="modeLogin" class="segb" type="button" role="tab">로그인</button>
+      <button id="modeSignup" class="segb" type="button" role="tab">새로 가입</button>
+    </div>
+    <form id="authForm" class="form" novalidate>
+      <label class="field"><span>아이디</span>
+        <input id="aUser" type="text" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="20" placeholder="영어 소문자·숫자·밑줄 3~20자"></label>
+      <label class="field"><span>비밀번호</span>
+        <input id="aPw" type="password" autocomplete="current-password" placeholder="8자 이상"></label>
+      <label id="aPw2Wrap" class="field" hidden><span>비밀번호 확인</span>
+        <input id="aPw2" type="password" autocomplete="new-password"></label>
+      <p id="aWarn" class="hint" hidden>비밀번호를 잊으면 메모를 되찾을 방법이 없어요. 꼭 기억해 두세요.</p>
+      <p id="aMsg" class="msg" role="alert"></p>
+      <button id="aGo" class="primary" type="submit">로그인</button>
+    </form>
+  </div>
+</main>
+
+<!-- 앱 -->
+<div id="app" class="app" hidden>
+  <header class="top">
+    <div>
+      <div class="brand">말랑메모</div>
+      <div id="sync" class="sync" role="status" aria-live="polite"></div>
+    </div>
+    <button id="syncBtn" class="iconBtn" type="button" aria-label="지금 맞추기"></button>
+  </header>
+
+  <section id="vMemos" class="view">
+    <label class="search"><span id="searchIcon" aria-hidden="true"></span><span class="sr">메모 검색</span>
+      <input id="q" type="search" placeholder="메모 검색" autocomplete="off"></label>
+    <div id="list" class="list"></div>
+  </section>
+
+  <section id="vCal" class="view" hidden>
+    <div class="calCard">
+      <div class="calHead">
+        <div class="calTtl"><span id="calNum" class="calNum"></span><span id="calEn" class="calEn"></span></div>
+        <div class="calNav">
+          <button id="calToday" class="textBtn" type="button">오늘</button>
+          <button id="calPrev" class="iconBtn sm" type="button" aria-label="이전 달"></button>
+          <button id="calNext" class="iconBtn sm" type="button" aria-label="다음 달"></button>
+        </div>
+      </div>
+      <div class="wdays" aria-hidden="true"><span class="sun">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span class="sat">토</span></div>
+      <div id="grid" class="grid"></div>
+    </div>
+    <div class="selRow"><div id="selLabel" class="selLabel"></div><button id="addEv" class="smallPrimary" type="button">+ 일정 추가</button></div>
+    <div id="evList" class="evList"></div>
+  </section>
+
+  <section id="vTrash" class="view" hidden>
+    <div class="info">지운 메모는 <b>7일</b> 동안 여기 있다가 자동으로 영구 삭제돼요. 영구 삭제하면 PC와 서버에서도 바로 지워져요.</div>
+    <div id="trashList" class="list"></div>
+    <button id="emptyTrash" class="dangerBtn" type="button">휴지통 비우기</button>
+  </section>
+
+  <section id="vSet" class="view" hidden>
+    <div class="card acct">
+      <span id="avatar" class="avatar"></span>
+      <div class="acctTxt"><div id="acctName" class="acctName"></div><div class="small">PC 앱의 계정 탭에서 같은 아이디로 로그인하면 함께 맞춰져요.</div></div>
+    </div>
+    <h2>스킨</h2>
+    <div id="skins" class="skins"></div>
+    <h2>글꼴</h2>
+    <div id="fonts" class="fonts"></div>
+    <h2>홈 화면에 추가하기</h2>
+    <div class="card small">아이폰: 사파리 아래쪽 <b>공유</b> 버튼 → <b>홈 화면에 추가</b><br>안드로이드: 크롬 오른쪽 위 <b>⋮</b> → <b>홈 화면에 추가</b> (또는 앱 설치)</div>
+    <button id="logout" class="ghostBtn" type="button">로그아웃</button>
+    <p class="small center">로그아웃하면 이 휴대폰에 저장된 메모가 지워져요. 메모는 서버와 PC에 그대로 있어요.</p>
+  </section>
+
+  <button id="fab" class="fab" type="button" aria-label="새 메모"></button>
+
+  <nav class="tabs" aria-label="화면">
+    <button class="tab" type="button" data-view="memos"><span class="ti" data-icon="memo"></span><span>메모</span></button>
+    <button class="tab" type="button" data-view="cal"><span class="ti" data-icon="cal"></span><span>캘린더</span></button>
+    <button class="tab" type="button" data-view="trash"><span class="ti" data-icon="trash"></span><span>휴지통</span></button>
+    <button class="tab" type="button" data-view="set"><span class="ti" data-icon="set"></span><span>설정</span></button>
+  </nav>
+</div>
+
+<!-- 메모 편집 -->
+<div id="editor" class="editor" hidden role="dialog" aria-modal="true" aria-label="메모 편집">
+  <div class="edTop">
+    <button id="edBack" class="iconBtn" type="button" aria-label="목록으로"></button>
+    <div class="edTools">
+      <button id="edMark" class="iconBtn" type="button" aria-label="중요 표시와 색"></button>
+      <button id="edType" class="iconBtn" type="button" aria-label="체크리스트 전환"></button>
+      <button id="edDel" class="iconBtn" type="button" aria-label="삭제"></button>
+    </div>
+  </div>
+  <div id="edPicker" class="picker" hidden>
+    <div class="plabel">기호</div><div id="pMarks" class="prow"></div>
+    <div class="plabel">기호 색</div><div id="pColors" class="prow"></div>
+    <div class="plabel">메모 색</div><div id="pSlots" class="prow"></div>
+  </div>
+  <div class="edTitleRow"><span id="edMarkIcon" class="edMarkIcon"></span>
+    <input id="edTitle" class="edTitle" type="text" placeholder="제목" maxlength="80" aria-label="제목"></div>
+  <textarea id="edText" class="edText" placeholder="여기에 바로 입력" aria-label="내용"></textarea>
+  <div id="edChecks" class="edChecks" hidden>
+    <div id="edItems"></div>
+    <button id="edAddItem" class="addItem" type="button">+ 항목 추가</button>
+  </div>
+</div>
+
+<!-- 확인 창 -->
+<div id="confirm" class="modal" hidden role="alertdialog" aria-modal="true" aria-labelledby="cTitle" aria-describedby="cDesc">
+  <div class="mbox">
+    <div id="cTitle" class="mTitle"></div>
+    <div id="cDesc" class="mDesc"></div>
+    <div class="mBtns"><button id="cNo" class="mNo" type="button">취소</button><button id="cYes" class="mYes" type="button"></button></div>
+  </div>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="common.js"></script>
+<script src="cloud-core.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
