@@ -281,6 +281,7 @@
     closeTools();
     closePicker();
     if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
+    try { getSelection().removeAllRanges(); title.setSelectionRange(0, 0); } catch (e) { /* 무시 */ }
     send({ folded: !memo.folded });
     render();
   }
@@ -477,9 +478,10 @@
     const s = window.getSelection ? String(window.getSelection()) : '';
     return s;
   }
-  const watchSel = (e) => { const el = e.target; if (el && (text.contains(el) || tblEl.contains(el))) { const s = String(getSelection()).replace(/\u00A0/g, ' '); if (s) remember(s); return; } if (el && (el === title || el.classList.contains('itxt'))) { const s = selFrom(el); if (s) remember(s); } };
+  const watchSel = (e) => { const el = e.target; if (el && (text.contains(el) || tblEl.contains(el))) { const s = String(getSelection()).replace(/\u00A0/g, ' '); if (s) remember(s); return; } if (el && el.classList && el.classList.contains('itxt')) { const s = selFrom(el); if (s) remember(s); } };
   for (const ev of ['select', 'mouseup', 'keyup']) document.addEventListener(ev, watchSel, true);
-  document.addEventListener('copy', () => { const s = liveSelection(); if (s) remember(s); });
+  // 제목을 고칠 때 전체 선택되는 것까지 기억하면 안 되므로, 내용 칸에서 복사한 것만 기억
+  document.addEventListener('copy', () => { const a = document.activeElement; if (a === title) return; const s = liveSelection(); if (s) remember(s); });
   let copiedT = null;
   function flashCopied() {
     const el = $('copied');
@@ -493,7 +495,8 @@
   // ───────── 단축키 ─────────
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && (e.key.toLowerCase() === 'c' || e.code === 'KeyC') && !e.isComposing) {
-      if (!liveSelection() && memo && memo.clip) {
+      // 접힌 메모는 내용이 안 보이므로 남아 있는 선택과 상관없이 기억해 둔 부분을 복사
+      if (memo && memo.clip && (memo.folded || !liveSelection())) {
         e.preventDefault();
         api.copyText(memo.clip);
         flashCopied();

@@ -23,7 +23,7 @@ body { padding: 14px; }
 }
 .head:active { cursor: grabbing; }
 .card.folded .head { height: 32px; padding: 0 14px 0 12px; }
-.card.folded .title { font-size: 13px; padding: 2px 0; }  /* 접힌 바는 높이가 정해져 있어 글자 크기 고정 */
+.card.folded .title { font-size: 13px; padding: 2px 0; pointer-events: none; }  /* 접힌 바를 눌러도 제목 글자가 선택되지 않게 */  /* 접힌 바는 높이가 정해져 있어 글자 크기 고정 */
 .card.folded .markIcon svg { width: 16px; height: 16px; }
 .card.folded .fold, .card.folded .more, .card.folded .tools { display: none; }
 
