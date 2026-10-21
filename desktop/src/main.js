@@ -423,6 +423,7 @@ function updateMemo(id, patch) {
   if (!['text', 'check', 'table'].includes(m.type)) m.type = 'text';
   if ('table' in patch) m.table = patch.table ? sanitizeTable(patch.table) : null;
   if ('group' in patch && (!patch.group || !store.groups.some((g) => g.id === patch.group))) delete m.group;
+  if (m.group && m.group !== prev.group) stackIntoGroup(m);
   if (m.layer !== 'top' && m.layer !== 'bottom') m.layer = 'normal';
   m.updated = Date.now();
   if (CONTENT.some((k) => k in patch && JSON.stringify(prev[k]) !== JSON.stringify(m[k]))) touch(m);
@@ -877,6 +878,26 @@ ipcMain.on('memo:move', (e, id, x, y, done) => {
     broadcast();
   }
 });
+// 그룹에 넣으면 그 그룹 메모들 맨 아래에 이어 붙이기 (멀리 떨어져 있어도 한데 모이게)
+function stackIntoGroup(m) {
+  const mates = store.memos.filter((o) => o !== m && o.group === m.group && !o.hidden && !o.deleting && o.x != null);
+  if (!mates.length || m.x == null) return;
+  const left = mates.reduce((a, o) => (o.y < a.y || (o.y === a.y && o.x < a.x) ? o : a), mates[0]);   // 맨 위 메모 줄에 맞춤
+  const bottom = Math.max(...mates.filter((o) => Math.abs(o.x - left.x) < 40).map((o) => o.y + (o.folded ? FOLD_H : o.h)));
+  m.x = left.x;
+  m.y = bottom + GAP;
+  // 화면 아래로 넘치면 옆 줄 맨 위로
+  const wa = screen.getDisplayMatching({ x: Math.round(left.x), y: Math.round(left.y), width: 10, height: 10 }).workArea;
+  const h = m.folded ? FOLD_H : m.h;
+  if (m.y + h > wa.y + wa.height) {
+    const colW = Math.max(...mates.filter((o) => Math.abs(o.x - left.x) < 40).map((o) => (o.folded ? FOLD_W : o.w)));
+    m.x = left.x + colW + GAP;
+    m.y = left.y;
+  }
+  delete m.ox; delete m.oy;
+  const win = memoWins.get(m.id);
+  if (win && !win.isDestroyed()) animateTo(win, boundsFor(m), 380);
+}
 // ───────── 그룹: 이 PC에서 메모를 묶어 함께 옮기고, 함께 숨기고, 함께 접기 ─────────
 const GROUP_COLORS = 6;
 ipcMain.handle('group:create', (e, name, memoId) => {
