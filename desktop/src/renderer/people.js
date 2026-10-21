@@ -92,6 +92,7 @@
     $('top').setAttribute('aria-pressed', String(on));
     if (!dirty && Date.now() - sentAt > 800) { tbl.setRows(S.contacts || null); tbl.filter(q.value); }
     if (!editing) gv.setRows(S.contacts || [window.M.CONTACT_HEAD]);
+    $('edit').hidden = S.canEditContacts === false && !editing;
   }
 
   // 제목줄 끌어서 옮기기

@@ -52,3 +52,4 @@ html.paper .head { border-bottom: 2px dotted var(--paper-dot); margin-bottom: 8p
 html.paper .search { background: #fff; box-shadow: 0 0 0 1px var(--paper-line); }
 html.paper .gv { --gv-surface: #fff; }
 html.paper .card.folded .head { border-bottom: none; margin: 0; }
+.ib.txt[hidden] { display: none; }

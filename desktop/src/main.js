@@ -52,6 +52,7 @@ function defaults() {
     evMeta: {},
     contacts: null,
     groups: [],
+    shared: {},
     cloud: {},
     widget: { x: null, y: null },
     peopleWin: { x: null, y: null, w: 430, h: 380, top: false }
@@ -90,6 +91,8 @@ function load() {
   const fixed = store.contacts && fixContactRows(store.contacts.rows);
   if (fixed) store.contacts = { rows: fixed, mt: Math.max(Date.now(), (store.contacts.mt || 0) + 1), dirty: true };
   store.cloud = store.cloud && typeof store.cloud === 'object' ? store.cloud : {};
+  store.shared = store.shared && typeof store.shared === 'object' ? store.shared : {};
+  if (store.shared.contacts && !Array.isArray(store.shared.contacts)) delete store.shared.contacts;
   store.groups = Array.isArray(store.groups) ? store.groups.filter((g) => g && typeof g.id === 'string').map((g) => ({ id: g.id, name: String(g.name || '그룹').slice(0, 40), color: Number(g.color) || 0 })) : [];
   { const gids = new Set(store.groups.map((g) => g.id)); for (const m of store.memos) if (m.group && !gids.has(m.group)) delete m.group; }
   store.nextId = Math.max(store.nextId || 1, ...store.memos.map((m) => m.id + 1), ...store.trash.map((m) => m.id + 1), 1);
@@ -185,7 +188,9 @@ function snapshot() {
     settings: store.settings,
     memos: store.memos.filter((m) => !m.deleting),
     events: store.events,
-    contacts: store.contacts ? store.contacts.rows : null,
+    contacts: store.shared.contacts || (store.contacts ? store.contacts.rows : null),
+    contactsShared: !!store.shared.contacts,                         // 회사 공통 연락망
+    canEditContacts: !store.shared.contacts || !!store.cloud.admin,   // 공통 연락망은 관리자만 고침
     groups: store.groups,
     peopleWin: store.peopleWin,
     trash: store.trash.map((t) => ({
@@ -951,6 +956,15 @@ ipcMain.on('events:set', (e, key, list) => {
 ipcMain.on('contacts:set', (e, rows) => {
   if (!Array.isArray(rows)) return;
   const clean = sanitizeTable({ rows }).rows;
+  if (store.shared.contacts) {
+    // 공통 연락망: 관리자만 고칠 수 있고, 고치면 모두에게 올라감
+    if (!store.cloud.admin) return;
+    if (JSON.stringify(store.shared.contacts) === JSON.stringify(clean)) return;
+    store.shared.contacts = clean;
+    store.shared.dirty = true;
+    save(); broadcast(); scheduleSync(600);
+    return;
+  }
   if (store.contacts && JSON.stringify(store.contacts.rows) === JSON.stringify(clean)) return;
   const prev = (store.contacts && store.contacts.mt) || 0;
   store.contacts = { rows: clean, mt: Math.max(Date.now(), prev + 1), dirty: true };
@@ -1206,6 +1220,30 @@ async function cloudStart() {
   scheduleSync(500);
 }
 
+// 회사 공통 연락망 받아오기 (관리자는 고친 것을 먼저 올림)
+async function syncShared() {
+  try {
+    if (store.cloud.admin == null || !store.shared.adminAt || Date.now() - store.shared.adminAt > 6 * 3600 * 1000) {
+      store.cloud.admin = await Cloud.isAdmin(holder);
+      store.shared.adminAt = Date.now();
+    }
+    if (store.cloud.admin && store.shared.dirty && store.shared.contacts) {
+      await Cloud.putShared(holder, 'contacts', { rows: store.shared.contacts });
+      store.shared.dirty = false;
+    }
+    const sh = await Cloud.getShared(holder, 'contacts');
+    if (sh && sh.data && Array.isArray(sh.data.rows)) {
+      if (!store.shared.dirty) store.shared.contacts = sanitizeTable({ rows: sh.data.rows }).rows;
+      store.shared.at = sh.updatedAt;
+    } else if (store.cloud.admin && store.contacts && store.contacts.rows.length > 1) {
+      // 처음: 관리자의 연락망을 회사 공통으로 올림
+      await Cloud.putShared(holder, 'contacts', { rows: store.contacts.rows });
+      store.shared.contacts = store.contacts.rows.map((r) => r.slice());
+    }
+    broadcast();
+  } catch (e) { console.error('공통 연락망', e && e.code); }
+}
+
 function scheduleSync(delay = 1500) {
   if (!cloudKey || !holder.session) return;
   clearTimeout(syncTimer);
@@ -1381,6 +1419,7 @@ async function runSync() {
     // 처음 로그인 때 합치기 표시 정리
     for (const meta of Object.values(store.evMeta)) if (meta && meta.merge) { meta.merge = false; meta.dirty = true; meta.mt = Date.now(); syncAgain = true; }
     store.cloud.cursor = r.cursor || store.cloud.cursor;
+    await syncShared();
     // 오래된 지움 표시 정리 (30일)
     store.tombs = store.tombs.filter((x) => !x.done || x.ts > Date.now() - 30 * DAY);
     if (needSecureSave) saveSecure(); else save();
@@ -1492,6 +1531,7 @@ app.whenReady().then(() => {
   setupUpdater();
   setInterval(() => scheduleSync(0), 20000);
   powerMonitor.on('resume', () => scheduleSync(2000));
+  setInterval(() => scheduleSync(0), 5 * 60 * 1000);   // 5분마다 다른 기기·공통 연락망 맞추기
   powerMonitor.on('unlock-screen', () => scheduleSync(1000));
   createHost();
   createSide();

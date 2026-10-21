@@ -31,7 +31,7 @@
 
   // ───────── 저장 ─────────
   function blankState() {
-    return { memos: [], trash: [], tombs: [], events: {}, evMeta: {}, contacts: null, cursor: null };
+    return { memos: [], trash: [], tombs: [], events: {}, evMeta: {}, contacts: null, shared: {}, cursor: null };
   }
   function loadJSON(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v || d; } catch (e) { return d; } }
   let st = Object.assign(blankState(), loadJSON(LS_STATE, {}));
@@ -248,6 +248,26 @@
     if (m && m.mt === ts) m.dirty = false;
     for (const t of st.tombs) if (t.uid === id && t.ts === ts) t.done = true;
   }
+  // 회사 공통 연락망 (가입자 누구나 읽기, 관리자만 고치기)
+  let sharedChecked = 0;
+  async function syncShared() {
+    st.shared = st.shared || {};
+    try {
+      if (st.shared.admin == null || Date.now() - sharedChecked > 6 * 3600 * 1000) { st.shared.admin = await C.isAdmin(holder); sharedChecked = Date.now(); }
+      if (st.shared.admin && st.shared.dirty && st.shared.contacts) { await C.putShared(holder, 'contacts', { rows: st.shared.contacts }); st.shared.dirty = false; }
+      // 자주 받아오지 않음 (1분에 한 번)
+      if (st.shared.fetched && Date.now() - st.shared.fetched < 60000 && !st.shared.dirty) return;
+      const sh = await C.getShared(holder, 'contacts');
+      st.shared.fetched = Date.now();
+      if (sh && sh.data && Array.isArray(sh.data.rows) && !st.shared.dirty) {
+        const rows = window.M.cleanTable({ rows: sh.data.rows }, window.M.CONTACT_HEAD).rows;
+        if (JSON.stringify(rows) !== JSON.stringify(st.shared.contacts)) { st.shared.contacts = rows; if (view === 'people') renderPeople(true); }
+      }
+    } catch (e) { /* 다음에 다시 */ }
+  }
+  const contactRows = () => (st.shared && st.shared.contacts) || (st.contacts && st.contacts.rows) || null;
+  const canEditContacts = () => !(st.shared && st.shared.contacts) || !!st.shared.admin;
+
   async function runSync() {
     if (!key || !holder.session) return;
     if (syncing) { again = true; return; }
@@ -256,6 +276,7 @@
     try {
       const r = await C.syncOnce({ holder, key, cursor: st.cursor, localTs, apply, dirty: dirtyList, pushed });
       st.cursor = r.cursor || st.cursor;
+      await syncShared();
       st.tombs = st.tombs.filter((t) => !t.done || t.ts > Date.now() - 30 * DAY);
       saveStateNow();
       sync.state = 'ok'; sync.last = Date.now(); sync.msg = '';
@@ -868,6 +889,13 @@
   const people = window.M.tableEditor($('people'), {
     head: window.M.CONTACT_HEAD, editable: false, copy: copyText,
     onChange: (rows) => {
+      if (st.shared && st.shared.contacts) {
+        if (!st.shared.admin) return;
+        st.shared.contacts = rows; st.shared.dirty = true;
+        saveState(); scheduleSync();
+        people.filter($('pq').value);
+        return;
+      }
       const prev = (st.contacts && st.contacts.mt) || 0;
       st.contacts = { rows, mt: Math.max(Date.now(), prev + 1), dirty: true };
       saveState(); scheduleSync();
@@ -883,12 +911,14 @@
   });
   function renderPeople(fromRemote) {
     if (fromRemote && people.isEditing()) return;
-    people.setRows((st.contacts && st.contacts.rows) || null);
+    if (peopleEditing && !canEditContacts()) { setPeopleEdit(false); return; }
+    people.setRows(contactRows());
     people.filter($('pq').value);
     $('people').hidden = !peopleEditing;
     $('peopleGv').hidden = peopleEditing;
-    if (!peopleEditing) { peopleGv.setRows((st.contacts && st.contacts.rows) || [window.M.CONTACT_HEAD]); peopleGv.filter($('pq').value); }
-    $('pHint').textContent = peopleEditing ? '엑셀에서 복사해 붙여넣을 수 있어요. 첫 줄은 머리글(부서 · 이름 · 내선)이에요.' : '번호를 누르면 복사돼요 · 부서 이름을 누르면 접혀요';
+    $('pEdit').hidden = !canEditContacts();
+    if (!peopleEditing) { peopleGv.setRows(contactRows() || [window.M.CONTACT_HEAD]); peopleGv.filter($('pq').value); }
+    $('pHint').textContent = st.shared && st.shared.contacts && !peopleEditing ? '회사 공통 연락망 · 번호를 누르면 복사돼요' : peopleEditing ? '엑셀에서 복사해 붙여넣을 수 있어요. 첫 줄은 머리글(부서 · 이름 · 내선)이에요.' : '번호를 누르면 복사돼요 · 부서 이름을 누르면 접혀요';
   }
   function setPeopleEdit(on) {
     peopleEditing = on;

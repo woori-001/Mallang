@@ -190,6 +190,23 @@
     }
   }
 
+  // ───────── 회사 공통 자료 (연락망): 가입자 누구나 읽기, 관리자만 쓰기 ─────────
+  async function getShared(holder, id) {
+    const rows = await authed(holder, '/rest/v1/mallang_shared?id=eq.' + encodeURIComponent(id) + '&select=data,updated_at', { method: 'GET' });
+    return Array.isArray(rows) && rows[0] ? { data: rows[0].data, updatedAt: rows[0].updated_at } : null;
+  }
+  async function putShared(holder, id, data) {
+    await authed(holder, '/rest/v1/mallang_shared?on_conflict=id', {
+      method: 'POST',
+      headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify([{ id, data }])
+    });
+  }
+  async function isAdmin(holder) {
+    const rows = await authed(holder, '/rest/v1/mallang_admins?select=user_id', { method: 'GET' });
+    return Array.isArray(rows) && rows.length > 0;
+  }
+
   /*
    * 한 번 맞추기
    *  ctx.holder   : { session, onSession }
@@ -247,5 +264,5 @@
 
   const uid = () => (globalThis.crypto.randomUUID ? globalThis.crypto.randomUUID() : toHex(globalThis.crypto.getRandomValues(new Uint8Array(16))));
 
-  return { CONFIG, deriveKeys, importKey, encrypt, decrypt, signup, login, refresh, pull, push, syncOnce, message, normUser, validUser, uid, toB64, fromB64, CloudError };
+  return { getShared, putShared, isAdmin, CONFIG, deriveKeys, importKey, encrypt, decrypt, signup, login, refresh, pull, push, syncOnce, message, normUser, validUser, uid, toB64, fromB64, CloudError };
 });

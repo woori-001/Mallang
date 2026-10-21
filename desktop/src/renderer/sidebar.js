@@ -147,7 +147,7 @@
       pToastT = setTimeout(() => { $('pFoot').textContent = footText(); }, 1500);
     }
   });
-  const footText = () => (peopleEditing ? '엑셀에서 복사해 붙여넣을 수 있어요 · Tab·Enter로 이동' : '누르면 번호가 복사돼요 · 부서 이름을 누르면 접혀요');
+  const footText = () => (peopleEditing ? (S && S.contactsShared ? '고치면 모든 사용자에게 바로 반영돼요 · Tab·Enter로 이동' : '엑셀에서 복사해 붙여넣을 수 있어요 · Tab·Enter로 이동') : '누르면 번호가 복사돼요 · 부서 이름을 누르면 접혀요');
   $('pEdit').addEventListener('click', () => {
     peopleEditing = !peopleEditing;
     if (!peopleEditing) flushPeople();
@@ -163,6 +163,9 @@
   function renderPeople() {
     $('peopleToggle').setAttribute('aria-pressed', String(!!S.settings.showPeople));
     if (!peopleEditing) peopleGv.setRows(S.contacts || [window.M.CONTACT_HEAD]);
+    // 회사 공통 연락망은 관리자만 고칠 수 있음
+    $('pEdit').hidden = S.canEditContacts === false && !peopleEditing;
+    $('pShared').hidden = !S.contactsShared;
     // 방금 보낸 내용보다 늦게 도착한 예전 상태로 되돌아가지 않게
     if (!peopleDirty && Date.now() - peopleSent > 800) people.setRows(S.contacts || null);
   }

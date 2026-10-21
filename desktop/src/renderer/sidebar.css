@@ -364,3 +364,5 @@ body.dnd .grp, body.dnd .ungrp { border-radius: 14px; transition: background .15
 .grp.dropOn, .ungrp.dropOn { background: color-mix(in srgb, var(--a1) 10%, transparent); outline: 2px dashed var(--a1); outline-offset: -1px; }
 .grp.dropOn .ghead { background: transparent; }
 body.dnd .ungrp { min-height: 40px; }
+.pShared { font-size: 11.5px; color: var(--sub); margin: -4px 2px 0; flex: none; }
+.pShared[hidden], .pEdit[hidden] { display: none; }
