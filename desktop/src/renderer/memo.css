@@ -225,7 +225,7 @@ html.paper .tblScroll { background: #fff; }
 html.paper .chip { background: var(--tint); }
 
 /* 그룹 */
-.grpDot { width: 8px; height: 8px; border-radius: 50%; flex: none; margin: 0 3px 0 4px; box-shadow: 0 0 0 2px rgba(var(--glass), .8); }
+.grpDot { display: inline-flex; flex: none; margin: 0 2px 0 3px; color: var(--sub); opacity: .85; }
 .grpDot[hidden] { display: none; }
 .gpicker { gap: 8px; }
 .glist { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
@@ -234,7 +234,8 @@ html.paper .chip { background: var(--tint); }
   background: rgba(80, 80, 140, .07); font-size: 12px; font-weight: 600; color: var(--ink); max-width: 100%;
   transition: background .2s ease, box-shadow .2s ease;
 }
-.gopt i { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.gopt svg { flex: none; color: var(--sub); }
+.gopt.on svg { color: var(--a1); }
 .gopt span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .gopt:hover { background: rgba(80, 80, 140, .12); }
 .gopt.on { background: rgba(var(--glass), 1); box-shadow: inset 0 0 0 1.5px var(--a1); }

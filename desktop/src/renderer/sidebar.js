@@ -223,10 +223,9 @@
         const allHidden = mem.length > 0 && mem.every((m) => m.hidden);
         const allFolded = mem.length > 0 && mem.filter((m) => !m.hidden).every((m) => m.folded);
         const closed = !!collapsedGroups[g.id] && !q;
-        html += '<div class="grp' + (closed ? ' closed' : '') + (allHidden ? ' ghidden' : '') + '" data-g="' + esc(g.id) + '" style="--gc:' + C[g.color % C.length] + '">' +
+        html += '<div class="grp' + (closed ? ' closed' : '') + (allHidden ? ' ghidden' : '') + '" data-g="' + esc(g.id) + '">' +
           '<div class="ghead">' +
-            '<button class="ib gtog" type="button" data-gact="toggle" aria-expanded="' + !closed + '" title="목록 접기/펴기">' + ICONS.chev.replace('class="chev"', 'class="chev" style="transform:rotate(' + (closed ? 90 : 180) + 'deg)"') + '</button>' +
-            '<i class="gdot"></i>' +
+            '<button class="ib gtog" type="button" data-gact="toggle" aria-expanded="' + !closed + '" title="' + (closed ? '폴더 열기' : '폴더 닫기') + '">' + (closed ? ICONS.folder : ICONS.folderOpen).replace('width="15" height="15"', 'width="17" height="17"') + '</button>' +
             (renamingGroup === g.id
               ? '<input class="gname-in" data-gact="rename-in" value="' + esc(g.name) + '" maxlength="40" spellcheck="false">'
               : '<span class="gname" data-gact="rename" title="더블클릭해서 이름 바꾸기">' + esc(g.name) + '</span>') +

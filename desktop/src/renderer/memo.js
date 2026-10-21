@@ -22,6 +22,7 @@
   $('bType').innerHTML = ICONS.list;
   $('bTable').innerHTML = ICONS.table;
   $('bGroup').innerHTML = ICONS.folder;
+  $('grpDot').innerHTML = ICONS.folder.replace('width="15" height="15"', 'width="14" height="14"');
   $('bSplit').innerHTML = ICONS.scissors;
   $('splitChip').innerHTML = ICONS.scissors + '<span>새 메모로 분리</span>';
   $('bTop').innerHTML = ICONS.front;
@@ -70,7 +71,7 @@
     const g = memo.group && groups.find((x) => x.id === memo.group);
     const gd = $('grpDot');
     gd.hidden = !g;
-    if (g) { gd.style.background = window.M.GROUP_COLORS[g.color % window.M.GROUP_COLORS.length]; gd.title = '그룹: ' + g.name; }
+    if (g) { gd.title = '그룹: ' + g.name; gd.setAttribute('aria-label', '그룹 ' + g.name); }
     setOn($('bGroup'), !gpicker.hidden);
     if (!gpicker.hidden && document.activeElement !== $('gName')) renderGroups();
     $('markIcon').innerHTML = memo.mark ? markSvg(memo.mark, memo.markColor || '#E8456B', 18) : '';
@@ -433,7 +434,7 @@
     const C = window.M.GROUP_COLORS;
     $('gList').innerHTML = groups.map((g) =>
       '<button type="button" class="gopt' + (memo.group === g.id ? ' on' : '') + '" data-g="' + esc(g.id) + '" aria-pressed="' + (memo.group === g.id) + '">' +
-        '<i style="background:' + C[g.color % C.length] + '"></i><span>' + esc(g.name) + '</span></button>').join('') +
+        ICONS.folder.replace('width="15" height="15"', 'width="13" height="13"') + '<span>' + esc(g.name) + '</span></button>').join('') +
       (memo.group ? '<button type="button" class="ptext" data-g="">그룹에서 빼기</button>' : '') +
       (groups.length ? '' : '<span class="gnone">아직 그룹이 없어요. 아래에서 만들어 보세요</span>');
   }
