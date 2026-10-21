@@ -689,5 +689,13 @@
     }
   }
 
-  window.M = { TBL, CONTACT_HEAD, fixContactRows, contactView, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
+  // 슬라이더: 채워진 부분을 스킨색으로 (기본 모양은 뒤가 검게 비쳐서 직접 그림)
+  function syncRange(el) {
+    const min = Number(el.min || 0), max = Number(el.max || 100), v = Number(el.value);
+    el.style.setProperty('--p', (max > min ? ((v - min) / (max - min)) * 100 : 0) + '%');
+  }
+  function syncRanges(root) { (root || document).querySelectorAll('input[type="range"]').forEach(syncRange); }
+  document.addEventListener('input', (e) => { if (e.target && e.target.type === 'range') syncRange(e.target); }, true);
+
+  window.M = { syncRanges, TBL, CONTACT_HEAD, fixContactRows, contactView, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
 })();

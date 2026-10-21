@@ -489,6 +489,7 @@
     $('alphaV').textContent = s.alpha + '%';
     $('sideAlphaV').textContent = s.sideAlpha + '%';
     $('autoStart').setAttribute('aria-pressed', String(!!s.autoStart));
+    window.M.syncRanges($('vStyle'));
     $('bodyBg').setAttribute('aria-pressed', String(!!s.bodyBg));
   }
   $('skins').addEventListener('click', (e) => { const b = e.target.closest('[data-skin]'); if (b) api.setSettings({ skin: b.dataset.skin }); });

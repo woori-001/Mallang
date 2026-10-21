@@ -57,3 +57,21 @@ input, textarea { font-family: inherit; color: inherit; }
 /* ───────── 종이 스킨 (투명하지 않은 업무 문서 느낌) ───────── */
 html.paper { --paper-line: color-mix(in srgb, var(--ink) 13%, transparent); --paper-dot: color-mix(in srgb, var(--a1) 40%, transparent); }
 html.paper .ib:hover { background: color-mix(in srgb, var(--a1) 10%, transparent); }
+
+/* 슬라이더 (기본 모양 대신 직접 그림) */
+input[type="range"] {
+  -webkit-appearance: none; appearance: none; height: 22px; background: transparent; cursor: pointer; margin: 0;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px; border-radius: 3px;
+  background: linear-gradient(to right, var(--a1) 0, var(--a2) var(--p, 50%), color-mix(in srgb, var(--ink) 12%, rgb(var(--glass))) var(--p, 50%));
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 18px; height: 18px; margin-top: -6px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--a1); box-shadow: 0 2px 6px rgba(30, 30, 80, .22);
+  transition: transform .2s var(--spring);
+}
+input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.12); }
+input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.2); }
+input[type="range"]:focus-visible { outline: none; }
+input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px color-mix(in srgb, var(--a1) 25%, transparent); }

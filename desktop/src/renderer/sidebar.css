@@ -175,7 +175,7 @@ body.open .tabArrow { transform: rotate(180deg); }
 .slabel { font-size: 13px; font-weight: 700; }
 .srow { display: flex; justify-content: space-between; align-items: center; }
 .sval { font-size: 13px; color: var(--sub); }
-input[type="range"] { width: 100%; accent-color: var(--a1); }
+input[type="range"] { width: 100%; }
 .skins { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px 4px; }
 .skin { border: none; background: transparent; padding: 2px 0; display: flex; flex-direction: column; align-items: center; gap: 5px; }
 .skin .sw {

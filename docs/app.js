@@ -322,6 +322,7 @@
     r.setProperty('--sun', sk.sun); r.setProperty('--sat', sk.sat);
     r.setProperty('--memo-size', Math.round((t.f.size + 1) * (prefs.fontScale || 100) / 10) / 10 + 'px');
     document.querySelector('meta[name="theme-color"]').setAttribute('content', sk.base);
+    setTimeout(() => window.M.syncRanges(), 0);
     return t;
   }
   const skin = () => SKINS[prefs.skin] || SKINS.lav;
@@ -696,6 +697,7 @@
     $('calFont').innerHTML = window.M.calFontOptions(prefs).map((o) => '<option value="' + o.id + '"' + ((prefs.calFont || 'same') === o.id ? ' selected' : '') + '>' + esc(o.name) + '</option>').join('');
     if (document.activeElement !== $('calScale')) $('calScale').value = prefs.calScale || 100;
     $('calScaleV').textContent = (prefs.calScale || 100) + '%';
+    window.M.syncRanges();
     $('avatar').textContent = ((session && session.username) || '?').slice(0, 1).toUpperCase();
     $('skins').innerHTML = Object.keys(SKINS).map((id) => {
       const k = SKINS[id];
