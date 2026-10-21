@@ -202,7 +202,7 @@
     } else {
       const rowOf = (m) => {
         const a = m.hidden ? 0.4 : 0.92;
-        return '<div class="row' + (m.hidden ? ' hidden' : '') + '" data-id="' + m.id + '" style="background:' + grad(sk, m.slot || 0, a) + '">' +
+        return '<div class="row' + (m.hidden ? ' hidden' : '') + '" draggable="true" data-id="' + m.id + '" title="끌어서 그룹 폴더에 넣거나 뺄 수 있어요" style="background:' + grad(sk, m.slot || 0, a) + '">' +
           '<button class="ib" type="button" data-act="fold" aria-label="' + (m.folded ? '펼치기' : '접기') + '" aria-expanded="' + !m.folded + '" title="' + (m.folded ? '펼치기' : '접기') + '">' +
             ICONS.chev.replace('class="chev"', 'class="chev" style="transform:rotate(' + (m.folded ? 0 : 180) + 'deg)"') + '</button>' +
           '<button class="rmain" type="button" data-act="focus" title="메모 보기">' +
@@ -238,8 +238,8 @@
         '</div>';
       }
       const rest = memos.filter((m) => !m.group || !groups.some((g) => g.id === m.group));
-      if (groups.length && rest.length) html += '<div class="nogrp">그룹 없음</div>';
-      html += rest.map(rowOf).join('');
+      if (groups.length) html += '<div class="ungrp" data-g=""><div class="nogrp">그룹 없음' + (rest.length ? '' : ' · 여기로 끌어 놓으면 그룹에서 빠져요') + '</div>' + rest.map(rowOf).join('') + '</div>';
+      else html += rest.map(rowOf).join('');
       listEl.innerHTML = html;
       const gi = listEl.querySelector('.gname-in');
       if (gi && document.activeElement !== gi) { gi.focus(); gi.select(); }
@@ -300,6 +300,52 @@
     const n = (S.trash || []).length;
     if (!n) return;
     if (await askConfirm('휴지통을 비울까요?', '메모 ' + n + '개가 PC에서도 완전히 지워져요. 되돌릴 수 없어요.', '모두 영구 삭제')) api.emptyTrash();
+  });
+
+  // ───────── 끌어서 그룹에 넣기·빼기 ─────────
+  let dragId = null;
+  const zoneOf = (el) => el && el.closest('.grp, .ungrp');
+  $('list').addEventListener('dragstart', (e) => {
+    const row = e.target.closest && e.target.closest('.row[data-id]');
+    if (!row) return;
+    dragId = Number(row.dataset.id);
+    e.dataTransfer.effectAllowed = 'move';
+    try { e.dataTransfer.setData('text/plain', 'mallang-memo:' + dragId); } catch (err) { /* 무시 */ }
+    requestAnimationFrame(() => row.classList.add('dragging'));
+    document.body.classList.add('dnd');
+  });
+  $('list').addEventListener('dragend', () => {
+    dragId = null;
+    document.body.classList.remove('dnd');
+    $('list').querySelectorAll('.dragging, .dropOn').forEach((x) => x.classList.remove('dragging', 'dropOn'));
+  });
+  $('list').addEventListener('dragover', (e) => {
+    if (dragId == null) return;
+    const z = zoneOf(e.target);
+    if (!z) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (!z.classList.contains('dropOn')) {
+      $('list').querySelectorAll('.dropOn').forEach((x) => x.classList.remove('dropOn'));
+      z.classList.add('dropOn');
+    }
+  });
+  $('list').addEventListener('dragleave', (e) => {
+    const z = zoneOf(e.target);
+    if (z && !z.contains(e.relatedTarget)) z.classList.remove('dropOn');
+  });
+  $('list').addEventListener('drop', (e) => {
+    if (dragId == null) return;
+    const z = zoneOf(e.target);
+    if (!z) return;
+    e.preventDefault();
+    const gid = z.dataset.g || null;
+    const m = S.memos.find((x) => x.id === dragId);
+    if (m && (m.group || null) !== gid) {
+      api.update(dragId, { group: gid });
+      if (gid) collapsedGroups[gid] = false;
+    }
+    z.classList.remove('dropOn');
   });
 
   // ───────── 그룹 ─────────

@@ -355,3 +355,12 @@ html.paper .tab { opacity: 1; }
 .gempty { font-size: 11.5px; color: var(--sub); padding: 4px 6px 6px; }
 .nogrp { font-size: 11.5px; font-weight: 700; color: var(--sub); padding: 6px 4px 0; flex: none; }
 html.paper .ghead { background: #fff; box-shadow: 0 0 0 1px var(--paper-line); }
+
+/* 끌어서 그룹에 넣기 */
+.row[draggable="true"] { cursor: grab; }
+.row.dragging { opacity: .4; }
+.ungrp { display: flex; flex-direction: column; gap: 6px; flex: none; border-radius: 14px; }
+body.dnd .grp, body.dnd .ungrp { border-radius: 14px; transition: background .15s ease, box-shadow .15s ease; }
+.grp.dropOn, .ungrp.dropOn { background: color-mix(in srgb, var(--a1) 10%, transparent); outline: 2px dashed var(--a1); outline-offset: -1px; }
+.grp.dropOn .ghead { background: transparent; }
+body.dnd .ungrp { min-height: 40px; }
