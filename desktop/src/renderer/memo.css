@@ -22,9 +22,9 @@ body { padding: 14px; }
   padding: 0 7px 0 6px; cursor: grab;
 }
 .head:active { cursor: grabbing; }
-.card.folded .head { height: calc(32px * var(--fz, 1)); padding: 0 calc(14px * var(--fz, 1)) 0 calc(12px * var(--fz, 1)); }
-.card.folded .title { font-size: calc(var(--fold-title-size, 13px) * var(--fz, 1)); padding: 2px 0; pointer-events: none; }  /* 접힌 바를 눌러도 제목 글자가 선택되지 않게 */  /* 접힌 바는 높이가 정해져 있어 글자 크기 고정 */
-.card.folded .markIcon svg { width: calc(16px * var(--fz, 1)); height: calc(16px * var(--fz, 1)); }
+.card.folded .head { height: 32px; padding: 0 14px 0 12px; }
+.card.folded .title { font-size: var(--fold-title-size, 13px); padding: 2px 0; pointer-events: none; }  /* 접힌 바를 눌러도 제목 글자가 선택되지 않게 */  /* 접힌 바는 높이가 정해져 있어 글자 크기 고정 */
+.card.folded .markIcon svg { width: 16px; height: 16px; }
 .card.folded .fold, .card.folded .more, .card.folded .tools { display: none; }
 
 .markIcon { display: inline-flex; margin: 0 3px 0 2px; }
@@ -296,12 +296,11 @@ html.paper .chip { background: var(--tint); }
 .item.fhit { background: color-mix(in srgb, var(--a1) 12%, transparent); }
 .item.fcur { background: #FFE58A; }
 
-/* 접었을 때 크기 */
-.fsl { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
-.fsv { color: var(--a1); font-weight: 700; }
-.fsr { height: 22px; font-size: 11px; margin-left: auto; padding: 0 6px; }
-.fsRange { width: 100%; }
-
+/* 접힌 메모 옆 끝: 끌어서 가로 길이 조절 */
+.fedge { position: absolute; top: 0; bottom: 0; width: 7px; z-index: 8; cursor: ew-resize; display: none; }
+.fedge.l { left: 0; } .fedge.r { right: 0; }
+.card.folded .fedge { display: block; }
+.card.folded.fresizing { transition: none; }
 /* 메모 속 링크 */
 ::highlight(mlink) { color: var(--link, #2A62C9); text-decoration: underline; text-decoration-color: currentColor; }
 .text.onlink, .tblArea.onlink td { cursor: pointer; }

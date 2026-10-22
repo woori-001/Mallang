@@ -642,7 +642,7 @@
     $('foldScaleV').textContent = fdv + '%';
     const own = (S.memos || []).filter((m) => m.fs && !m.deleting).length;
     $('fsClear').hidden = !own;
-    $('fsClear').textContent = '따로 정한 메모 ' + own + '개도 이 크기로 맞추기';
+    $('fsClear').textContent = '따로 길이를 정한 메모 ' + own + '개도 이 길이로 맞추기';
     $('titleBold').setAttribute('aria-pressed', String(s.titleBold !== false));
     if (document.activeElement !== $('alpha')) $('alpha').value = s.alpha;
     if (document.activeElement !== $('sideAlpha')) $('sideAlpha').value = s.sideAlpha;

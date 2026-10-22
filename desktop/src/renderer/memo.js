@@ -11,8 +11,9 @@
   const checks = $('checks'), itemsEl = $('items'), chip = $('chip'), picker = $('picker'), grip = $('grip');
   const FOLD_W = 180, FOLD_H = 32, MIN_W = 180, MIN_H = 110;
   // 접은 크기 (%) : 이 메모 값 → 없으면 전체 설정
-  const foldPct = () => Math.min(200, Math.max(70, Math.round(Number((memo && memo.fs) || (settings && settings.foldScale) || 100))));
-  const foldW = () => Math.round(FOLD_W * foldPct() / 100), foldH = () => Math.round(FOLD_H * foldPct() / 100);
+  const foldPct = () => Math.min(250, Math.max(50, Math.round(Number((memo && memo.fs) || (settings && settings.foldScale) || 100))));
+  const foldW = () => (fLocalW != null ? fLocalW : Math.round(FOLD_W * foldPct() / 100)), foldH = () => FOLD_H;
+  let fLocalW = null;
 
   let memo = null, settings = null, sk = null, groups = [], lastFolded = null, arT = null;
   let items = [];
@@ -71,8 +72,6 @@
     card.classList.toggle('bodybg', !!settings.bodyBg);
     const w = memo.folded ? foldW() : (localSize ? localSize.w : memo.w);
     const h = memo.folded ? foldH() : (localSize ? localSize.h : memo.h);
-    card.style.setProperty('--fz', foldPct() / 100);
-    if (!picker.hidden && document.activeElement !== $('fsRange')) syncFs();
     card.style.width = w + 'px';
     card.style.height = h + 'px';
 
@@ -421,7 +420,6 @@
       '<button class="swatch' + (c.hex.toLowerCase() === color.toLowerCase() ? ' on' : '') + '" style="background:' + c.hex + ';--pc:' + c.hex + '" type="button" data-color="' + c.hex + '" aria-label="' + c.name + '" title="' + c.name + '"></button>'
     ).join('') +
       '<label class="custom" title="직접 고르기"><span class="sr">기호 색 직접 고르기</span><input id="customColor" type="color" value="' + esc(color.toLowerCase()) + '"></label>';
-    syncFs();
     $('pSlots').innerHTML = [0, 1, 2, 3, 4].map((s) =>
       '<button class="swatch slotsw' + ((memo.slot || 0) === s ? ' on' : '') + '" style="background:' + grad(sk, s, 1) + ';--pc:' + sk.a1 + '" type="button" data-slot="' + s + '" aria-label="메모 색 ' + (s + 1) + '"></button>'
     ).join('');
@@ -435,31 +433,6 @@
     render();
     renderPicker();
   });
-  // 접었을 때 크기 (이 메모만)
-  function syncFs() {
-    const r = $('fsRange');
-    r.value = foldPct();
-    $('fsVal').textContent = foldPct() + '%' + (memo.fs ? '' : ' (전체 설정)');
-    $('fsReset').hidden = !memo.fs;
-    window.M.syncRanges(picker);
-  }
-  const sendFs = debounce(() => api.update(id, { fs: memo.fs || null }), 120);
-  $('fsRange').addEventListener('input', (e) => {
-    memo.fs = Number(e.target.value);
-    $('fsVal').textContent = memo.fs + '%';
-    $('fsReset').hidden = false;
-    sendFs();
-  });
-  $('fsReset').addEventListener('click', () => { delete memo.fs; api.update(id, { fs: null }); syncFs(); render(); });
-  // 접힌 메모 위에서 Ctrl+휠: 접은 크기 조절
-  card.addEventListener('wheel', (e) => {
-    if (!memo || !memo.folded || !e.ctrlKey) return;
-    e.preventDefault();
-    const v = Math.min(200, Math.max(70, foldPct() + (e.deltaY < 0 ? 10 : -10)));
-    if (v === foldPct()) return;
-    send({ fs: v });
-    render();
-  }, { passive: false });
   picker.addEventListener('change', (e) => {
     if (e.target.id === 'customColor') {
       send({ markColor: e.target.value, mark: memo.mark || 'heart' });
@@ -666,6 +639,45 @@
   text.addEventListener('input', refind);
   itemsEl.addEventListener('input', refind);
   tblEl.addEventListener('input', refind);
+
+  // ───────── 접힌 메모: 옆 끝을 끌어서 가로 길이 조절 ─────────
+  let fr = null, frRaf = 0;
+  function frMove(e) {
+    if (!fr) return;
+    const dx = e.screenX - fr.sx;
+    fLocalW = Math.min(FOLD_W * 2.5, Math.max(FOLD_W * 0.5, Math.round(fr.w + (fr.left ? -dx : dx))));
+    if (frRaf) return;
+    frRaf = requestAnimationFrame(() => {
+      frRaf = 0;
+      if (fLocalW == null || !fr) return;
+      api.foldResize(id, fLocalW, fr.left, false);
+      card.style.width = fLocalW + 'px';
+    });
+  }
+  function frEnd() {
+    window.removeEventListener('pointermove', frMove, true);
+    window.removeEventListener('pointerup', frEnd, true);
+    window.removeEventListener('pointercancel', frEnd, true);
+    if (!fr) return;
+    const f = fr; fr = null;
+    if (fLocalW != null) { memo.fs = Math.round(fLocalW / FOLD_W * 100); api.foldResize(id, fLocalW, f.left, true); }
+    fLocalW = null;
+    setTimeout(() => card.classList.remove('noanim', 'fresizing'), 50);
+    render();
+  }
+  card.querySelectorAll('.fedge').forEach((h) => {
+    h.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 || !memo.folded) return;
+      e.preventDefault(); e.stopPropagation();
+      fr = { sx: e.screenX, w: foldW(), left: h.classList.contains('l') };
+      card.classList.add('noanim', 'fresizing');
+      try { h.setPointerCapture(e.pointerId); } catch (err) { /* 무시 */ }
+      window.addEventListener('pointermove', frMove, true);
+      window.addEventListener('pointerup', frEnd, true);
+      window.addEventListener('pointercancel', frEnd, true);
+    });
+    h.addEventListener('dblclick', (e) => e.stopPropagation());
+  });
 
   // ───────── 크기 조절 ─────────
   let rs = null, resizeRaf = 0;

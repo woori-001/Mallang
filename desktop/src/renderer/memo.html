@@ -42,8 +42,6 @@
     <div id="pColors" class="prow"></div>
     <div class="plabel">메모 색</div>
     <div id="pSlots" class="prow"></div>
-    <div class="plabel fsl"><span>접었을 때 크기</span><span id="fsVal" class="fsv"></span><button id="fsReset" class="ptext fsr" type="button" hidden>전체 설정 따르기</button></div>
-    <input id="fsRange" class="fsRange" type="range" min="70" max="200" step="10" aria-label="이 메모를 접었을 때 크기 (%)">
   </div>
 
   <div id="gpicker" class="picker gpicker" hidden>
@@ -69,6 +67,8 @@
     </div>
   </div>
   <div id="chip" class="chip" hidden></div>
+  <div class="fedge l" title="끌어서 가로 길이 조절" aria-hidden="true"></div>
+  <div class="fedge r" title="끌어서 가로 길이 조절" aria-hidden="true"></div>
   <button id="splitChip" class="splitChip" type="button" hidden></button>
   <button id="undoChip" class="undoChip" type="button" hidden></button>
   <div id="hint" class="hint" role="status" aria-live="polite"></div>

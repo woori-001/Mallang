@@ -51,6 +51,7 @@ contextBridge.exposeInMainWorld('api', {
   searchClose: () => ipcRenderer.send('search:close'),
   searchOpen: (id, q) => ipcRenderer.send('search:open', id, q),
   openData: () => ipcRenderer.send('open:data'),
+  foldResize: (id, w, left, done) => ipcRenderer.send('memo:foldResize', id, w, !!left, !!done),
   openLink: (u) => ipcRenderer.send('link:open', u),
   foldSizeReset: () => ipcRenderer.send('fold:resetAll'),
   copyText: (t) => ipcRenderer.send('clip:write', t),

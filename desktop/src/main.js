@@ -18,10 +18,10 @@ const isWin = process.platform === 'win32';
 const P = 14;                  // 메모 창 그림자 여백
 const FOLD_W = 180, FOLD_H = 32;
 // 접은 메모 크기 (%) : 메모마다 정한 값(fs) → 없으면 전체 설정(foldScale)
-const clampFs = (v) => Math.min(200, Math.max(70, Math.round(Number(v) || 100)));
+const clampFs = (v) => Math.min(250, Math.max(50, Math.round(Number(v) || 100)));   // 접은 메모 가로 길이 %
 const foldScale = (m) => clampFs((m && m.fs) || (store && store.settings && store.settings.foldScale) || 100);
 const foldW = (m) => Math.round(FOLD_W * foldScale(m) / 100);
-const foldH = (m) => Math.round(FOLD_H * foldScale(m) / 100);
+const foldH = () => FOLD_H;   // 높이는 그대로, 가로만 조절
 const SIDE_W = 370;            // 목록 패널 340 + 탭 30
 const WIDGET_W = 284;
 const MIN_W = 180, MIN_H = 110, MAX_W = 1400, MAX_H = 1200;
@@ -1105,6 +1105,18 @@ ipcMain.on('group:hide', (e, gid, hidden) => {
 });
 ipcMain.on('group:fold', (e, gid, folded) => {
   for (const m of store.memos.filter((x) => x.group === gid && !x.deleting && !x.hidden && !!x.folded !== !!folded)) updateMemo(m.id, { folded: !!folded });
+});
+// 접힌 메모 옆 끝을 끌어서 가로 길이 조절 (left: 왼쪽 끝을 끄는 중 → 오른쪽 끝 고정)
+ipcMain.on('memo:foldResize', (e, id, w, left, done) => {
+  const m = getMemo(id);
+  const win = memoWins.get(id);
+  w = num(w);
+  if (!m || !win || win.isDestroyed() || w == null || !m.folded || m.x == null) return;
+  const right = m.x + foldW(m);
+  m.fs = clampFs(w / FOLD_W * 100);
+  if (left) m.x = right - foldW(m);
+  setB(win, boundsFor(m));
+  if (done) { layoutTouched(m); save(); broadcast(); }
 });
 ipcMain.on('memo:resize', (e, id, w, h, done) => {
   const m = getMemo(id);
