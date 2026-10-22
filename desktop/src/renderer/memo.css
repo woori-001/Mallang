@@ -276,3 +276,21 @@ html.paper .chip { background: var(--tint); }
 
 /* 오른쪽 기준 접기·펴기 */
 .card.ar { left: auto; right: 14px; }
+
+/* 메모 안에서 찾기 */
+.findBar {
+  position: absolute; top: 44px; left: 10px; right: 10px; z-index: 7; display: flex; align-items: center; gap: 2px;
+  height: 36px; padding: 0 4px 0 10px; border-radius: 12px; background: rgba(var(--glass), .97);
+  box-shadow: 0 6px 16px rgba(60, 50, 140, .18), 0 0 0 1.5px var(--a1); animation: drop .22s var(--ease);
+}
+.findBar[hidden] { display: none; }
+.findBar.none { box-shadow: 0 6px 16px rgba(60, 50, 140, .18), 0 0 0 1.5px #D2445E; }
+.findBar input { flex: 1; min-width: 0; border: none; outline: none; background: transparent; font-size: 13px; color: var(--ink); user-select: text; }
+.findN { font-size: 11.5px; color: var(--sub); flex: none; padding: 0 4px; font-variant-numeric: tabular-nums; }
+.findBar .ib { width: 26px; height: 26px; color: var(--sub); }
+.card.finding .body { padding-top: 40px; }
+.card.folded .findBar { display: none; }
+::highlight(mfind) { background-color: color-mix(in srgb, var(--a1) 28%, transparent); }
+::highlight(mfindcur) { background-color: #FFD54A; color: #1A1A1A; }
+.item.fhit { background: color-mix(in srgb, var(--a1) 12%, transparent); }
+.item.fcur { background: #FFE58A; }

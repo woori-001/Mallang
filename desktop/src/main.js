@@ -701,12 +701,19 @@ ipcMain.on('search:size', (e, h) => {
   searchWin.setBounds({ x: b.x, y: b.y, width: b.width, height: Math.round(Math.min(640, Math.max(60, h))) });
 });
 ipcMain.on('search:close', () => closeSearch());
-ipcMain.on('search:open', (e, id) => {
+ipcMain.on('search:open', (e, id, q) => {
   closeSearch();
   const m = getMemo(id);
   if (!m) return;
+  const wasHidden = m.hidden;
   if (m.folded) updateMemo(id, { folded: false });
-  setTimeout(() => focusMemo(id), m.hidden ? 0 : 60);
+  setTimeout(() => focusMemo(id), wasHidden ? 0 : 60);
+  // 찾은 글자를 메모 안에서 바로 보여주기 (창이 새로 열리면 조금 늦게)
+  if (typeof q === 'string' && q.trim()) {
+    const send = () => { const w = memoWins.get(id); if (w && !w.isDestroyed()) w.webContents.send('cmd', { type: 'find', q: q.trim().slice(0, 100) }); };
+    setTimeout(send, 450);
+    if (wasHidden) setTimeout(send, 1400);
+  }
 });
 
 // ───────────────────────── 연락망 띄우기 ─────────────────────────

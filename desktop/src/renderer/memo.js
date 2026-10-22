@@ -539,6 +539,100 @@
     $('splitChip').hidden = !(r && String(getSelection()).trim());
   });
 
+  // ───────── 메모 안에서 찾기 (Ctrl+F) ─────────
+  const findBar = $('findBar'), findQ = $('findQ');
+  const chevSvg = (d) => '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + d + '"/></svg>';
+  $('findPrev').innerHTML = chevSvg('M6 15l6-6 6 6');
+  $('findNext').innerHTML = chevSvg('M6 9l6 6 6-6');
+  $('findX').innerHTML = ICONS.x;
+  const HL = window.CSS && CSS.highlights;
+  let fMatches = [], fCur = -1, lastCmd = { q: '', at: 0 };
+  function clearFind() {
+    if (HL) { HL.delete('mfind'); HL.delete('mfindcur'); }
+    itemsEl.querySelectorAll('.fhit, .fcur').forEach((x) => x.classList.remove('fhit', 'fcur'));
+  }
+  function collectFind(qs) {
+    const out = [], n = qs.toLowerCase();
+    if (!n) return out;
+    if (memo.type === 'check') {
+      itemsEl.querySelectorAll('.item').forEach((row) => { const v = (row.querySelector('.itxt').value || '').toLowerCase(); let i = v.indexOf(n); while (i >= 0) { out.push({ row }); i = v.indexOf(n, i + n.length); } });
+      return out;
+    }
+    const root = memo.type === 'table' ? tblEl.querySelector('table') : text;
+    if (!root) return out;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) {
+      const v = node.nodeValue.toLowerCase();
+      let i = v.indexOf(n);
+      while (i >= 0) { const r = document.createRange(); r.setStart(node, i); r.setEnd(node, i + n.length); out.push({ range: r }); i = v.indexOf(n, i + n.length); }
+    }
+    return out;
+  }
+  function paintFind() {
+    clearFind();
+    const ranges = fMatches.filter((x) => x.range).map((x) => x.range);
+    if (HL && ranges.length) HL.set('mfind', new Highlight(...ranges));
+    fMatches.forEach((x) => { if (x.row) x.row.classList.add('fhit'); });
+    const m = fMatches[fCur];
+    $('findN').textContent = (fCur + 1) + '/' + fMatches.length;
+    if (!m) return;
+    if (m.range) {
+      if (HL) HL.set('mfindcur', new Highlight(m.range));
+      const el = m.range.startContainer.parentElement;
+      if (el) {
+        // 찾은 줄이 보이게 스크롤
+        const box = memo.type === 'table' ? tblEl.querySelector('.tblScroll') : text;
+        const rr = m.range.getBoundingClientRect(), br = box.getBoundingClientRect();
+        if (rr.top < br.top + 8 || rr.bottom > br.bottom - 8) box.scrollTop += rr.top - br.top - br.height / 2;
+        if (box.scrollWidth > box.clientWidth && (rr.left < br.left || rr.right > br.right)) box.scrollLeft += rr.left - br.left - br.width / 2;
+      }
+    } else if (m.row) {
+      m.row.classList.add('fcur');
+      m.row.scrollIntoView({ block: 'nearest' });
+    }
+  }
+  function runFind(keep) {
+    const qs = findQ.value.trim();
+    fMatches = collectFind(qs);
+    findBar.classList.toggle('none', !!qs && !fMatches.length);
+    if (!fMatches.length) { fCur = -1; clearFind(); $('findN').textContent = qs ? '없음' : ''; return; }
+    fCur = keep ? Math.min(Math.max(fCur, 0), fMatches.length - 1) : 0;
+    paintFind();
+  }
+  function stepFind(d) { if (!fMatches.length) return; fCur = (fCur + d + fMatches.length) % fMatches.length; paintFind(); }
+  function openFind(qs) {
+    if (memo.folded) toggleFold();
+    closeTools();
+    const sel = String(getSelection()).trim();
+    findBar.hidden = false;
+    card.classList.add('finding');
+    if (qs != null) findQ.value = qs;
+    else if (sel && sel.length < 80 && !sel.includes('\n')) findQ.value = sel;
+    setTimeout(() => { findQ.focus(); findQ.select(); runFind(false); }, memo.folded ? 380 : 20);
+  }
+  function closeFind() {
+    findBar.hidden = true;
+    card.classList.remove('finding');
+    clearFind();
+    fMatches = []; fCur = -1;
+  }
+  findQ.addEventListener('input', () => runFind(false));
+  findQ.addEventListener('keydown', (e) => {
+    if (e.isComposing || e.keyCode === 229) return;
+    if (e.key === 'Enter') { e.preventDefault(); stepFind(e.shiftKey ? -1 : 1); }
+    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeFind(); }
+  });
+  $('findNext').addEventListener('click', () => stepFind(1));
+  $('findPrev').addEventListener('click', () => stepFind(-1));
+  $('findX').addEventListener('click', closeFind);
+  // 내용을 고치면 찾은 표시도 다시
+  let refindT = null;
+  const refind = () => { if (!findBar.hidden) { clearTimeout(refindT); refindT = setTimeout(() => runFind(true), 200); } };
+  text.addEventListener('input', refind);
+  itemsEl.addEventListener('input', refind);
+  tblEl.addEventListener('input', refind);
+
   // ───────── 크기 조절 ─────────
   let rs = null, resizeRaf = 0;
   grip.addEventListener('pointerdown', (e) => {
@@ -632,6 +726,7 @@
       return;
     }
     if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === 'n') { e.preventDefault(); api.create({ near: id }); }
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && (e.key.toLowerCase() === 'f' || e.code === 'KeyF')) { e.preventDefault(); openFind(null); }
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && !e.altKey && (e.key.toLowerCase() === 'x' || e.code === 'KeyX')) { e.preventDefault(); splitSelection(); }
     // 분리 직후 Ctrl+Z = 분리 되돌리기
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && (e.key.toLowerCase() === 'z' || e.code === 'KeyZ') && lastSplit != null && !$('undoChip').hidden) { e.preventDefault(); $('undoChip').click(); }
@@ -641,6 +736,12 @@
   card.addEventListener('animationend', () => card.classList.remove('enter', 'flash'));
   api.onCmd((c) => {
     if (c.type === 'leave') card.classList.add('leaving');
+    if (c.type === 'find' && typeof c.q === 'string') {
+      // 검색 창에서 연 메모: 찾은 글자를 바로 보여줌 (같은 요청이 두 번 오면 한 번만)
+      if (c.q === lastCmd.q && Date.now() - lastCmd.at < 2500) return;
+      lastCmd = { q: c.q, at: Date.now() };
+      setTimeout(() => openFind(c.q), memo && memo.folded ? 400 : 60);
+    }
     if (c.type === 'settext' && typeof c.text === 'string') { memo.text = c.text; ed.setText(c.text); }
     if (c.type === 'flash') {
       card.classList.remove('flash', 'enter');

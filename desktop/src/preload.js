@@ -39,7 +39,7 @@ contextBridge.exposeInMainWorld('api', {
   peopleFold: (on) => ipcRenderer.send('people:fold', !!on),
   searchSize: (h) => ipcRenderer.send('search:size', h),
   searchClose: () => ipcRenderer.send('search:close'),
-  searchOpen: (id) => ipcRenderer.send('search:open', id),
+  searchOpen: (id, q) => ipcRenderer.send('search:open', id, q),
   openData: () => ipcRenderer.send('open:data'),
   copyText: (t) => ipcRenderer.send('clip:write', t),
   checkUpdate: () => ipcRenderer.send('update:check'),

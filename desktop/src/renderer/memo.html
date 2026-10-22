@@ -50,6 +50,14 @@
     <form id="gNew" class="gnew"><input id="gName" type="text" maxlength="40" placeholder="새 그룹 이름" spellcheck="false"><button type="submit" class="gadd">만들기</button></form>
   </div>
 
+  <div id="findBar" class="findBar" hidden role="search">
+    <input id="findQ" type="text" placeholder="메모에서 찾기" spellcheck="false" aria-label="메모에서 찾기">
+    <span id="findN" class="findN"></span>
+    <button id="findPrev" class="ib" type="button" aria-label="이전" title="이전 (Shift+Enter)"></button>
+    <button id="findNext" class="ib" type="button" aria-label="다음" title="다음 (Enter)"></button>
+    <button id="findX" class="ib" type="button" aria-label="찾기 닫기" title="닫기 (Esc)"></button>
+  </div>
+
   <div id="body" class="body">
     <div id="text" class="text" data-placeholder="여기에 바로 입력 · Ctrl+Enter 구분선" aria-label="메모 내용"></div>
     <div id="tbl" class="tblArea" hidden></div>

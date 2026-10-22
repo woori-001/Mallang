@@ -31,10 +31,7 @@
     if (!n) return lines.slice(0, 2).join(' · ');
     const k = lines.findIndex((l) => l.toLowerCase().includes(n));
     if (k < 0) return lines.slice(0, 2).join(' · ');
-    let l = lines[k];
-    const j = l.toLowerCase().indexOf(n);
-    if (j > 24) l = '…' + l.slice(j - 18);
-    return l;
+    return lines.slice(k, k + 3).join('\n');   // 찾은 줄부터 세 줄 (그대로 드래그해서 복사할 수 있게)
   }
   const kindTag = (m) => [m.hidden ? '숨김' : m.folded ? '접힘' : '', m.type === 'table' ? '표' : m.type === 'check' ? '체크리스트' : ''].filter(Boolean).join(' · ');
 
@@ -99,7 +96,7 @@
   function choose(i) {
     const it = items[i];
     if (!it || closing) return;
-    if (it.kind === 'memo') { closing = true; api.searchOpen(it.id); return; }
+    if (it.kind === 'memo') { closing = true; api.searchOpen(it.id, q.value.trim()); return; }
     api.copyText(it.copy);
     const el = res.querySelector('.it[data-i="' + i + '"] .tag') || res.querySelector('.it[data-i="' + i + '"] .t');
     if (el) { el.textContent = '복사했어요'; el.classList.add('copied'); }
@@ -116,8 +113,20 @@
   });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); api.searchClose(); } });
   res.addEventListener('mousemove', (e) => { const it = e.target.closest('.it'); if (it && Number(it.dataset.i) !== sel) { sel = Number(it.dataset.i); mark(); } });
-  res.addEventListener('mousedown', (e) => e.preventDefault());
-  res.addEventListener('click', (e) => { const it = e.target.closest('.it'); if (it) choose(Number(it.dataset.i)); });
+  // 결과 글자는 드래그해서 복사할 수 있어요 (드래그했으면 메모를 열지 않음)
+  let downAt = null;
+  res.addEventListener('mousedown', (e) => { downAt = { x: e.clientX, y: e.clientY }; if (!e.target.closest('.t, .s')) e.preventDefault(); });
+  res.addEventListener('click', (e) => {
+    const moved = downAt && Math.abs(e.clientX - downAt.x) + Math.abs(e.clientY - downAt.y) > 4;
+    if (moved || String(getSelection()).trim()) return;
+    const it = e.target.closest('.it'); if (it) choose(Number(it.dataset.i));
+  });
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'c' || e.code === 'KeyC') && document.activeElement !== q) {
+      const s = String(getSelection());
+      if (s) { e.preventDefault(); api.copyText(s); const b = $('foot'); b.hidden = false; b.innerHTML = '<span class="copied">복사했어요</span>'; setTimeout(() => { b.innerHTML = '<span>↑↓ 고르기</span><span>Enter 열기</span><span>Esc 닫기</span>'; }, 1200); }
+    }
+  });
 
   function apply(s) {
     S = s;
