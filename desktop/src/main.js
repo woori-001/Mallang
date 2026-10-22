@@ -438,8 +438,16 @@ function updateMemo(id, patch) {
   if (['layer', 'hidden', 'folded', 'group', 'x', 'y'].some((k) => prev[k] !== m[k])) layoutTouched(m);
 
   // 접힌 메모를 펼 때 예전 '모두 접어 정리' 이전 자리로 돌아가기
+  let restored = false;
   if ('folded' in patch && prev.folded && !m.folded && m.ox != null) {
-    m.x = m.ox; m.y = m.oy; delete m.ox; delete m.oy;
+    m.x = m.ox; m.y = m.oy; delete m.ox; delete m.oy; restored = true;
+  }
+  // 화면 오른쪽에 있는 메모는 오른쪽 끝을 그대로 두고 왼쪽으로 펼쳐요 (옆 모니터로 넘어가지 않게)
+  if (!!m.folded !== !!prev.folded && !restored && m.x != null && !applyingLayout) {
+    const fromW = prev.folded ? FOLD_W : m.w, toW = m.folded ? FOLD_W : m.w;
+    const d = screen.getDisplayMatching({ x: Math.round(m.x), y: Math.round(m.y), width: Math.round(fromW), height: 40 }).workArea;
+    m.ar = m.x + fromW / 2 > d.x + d.width / 2;
+    if (m.ar) m.x = Math.max(d.x, m.x + fromW - toW);
   }
   save();
   broadcast();
@@ -456,7 +464,9 @@ function updateMemo(id, patch) {
       setTimeout(() => { const mm = getMemo(id); if (mm && mm.folded) setB(win, boundsFor(mm)); }, 320);
     } else {
       const moved = prev.x !== m.x || prev.y !== m.y;
-      if (moved) {
+      if (m.ar && !restored) {
+        setB(win, boundsFor(m));   // 오른쪽 기준: 창은 바로 펼친 자리로, 메모는 오른쪽에서 왼쪽으로 커짐
+      } else if (moved) {
         const b = boundsFor(m);
         const cur = win.getBounds();
         setB(win, { x: cur.x, y: cur.y, width: b.width, height: b.height });
@@ -567,12 +577,20 @@ function focusMemo(id) {
   win.webContents.send('cmd', { type: 'flash' });
 }
 
+// 접기·펴기 기준 정하기: 화면 오른쪽 절반이면 오른쪽 끝 기준
+function anchorFold(m, folding) {
+  if (m.x == null) return;
+  const fromW = folding ? m.w : FOLD_W, toW = folding ? FOLD_W : m.w;
+  const d = screen.getDisplayMatching({ x: Math.round(m.x), y: Math.round(m.y), width: Math.round(fromW), height: 40 }).workArea;
+  m.ar = m.x + fromW / 2 > d.x + d.width / 2;
+  if (m.ar) m.x = Math.max(d.x, m.x + fromW - toW);
+}
 // 모두 접기: 지금 자리 그대로 접기만 (배치는 바꾸지 않음)
 function foldAll() {
   if (peopleWin && !peopleWin.isDestroyed()) setPeopleFolded(true);
   const list = store.memos.filter((m) => !m.hidden && !m.deleting && !m.folded);
   if (!list.length) return;
-  for (const m of list) m.folded = true;
+  for (const m of list) { anchorFold(m, true); m.folded = true; }
   layoutTouched(null, list);
   save();
   broadcast();
@@ -590,6 +608,7 @@ function unfoldAll() {
   if (peopleWin && !peopleWin.isDestroyed()) setPeopleFolded(false);
   const list = store.memos.filter((m) => m.folded && !m.hidden && !m.deleting);
   for (const m of list) {
+    if (m.ox == null) anchorFold(m, false);
     m.folded = false;
     if (m.ox != null) { m.x = m.ox; m.y = m.oy; }
     delete m.ox; delete m.oy;
@@ -601,6 +620,7 @@ function unfoldAll() {
     const win = memoWins.get(m.id);
     if (!win || win.isDestroyed()) continue;
     const b = boundsFor(m);
+    if (m.ar) { setB(win, b); continue; }   // 오른쪽 기준 메모는 왼쪽으로 펼침
     const cur = win.getBounds();
     setB(win, { x: cur.x, y: cur.y, width: b.width, height: b.height });
     animateTo(win, b, 420);
@@ -837,7 +857,7 @@ ipcMain.on('memo:foldAll', foldAll);
 ipcMain.on('memo:unfoldAll', unfoldAll);
 // ───────── 자석 정렬: 옮길 때 다른 메모·화면 가장자리에 착 붙음 ─────────
 const SNAP = 14;   // 이 거리(px) 안에 들어오면 붙음
-const GAP = 6;     // 붙었을 때 메모 사이 간격
+const GAP = 0;     // 붙었을 때 메모 사이 간격 (메모잇·에스메모처럼 딱 붙게)
 function snapPos(m, x, y, skip) {
   const w = m.folded ? FOLD_W : m.w;
   const h = m.folded ? FOLD_H : m.h;

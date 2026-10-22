@@ -11,7 +11,7 @@
   const checks = $('checks'), itemsEl = $('items'), chip = $('chip'), picker = $('picker'), grip = $('grip');
   const FOLD_W = 180, FOLD_H = 32, MIN_W = 180, MIN_H = 110;
 
-  let memo = null, settings = null, sk = null, groups = [];
+  let memo = null, settings = null, sk = null, groups = [], lastFolded = null, arT = null;
   let items = [];
   let localSize = null;
 
@@ -55,6 +55,13 @@
       card.style.setProperty('--tint', 'rgb(' + p.join(',') + ')');
       card.style.background = memo.folded ? 'var(--tint)' : '#FFFFFF';
     } else card.style.background = grad(sk, memo.slot || 0, a);
+    // 오른쪽 기준으로 접고 펼 때는 메모가 오른쪽 끝에 붙은 채로 줄고 늘어나게
+    if (lastFolded !== null && lastFolded !== !!memo.folded && memo.ar) {
+      card.classList.add('ar');
+      clearTimeout(arT);
+      arT = setTimeout(() => card.classList.remove('ar'), 700);
+    }
+    lastFolded = !!memo.folded;
     card.classList.toggle('folded', !!memo.folded);
     card.classList.toggle('bodybg', !!settings.bodyBg);
     const w = memo.folded ? FOLD_W : (localSize ? localSize.w : memo.w);
@@ -298,6 +305,10 @@
     closePicker();
     if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
     try { getSelection().removeAllRanges(); title.setSelectionRange(0, 0); } catch (e) { /* 무시 */ }
+    // 화면 오른쪽 절반이면 오른쪽 끝 기준 (메인과 같은 규칙)
+    const w0 = memo.folded ? FOLD_W : memo.w;
+    const sc = window.screen;
+    memo.ar = window.screenX + 14 + w0 / 2 > (sc.availLeft || 0) + sc.availWidth / 2;
     send({ folded: !memo.folded });
     render();
   }

@@ -273,3 +273,6 @@ html.paper .chip { background: var(--tint); }
 .undoChip[hidden] { display: none; }
 .card.folded .undoChip { display: none; }
 #bUnsplit[hidden] { display: none; }
+
+/* 오른쪽 기준 접기·펴기 */
+.card.ar { left: auto; right: 14px; }
