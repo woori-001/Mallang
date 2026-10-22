@@ -708,6 +708,7 @@ function closeWidget() {
 // ───────────────────────── 말랑이 시계 알림 (정각·30분) ─────────────────────────
 let clockWin = null, clockTimer = null, clockLast = '', clockMode = null;
 const CLOCK_W = 250, CLOCK_H = 96;
+
 function clockBounds() {
   const s = (store.settings.clockScale || 100) / 100;
   const w = Math.round(CLOCK_W * s) + 2 * P + 20, h = Math.round(CLOCK_H * s) + 2 * P + 40;
@@ -715,8 +716,10 @@ function clockBounds() {
   const p = store.clockPos || { x: wa.x + wa.width / 2, y: wa.y + 110 };
   // 화면 밖이면 기본 자리로
   const d = screen.getDisplayNearestPoint({ x: Math.round(p.x), y: Math.round(p.y) }).workArea;
-  const cx = Math.min(d.x + d.width - w / 2, Math.max(d.x + w / 2, p.x)), cy = Math.min(d.y + d.height - h / 2, Math.max(d.y + h / 2, p.y));
-  return { x: Math.round(cx - w / 2), y: Math.round(cy - h / 2), width: w, height: h };
+  // 시계 판 기준으로 화면 안에 (창 여백은 화면 밖이어도 괜찮음)
+  const ii = cleanInset(store.clockInset) || { l: (w - Math.round(CLOCK_W * s * 0.9)) / 2, t: (h - Math.round(CLOCK_H * s * 0.75)) / 2, w: Math.round(CLOCK_W * s * 0.9), h: Math.round(CLOCK_H * s * 0.75) };
+  const q = { x: Math.min(d.x + d.width - ii.w, Math.max(d.x, p.x - w / 2 + ii.l)) - ii.l, y: Math.min(d.y + d.height - ii.h, Math.max(d.y, p.y - h / 2 + ii.t)) - ii.t };
+  return { x: Math.round(q.x), y: Math.round(q.y), width: w, height: h };
 }
 function showClock(mode) {
   if (clockWin && !clockWin.isDestroyed()) {
@@ -737,12 +740,33 @@ function setupClock(win, mode) {
 }
 function closeClock() { if (clockWin && !clockWin.isDestroyed()) clockWin.close(); clockWin = null; }
 ipcMain.on('clock:done', () => { if (clockMode !== 'place') closeClock(); });
-ipcMain.on('clock:move', (e, x, y, done) => {
+// 시계 판이 화면 끝 가까이 오면 끝에 딱 붙이기 (창의 투명 여백은 화면 밖으로 나가도 됨)
+const CLOCK_SNAP = 22;
+function cleanInset(i) {
+  if (!i || typeof i !== 'object') return null;
+  const o = {};
+  for (const k of ['l', 't', 'w', 'h']) { const v = num(i[k]); if (v == null || v < 0 || v > 2000) return null; o[k] = Math.round(v); }
+  return o.w > 0 && o.h > 0 ? o : null;
+}
+function snapClock(x, y, i) {
+  if (!i) return { x, y };
+  let px = x + i.l, py = y + i.t;
+  const d = screen.getDisplayNearestPoint({ x: Math.round(px + i.w / 2), y: Math.round(py + i.h / 2) }).workArea;
+  const R = d.x + d.width - i.w, B = d.y + d.height - i.h;
+  if (Math.abs(px - d.x) < CLOCK_SNAP) px = d.x; else if (Math.abs(px - R) < CLOCK_SNAP) px = R;
+  if (Math.abs(py - d.y) < CLOCK_SNAP) py = d.y; else if (Math.abs(py - B) < CLOCK_SNAP) py = B;
+  px = Math.min(R, Math.max(d.x, px)); py = Math.min(B, Math.max(d.y, py));
+  return { x: px - i.l, y: py - i.t };
+}
+ipcMain.on('clock:move', (e, x, y, done, inset) => {
   x = num(x); y = num(y);
   if (!clockWin || clockWin.isDestroyed() || x == null || y == null) return;
+  const i = cleanInset(inset);
+  if (i) store.clockInset = i;
+  const p = snapClock(x, y, i);
   const b = clockWin.getBounds();
-  clockWin.setBounds({ x: Math.round(x), y: Math.round(y), width: b.width, height: b.height });
-  if (done) { store.clockPos = { x: Math.round(x + b.width / 2), y: Math.round(y + b.height / 2) }; save(); }
+  clockWin.setBounds({ x: Math.round(p.x), y: Math.round(p.y), width: b.width, height: b.height });
+  if (done) { store.clockPos = { x: Math.round(p.x + b.width / 2), y: Math.round(p.y + b.height / 2) }; save(); }
 });
 ipcMain.on('clock:place', (e, on) => {
   closeClock();

@@ -44,7 +44,7 @@ contextBridge.exposeInMainWorld('api', {
   noticeOpen: (id) => ipcRenderer.send('notice:open', id),
   noticeSend: (n) => ipcRenderer.invoke('notice:send', n),
   clockDone: () => ipcRenderer.send('clock:done'),
-  clockMove: (x, y, done) => ipcRenderer.send('clock:move', x, y, !!done),
+  clockMove: (x, y, done, inset) => ipcRenderer.send('clock:move', x, y, !!done, inset),
   clockPlace: (on) => ipcRenderer.send('clock:place', !!on),
   clockPreview: () => ipcRenderer.send('clock:preview'),
   searchSize: (h) => ipcRenderer.send('search:size', h),
