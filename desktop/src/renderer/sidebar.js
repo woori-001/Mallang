@@ -637,6 +637,12 @@
     const tsv = s.titleScale || 100;
     if (document.activeElement !== $('titleScale')) $('titleScale').value = tsv;
     $('titleScaleV').textContent = tsv + '%';
+    const fdv = s.foldScale || 100;
+    if (document.activeElement !== $('foldScale')) $('foldScale').value = fdv;
+    $('foldScaleV').textContent = fdv + '%';
+    const own = (S.memos || []).filter((m) => m.fs && !m.deleting).length;
+    $('fsClear').hidden = !own;
+    $('fsClear').textContent = '따로 정한 메모 ' + own + '개도 이 크기로 맞추기';
     $('titleBold').setAttribute('aria-pressed', String(s.titleBold !== false));
     if (document.activeElement !== $('alpha')) $('alpha').value = s.alpha;
     if (document.activeElement !== $('sideAlpha')) $('sideAlpha').value = s.sideAlpha;
@@ -677,6 +683,8 @@
   $('clockPlace').addEventListener('click', () => api.clockPlace(true));
   $('noticeOn').addEventListener('click', () => api.setSettings({ noticeOn: S.settings.noticeOn === false }));
   $('fontSel').addEventListener('change', (e) => api.setSettings({ font: e.target.value }));
+  $('foldScale').addEventListener('input', (e) => { $('foldScaleV').textContent = e.target.value + '%'; api.setSettings({ foldScale: Number(e.target.value) }); });
+  $('fsClear').addEventListener('click', () => api.foldSizeReset());
   $('titleScale').addEventListener('input', (e) => { $('titleScaleV').textContent = e.target.value + '%'; api.setSettings({ titleScale: Number(e.target.value) }); });
   $('titleBold').addEventListener('click', () => api.setSettings({ titleBold: S.settings.titleBold === false }));
   const setFs = (v) => { v = Math.min(170, Math.max(70, v)); $('fontScale').value = v; $('fontScaleV').textContent = v + '%'; api.setSettings({ fontScale: v }); };

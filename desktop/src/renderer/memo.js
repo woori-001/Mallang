@@ -10,6 +10,9 @@
   const card = $('card'), head = $('head'), title = $('title'), text = $('text');
   const checks = $('checks'), itemsEl = $('items'), chip = $('chip'), picker = $('picker'), grip = $('grip');
   const FOLD_W = 180, FOLD_H = 32, MIN_W = 180, MIN_H = 110;
+  // 접은 크기 (%) : 이 메모 값 → 없으면 전체 설정
+  const foldPct = () => Math.min(200, Math.max(70, Math.round(Number((memo && memo.fs) || (settings && settings.foldScale) || 100))));
+  const foldW = () => Math.round(FOLD_W * foldPct() / 100), foldH = () => Math.round(FOLD_H * foldPct() / 100);
 
   let memo = null, settings = null, sk = null, groups = [], lastFolded = null, arT = null;
   let items = [];
@@ -56,16 +59,20 @@
       card.style.background = memo.folded ? 'var(--tint)' : '#FFFFFF';
     } else card.style.background = grad(sk, memo.slot || 0, a);
     // 오른쪽 기준으로 접고 펼 때는 메모가 오른쪽 끝에 붙은 채로 줄고 늘어나게
-    if (lastFolded !== null && lastFolded !== !!memo.folded && memo.ar) {
-      card.classList.add('ar');
+    // 아래쪽 메모는 아래 끝에 붙은 채로 (위로 펼쳐짐)
+    if (lastFolded !== null && lastFolded !== !!memo.folded && (memo.ar || memo.ab)) {
+      card.classList.toggle('ar', !!memo.ar);
+      card.classList.toggle('ab', !!memo.ab);
       clearTimeout(arT);
-      arT = setTimeout(() => card.classList.remove('ar'), 700);
+      arT = setTimeout(() => card.classList.remove('ar', 'ab'), 700);
     }
     lastFolded = !!memo.folded;
     card.classList.toggle('folded', !!memo.folded);
     card.classList.toggle('bodybg', !!settings.bodyBg);
-    const w = memo.folded ? FOLD_W : (localSize ? localSize.w : memo.w);
-    const h = memo.folded ? FOLD_H : (localSize ? localSize.h : memo.h);
+    const w = memo.folded ? foldW() : (localSize ? localSize.w : memo.w);
+    const h = memo.folded ? foldH() : (localSize ? localSize.h : memo.h);
+    card.style.setProperty('--fz', foldPct() / 100);
+    if (!picker.hidden && document.activeElement !== $('fsRange')) syncFs();
     card.style.width = w + 'px';
     card.style.height = h + 'px';
 
@@ -306,9 +313,10 @@
     if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
     try { getSelection().removeAllRanges(); title.setSelectionRange(0, 0); } catch (e) { /* 무시 */ }
     // 화면 오른쪽 절반이면 오른쪽 끝 기준 (메인과 같은 규칙)
-    const w0 = memo.folded ? FOLD_W : memo.w;
+    const w0 = memo.folded ? foldW() : memo.w, h0 = memo.folded ? foldH() : memo.h;
     const sc = window.screen;
     memo.ar = window.screenX + 14 + w0 / 2 > (sc.availLeft || 0) + sc.availWidth / 2;
+    memo.ab = window.screenY + 14 + h0 / 2 > (sc.availTop || 0) + sc.availHeight / 2;
     send({ folded: !memo.folded });
     render();
   }
@@ -413,6 +421,7 @@
       '<button class="swatch' + (c.hex.toLowerCase() === color.toLowerCase() ? ' on' : '') + '" style="background:' + c.hex + ';--pc:' + c.hex + '" type="button" data-color="' + c.hex + '" aria-label="' + c.name + '" title="' + c.name + '"></button>'
     ).join('') +
       '<label class="custom" title="직접 고르기"><span class="sr">기호 색 직접 고르기</span><input id="customColor" type="color" value="' + esc(color.toLowerCase()) + '"></label>';
+    syncFs();
     $('pSlots').innerHTML = [0, 1, 2, 3, 4].map((s) =>
       '<button class="swatch slotsw' + ((memo.slot || 0) === s ? ' on' : '') + '" style="background:' + grad(sk, s, 1) + ';--pc:' + sk.a1 + '" type="button" data-slot="' + s + '" aria-label="메모 색 ' + (s + 1) + '"></button>'
     ).join('');
@@ -426,6 +435,31 @@
     render();
     renderPicker();
   });
+  // 접었을 때 크기 (이 메모만)
+  function syncFs() {
+    const r = $('fsRange');
+    r.value = foldPct();
+    $('fsVal').textContent = foldPct() + '%' + (memo.fs ? '' : ' (전체 설정)');
+    $('fsReset').hidden = !memo.fs;
+    window.M.syncRanges(picker);
+  }
+  const sendFs = debounce(() => api.update(id, { fs: memo.fs || null }), 120);
+  $('fsRange').addEventListener('input', (e) => {
+    memo.fs = Number(e.target.value);
+    $('fsVal').textContent = memo.fs + '%';
+    $('fsReset').hidden = false;
+    sendFs();
+  });
+  $('fsReset').addEventListener('click', () => { delete memo.fs; api.update(id, { fs: null }); syncFs(); render(); });
+  // 접힌 메모 위에서 Ctrl+휠: 접은 크기 조절
+  card.addEventListener('wheel', (e) => {
+    if (!memo || !memo.folded || !e.ctrlKey) return;
+    e.preventDefault();
+    const v = Math.min(200, Math.max(70, foldPct() + (e.deltaY < 0 ? 10 : -10)));
+    if (v === foldPct()) return;
+    send({ fs: v });
+    render();
+  }, { passive: false });
   picker.addEventListener('change', (e) => {
     if (e.target.id === 'customColor') {
       send({ markColor: e.target.value, mark: memo.mark || 'heart' });
@@ -772,5 +806,61 @@
         else ed.focusEnd();
       }, 120);
     }
+  });
+
+  // ───────── 링크: 메모에 적은 웹 주소를 누르면 바로 열기 ─────────
+  const LHL = window.CSS && CSS.highlights;
+  const URL_RE = /\b(?:https?:\/\/|www\.)[^\s<>"'`]+/gi;
+  let links = [];
+  function scanLinks() {
+    links = [];
+    if (memo && memo.type !== 'check') {
+      const root = memo.type === 'table' ? tblEl : text;
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      let node;
+      while ((node = walker.nextNode())) {
+        const v = node.nodeValue;
+        if (v.indexOf('http') < 0 && v.indexOf('www.') < 0 && v.indexOf('HTTP') < 0 && v.indexOf('WWW.') < 0) continue;
+        URL_RE.lastIndex = 0;
+        let m;
+        while ((m = URL_RE.exec(v))) {
+          let u = m[0].replace(/[.,;:!?)\]}>」』。、]+$/, '');
+          if (u.length < 5) continue;
+          const r = document.createRange();
+          r.setStart(node, m.index); r.setEnd(node, m.index + u.length);
+          links.push({ r, u });
+        }
+      }
+    }
+    if (LHL) { if (links.length) LHL.set('mlink', new Highlight(...links.map((l) => l.r))); else LHL.delete('mlink'); }
+  }
+  const scanSoon = debounce(scanLinks, 150);
+  new MutationObserver(scanSoon).observe(card, { childList: true, subtree: true, characterData: true });
+  function linkAt(x, y) {
+    for (const l of links) {
+      for (const b of l.r.getClientRects()) if (x >= b.left - 1 && x <= b.right + 1 && y >= b.top - 1 && y <= b.bottom + 1) return l;
+    }
+    return null;
+  }
+  let downAt = null;
+  card.addEventListener('pointermove', (e) => {
+    if (!links.length || (memo && memo.folded)) return;
+    const on = !!linkAt(e.clientX, e.clientY);
+    text.classList.toggle('onlink', on && !text.hidden);
+    tblEl.classList.toggle('onlink', on && !tblEl.hidden);
+    text.title = on ? '누르면 링크가 열려요' : '';
+  });
+  card.addEventListener('pointerdown', (e) => { downAt = e.button === 0 ? { x: e.clientX, y: e.clientY } : null; }, true);
+  card.addEventListener('click', (e) => {
+    if (!downAt || !links.length || memo.folded) return;
+    const moved = Math.abs(e.clientX - downAt.x) > 4 || Math.abs(e.clientY - downAt.y) > 4;
+    downAt = null;
+    if (moved) return;
+    const sel = getSelection();
+    if (sel && !sel.isCollapsed) return;   // 드래그로 고르는 중이면 열지 않기
+    const l = linkAt(e.clientX, e.clientY);
+    if (!l) return;
+    api.openLink(l.u);
+    showHint('링크를 열었어요');
   });
 })();

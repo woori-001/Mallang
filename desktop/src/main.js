@@ -17,6 +17,11 @@ const MOBILE_URL = 'https://woori-001.github.io/Mallang/';
 const isWin = process.platform === 'win32';
 const P = 14;                  // 메모 창 그림자 여백
 const FOLD_W = 180, FOLD_H = 32;
+// 접은 메모 크기 (%) : 메모마다 정한 값(fs) → 없으면 전체 설정(foldScale)
+const clampFs = (v) => Math.min(200, Math.max(70, Math.round(Number(v) || 100)));
+const foldScale = (m) => clampFs((m && m.fs) || (store && store.settings && store.settings.foldScale) || 100);
+const foldW = (m) => Math.round(FOLD_W * foldScale(m) / 100);
+const foldH = (m) => Math.round(FOLD_H * foldScale(m) / 100);
 const SIDE_W = 370;            // 목록 패널 340 + 탭 30
 const WIDGET_W = 284;
 const MIN_W = 180, MIN_H = 110, MAX_W = 1400, MAX_H = 1200;
@@ -39,7 +44,7 @@ let dataDir, dataFile, store, saveTimer, quitting = false;
 function defaults() {
   return {
     version: 1,
-    settings: { skin: 'lav', font: 'gowun', fontScale: 100, titleScale: 100, titleBold: true, calFont: 'same', calScale: 100, peopleFont: 'same', peopleScale: 100, bodyBg: false, alpha: 60, sideAlpha: 55, showToday: true, showPeople: false, clockMode: 30, clockAlpha: 75, clockScale: 100, clockDark: false, noticeOn: true, pinned: false, autoStart: false },
+    settings: { skin: 'lav', font: 'gowun', fontScale: 100, titleScale: 100, titleBold: true, calFont: 'same', calScale: 100, peopleFont: 'same', peopleScale: 100, bodyBg: false, alpha: 60, sideAlpha: 55, showToday: true, showPeople: false, clockMode: 30, clockAlpha: 75, clockScale: 100, clockDark: false, foldScale: 100, noticeOn: true, pinned: false, autoStart: false },
     nextId: 2,
     memos: [{
       id: 1, slot: 0, x: null, y: null, w: 290, h: 240, type: 'text', title: '말랑메모 시작하기',
@@ -235,8 +240,8 @@ const baseWinOpts = {
 const workArea = () => screen.getPrimaryDisplay().workArea;
 
 function boundsFor(m) {
-  const w = m.folded ? FOLD_W : m.w;
-  const h = m.folded ? FOLD_H : m.h;
+  const w = m.folded ? foldW(m) : m.w;
+  const h = m.folded ? foldH(m) : m.h;
   return { x: Math.round(m.x - P), y: Math.round(m.y - P), width: Math.round(w + 2 * P), height: Math.round(h + 2 * P) };
 }
 
@@ -301,7 +306,7 @@ function ensurePos(m) {
     m.x = wa.x + Math.round(wa.width / 2) - 180 + n * 28;
     m.y = wa.y + Math.round(wa.height / 3) - 80 + n * 26;
   }
-  const w = m.folded ? FOLD_W : m.w;
+  const w = m.folded ? foldW(m) : m.w;
   const disp = screen.getDisplayMatching({ x: Math.round(m.x), y: Math.round(m.y), width: Math.round(w), height: 40 }).workArea;
   const off = m.x + 60 > disp.x + disp.width || m.x + w - 60 < disp.x || m.y < disp.y - 20 || m.y + 30 > disp.y + disp.height;
   if (off) {
@@ -426,7 +431,7 @@ function applyLayer(id) {
   }
 }
 
-const ALLOWED = ['title', 'text', 'items', 'table', 'type', 'layer', 'hidden', 'folded', 'mark', 'markColor', 'slot', 'ord', 'clip', 'group'];  // group: 이 PC에서 묶은 그룹  // clip: 드래그해 둔 부분 (이 PC에만)
+const ALLOWED = ['title', 'text', 'items', 'table', 'type', 'layer', 'hidden', 'folded', 'mark', 'markColor', 'slot', 'ord', 'clip', 'group', 'fs'];  // group: 이 PC에서 묶은 그룹  // clip: 드래그해 둔 부분 (이 PC에만)
 // 기기끼리 맞추는 내용 (위치·크기·접힘·맨앞/맨뒤·숨김은 기기마다 따로)
 const CONTENT = ['title', 'text', 'items', 'table', 'type', 'mark', 'markColor', 'slot', 'ord'];
 function touch(m) {
@@ -456,10 +461,14 @@ function updateMemo(id, patch) {
   }
   // 화면 오른쪽에 있는 메모는 오른쪽 끝을 그대로 두고 왼쪽으로 펼쳐요 (옆 모니터로 넘어가지 않게)
   if (!!m.folded !== !!prev.folded && !restored && m.x != null && !applyingLayout) {
-    const fromW = prev.folded ? FOLD_W : m.w, toW = m.folded ? FOLD_W : m.w;
-    const d = screen.getDisplayMatching({ x: Math.round(m.x), y: Math.round(m.y), width: Math.round(fromW), height: 40 }).workArea;
-    m.ar = m.x + fromW / 2 > d.x + d.width / 2;
-    if (m.ar) m.x = Math.max(d.x, m.x + fromW - toW);
+    anchorFold(m, !!m.folded);
+  }
+  // 접은 크기를 바꾸면: 화면 오른쪽·아래쪽 메모는 그쪽 끝을 그대로 두고 크기만 바뀌게
+  let fsMoved = false;
+  if ('fs' in patch) {
+    if (m.fs != null) m.fs = clampFs(m.fs); else delete m.fs;
+    if (m.folded && foldScale(prev) !== foldScale(m) && m.x != null) { keepEdges(m, foldW(prev), foldH(prev), foldW(m), foldH(m)); fsMoved = true; }
+    layoutTouched(m);
   }
   save();
   broadcast();
@@ -470,14 +479,15 @@ function updateMemo(id, patch) {
     if (m.hidden) closeMemoWin(id);
     else { focusOnOpen.add(id); openMemoWin(m); }
   }
+  if (fsMoved && win && !win.isDestroyed()) setB(win, boundsFor(m));
   if (m.folded !== prev.folded && win && !win.isDestroyed()) {
     if (m.folded) {
       // 내용이 먼저 접히고 나서 창 크기 맞추기
       setTimeout(() => { const mm = getMemo(id); if (mm && mm.folded) setB(win, boundsFor(mm)); }, 320);
     } else {
       const moved = prev.x !== m.x || prev.y !== m.y;
-      if (m.ar && !restored) {
-        setB(win, boundsFor(m));   // 오른쪽 기준: 창은 바로 펼친 자리로, 메모는 오른쪽에서 왼쪽으로 커짐
+      if ((m.ar || m.ab) && !restored) {
+        setB(win, boundsFor(m));   // 오른쪽·아래 기준: 창은 바로 펼친 자리로, 메모는 오른쪽에서 왼쪽으로 커짐
       } else if (moved) {
         const b = boundsFor(m);
         const cur = win.getBounds();
@@ -590,12 +600,22 @@ function focusMemo(id) {
 }
 
 // 접기·펴기 기준 정하기: 화면 오른쪽 절반이면 오른쪽 끝 기준
+// 화면 아래쪽 절반이면 아래 끝 기준 → 위로 펼쳐짐 (오른쪽 아래면 왼쪽 위 대각선으로)
 function anchorFold(m, folding) {
   if (m.x == null) return;
-  const fromW = folding ? m.w : FOLD_W, toW = folding ? FOLD_W : m.w;
-  const d = screen.getDisplayMatching({ x: Math.round(m.x), y: Math.round(m.y), width: Math.round(fromW), height: 40 }).workArea;
+  const fromW = folding ? m.w : foldW(m), toW = folding ? foldW(m) : m.w;
+  const fromH = folding ? m.h : foldH(m), toH = folding ? foldH(m) : m.h;
+  const d = screen.getDisplayMatching({ x: Math.round(m.x), y: Math.round(m.y), width: Math.round(fromW), height: Math.round(fromH) }).workArea;
   m.ar = m.x + fromW / 2 > d.x + d.width / 2;
+  m.ab = m.y + fromH / 2 > d.y + d.height / 2;
   if (m.ar) m.x = Math.max(d.x, m.x + fromW - toW);
+  if (m.ab) m.y = Math.max(d.y, m.y + fromH - toH);
+}
+// 크기만 바뀔 때 화면 오른쪽·아래쪽이면 그쪽 끝 고정
+function keepEdges(m, fromW, fromH, toW, toH) {
+  const d = screen.getDisplayMatching({ x: Math.round(m.x), y: Math.round(m.y), width: Math.round(fromW), height: Math.round(fromH) }).workArea;
+  if (m.x + fromW / 2 > d.x + d.width / 2) m.x = Math.max(d.x, m.x + fromW - toW);
+  if (m.y + fromH / 2 > d.y + d.height / 2) m.y = Math.max(d.y, m.y + fromH - toH);
 }
 // 모두 접기: 지금 자리 그대로 접기만 (배치는 바꾸지 않음)
 function foldAll() {
@@ -632,7 +652,7 @@ function unfoldAll() {
     const win = memoWins.get(m.id);
     if (!win || win.isDestroyed()) continue;
     const b = boundsFor(m);
-    if (m.ar) { setB(win, b); continue; }   // 오른쪽 기준 메모는 왼쪽으로 펼침
+    if (m.ar || m.ab) { setB(win, b); continue; }   // 오른쪽·아래 기준 메모는 왼쪽·위로 펼침
     const cur = win.getBounds();
     setB(win, { x: cur.x, y: cur.y, width: b.width, height: b.height });
     animateTo(win, b, 420);
@@ -862,15 +882,25 @@ function updateSettings(patch) {
   if ('bodyBg' in patch) patch.bodyBg = !!patch.bodyBg;
   if ('titleBold' in patch) patch.titleBold = !!patch.titleBold;
   if ('titleScale' in patch) patch.titleScale = Math.min(170, Math.max(70, Number(patch.titleScale) || 100));
-  const keys = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'showPeople', 'clockMode', 'clockAlpha', 'clockScale', 'clockDark', 'noticeOn', 'pinned', 'autoStart'];
+  const keys = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'showPeople', 'clockMode', 'clockAlpha', 'clockScale', 'clockDark', 'foldScale', 'noticeOn', 'pinned', 'autoStart'];
   if ('noticeOn' in patch) patch.noticeOn = !!patch.noticeOn;
+  if ('foldScale' in patch) patch.foldScale = clampFs(patch.foldScale);
   if ('clockMode' in patch) patch.clockMode = [0, 30, 60].includes(Number(patch.clockMode)) ? Number(patch.clockMode) : 30;
   if ('clockAlpha' in patch) patch.clockAlpha = Math.min(100, Math.max(20, Number(patch.clockAlpha) || 75));
   if ('clockScale' in patch) patch.clockScale = Math.min(150, Math.max(70, Number(patch.clockScale) || 100));
   if ('clockDark' in patch) patch.clockDark = !!patch.clockDark;
   if ('fontScale' in patch) patch.fontScale = Math.min(170, Math.max(70, Number(patch.fontScale) || 100));
+  const oldFold = new Map(store.memos.filter((m) => m.folded && m.fs == null && m.x != null && !m.hidden && !m.deleting).map((m) => [m, [foldW(m), foldH(m)]]));
   for (const k of keys) if (k in patch) store.settings[k] = patch[k];
   const s = store.settings;
+  if (s.foldScale !== prev.foldScale) {
+    // 전체 접은 크기 바뀜 → 접힌 메모 창 크기 맞추기
+    for (const [m, [w0, h0]] of oldFold) {
+      keepEdges(m, w0, h0, foldW(m), foldH(m));
+      const win = memoWins.get(m.id);
+      if (win && !win.isDestroyed()) setB(win, boundsFor(m));
+    }
+  }
   if (!applyingLayout && SYNC_SETTINGS.some((k) => JSON.stringify(prev[k]) !== JSON.stringify(s[k]))) { store.layoutSync.settingsT = Date.now(); markLayout(); }
   if (s.autoStart !== prev.autoStart) {
     try { app.setLoginItemSettings({ openAtLogin: !!s.autoStart }); } catch (e) { console.error(e); }
@@ -941,11 +971,11 @@ ipcMain.on('memo:unfoldAll', unfoldAll);
 const SNAP = 14;   // 이 거리(px) 안에 들어오면 붙음
 const GAP = 0;     // 붙었을 때 메모 사이 간격 (메모잇·에스메모처럼 딱 붙게)
 function snapPos(m, x, y, skip) {
-  const w = m.folded ? FOLD_W : m.w;
-  const h = m.folded ? FOLD_H : m.h;
+  const w = m.folded ? foldW(m) : m.w;
+  const h = m.folded ? foldH(m) : m.h;
   const disp = screen.getDisplayMatching({ x: Math.round(x), y: Math.round(y), width: Math.round(w), height: Math.round(h) }).workArea;
   const others = store.memos.filter((o) => o.id !== m.id && !o.hidden && !o.deleting && o.x != null && !(skip && skip.has(o))).map((o) => ({
-    x: o.x, y: o.y, w: o.folded ? FOLD_W : o.w, h: o.folded ? FOLD_H : o.h
+    x: o.x, y: o.y, w: o.folded ? foldW(o) : o.w, h: o.folded ? foldH(o) : o.h
   }));
   let bx = null, by = null, dx = SNAP + 1, dy = SNAP + 1;
   const tryX = (v) => { const d = Math.abs(v - x); if (d < dx) { dx = d; bx = v; } };
@@ -1003,14 +1033,14 @@ function stackIntoGroup(m) {
   const mates = store.memos.filter((o) => o !== m && o.group === m.group && !o.hidden && !o.deleting && o.x != null);
   if (!mates.length || m.x == null) return;
   const left = mates.reduce((a, o) => (o.y < a.y || (o.y === a.y && o.x < a.x) ? o : a), mates[0]);   // 맨 위 메모 줄에 맞춤
-  const bottom = Math.max(...mates.filter((o) => Math.abs(o.x - left.x) < 40).map((o) => o.y + (o.folded ? FOLD_H : o.h)));
+  const bottom = Math.max(...mates.filter((o) => Math.abs(o.x - left.x) < 40).map((o) => o.y + (o.folded ? foldH(o) : o.h)));
   m.x = left.x;
   m.y = bottom + GAP;
   // 화면 아래로 넘치면 옆 줄 맨 위로
   const wa = screen.getDisplayMatching({ x: Math.round(left.x), y: Math.round(left.y), width: 10, height: 10 }).workArea;
-  const h = m.folded ? FOLD_H : m.h;
+  const h = m.folded ? foldH(m) : m.h;
   if (m.y + h > wa.y + wa.height) {
-    const colW = Math.max(...mates.filter((o) => Math.abs(o.x - left.x) < 40).map((o) => (o.folded ? FOLD_W : o.w)));
+    const colW = Math.max(...mates.filter((o) => Math.abs(o.x - left.x) < 40).map((o) => (o.folded ? foldW(o) : o.w)));
     m.x = left.x + colW + GAP;
     m.y = left.y;
   }
@@ -1118,6 +1148,14 @@ ipcMain.on('widget:size', (e, h) => {
   widget.setBounds({ x: b.x, y: b.y, width: WIDGET_W, height: Math.round(Math.min(600, Math.max(80, h))) });
 });
 ipcMain.on('open:data', () => shell.openPath(dataDir));
+// 따로 정한 접은 크기 모두 지우고 전체 설정 따르기
+ipcMain.on('fold:resetAll', () => { for (const m of store.memos.filter((x) => x.fs && !x.deleting)) updateMemo(m.id, { fs: null }); });
+// 메모 속 링크 열기 (웹 주소만)
+ipcMain.on('link:open', (e, raw) => {
+  let u = String(raw || '').trim().slice(0, 2000);
+  if (/^www\./i.test(u)) u = 'https://' + u;
+  try { const p = new URL(u); if (p.protocol === 'http:' || p.protocol === 'https:') shell.openExternal(p.href); } catch (err) { /* 잘못된 주소 */ }
+});
 ipcMain.on('clip:write', (e, t) => { if (typeof t === 'string' && t) clipboard.writeText(t.slice(0, 200000)); });
 
 // ───────────────────────── 백업 내보내기 / 가져오기 (비밀번호 암호화) ─────────────────────────
@@ -1462,8 +1500,8 @@ async function cloudStart() {
 
 // ───────── 배치·꾸미기 맞추기 (같은 계정이면 어느 PC에서든 같은 배치) ─────────
 // 메모마다 배치 시각(lt)을 따로 두어, 한 PC에서 옮긴 메모만 다른 PC에 반영돼요.
-const LAYOUT_KEYS = ['x', 'y', 'w', 'h', 'folded', 'layer', 'hidden', 'group', 'ox', 'oy'];
-const SYNC_SETTINGS = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha'];
+const LAYOUT_KEYS = ['x', 'y', 'w', 'h', 'folded', 'layer', 'hidden', 'group', 'ox', 'oy', 'fs'];
+const SYNC_SETTINGS = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha', 'foldScale'];
 let applyingLayout = false;
 function markLayout() {
   if (applyingLayout || !store.layoutSync) return;
@@ -1499,6 +1537,7 @@ function cleanLayout(l) {
   o.folded = !!l.folded; o.hidden = !!l.hidden;
   o.layer = ['top', 'bottom'].includes(l.layer) ? l.layer : 'normal';
   o.group = typeof l.group === 'string' ? l.group : null;
+  o.fs = typeof l.fs === 'number' && isFinite(l.fs) ? clampFs(l.fs) : null;
   return o;
 }
 function applyLayout(d) {
@@ -1534,7 +1573,7 @@ function applyLayout(d) {
       if (l.w != null) { m.w = l.w; m.h = l.h; }
       if (l.ox != null) { m.ox = l.ox; m.oy = l.oy; } else { delete m.ox; delete m.oy; }
       ensurePos(m);
-      updateMemo(m.id, { folded: l.folded, layer: l.layer, hidden: l.hidden, group: l.group });
+      updateMemo(m.id, { folded: l.folded, layer: l.layer, hidden: l.hidden, group: l.group, fs: l.fs });
       const win = memoWins.get(m.id);
       if (moved && win && !win.isDestroyed() && !m.hidden) animateTo(win, boundsFor(m), 380);
     }
