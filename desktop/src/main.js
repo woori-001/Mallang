@@ -39,7 +39,7 @@ let dataDir, dataFile, store, saveTimer, quitting = false;
 function defaults() {
   return {
     version: 1,
-    settings: { skin: 'lav', font: 'gowun', fontScale: 100, titleScale: 100, titleBold: true, calFont: 'same', calScale: 100, peopleFont: 'same', peopleScale: 100, bodyBg: false, alpha: 60, sideAlpha: 55, showToday: true, showPeople: false, clockMode: 30, clockAlpha: 75, clockScale: 100, clockDark: false, pinned: false, autoStart: false },
+    settings: { skin: 'lav', font: 'gowun', fontScale: 100, titleScale: 100, titleBold: true, calFont: 'same', calScale: 100, peopleFont: 'same', peopleScale: 100, bodyBg: false, alpha: 60, sideAlpha: 55, showToday: true, showPeople: false, clockMode: 30, clockAlpha: 75, clockScale: 100, clockDark: false, noticeOn: true, pinned: false, autoStart: false },
     nextId: 2,
     memos: [{
       id: 1, slot: 0, x: null, y: null, w: 290, h: 240, type: 'text', title: '말랑메모 시작하기',
@@ -92,6 +92,7 @@ function load() {
   if (fixed) store.contacts = { rows: fixed, mt: Math.max(Date.now(), (store.contacts.mt || 0) + 1), dirty: true };
   store.cloud = store.cloud && typeof store.cloud === 'object' ? store.cloud : {};
   store.shared = store.shared && typeof store.shared === 'object' ? store.shared : {};
+  if (!store.installedAt) store.installedAt = Date.now();
   store.openGroups = store.openGroups && typeof store.openGroups === 'object' ? store.openGroups : {};   // 목록바에서 열어 둔 그룹 폴더 (기본은 닫힘)
   store.layoutSync = store.layoutSync && typeof store.layoutSync === 'object' ? store.layoutSync : { mt: 0, dirty: false };
   if (store.shared.contacts && !Array.isArray(store.shared.contacts)) delete store.shared.contacts;
@@ -191,7 +192,9 @@ function snapshot() {
     memos: store.memos.filter((m) => !m.deleting),
     events: store.events,
     contacts: store.shared.contacts || (store.contacts ? store.contacts.rows : null),
-    contactsShared: !!store.shared.contacts,                         // 회사 공통 연락망
+    contactsShared: !!store.shared.contacts,
+    notices: store.shared.notices || [],
+    isAdmin: !!(store.cloud && store.cloud.admin),                         // 회사 공통 연락망
     canEditContacts: !store.shared.contacts || !!store.cloud.admin,   // 공통 연락망은 관리자만 고침
     groups: store.groups,
     openGroups: store.openGroups,
@@ -327,6 +330,10 @@ function createHost() {
       const wy = store.widget.y != null ? store.widget.y : wa.y + wa.height - 260;
       return { action: 'allow', overrideBrowserWindowOptions: { ...baseWinOpts, x: Math.round(wx), y: Math.round(wy), width: WIDGET_W, height: 200 } };
     }
+    if (kind === 'notice') {
+      const detail = u.searchParams.get('view') === '1';
+      return { action: 'allow', overrideBrowserWindowOptions: { ...baseWinOpts, ...(detail ? noticeDetailBounds() : noticeToastBounds()), alwaysOnTop: true } };
+    }
     if (kind === 'clock') {
       return { action: 'allow', overrideBrowserWindowOptions: { ...baseWinOpts, ...clockBounds(), alwaysOnTop: true, focusable: false } };
     }
@@ -351,6 +358,7 @@ function createHost() {
     if (kind === 'people') setupPeople(win);
     if (kind === 'search') setupSearch(win);
     if (kind === 'clock') setupClock(win, u.searchParams.get('mode'));
+    if (kind === 'notice') setupNotice(win, u.searchParams.get('view') === '1');
   });
   host.on('close', (e) => { if (!quitting) e.preventDefault(); });
   host.loadFile(R('host.html'));
@@ -854,7 +862,8 @@ function updateSettings(patch) {
   if ('bodyBg' in patch) patch.bodyBg = !!patch.bodyBg;
   if ('titleBold' in patch) patch.titleBold = !!patch.titleBold;
   if ('titleScale' in patch) patch.titleScale = Math.min(170, Math.max(70, Number(patch.titleScale) || 100));
-  const keys = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'showPeople', 'clockMode', 'clockAlpha', 'clockScale', 'clockDark', 'pinned', 'autoStart'];
+  const keys = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'showPeople', 'clockMode', 'clockAlpha', 'clockScale', 'clockDark', 'noticeOn', 'pinned', 'autoStart'];
+  if ('noticeOn' in patch) patch.noticeOn = !!patch.noticeOn;
   if ('clockMode' in patch) patch.clockMode = [0, 30, 60].includes(Number(patch.clockMode)) ? Number(patch.clockMode) : 30;
   if ('clockAlpha' in patch) patch.clockAlpha = Math.min(100, Math.max(20, Number(patch.clockAlpha) || 75));
   if ('clockScale' in patch) patch.clockScale = Math.min(150, Math.max(70, Number(patch.clockScale) || 100));
@@ -1585,9 +1594,79 @@ async function syncShared() {
       await Cloud.putShared(holder, 'contacts', { rows: store.contacts.rows });
       store.shared.contacts = store.contacts.rows.map((r) => r.slice());
     }
+    // 공지 (관리자가 올린 것)
+    const nt = await Cloud.getShared(holder, 'notices');
+    if (nt && nt.data && Array.isArray(nt.data.list)) store.shared.notices = cleanNotices(nt.data.list);
     broadcast();
-  } catch (e) { console.error('공통 연락망', e && e.code); }
+    checkNotice();
+  } catch (e) { console.error('공통 연락망·공지', e && e.code); }
 }
+
+// ───────── 공지: 관리자가 올리면 모든 사용자에게 작게 알림 → 내용 보기 ─────────
+function cleanNotices(list) {
+  return list.filter((n) => n && typeof n.id === 'string').slice(0, 30).map((n) => ({
+    id: n.id.slice(0, 40), title: String(n.title || '공지').slice(0, 80), body: String(n.body || '').slice(0, 5000), upd: !!n.upd, at: Number(n.at) || 0
+  }));
+}
+let noticeWin = null;
+function checkNotice() {
+  const list = store.shared.notices || [];
+  const n = list[0];
+  if (!n || store.settings.noticeOn === false) return;
+  if (store.noticeSeen === n.id) return;
+  if (!store.noticeSeen && n.at && store.installedAt && n.at < store.installedAt - 7 * DAY) { store.noticeSeen = n.id; save(); return; }   // 설치 훨씬 전 공지는 건너뜀
+  store.noticeSeen = n.id;
+  save();
+  openNotice(n.id, false);
+}
+function openNotice(id, detail) {
+  if (noticeWin && !noticeWin.isDestroyed()) noticeWin.close();
+  hostOpen('notice.html?kind=notice&id=' + encodeURIComponent(id) + (detail ? '&view=1' : ''), 'notice-' + Date.now());
+}
+const NOTICE_TOAST = { w: 380, h: 150 };
+function noticeToastBounds() {
+  const wa = workArea();
+  return { x: wa.x + wa.width - NOTICE_TOAST.w - 6, y: wa.y + wa.height - NOTICE_TOAST.h - 6, width: NOTICE_TOAST.w, height: NOTICE_TOAST.h };
+}
+function noticeDetailBounds(h) {
+  const wa = workArea();
+  const w = 520, hh = Math.round(Math.min(wa.height - 40, Math.max(260, h || 420)));
+  return { x: Math.round(wa.x + (wa.width - w) / 2), y: Math.round(wa.y + (wa.height - hh) / 2), width: w, height: hh };
+}
+function setupNotice(win, detail) {
+  noticeWin = win;
+  win.setAlwaysOnTop(true, 'pop-up-menu');
+  win.once('ready-to-show', () => { if (win.isDestroyed()) return; if (detail) { win.show(); win.focus(); } else win.showInactive(); });
+  win.on('closed', () => { if (noticeWin === win) noticeWin = null; });
+}
+ipcMain.on('notice:expand', (e, h) => {
+  if (!noticeWin || noticeWin.isDestroyed()) return;
+  noticeWin.setBounds(noticeDetailBounds(num(h)));
+  noticeWin.show(); noticeWin.focus();
+});
+ipcMain.on('notice:size', (e, h) => {
+  if (!noticeWin || noticeWin.isDestroyed()) return;
+  const b = noticeWin.getBounds();
+  if (b.width > NOTICE_TOAST.w) noticeWin.setBounds(noticeDetailBounds(num(h)));
+});
+ipcMain.on('notice:close', () => { if (noticeWin && !noticeWin.isDestroyed()) noticeWin.close(); });
+ipcMain.on('notice:open', (e, id) => { if (typeof id === 'string') openNotice(id, true); });
+ipcMain.handle('notice:send', async (e, n) => {
+  if (!store.cloud.admin || !holder.session) return { error: '관리자 계정으로 로그인해야 보낼 수 있어요' };
+  if (!n || typeof n.title !== 'string' || !n.title.trim()) return { error: '제목을 써 주세요' };
+  const item = { id: 'n' + Date.now().toString(36), title: n.title.trim(), body: String(n.body || '').trim(), upd: !!n.upd, at: Date.now() };
+  try {
+    const cur = await Cloud.getShared(holder, 'notices');
+    const list = cleanNotices([item].concat((cur && cur.data && cur.data.list) || []));
+    await Cloud.putShared(holder, 'notices', { list });
+    store.shared.notices = list;
+    store.noticeSeen = item.id;   // 보낸 사람에게는 다시 띄우지 않음
+    save(); broadcast();
+    return { ok: true };
+  } catch (err) {
+    return { error: Cloud.message(err) };
+  }
+});
 
 function scheduleSync(delay = 1500) {
   if (!cloudKey || !holder.session) return;

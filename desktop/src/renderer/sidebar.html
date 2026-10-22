@@ -135,6 +135,16 @@
               <button id="acLogout" class="pill soft" type="button">로그아웃</button>
             </div>
           </div>
+          <div id="ntAdmin" class="ntAdmin" hidden>
+            <div class="slabel">공지 보내기 <span class="adminBadge">관리자</span></div>
+            <label class="ntChk"><input id="ntUpd" type="checkbox" checked> 업데이트 공지 (버전 표시)</label>
+            <input id="ntTitle" class="ntIn" type="text" maxlength="80" placeholder="제목 (예: 말랑메모 2.2.0 업데이트)" spellcheck="false">
+            <textarea id="ntBody" class="ntIn" rows="5" placeholder="내용 (한 줄에 하나씩 쓰면 보기 좋아요)" spellcheck="false"></textarea>
+            <button id="ntSend" class="smallprimary soft" type="button">모두에게 보내기</button>
+            <div id="ntMsg" class="bkMsg" role="status"></div>
+          </div>
+          <div class="slabel">공지</div>
+          <div id="ntList" class="ntList"></div>
           <div class="slabel">다른 PC와 배치 맞추기</div>
           <div class="bkInfo">같은 아이디로 로그인한 PC끼리는 메모 자리·크기·접힘·그룹·꾸미기가 자동으로 맞춰져요. 지금 이 PC의 배치를 기준으로 다른 PC를 한 번에 맞추려면 아래를 누르세요.</div>
           <button id="acLayout" class="pill soft" type="button">이 PC 배치를 다른 PC에 적용</button>
@@ -209,6 +219,7 @@
         <div class="box">
           <div class="bhead">시작 · 백업</div>
           <button id="autoStart" class="toggle mini" type="button" aria-pressed="false"><span>윈도우 시작 시 자동 실행</span><span class="track"><span class="knob"></span></span></button>
+          <button id="noticeOn" class="toggle mini" type="button" aria-pressed="true"><span>업데이트 공지 받기</span><span class="track"><span class="knob"></span></span></button>
           <div class="bkInfo">메모·일정·연락망을 비밀번호로 잠근 파일로 내보내요. PC를 바꿀 때 되살릴 수 있어요.</div>
           <div class="row2">
             <button id="bkExportBtn" class="pill soft" type="button">백업 내보내기</button>

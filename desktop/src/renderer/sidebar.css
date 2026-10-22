@@ -374,3 +374,17 @@ body.dnd .ungrp { min-height: 40px; }
 .clockOpts { display: flex; flex-direction: column; gap: 10px; }
 .clockOpts[hidden] { display: none; }
 html.paper .cseg { background: var(--base); }
+
+/* 공지 */
+.ntAdmin { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 14px; background: rgba(var(--glass), .6); }
+.ntAdmin[hidden] { display: none; }
+.adminBadge { font-size: 10.5px; font-weight: 700; color: var(--on); background: var(--accent); border-radius: 7px; padding: 1px 6px; margin-left: 4px; }
+.ntChk { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; }
+.ntChk input { accent-color: var(--a1); }
+.ntIn { border: 1px solid var(--line-soft, rgba(80, 80, 140, .18)); border-radius: 10px; padding: 8px 10px; font-size: 12.5px; background: rgba(var(--glass), .9); color: var(--ink); outline: none; resize: vertical; user-select: text; font-family: inherit; }
+.ntIn:focus { border-color: var(--a1); }
+.ntList { display: flex; flex-direction: column; gap: 4px; }
+.ntItem { display: flex; justify-content: space-between; align-items: center; gap: 8px; border: none; border-radius: 10px; padding: 8px 10px; background: rgba(var(--glass), .55); text-align: left; font-size: 12.5px; }
+.ntItem b { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ntItem span { font-size: 11px; color: var(--sub); flex: none; }
+.ntItem:hover { background: rgba(var(--glass), .9); }

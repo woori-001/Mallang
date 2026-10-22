@@ -623,6 +623,7 @@
     $('alphaV').textContent = s.alpha + '%';
     $('sideAlphaV').textContent = s.sideAlpha + '%';
     $('autoStart').setAttribute('aria-pressed', String(!!s.autoStart));
+    $('noticeOn').setAttribute('aria-pressed', String(s.noticeOn !== false));
     const cm = s.clockMode == null ? 30 : s.clockMode;
     document.querySelectorAll('[data-cm]').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.cm) === cm)));
     $('clockOpts').hidden = !cm;
@@ -643,6 +644,7 @@
   $('clockDark').addEventListener('click', () => { api.setSettings({ clockDark: !S.settings.clockDark }); setTimeout(() => api.clockPreview(), 80); });
   $('clockPreview').addEventListener('click', () => api.clockPreview());
   $('clockPlace').addEventListener('click', () => api.clockPlace(true));
+  $('noticeOn').addEventListener('click', () => api.setSettings({ noticeOn: S.settings.noticeOn === false }));
   $('fontSel').addEventListener('change', (e) => api.setSettings({ font: e.target.value }));
   $('titleScale').addEventListener('input', (e) => { $('titleScaleV').textContent = e.target.value + '%'; api.setSettings({ titleScale: Number(e.target.value) }); });
   $('titleBold').addEventListener('click', () => api.setSettings({ titleBold: S.settings.titleBold === false }));
@@ -686,8 +688,29 @@
     if (s2 < 3600) return Math.round(s2 / 60) + '분 전';
     return new Date(t).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
   }
+  function renderNotices() {
+    $('ntAdmin').hidden = !S.isAdmin;
+    const list = S.notices || [];
+    const pad = (n) => (n < 10 ? '0' : '') + n;
+    $('ntList').innerHTML = list.length
+      ? list.slice(0, 8).map((n) => { const d = new Date(n.at); return '<button type="button" class="ntItem" data-nid="' + esc(n.id) + '"><b>' + esc(n.title) + '</b><span>' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + '</span></button>'; }).join('')
+      : '<div class="bkInfo">아직 공지가 없어요</div>';
+  }
+  $('ntList').addEventListener('click', (e) => { const b = e.target.closest('[data-nid]'); if (b) api.noticeOpen(b.dataset.nid); });
+  $('ntSend').addEventListener('click', async () => {
+    const title = $('ntTitle').value.trim();
+    if (!title) { $('ntMsg').textContent = '제목을 써 주세요'; $('ntMsg').className = 'bkMsg err'; return; }
+    const ok = await askConfirm('공지를 보낼까요?', '"' + title + '" 공지가 말랑메모를 쓰는 모든 사용자에게 떠요.', '보내기');
+    if (!ok) return;
+    $('ntSend').disabled = true;
+    const r = await api.noticeSend({ title, body: $('ntBody').value, upd: $('ntUpd').checked });
+    $('ntSend').disabled = false;
+    if (r && r.ok) { $('ntTitle').value = ''; $('ntBody').value = ''; $('ntMsg').textContent = '보냈어요 · 다른 사용자에게 5분 안에 떠요'; $('ntMsg').className = 'bkMsg ok'; }
+    else { $('ntMsg').textContent = (r && r.error) || '보내지 못했어요'; $('ntMsg').className = 'bkMsg err'; }
+  });
   function renderAcct() {
     const c = S.cloud || {};
+    renderNotices();
     $('acOut').hidden = !!c.signedIn;
     $('acIn').hidden = !c.signedIn;
     if (c.signedIn) {
