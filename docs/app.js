@@ -198,7 +198,11 @@
     if (item.kind !== 'memo' && item.kind !== 'event') return;
     if (item.kind === 'event') {
       const list = item.deleted ? [] : (item.data && Array.isArray(item.data.list) ? item.data.list : []);
-      if (list.length) st.events[item.id] = list.map((e) => ({ t: String(e.t || ''), title: String(e.title || ''), c: EV_ORDER.includes(e.c) ? e.c : 'lav' }));
+      if (list.length) st.events[item.id] = list.map((e) => {
+        const o = { t: String(e.t || ''), title: String(e.title || ''), c: EV_ORDER.includes(e.c) ? e.c : 'lav' };
+        if (['d', 'wd', 'w', 'm', 'y'].includes(e.r)) { o.r = e.r; if (Array.isArray(e.x)) o.x = e.x.filter((k) => typeof k === 'string'); }
+        return o;
+      });
       else delete st.events[item.id];
       st.evMeta[item.id] = { mt: item.ts, dirty: false };
       return;
@@ -612,11 +616,12 @@
     const days = new Date(calY, calM + 1, 0).getDate();
     const count = Math.ceil((start + days) / 7) * 7;
     let h = '';
+    const rec = window.M.recurring(st.events);
     for (let i = 0; i < count; i++) {
       const d = new Date(calY, calM, i - start + 1);
       if (d.getMonth() !== calM) { h += '<div class="cell"></div>'; continue; }
       const k = dateKey(d);
-      const evs = st.events[k] || [];
+      const evs = window.M.eventsOn(st.events, k, rec).map((x) => x.ev);
       const wd = d.getDay();
       const color = wd === 0 ? 'var(--sun)' : wd === 6 ? 'var(--sat)' : 'var(--ink)';
       h += '<div class="cell"><button class="day' + (k === todayK ? ' today' : '') + (k === sel ? ' sel' : '') + '" type="button" data-k="' + k + '" style="color:' + color + '" aria-pressed="' + (k === sel) + '" aria-label="' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일' + (evs.length ? ', 일정 ' + evs.length + '개' : '') + '">' +
@@ -630,12 +635,22 @@
   }
   function renderEvents(focusIdx) {
     const list = st.events[sel] || [];
-    if (!list.length) { $('evList').innerHTML = '<div class="empty" style="padding:20px">일정이 없어요</div>'; return; }
-    $('evList').innerHTML = list.map((e, i) =>
-      '<div class="ev" data-i="' + i + '">' +
+    const rec = window.M.eventsOn(st.events, sel).filter((x) => !x.own);
+    if (!list.length && !rec.length) { $('evList').innerHTML = '<div class="empty" style="padding:20px">일정이 없어요</div>'; return; }
+    const repSel = (e) => '<select class="evr" data-f="r" aria-label="반복">' + window.M.REPEATS.map((o) => '<option value="' + o[0] + '"' + ((e.r || '') === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select>';
+    $('evList').innerHTML = rec.map((x) =>
+      '<div class="ev rec" data-src="' + x.k + '" data-si="' + x.i + '">' +
+        '<span class="evc" style="background:' + EVENT_COLORS[x.ev.c] + '"></span>' +
+        '<span class="evt">' + esc(/^\d{2}:\d{2}$/.test(x.ev.t) ? x.ev.t : '종일') + '</span>' +
+        '<button class="evn evgo" type="button" data-act="go">' + esc(x.ev.title || '(이름 없음)') + '</button>' +
+        '<span class="evrep">↻ ' + window.M.REPEAT_NAME[x.ev.r] + '</span>' +
+        '<button class="idel" type="button" data-act="skip" aria-label="이 날만 빼기">' + I.x + '</button>' +
+      '</div>').join('') + list.map((e, i) =>
+      '<div class="ev' + (e.r ? ' hasrep' : '') + '" data-i="' + i + '">' +
         '<button class="evc" type="button" data-act="color" style="background:' + EVENT_COLORS[e.c] + '" aria-label="일정 색 바꾸기"></button>' +
         '<input class="evt" type="time" data-f="t" value="' + esc(/^\d{2}:\d{2}$/.test(e.t) ? e.t : '') + '" aria-label="시간 (비우면 종일)">' +
         '<input class="evn" type="text" data-f="title" value="' + esc(e.title) + '" placeholder="일정 이름" aria-label="일정 이름">' +
+        repSel(e) +
         '<button class="idel" type="button" data-act="del" aria-label="일정 삭제">' + I.x + '</button>' +
       '</div>').join('');
     if (focusIdx != null) { const inp = $('evList').querySelector('.ev[data-i="' + focusIdx + '"] .evn'); if (inp) inp.focus(); }
@@ -651,19 +666,36 @@
     renderCal();
     renderEvents(list.length - 1);
   };
-  $('evList').addEventListener('click', (e) => {
+  $('evList').addEventListener('click', async (e) => {
     const b = e.target.closest('button'); if (!b) return;
+    const recRow = b.closest('.ev.rec');
+    if (recRow) {
+      const src = recRow.dataset.src, si = Number(recRow.dataset.si);
+      const p = src.split('-').map(Number);
+      if (b.dataset.act === 'go') { sel = src; calY = p[0]; calM = p[1] - 1; renderCal(); }
+      if (b.dataset.act === 'skip' && await ask('이 날 일정만 뺄까요?', '반복은 그대로 두고 이 날만 빠져요. 반복 전체를 지우려면 시작한 날(' + p[1] + '/' + p[2] + ')에서 지우세요.', '이 날만 빼기')) {
+        const ev = (st.events[src] || [])[si];
+        if (ev) { ev.x = Array.isArray(ev.x) ? ev.x : []; if (!ev.x.includes(sel)) ev.x.push(sel); markEvent(src); renderCal(); renderEvents(); }
+      }
+      return;
+    }
     const i = Number(b.closest('.ev').dataset.i);
     const list = st.events[sel] || [];
     if (b.dataset.act === 'color') { list[i].c = EV_ORDER[(EV_ORDER.indexOf(list[i].c) + 1) % 4]; b.style.background = EVENT_COLORS[list[i].c]; }
-    if (b.dataset.act === 'del') { list.splice(i, 1); if (!list.length) delete st.events[sel]; renderEvents(); }
+    if (b.dataset.act === 'del') {
+      if (list[i].r && !(await ask('반복 일정을 지울까요?', '"' + (list[i].title || '이름 없음') + '" ' + window.M.REPEAT_NAME[list[i].r] + ' 반복이 모두 지워져요.', '모두 지우기'))) return;
+      list.splice(i, 1); if (!list.length) delete st.events[sel]; renderEvents();
+    }
     markEvent(sel);
     renderCal();
   });
   $('evList').addEventListener('input', (e) => {
-    const inp = e.target.closest('input'); if (!inp) return;
+    const inp = e.target.closest('input, select'); if (!inp || !inp.closest('.ev[data-i]')) return;
     const i = Number(inp.closest('.ev').dataset.i);
-    (st.events[sel] || [])[i][inp.dataset.f] = inp.value;
+    const ev = (st.events[sel] || [])[i];
+    if (!ev) return;
+    if (inp.dataset.f === 'r') { if (inp.value) ev.r = inp.value; else { delete ev.r; delete ev.x; } inp.closest('.ev').classList.toggle('hasrep', !!inp.value); markEvent(sel); renderCal(); return; }
+    ev[inp.dataset.f] = inp.value;
     markEvent(sel);
   });
   $('evList').addEventListener('focusout', () => setTimeout(() => { if (!$('evList').contains(document.activeElement)) renderCal(); }, 50));

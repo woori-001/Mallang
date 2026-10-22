@@ -702,5 +702,36 @@
   function syncRanges(root) { (root || document).querySelectorAll('input[type="range"]').forEach(syncRange); }
   document.addEventListener('input', (e) => { if (e.target && e.target.type === 'range') syncRange(e.target); }, true);
 
-  window.M = { GROUP_COLORS, syncRanges, TBL, CONTACT_HEAD, fixContactRows, contactView, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
+  // ───────── 반복 일정 ─────────
+  // 일정 { t, title, c, r?, x? } · r: 'd' 매일 · 'wd' 평일 · 'w' 매주 · 'm' 매월 · 'y' 매년 · x: 이 날은 빼기 [날짜키]
+  const REPEATS = [['', '반복 안 함'], ['d', '매일'], ['wd', '평일'], ['w', '매주'], ['m', '매월'], ['y', '매년']];
+  const REPEAT_NAME = { d: '매일', wd: '평일', w: '매주', m: '매월', y: '매년' };
+  const keyDate = (k) => { const p = k.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); };
+  function repeatsOn(ev, startKey, k) {
+    if (!ev.r || k <= startKey) return false;
+    if (Array.isArray(ev.x) && ev.x.includes(k)) return false;
+    const a = keyDate(startKey), b = keyDate(k);
+    switch (ev.r) {
+      case 'd': return true;
+      case 'wd': return b.getDay() > 0 && b.getDay() < 6;
+      case 'w': return a.getDay() === b.getDay();
+      case 'm': return a.getDate() === b.getDate();
+      case 'y': return a.getDate() === b.getDate() && a.getMonth() === b.getMonth();
+      default: return false;
+    }
+  }
+  // 반복 일정 목록 (한 번 만들어 두고 여러 날짜에 씀)
+  function recurring(events) {
+    const out = [];
+    for (const [k, list] of Object.entries(events || {})) (list || []).forEach((ev, i) => { if (ev && ev.r) out.push({ k, i, ev }); });
+    return out;
+  }
+  // 그 날의 일정: 그 날 적은 것 + 다른 날에서 반복되어 오는 것 (시간 순)
+  function eventsOn(events, k, rec) {
+    const own = ((events || {})[k] || []).map((ev, i) => ({ ev, k, i, own: true }));
+    const more = (rec || recurring(events)).filter((x) => x.k !== k && repeatsOn(x.ev, x.k, k)).map((x) => ({ ...x, own: false }));
+    return own.concat(more).sort((p, q) => (p.ev.t || '').localeCompare(q.ev.t || ''));
+  }
+
+  window.M = { REPEATS, REPEAT_NAME, repeatsOn, recurring, eventsOn, GROUP_COLORS, syncRanges, TBL, CONTACT_HEAD, fixContactRows, contactView, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
 })();

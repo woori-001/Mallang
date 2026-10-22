@@ -1063,11 +1063,20 @@ ipcMain.on('memo:resize', (e, id, w, h, done) => {
   if (done) { layoutTouched(m); save(); broadcast(); }
 });
 ipcMain.on('settings:update', (e, patch) => { if (patch && typeof patch === 'object') updateSettings(patch); });
+// 반복 일정에서 이 날만 빼기
+ipcMain.on('events:skip', (e, srcKey, idx, dayKey) => {
+  const list = store.events[srcKey];
+  const ev = list && list[idx];
+  if (!ev || !ev.r || typeof dayKey !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dayKey)) return;
+  ev.x = Array.isArray(ev.x) ? ev.x : [];
+  if (!ev.x.includes(dayKey)) ev.x.push(dayKey);
+  markEvent(srcKey);
+  save();
+  broadcast();
+});
 ipcMain.on('events:set', (e, key, list) => {
   if (typeof key !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(key) || !Array.isArray(list)) return;
-  const clean = list.slice(0, 50).map((ev) => ({
-    t: String(ev.t || '').slice(0, 10), title: String(ev.title || '').slice(0, 200), c: ['lav', 'mint', 'pink', 'sky'].includes(ev.c) ? ev.c : 'lav'
-  }));
+  const clean = sanitizeEvents(list);
   if (clean.length) store.events[key] = clean; else delete store.events[key];
   markEvent(key);
   save();
@@ -1327,7 +1336,7 @@ ipcMain.handle('backup:import', async (e, password) => {
       const seen = new Set(cur.map(key));
       for (const ev of list) {
         if (!ev || seen.has(key(ev))) continue;
-        cur.push({ t: String(ev.t || ''), title: String(ev.title || ''), c: ['lav', 'mint', 'pink', 'sky'].includes(ev.c) ? ev.c : 'lav' });
+        cur.push(cleanEvent(ev));
         seen.add(key(ev));
         evAdded++;
         markEvent(k);
@@ -1694,10 +1703,19 @@ function sanitizeTable(t) {
   return { rows };
 }
 const sanitizeItems = (a) => (Array.isArray(a) ? a.slice(0, 500).map((x) => ({ t: String((x && x.t) || '').slice(0, 2000), d: !!(x && x.d) })) : []);
-const sanitizeEvents = (a) => (Array.isArray(a) ? a.slice(0, 50).map((ev) => ({
-  t: String((ev && ev.t) || '').slice(0, 10), title: String((ev && ev.title) || '').slice(0, 200),
-  c: ['lav', 'mint', 'pink', 'sky'].includes(ev && ev.c) ? ev.c : 'lav'
-})) : []);
+// 일정: t 시간 · title · c 색 · r 반복(d 매일, wd 평일, w 매주, m 매월, y 매년) · x 반복에서 뺀 날짜들
+const cleanEvent = (ev) => {
+  const o = {
+    t: String((ev && ev.t) || '').slice(0, 10), title: String((ev && ev.title) || '').slice(0, 200),
+    c: ['lav', 'mint', 'pink', 'sky'].includes(ev && ev.c) ? ev.c : 'lav'
+  };
+  if (ev && ['d', 'wd', 'w', 'm', 'y'].includes(ev.r)) {
+    o.r = ev.r;
+    if (Array.isArray(ev.x)) o.x = ev.x.filter((k) => typeof k === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(k)).slice(-400);
+  }
+  return o;
+};
+const sanitizeEvents = (a) => (Array.isArray(a) ? a.slice(0, 50).map(cleanEvent) : []);
 function contentOf(d) {
   return {
     title: String(d.title || '').slice(0, 200),

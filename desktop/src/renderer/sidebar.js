@@ -499,11 +499,12 @@
     const daysIn = new Date(calY, calM + 1, 0).getDate();
     const count = Math.ceil((start + daysIn) / 7) * 7;
     let html = '';
+    const rec = window.M.recurring(S.events);
     for (let i = 0; i < count; i++) {
       const dt = new Date(calY, calM, i - start + 1);
       if (dt.getMonth() !== calM) { html += '<div class="cell"></div>'; continue; }
       const k = dateKey(dt);
-      const evs = (S.events[k] || []);
+      const evs = window.M.eventsOn(S.events, k, rec).map((x) => x.ev);
       const wd = dt.getDay();
       const color = wd === 0 ? 'var(--sun)' : (wd === 6 ? 'var(--sat)' : 'var(--ink)');
       html += '<div class="cell"><button class="day' + (k === todayK ? ' today' : '') + (k === sel ? ' sel' : '') + '" type="button" data-k="' + k + '" style="color:' + color + '" aria-pressed="' + (k === sel) + '" aria-label="' + (dt.getMonth() + 1) + '월 ' + dt.getDate() + '일' + (evs.length ? ', 일정 ' + evs.length + '개' : '') + '">' +
@@ -521,17 +522,31 @@
       renderEvents();
     }
   }
+  const REP_ICON = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12"/><path d="M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/></svg>';
   function renderEvents(focusIdx) {
     const el = $('evList');
-    if (!evList.length) {
+    // 다른 날에서 반복되어 오는 일정 (보기 · 이 날만 빼기 · 시작한 날로 가서 고치기)
+    const rec = window.M.eventsOn(S.events, sel).filter((x) => !x.own);
+    if (!evList.length && !rec.length) {
       el.innerHTML = '<div class="empty">일정이 없어요</div>';
       return;
     }
-    el.innerHTML = evList.map((ev, i) =>
-      '<div class="ev" data-i="' + i + '">' +
+    const repSel = (ev) => '<select class="evr" data-f="r" aria-label="반복" title="반복">' + window.M.REPEATS.map((o) => '<option value="' + o[0] + '"' + ((ev.r || '') === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select>';
+    el.innerHTML = rec.map((x) => {
+      const sp = x.k.split('-').map(Number);
+      return '<div class="ev rec" data-src="' + x.k + '" data-si="' + x.i + '">' +
+        '<span class="evc" style="background:' + EVENT_COLORS[x.ev.c] + '"></span>' +
+        '<span class="evt">' + esc(/^\d{2}:\d{2}$/.test(x.ev.t) ? x.ev.t : '종일') + '</span>' +
+        '<button class="evn evgo" type="button" data-act="go" title="' + sp[1] + '/' + sp[2] + '부터 반복 · 눌러서 고치기">' + esc(x.ev.title || '(이름 없음)') + '</button>' +
+        '<span class="evrep">' + REP_ICON + window.M.REPEAT_NAME[x.ev.r] + '</span>' +
+        '<button class="ib" type="button" data-act="skip" aria-label="이 날만 빼기" title="이 날만 빼기">' + ICONS.x + '</button>' +
+      '</div>';
+    }).join('') + evList.map((ev, i) =>
+      '<div class="ev' + (ev.r ? ' hasrep' : '') + '" data-i="' + i + '">' +
         '<button class="evc" type="button" data-act="color" style="background:' + EVENT_COLORS[ev.c] + '" aria-label="일정 색 바꾸기" title="색 바꾸기"></button>' +
         '<input class="evt" type="time" data-f="t" value="' + esc(/^\d{2}:\d{2}$/.test(ev.t) ? ev.t : '') + '" aria-label="시간 (비우면 종일)">' +
         '<input class="evn" type="text" data-f="title" value="' + esc(ev.title) + '" placeholder="일정 이름" spellcheck="false" aria-label="일정 이름">' +
+        repSel(ev) +
         '<button class="ib" type="button" data-act="del" aria-label="일정 삭제" title="삭제">' + ICONS.x + '</button>' +
       '</div>'
     ).join('');
@@ -568,6 +583,16 @@
   $('evList').addEventListener('click', (e) => {
     const b = e.target.closest('button');
     if (!b) return;
+    const recRow = b.closest('.ev.rec');
+    if (recRow) {
+      const src = recRow.dataset.src, si = Number(recRow.dataset.si);
+      if (b.dataset.act === 'go') { if (evSaveT) saveEvents(true); sel = src; const p = src.split('-').map(Number); calY = p[0]; calM = p[1] - 1; renderCal(); }
+      if (b.dataset.act === 'skip') {
+        const p = src.split('-').map(Number);
+        askConfirm('이 날 일정만 뺄까요?', '반복은 그대로 두고 이 날만 빠져요. 반복 전체를 지우려면 시작한 날(' + p[1] + '/' + p[2] + ')에서 지우세요.', '이 날만 빼기').then((ok) => { if (ok) api.skipEvent(src, si, sel); });
+      }
+      return;
+    }
     const i = Number(b.closest('.ev').dataset.i);
     if (b.dataset.act === 'color') {
       evList[i].c = EV_ORDER[(EV_ORDER.indexOf(evList[i].c) + 1) % 4];
@@ -575,15 +600,21 @@
       saveEvents(true);
     }
     if (b.dataset.act === 'del') {
-      evList.splice(i, 1);
-      renderEvents();
-      saveEvents(true);
+      const del = () => { evList.splice(i, 1); renderEvents(); saveEvents(true); };
+      if (evList[i].r) askConfirm('반복 일정을 지울까요?', '"' + (evList[i].title || '이름 없음') + '" ' + window.M.REPEAT_NAME[evList[i].r] + ' 반복이 모두 지워져요.', '모두 지우기').then((ok) => { if (ok) del(); });
+      else del();
     }
   });
   $('evList').addEventListener('input', (e) => {
-    const inp = e.target.closest('input');
-    if (!inp) return;
+    const inp = e.target.closest('input, select');
+    if (!inp || !inp.closest('.ev[data-i]')) return;
     const i = Number(inp.closest('.ev').dataset.i);
+    if (inp.dataset.f === 'r') {
+      if (inp.value) evList[i].r = inp.value; else { delete evList[i].r; delete evList[i].x; }
+      inp.closest('.ev').classList.toggle('hasrep', !!inp.value);
+      saveEvents(true);
+      return;
+    }
     evList[i][inp.dataset.f] = inp.value;
     saveEvents(false);
   });

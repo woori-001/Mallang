@@ -15,7 +15,7 @@
     const sk0 = window.M.SKINS[S.settings.skin] || {};
     w.style.background = sk0.paper ? '#FFFFFF' : 'rgba(var(--glass),' + Math.max(0.2, a - 0.1) + ')';
     const d = new Date();
-    const evs = (S.events[dateKey(d)] || []).slice().sort((x, y) => (x.t || '').localeCompare(y.t || ''));
+    const evs = window.M.eventsOn(S.events, dateKey(d)).map((x) => x.ev);   // 반복 일정 포함
     document.getElementById('big').textContent = d.getDate();
     document.getElementById('mon').textContent = MONTH_EN[d.getMonth()];
     document.getElementById('sub').textContent = WD[d.getDay()] + '요일 · 일정 ' + evs.length + '개';
