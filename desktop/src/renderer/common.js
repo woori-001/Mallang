@@ -704,7 +704,7 @@
 
   // ───────── 반복 일정 ─────────
   // 일정 { t, title, c, r?, x? } · r: 'd' 매일 · 'wd' 평일 · 'w' 매주 · 'm' 매월 · 'y' 매년 · x: 이 날은 빼기 [날짜키]
-  const REPEATS = [['', '반복 안 함'], ['d', '매일'], ['wd', '평일'], ['w', '매주'], ['m', '매월'], ['y', '매년']];
+  const REPEATS = [['', '반복'], ['d', '매일'], ['wd', '평일'], ['w', '매주'], ['m', '매월'], ['y', '매년']];
   const REPEAT_NAME = { d: '매일', wd: '평일', w: '매주', m: '매월', y: '매년' };
   const keyDate = (k) => { const p = k.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); };
   function repeatsOn(ev, startKey, k) {
