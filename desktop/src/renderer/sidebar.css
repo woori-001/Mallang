@@ -459,6 +459,7 @@ html.draw .calDeco .st1 { transform-origin: 50% 50%; animation: starTwinkle 2.8s
 
 /* 드로잉 스킨: 목록은 공책처럼 줄로 나누고, 글꼴은 고른 메모 글꼴로 */
 html.draw .panel, html.draw .panel button, html.draw .panel input, html.draw .panel select { font-family: var(--memo-font); }
+html.draw .segb, html.draw .primary, html.draw .smallprimary, html.draw .pill, html.draw .search input, html.draw .gname, html.draw .nogrp, html.draw .bhead, html.draw .todaytxt, html.draw .rmeta, html.draw .ctext, html.draw .sellabel { font-size-adjust: .47; white-space: nowrap; }
 html.draw .row { background: transparent !important; box-shadow: none; border-radius: 0; border-bottom: 1px solid rgba(22, 22, 22, .2); min-height: 46px; }
 html.draw .row:hover { background: rgba(22, 22, 22, .05) !important; transform: none; }
 html.draw .list { gap: 0; }

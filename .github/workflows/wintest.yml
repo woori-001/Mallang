@@ -24,7 +24,8 @@ jobs:
       - name: 점검 (고치기 전 / 고친 뒤)
         run: |
           mkdir -p ../wt-out
-          export MALLANG_DEBUG_SCRIPT="$(cygpath -w "$PWD/../wintest/stack-test.js")"
+          cp ../wintest/stack-test.js ./wt-test.js
+          export MALLANG_DEBUG_SCRIPT="$(cygpath -w "$PWD/wt-test.js")"
           export WT_OUT="$(cygpath -w "$PWD/../wt-out")"
           for run in "noshape:1:lav" "shape::lav" "shape-draw::draw"; do
             IFS=: read tag ns skin <<< "$run"
