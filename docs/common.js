@@ -742,5 +742,27 @@
     return own.concat(more).sort((p, q) => (p.ev.t || '').localeCompare(q.ev.t || ''));
   }
 
-  window.M = { REPEATS, REPEAT_NAME, repeatsOn, recurring, eventsOn, GROUP_COLORS, syncRanges, TBL, CONTACT_HEAD, fixContactRows, contactView, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
+  // 카드 바깥 투명 여백은 클릭 통과 (누르고 끄는 중에는 그대로)
+  function passThrough(getCard) {
+    const api = window.api;
+    if (!api || !api.setIgnore) return;
+    let cur = null, pressing = false;
+    const set = (v) => { if (v !== cur) { cur = v; api.setIgnore(v); } };
+    const check = (e) => {
+      if (pressing) return;
+      const c = getCard();
+      if (!c) return;
+      const r = c.getBoundingClientRect();
+      const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      set(!inside);
+    };
+    document.addEventListener('mousemove', check, true);
+    document.addEventListener('pointerdown', () => { pressing = true; set(false); }, true);
+    const up = (e) => { pressing = false; if (e && e.clientX != null) check(e); };
+    document.addEventListener('pointerup', up, true);
+    document.addEventListener('pointercancel', up, true);
+    window.addEventListener('blur', () => { pressing = false; });
+    set(true);
+  }
+  window.M = { passThrough, REPEATS, REPEAT_NAME, repeatsOn, recurring, eventsOn, GROUP_COLORS, syncRanges, TBL, CONTACT_HEAD, fixContactRows, contactView, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
 })();

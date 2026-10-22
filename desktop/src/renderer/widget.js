@@ -5,6 +5,7 @@
   const MONTH_EN = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
   const WD = ['일', '월', '화', '수', '목', '금', '토'];
   const w = document.getElementById('w');
+  window.M.passThrough(() => w);
   window.M.guardHTML(document.getElementById('list'));
   let S = null;
 

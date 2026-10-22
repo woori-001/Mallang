@@ -38,7 +38,6 @@ body.detail { align-items: flex-start; justify-content: stretch; }
 
 /* 말랑 드로잉 스킨 */
 html.draw .toast, html.draw .modal { background: #FBFAF5; box-shadow: inset 0 0 0 2.5px #161616, 4px 4px 0 #161616; }
-html.draw .toast b { font-family: 'Gaegu', sans-serif; font-size: 18px; }
 html.draw .btn.pri { background: #161616; color: #FBFAF5; }
 html.draw .btn.ghost { background: transparent; box-shadow: inset 0 0 0 2px #161616; color: #161616; }
 html.draw .bun img { filter: none; }

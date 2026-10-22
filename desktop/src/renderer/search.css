@@ -33,5 +33,5 @@ body { padding: 14px; }
 .copied { color: var(--a1); font-weight: 700; }
 
 /* 말랑 드로잉 스킨 */
-html.draw .box { background: #FBFAF5 !important; box-shadow: inset 0 0 0 2.5px #161616, 4px 4px 0 #161616; }
+html.draw .box { background: #FBFAF5 !important; box-shadow: inset 0 0 0 2.2px #161616, 0 3px 8px rgba(0, 0, 0, .12); }
 html.draw .res:not(:empty) { border-top: 2px solid #161616; }

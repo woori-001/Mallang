@@ -1206,6 +1206,12 @@ ipcMain.on('widget:size', (e, h) => {
   widget.setBounds({ x: b.x, y: b.y, width: WIDGET_W, height: Math.round(Math.min(600, Math.max(80, h))) });
 });
 ipcMain.on('open:data', () => shell.openPath(dataDir));
+// 메모·연락망·위젯 창: 카드 바깥(투명한 여백)은 클릭이 아래 창으로 통과하게
+// (딱 붙여 둔 옆 메모의 여백이 이 메모를 가려 클릭·이동이 안 되던 문제)
+ipcMain.on('win:ignore', (e, v) => {
+  const w = BrowserWindow.fromWebContents(e.sender);
+  if (w && !w.isDestroyed() && w !== side) w.setIgnoreMouseEvents(!!v, { forward: true });
+});
 // 따로 정한 접은 크기 모두 지우고 전체 설정 따르기
 ipcMain.on('fold:resetAll', () => { for (const m of store.memos.filter((x) => x.fs && !x.deleting)) updateMemo(m.id, { fs: null }); });
 // 메모 속 링크 열기 (웹 주소만)
