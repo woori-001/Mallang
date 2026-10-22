@@ -307,7 +307,7 @@ function ensurePos(m) {
     m.y = wa.y + Math.round(wa.height / 3) - 80 + n * 26;
   }
   const w = m.folded ? foldW(m) : m.w;
-  const disp = screen.getDisplayMatching({ x: Math.round(m.x), y: Math.round(m.y), width: Math.round(w), height: 40 }).workArea;
+  const disp = memoDisplay(m.x, m.y, w, 40);
   const off = m.x + 60 > disp.x + disp.width || m.x + w - 60 < disp.x || m.y < disp.y - 20 || m.y + 30 > disp.y + disp.height;
   if (off) {
     m.x = wa.x + 140 + n * 28;
@@ -461,7 +461,7 @@ function updateMemo(id, patch) {
   }
   // 화면 오른쪽에 있는 메모는 오른쪽 끝을 그대로 두고 왼쪽으로 펼쳐요 (옆 모니터로 넘어가지 않게)
   if (!!m.folded !== !!prev.folded && !restored && m.x != null && !applyingLayout) {
-    anchorFold(m, !!m.folded);
+    foldMove(m, !!m.folded);
   }
   // 접은 크기를 바꾸면: 화면 오른쪽·아래쪽 메모는 그쪽 끝을 그대로 두고 크기만 바뀌게
   let fsMoved = false;
@@ -601,19 +601,41 @@ function focusMemo(id) {
 
 // 접기·펴기 기준 정하기: 화면 오른쪽 절반이면 오른쪽 끝 기준
 // 화면 아래쪽 절반이면 아래 끝 기준 → 위로 펼쳐짐 (오른쪽 아래면 왼쪽 위 대각선으로)
+// 메모가 실제로 놓인 화면 (가운데 점 기준 — 모니터가 여러 대·배율이 달라도 엉뚱한 화면을 고르지 않게)
+function memoDisplay(x, y, w, h) {
+  return screen.getDisplayNearestPoint({ x: Math.round(x + Math.min(w, 120) / 2), y: Math.round(y + Math.min(h, 32) / 2) }).workArea;
+}
 function anchorFold(m, folding) {
   if (m.x == null) return;
   const fromW = folding ? m.w : foldW(m), toW = folding ? foldW(m) : m.w;
   const fromH = folding ? m.h : foldH(m), toH = folding ? foldH(m) : m.h;
-  const d = screen.getDisplayMatching({ x: Math.round(m.x), y: Math.round(m.y), width: Math.round(fromW), height: Math.round(fromH) }).workArea;
+  const d = memoDisplay(m.x, m.y, fromW, fromH);
   m.ar = m.x + fromW / 2 > d.x + d.width / 2;
   m.ab = m.y + fromH / 2 > d.y + d.height / 2;
   if (m.ar) m.x = Math.max(d.x, m.x + fromW - toW);
   if (m.ab) m.y = Math.max(d.y, m.y + fromH - toH);
 }
+// 접기·펴기 자리 정하기: 접었다 바로 다시 펴면(또는 그 반대) 꼭 원래 자리로 돌아오게 기억해 둠
+// (옮기지 않았으면 몇 번을 접고 펴도 자리가 바뀌지 않음)
+function foldMove(m, folding) {
+  if (m.x == null) return;
+  const x0 = m.x, y0 = m.y;
+  const back = folding ? m.uh : m.fh;
+  if (back && back.x2 === m.x && back.y2 === m.y) {
+    m.x = back.x1; m.y = back.y1;
+    m.ar = folding ? m.x > x0 : m.x < x0;
+    m.ab = folding ? m.y > y0 : m.y < y0;
+  } else if (folding) {
+    m.ar = false; m.ab = false;   // 접을 때는 제목줄 자리 그대로
+  } else {
+    anchorFold(m, folding);       // 펼 때는 화면 오른쪽·아래쪽이면 왼쪽·위로
+  }
+  const rec = { x1: x0, y1: y0, x2: m.x, y2: m.y };
+  if (folding) { m.fh = rec; delete m.uh; } else { m.uh = rec; delete m.fh; }
+}
 // 크기만 바뀔 때 화면 오른쪽·아래쪽이면 그쪽 끝 고정
 function keepEdges(m, fromW, fromH, toW, toH) {
-  const d = screen.getDisplayMatching({ x: Math.round(m.x), y: Math.round(m.y), width: Math.round(fromW), height: Math.round(fromH) }).workArea;
+  const d = memoDisplay(m.x, m.y, fromW, fromH);
   if (m.x + fromW / 2 > d.x + d.width / 2) m.x = Math.max(d.x, m.x + fromW - toW);
   if (m.y + fromH / 2 > d.y + d.height / 2) m.y = Math.max(d.y, m.y + fromH - toH);
 }
@@ -622,7 +644,7 @@ function foldAll() {
   if (peopleWin && !peopleWin.isDestroyed()) setPeopleFolded(true);
   const list = store.memos.filter((m) => !m.hidden && !m.deleting && !m.folded);
   if (!list.length) return;
-  for (const m of list) { anchorFold(m, true); m.folded = true; }
+  for (const m of list) { foldMove(m, true); m.folded = true; }
   layoutTouched(null, list);
   save();
   broadcast();
@@ -640,7 +662,7 @@ function unfoldAll() {
   if (peopleWin && !peopleWin.isDestroyed()) setPeopleFolded(false);
   const list = store.memos.filter((m) => m.folded && !m.hidden && !m.deleting);
   for (const m of list) {
-    if (m.ox == null) anchorFold(m, false);
+    if (m.ox == null) foldMove(m, false);
     m.folded = false;
     if (m.ox != null) { m.x = m.ox; m.y = m.oy; }
     delete m.ox; delete m.oy;
@@ -997,7 +1019,7 @@ const GAP = 0;     // 붙었을 때 메모 사이 간격 (메모잇·에스메�
 function snapPos(m, x, y, skip) {
   const w = m.folded ? foldW(m) : m.w;
   const h = m.folded ? foldH(m) : m.h;
-  const disp = screen.getDisplayMatching({ x: Math.round(x), y: Math.round(y), width: Math.round(w), height: Math.round(h) }).workArea;
+  const disp = memoDisplay(x, y, w, h);
   const others = store.memos.filter((o) => o.id !== m.id && !o.hidden && !o.deleting && o.x != null && !(skip && skip.has(o))).map((o) => ({
     x: o.x, y: o.y, w: o.folded ? foldW(o) : o.w, h: o.folded ? foldH(o) : o.h
   }));
@@ -1061,7 +1083,7 @@ function stackIntoGroup(m) {
   m.x = left.x;
   m.y = bottom + GAP;
   // 화면 아래로 넘치면 옆 줄 맨 위로
-  const wa = screen.getDisplayMatching({ x: Math.round(left.x), y: Math.round(left.y), width: 10, height: 10 }).workArea;
+  const wa = memoDisplay(left.x, left.y, 10, 10);
   const h = m.folded ? foldH(m) : m.h;
   if (m.y + h > wa.y + wa.height) {
     const colW = Math.max(...mates.filter((o) => Math.abs(o.x - left.x) < 40).map((o) => (o.folded ? foldW(o) : o.w)));

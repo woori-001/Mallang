@@ -311,13 +311,8 @@
     closePicker();
     if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
     try { getSelection().removeAllRanges(); title.setSelectionRange(0, 0); } catch (e) { /* 무시 */ }
-    // 화면 오른쪽 절반이면 오른쪽 끝 기준 (메인과 같은 규칙)
-    const w0 = memo.folded ? foldW() : memo.w, h0 = memo.folded ? foldH() : memo.h;
-    const sc = window.screen;
-    memo.ar = window.screenX + 14 + w0 / 2 > (sc.availLeft || 0) + sc.availWidth / 2;
-    memo.ab = window.screenY + 14 + h0 / 2 > (sc.availTop || 0) + sc.availHeight / 2;
-    send({ folded: !memo.folded });
-    render();
+    // 어느 쪽으로 접고 펼지는 메인이 정해서 알려줌 (자리 기억 포함)
+    api.update(id, { folded: !memo.folded });
   }
 
   // ───────── ⋯ 도구 막대 ─────────
