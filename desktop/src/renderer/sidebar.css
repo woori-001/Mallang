@@ -452,3 +452,10 @@ html.draw .evc { box-shadow: 0 0 0 2px var(--ink); }
 html.draw .evr { background: transparent; box-shadow: inset 0 0 0 1.6px var(--ink); color: var(--ink); }
 html.draw .ev.hasrep .evr, html.draw .evrep { background: var(--ink); color: #FBFAF5; }
 html.draw .ev.rec { background: transparent; }
+/* 달력 말랑이: 살랑살랑 + 가끔 폴짝 */
+html.draw .calDeco img { transform-origin: 50% 100%; animation: bunSway 3.6s ease-in-out infinite, bunHop 7s ease-in-out 2s infinite; }
+html.draw .calDeco .st1 { transform-origin: 50% 50%; animation: starTwinkle 2.8s ease-in-out infinite; }
+@keyframes bunSway { 0%, 100% { rotate: -3deg; } 50% { rotate: 3deg; } }
+@keyframes bunHop { 0%, 84%, 100% { translate: 0 0; scale: 1 1; } 88% { translate: 0 0; scale: 1.12 .88; } 92% { translate: 0 -7px; scale: .94 1.08; } 96% { translate: 0 0; scale: 1.06 .95; } }
+@keyframes starTwinkle { 0%, 100% { scale: 1; rotate: 0deg; } 50% { scale: 1.18; rotate: 14deg; } }
+@media (prefers-reduced-motion: reduce) { html.draw .calDeco img, html.draw .calDeco .st1 { animation: none; } }
