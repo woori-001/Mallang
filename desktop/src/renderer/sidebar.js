@@ -225,7 +225,7 @@
         if (q && !mem.length) continue;
         const allHidden = mem.length > 0 && mem.every((m) => m.hidden);
         const allFolded = mem.length > 0 && mem.filter((m) => !m.hidden).every((m) => m.folded);
-        const closed = !!collapsedGroups[g.id] && !q;
+        const closed = !openGroups[g.id] && !q;   // 기본은 닫힘, 열어 둔 폴더만 열림
         html += '<div class="grp' + (closed ? ' closed' : '') + (allHidden ? ' ghidden' : '') + '" data-g="' + esc(g.id) + '">' +
           '<div class="ghead">' +
             '<button class="ib gtog" type="button" data-gact="toggle" aria-expanded="' + !closed + '" title="' + (closed ? '폴더 열기' : '폴더 닫기') + '">' + (closed ? ICONS.folder : ICONS.folderOpen).replace('width="15" height="15"', 'width="17" height="17"') + '</button>' +
@@ -346,17 +346,19 @@
     const m = S.memos.find((x) => x.id === dragId);
     if (m && (m.group || null) !== gid) {
       api.update(dragId, { group: gid });
-      if (gid) collapsedGroups[gid] = false;
+      if (gid && !openGroups[gid]) api.groupOpen(gid, true);
     }
     z.classList.remove('dropOn');
   });
 
   // ───────── 그룹 ─────────
-  const collapsedGroups = {};
+  // 폴더 열림 상태: 기본은 닫힘, 열고 닫은 그대로 기억 (PC에 저장 · 다시 켜도, 다시 로그인해도)
+  const openGroups = new Proxy({}, { get: (t, k) => !!(S && S.openGroups && S.openGroups[k]) });
   let renamingGroup = null;
   $('newGroup').innerHTML = ICONS.folder + '<span>새 그룹</span>';
   $('newGroup').addEventListener('click', async () => {
     const gid = await api.groupCreate('');
+    api.groupOpen(gid, true);
     renamingGroup = gid;
     renderMemos();
   });
@@ -386,7 +388,7 @@
       const gid = grp.dataset.g;
       const mem = S.memos.filter((m) => m.group === gid);
       const act = gb.dataset.gact;
-      if (act === 'toggle') { collapsedGroups[gid] = !collapsedGroups[gid]; renderMemos(); }
+      if (act === 'toggle') { S.openGroups = { ...(S.openGroups || {}) }; if (S.openGroups[gid]) delete S.openGroups[gid]; else S.openGroups[gid] = true; api.groupOpen(gid, !!S.openGroups[gid]); renderMemos(); }
       if (act === 'hide') api.groupHide(gid, !(mem.length && mem.every((m) => m.hidden)));
       if (act === 'fold') api.groupFold(gid, !(mem.length && mem.filter((m) => !m.hidden).every((m) => m.folded)));
       if (act === 'remove') {
@@ -450,6 +452,13 @@
   }
   $('bkExportBtn').addEventListener('click', () => openBk('export'));
   $('bkImportBtn').addEventListener('click', () => openBk('import'));
+  $('memoitBtn').addEventListener('click', async () => {
+    bkMsg('메모잇 백업 파일(memodb_날짜)을 골라 주세요…');
+    const r = await api.importMemoit();
+    if (r.canceled) { bkMsg(''); return; }
+    if (r.error) { bkMsg(r.error, 'err'); return; }
+    bkMsg('메모잇에서 메모 ' + r.added + '개' + (r.events ? ', 달력 일정 ' + r.events + '개' : '') + '를 가져왔어요' + (r.skipped ? ' (이미 있거나 빈 메모 ' + r.skipped + '개는 건너뜀)' : ''), 'ok');
+  });
   $('bkCancel').addEventListener('click', () => { closeBk(); bkMsg(''); });
   $('bkForm').addEventListener('submit', async (e) => {
     e.preventDefault();

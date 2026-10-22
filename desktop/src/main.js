@@ -92,6 +92,7 @@ function load() {
   if (fixed) store.contacts = { rows: fixed, mt: Math.max(Date.now(), (store.contacts.mt || 0) + 1), dirty: true };
   store.cloud = store.cloud && typeof store.cloud === 'object' ? store.cloud : {};
   store.shared = store.shared && typeof store.shared === 'object' ? store.shared : {};
+  store.openGroups = store.openGroups && typeof store.openGroups === 'object' ? store.openGroups : {};   // 목록바에서 열어 둔 그룹 폴더 (기본은 닫힘)
   store.layoutSync = store.layoutSync && typeof store.layoutSync === 'object' ? store.layoutSync : { mt: 0, dirty: false };
   if (store.shared.contacts && !Array.isArray(store.shared.contacts)) delete store.shared.contacts;
   store.groups = Array.isArray(store.groups) ? store.groups.filter((g) => g && typeof g.id === 'string').map((g) => ({ id: g.id, name: String(g.name || '그룹').slice(0, 40), color: Number(g.color) || 0 })) : [];
@@ -193,6 +194,7 @@ function snapshot() {
     contactsShared: !!store.shared.contacts,                         // 회사 공통 연락망
     canEditContacts: !store.shared.contacts || !!store.cloud.admin,   // 공통 연락망은 관리자만 고침
     groups: store.groups,
+    openGroups: store.openGroups,
     peopleWin: store.peopleWin,
     trash: store.trash.map((t) => ({
       id: t.id, title: t.title, slot: t.slot, mark: t.mark, markColor: t.markColor, type: t.type,
@@ -926,6 +928,11 @@ ipcMain.handle('group:create', (e, name, memoId) => {
   groupsTouched(); save(); broadcast();
   return g.id;
 });
+ipcMain.on('group:open', (e, gid, open) => {
+  if (typeof gid !== 'string') return;
+  if (open) store.openGroups[gid] = true; else delete store.openGroups[gid];
+  save(); broadcast();
+});
 ipcMain.on('group:rename', (e, gid, name) => {
   const g = store.groups.find((x) => x.id === gid);
   if (!g || typeof name !== 'string' || !name.trim()) return;
@@ -1057,6 +1064,117 @@ ipcMain.handle('backup:export', async (e, password) => {
   } catch (err) {
     console.error(err);
     return { error: '백업 파일을 저장하지 못했어요' };
+  }
+});
+
+// ───────── 메모잇 백업 가져오기 (SQLite 파일) ─────────
+const FILETIME_EPOCH = 11644473600000;   // 1601-01-01 ~ 1970-01-01 (ms)
+const fromFiletime = (v) => { const n = Number(v); return n > 1e16 ? Math.round(n / 10000 - FILETIME_EPOCH) : null; };   // BigInt도 받음
+function slotFromColorref(c) {
+  // 메모잇 색(COLORREF: 0x00BBGGRR) → 말랑메모 메모 색 5가지 중 가까운 것
+  c = Number(c || 0) >>> 0;
+  const r = c & 255, g = (c >> 8) & 255, b = (c >> 16) & 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+  if (mx - mn < 18) return 0;                     // 흰색·회색 계열
+  let h;
+  if (mx === r) h = ((g - b) / (mx - mn)) * 60; else if (mx === g) h = (2 + (b - r) / (mx - mn)) * 60; else h = (4 + (r - g) / (mx - mn)) * 60;
+  if (h < 0) h += 360;
+  if (h >= 30 && h < 75) return 0;                // 노랑·주황
+  if (h >= 75 && h < 190) return 1;               // 초록·민트
+  if (h >= 190 && h < 255) return 3;              // 파랑
+  if (h >= 255 && h < 320) return 4;              // 보라
+  return 2;                                       // 빨강·분홍
+}
+ipcMain.handle('import:memoit', async (e) => {
+  const parent = BrowserWindow.fromWebContents(e.sender);
+  const r = await dialog.showOpenDialog(parent, {
+    title: '메모잇 백업 파일 고르기',
+    defaultPath: app.getPath('documents'),
+    properties: ['openFile'],
+    filters: [{ name: '메모잇 백업 (memodb...)', extensions: ['*'] }]
+  });
+  if (r.canceled || !r.filePaths || !r.filePaths[0]) return { canceled: true };
+  let db;
+  try {
+    const { DatabaseSync } = require('node:sqlite');
+    db = new DatabaseSync(r.filePaths[0], { readOnly: true });
+    db.prepare('select count(*) n from memo').get();
+  } catch (err) {
+    try { if (db) db.close(); } catch (e2) { /* 무시 */ }
+    return { error: '메모잇 백업 파일이 아니에요. 메모잇에서 백업한 memodb 파일을 골라 주세요' };
+  }
+  try {
+    const cols = new Set(db.prepare('pragma table_info(memo)').all().map((c) => c.name));
+    const has = (c) => cols.has(c);
+    const q = (sql) => { const st = db.prepare(sql); st.setReadBigInts(true); return st.all(); };   // 메모잇 시간 값이 커서 BigInt로 읽음
+    const rows = q('select * from memo' + (has('is_deleted') ? ' where coalesce(is_deleted, 0) = 0' : '') + ' order by _id');
+    const sig = (m) => (m.title || '') + '\u0001' + (m.text || '');
+    const have = new Set(store.memos.map(sig));
+    let added = 0, skipped = 0;
+    const ords = store.memos.map((x) => x.ord).filter((v) => typeof v === 'number');
+    let ord = ords.length ? Math.min(...ords) : null;
+    for (const row of rows) {
+      const text = String(row.data == null ? '' : row.data).replace(/\r\n?/g, '\n').replace(/\u0000/g, '').replace(/\n+$/, '').slice(0, 200000);
+      let title = String(row.title || '').replace(/\s+/g, ' ').trim();
+      if (!title && !text.trim()) { skipped++; continue; }
+      if (!title) { const f = text.split('\n').map((l) => l.trim()).find(Boolean) || ''; title = f.length > 30 ? f.slice(0, 30) + '…' : f; }
+      if (have.has(title + '\u0001' + text)) { skipped++; continue; }
+      const L = Number(row.winrect_left), T = Number(row.winrect_top), R = Number(row.winrect_right), B = Number(row.winrect_bottom);
+      const okRect = [L, T, R, B].every(Number.isFinite) && R - L > 40 && B - T > 30;
+      const created = fromFiletime(row.cretime) || Date.now();
+      const m = {
+        id: store.nextId++, slot: slotFromColorref(row.titlebkcolor), type: 'text', title: title.slice(0, 200), text, items: [],
+        x: okRect ? L : null, y: okRect ? T : null,
+        w: okRect ? Math.min(MAX_W, Math.max(MIN_W, R - L)) : 260, h: okRect ? Math.min(MAX_H, Math.max(MIN_H, B - T)) : 220,
+        layer: 'normal', hidden: Number(row.show) === 0, folded: !!Number(row.fold),   // 메모잇은 기본이 '항상 위'라 따라가지 않음
+        mark: null, markColor: '#E8456B', created, updated: fromFiletime(row.lastmodifytime) || created,
+        uid: Cloud.uid(), mt: Date.now(), dirty: true, lt: Date.now()
+      };
+      if (ord != null) m.ord = --ord;
+      // 메모잇 분류 → 그룹
+      const cat = has('category') ? String(row.category || '').trim() : '';
+      if (cat) {
+        let g = store.groups.find((x) => x.name === cat);
+        if (!g) { g = { id: 'g' + Cloud.uid().replace(/-/g, '').slice(0, 10), name: cat.slice(0, 40), color: store.groups.length % 6 }; store.groups.push(g); store.layoutSync.groupsT = Date.now(); }
+        m.group = g.id;
+      }
+      store.memos.push(m);
+      have.add(sig(m));
+      ensurePos(m);
+      if (!m.hidden) openMemoWin(m);
+      added++;
+    }
+    // 메모잇 달력 → 캘린더 일정 (한 줄 = 일정 하나)
+    let evAdded = 0;
+    try {
+      const cal = q('select * from calendar');
+      for (const c of cal) {
+        if (Number(c.is_deleted)) continue;
+        const d = String(c.id_date || '');
+        if (!/^\d{8}$/.test(d)) continue;
+        const k = d.slice(0, 4) + '-' + d.slice(4, 6) + '-' + d.slice(6, 8);
+        const lines = String(c.text || '').replace(/\r\n?/g, '\n').split('\n').map((l) => l.trim()).filter(Boolean);
+        if (!lines.length) continue;
+        const cur = store.events[k] || [];
+        const seen = new Set(cur.map((x) => x.title));
+        let changed = false;
+        for (const l of lines) {
+          if (seen.has(l) || cur.length >= 50) continue;
+          cur.push({ t: '', title: l.slice(0, 200), c: 'lav' }); seen.add(l); evAdded++; changed = true;
+        }
+        if (changed) { store.events[k] = cur; markEvent(k); }
+      }
+    } catch (err) { /* 달력이 없는 백업 */ }
+    markLayout();
+    save();
+    broadcast();
+    scheduleSync();
+    return { ok: true, added, skipped, events: evAdded };
+  } catch (err) {
+    console.error(err);
+    return { error: '메모잇 백업을 읽지 못했어요' };
+  } finally {
+    try { db.close(); } catch (e2) { /* 무시 */ }
   }
 });
 

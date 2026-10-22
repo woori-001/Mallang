@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld('api', {
   unsplit: (id) => ipcRenderer.invoke('memo:unsplit', id),
   layoutPushAll: () => ipcRenderer.send('layout:pushAll'),
   groupCreate: (name, memoId) => ipcRenderer.invoke('group:create', name, memoId),
+  groupOpen: (gid, open) => ipcRenderer.send('group:open', gid, !!open),
   groupRename: (gid, name) => ipcRenderer.send('group:rename', gid, name),
   groupRemove: (gid) => ipcRenderer.send('group:remove', gid),
   groupHide: (gid, hidden) => ipcRenderer.send('group:hide', gid, !!hidden),
@@ -49,6 +50,7 @@ contextBridge.exposeInMainWorld('api', {
   emptyTrash: () => ipcRenderer.send('trash:empty'),
   exportBackup: (pw) => ipcRenderer.invoke('backup:export', pw),
   importBackup: (pw) => ipcRenderer.invoke('backup:import', pw),
+  importMemoit: () => ipcRenderer.invoke('import:memoit'),
 
   cloudSignIn: (mode, username, password) => ipcRenderer.invoke('cloud:signin', mode, username, password),
   cloudLogout: (force) => ipcRenderer.invoke('cloud:logout', !!force),
