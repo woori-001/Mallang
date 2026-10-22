@@ -1,0 +1,6 @@
+
+T> scale 1 {"x":0,"y":0,"width":1024,"height":720}
+T> A {"x":386,"y":286,"width":208,"height":60} B {"x":386,"y":318,"width":208,"height":60}
+T> click B-top -> A got 1 B got 0 FAIL
+T> click B-mid -> A 1 B 0
+T> pixel padding-left of A [186,174,156] far [59,59,59] inside A [205,221,215]
