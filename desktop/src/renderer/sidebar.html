@@ -183,6 +183,24 @@
         </div>
 
         <div class="box">
+          <div class="bhead">말랑이 시계 알림</div>
+          <div class="cseg" role="group" aria-label="시계 알림 간격">
+            <button type="button" data-cm="30">30분마다</button>
+            <button type="button" data-cm="60">1시간마다</button>
+            <button type="button" data-cm="0">사용 안 함</button>
+          </div>
+          <div id="clockOpts" class="clockOpts">
+            <div class="line"><label for="clockAlpha">투명도</label><input id="clockAlpha" type="range" min="20" max="100" step="5"><span id="clockAlphaV" class="sval"></span></div>
+            <div class="line"><label for="clockScale">크기</label><input id="clockScale" type="range" min="70" max="150" step="5"><span id="clockScaleV" class="sval"></span></div>
+            <button id="clockDark" class="toggle mini" type="button" aria-pressed="false"><span>어두운 시계</span><span class="track"><span class="knob"></span></span></button>
+            <div class="row2">
+              <button id="clockPreview" class="pill soft" type="button">미리보기</button>
+              <button id="clockPlace" class="pill soft" type="button">위치 바꾸기</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="box">
           <div class="bhead">투명도</div>
           <div class="line"><label for="alpha">메모</label><input id="alpha" type="range" min="25" max="95" step="1"><span id="alphaV" class="sval"></span></div>
           <div class="line"><label for="sideAlpha">목록바</label><input id="sideAlpha" type="range" min="15" max="95" step="1"><span id="sideAlphaV" class="sval"></span></div>

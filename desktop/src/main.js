@@ -39,7 +39,7 @@ let dataDir, dataFile, store, saveTimer, quitting = false;
 function defaults() {
   return {
     version: 1,
-    settings: { skin: 'lav', font: 'gowun', fontScale: 100, titleScale: 100, titleBold: true, calFont: 'same', calScale: 100, peopleFont: 'same', peopleScale: 100, bodyBg: false, alpha: 60, sideAlpha: 55, showToday: true, showPeople: false, pinned: false, autoStart: false },
+    settings: { skin: 'lav', font: 'gowun', fontScale: 100, titleScale: 100, titleBold: true, calFont: 'same', calScale: 100, peopleFont: 'same', peopleScale: 100, bodyBg: false, alpha: 60, sideAlpha: 55, showToday: true, showPeople: false, clockMode: 30, clockAlpha: 75, clockScale: 100, clockDark: false, pinned: false, autoStart: false },
     nextId: 2,
     memos: [{
       id: 1, slot: 0, x: null, y: null, w: 290, h: 240, type: 'text', title: '말랑메모 시작하기',
@@ -327,6 +327,9 @@ function createHost() {
       const wy = store.widget.y != null ? store.widget.y : wa.y + wa.height - 260;
       return { action: 'allow', overrideBrowserWindowOptions: { ...baseWinOpts, x: Math.round(wx), y: Math.round(wy), width: WIDGET_W, height: 200 } };
     }
+    if (kind === 'clock') {
+      return { action: 'allow', overrideBrowserWindowOptions: { ...baseWinOpts, ...clockBounds(), alwaysOnTop: true, focusable: false } };
+    }
     if (kind === 'search') {
       const wa = workArea();
       return { action: 'allow', overrideBrowserWindowOptions: {
@@ -347,6 +350,7 @@ function createHost() {
     if (kind === 'widget') setupWidget(win);
     if (kind === 'people') setupPeople(win);
     if (kind === 'search') setupSearch(win);
+    if (kind === 'clock') setupClock(win, u.searchParams.get('mode'));
   });
   host.on('close', (e) => { if (!quitting) e.preventDefault(); });
   host.loadFile(R('host.html'));
@@ -673,6 +677,64 @@ function closeWidget() {
   setTimeout(() => { if (!w.isDestroyed()) w.close(); }, 330);
 }
 
+// ───────────────────────── 말랑이 시계 알림 (정각·30분) ─────────────────────────
+let clockWin = null, clockTimer = null, clockLast = '', clockMode = null;
+const CLOCK_W = 250, CLOCK_H = 96;
+function clockBounds() {
+  const s = (store.settings.clockScale || 100) / 100;
+  const w = Math.round(CLOCK_W * s) + 2 * P + 20, h = Math.round(CLOCK_H * s) + 2 * P + 40;
+  const wa = workArea();
+  const p = store.clockPos || { x: wa.x + wa.width / 2, y: wa.y + 110 };
+  // 화면 밖이면 기본 자리로
+  const d = screen.getDisplayNearestPoint({ x: Math.round(p.x), y: Math.round(p.y) }).workArea;
+  const cx = Math.min(d.x + d.width - w / 2, Math.max(d.x + w / 2, p.x)), cy = Math.min(d.y + d.height - h / 2, Math.max(d.y + h / 2, p.y));
+  return { x: Math.round(cx - w / 2), y: Math.round(cy - h / 2), width: w, height: h };
+}
+function showClock(mode) {
+  if (clockWin && !clockWin.isDestroyed()) {
+    clockWin.setBounds(clockBounds());
+    clockWin.webContents.send('cmd', { type: 'clock', mode });
+    return;
+  }
+  hostOpen('clock.html?kind=clock&mode=' + mode, 'clock-' + Date.now());
+}
+function setupClock(win, mode) {
+  clockWin = win;
+  clockMode = mode;
+  win.setAlwaysOnTop(true, 'screen-saver');
+  win.setVisibleOnAllWorkspaces && win.setVisibleOnAllWorkspaces(true);
+  if (mode !== 'place') win.setIgnoreMouseEvents(true);   // 클릭은 아래 창으로 그대로
+  win.once('ready-to-show', () => { if (!win.isDestroyed()) win.showInactive(); });
+  win.on('closed', () => { if (clockWin === win) clockWin = null; });
+}
+function closeClock() { if (clockWin && !clockWin.isDestroyed()) clockWin.close(); clockWin = null; }
+ipcMain.on('clock:done', () => { if (clockMode !== 'place') closeClock(); });
+ipcMain.on('clock:move', (e, x, y, done) => {
+  x = num(x); y = num(y);
+  if (!clockWin || clockWin.isDestroyed() || x == null || y == null) return;
+  const b = clockWin.getBounds();
+  clockWin.setBounds({ x: Math.round(x), y: Math.round(y), width: b.width, height: b.height });
+  if (done) { store.clockPos = { x: Math.round(x + b.width / 2), y: Math.round(y + b.height / 2) }; save(); }
+});
+ipcMain.on('clock:place', (e, on) => {
+  closeClock();
+  if (on) setTimeout(() => showClock('place'), 120);
+});
+ipcMain.on('clock:preview', () => { closeClock(); setTimeout(() => showClock('show'), 120); });
+function tickClock() {
+  const mode = store.settings.clockMode;
+  if (!mode) return;
+  const d = new Date(), m = d.getMinutes();
+  if (d.getSeconds() > 40) return;
+  if (!(m === 0 || (mode === 30 && m === 30))) return;
+  const key = d.toDateString() + ' ' + d.getHours() + ':' + m;
+  if (clockLast === key) return;
+  clockLast = key;
+  if (clockWin && clockMode === 'place') return;   // 위치를 고르는 중엔 건너뜀
+  closeClock();
+  showClock('show');
+}
+
 // ───────────────────────── 빠른 검색 (Ctrl+Alt+F) ─────────────────────────
 const SEARCH_W = 560;
 function toggleSearch() {
@@ -792,7 +854,11 @@ function updateSettings(patch) {
   if ('bodyBg' in patch) patch.bodyBg = !!patch.bodyBg;
   if ('titleBold' in patch) patch.titleBold = !!patch.titleBold;
   if ('titleScale' in patch) patch.titleScale = Math.min(170, Math.max(70, Number(patch.titleScale) || 100));
-  const keys = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'showPeople', 'pinned', 'autoStart'];
+  const keys = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'showPeople', 'clockMode', 'clockAlpha', 'clockScale', 'clockDark', 'pinned', 'autoStart'];
+  if ('clockMode' in patch) patch.clockMode = [0, 30, 60].includes(Number(patch.clockMode)) ? Number(patch.clockMode) : 30;
+  if ('clockAlpha' in patch) patch.clockAlpha = Math.min(100, Math.max(20, Number(patch.clockAlpha) || 75));
+  if ('clockScale' in patch) patch.clockScale = Math.min(150, Math.max(70, Number(patch.clockScale) || 100));
+  if ('clockDark' in patch) patch.clockDark = !!patch.clockDark;
   if ('fontScale' in patch) patch.fontScale = Math.min(170, Math.max(70, Number(patch.fontScale) || 100));
   for (const k of keys) if (k in patch) store.settings[k] = patch[k];
   const s = store.settings;
@@ -1822,6 +1888,7 @@ app.whenReady().then(() => {
   setInterval(() => scheduleSync(0), 20000);
   powerMonitor.on('resume', () => scheduleSync(2000));
   setInterval(() => scheduleSync(0), 5 * 60 * 1000);   // 5분마다 다른 기기·공통 연락망 맞추기
+  clockTimer = setInterval(tickClock, 10 * 1000);         // 정각·30분 말랑이 시계
   powerMonitor.on('unlock-screen', () => scheduleSync(1000));
   createHost();
   createSide();

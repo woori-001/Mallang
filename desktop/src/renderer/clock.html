@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:">
+<title>말랑이 시계</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="clock.css">
+</head>
+<body>
+<div id="clock" class="clock">
+  <div class="time" id="time"></div>
+  <div class="bun"><img src="bunny-l.png" alt="" draggable="false"></div>
+</div>
+<button id="done" class="done" type="button" hidden>끌어서 옮긴 뒤 여기를 누르면 저장돼요 ✓</button>
+<script src="common.js"></script>
+<script src="clock.js"></script>
+</body>
+</html>

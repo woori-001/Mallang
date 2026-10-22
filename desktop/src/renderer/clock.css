@@ -1,0 +1,28 @@
+html, body { background: transparent; }
+body { padding: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; height: 100%; box-sizing: border-box; }
+.clock {
+  display: flex; align-items: center; gap: calc(10px * var(--s, 1));
+  padding: calc(8px * var(--s, 1)) calc(20px * var(--s, 1)) calc(8px * var(--s, 1)) calc(24px * var(--s, 1));
+  border-radius: 999px; background: rgba(255, 255, 255, var(--op, .75));
+  box-shadow: 0 8px 20px rgba(40, 30, 90, .22); opacity: 0; transform: scale(.6); will-change: transform, opacity;
+}
+.clock.dark { background: rgba(36, 36, 52, var(--op, .75)); }
+.time { font: 700 calc(34px * var(--s, 1))/1 'Poppins', 'IBM Plex Sans KR', sans-serif; letter-spacing: .5px; color: var(--a1); display: flex; font-variant-numeric: tabular-nums; }
+.clock.dark .time { color: #C3C6FF; }
+.time span { display: inline-block; }
+.bun { width: calc(54px * var(--s, 1)); height: calc(54px * var(--s, 1)); flex: none; transform-origin: 50% 92%; filter: drop-shadow(0 3px 4px rgba(60, 40, 80, .25)); }
+.bun img { width: 100%; height: 100%; object-fit: contain; display: block; }
+/* 등장 → 머물기 → 서서히 사라짐 */
+.clock.show { animation: pop .7s cubic-bezier(.34, 1.56, .64, 1) forwards, out 1.4s ease 5.2s forwards; }
+.clock.show .bun { animation: jelly 1.1s ease .1s, hop 1.6s ease-in-out 1.3s 2; }
+.clock.show .time span, .clock.stay .time span { animation: digit .55s cubic-bezier(.34, 1.7, .6, 1) backwards; }
+.clock.stay { animation: pop .7s cubic-bezier(.34, 1.56, .64, 1) forwards; cursor: grab; }
+.clock.stay .bun { animation: jelly 1.1s ease .1s; }
+.clock.stay:active { cursor: grabbing; }
+@keyframes pop { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: scale(1); } }
+@keyframes out { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: translateY(6px) scale(.92); } }
+@keyframes jelly { 0% { transform: scale(1, 1); } 18% { transform: scale(1.28, .72); } 36% { transform: scale(.82, 1.2) translateY(-10px); } 54% { transform: scale(1.12, .9); } 70% { transform: scale(.96, 1.05); } 85% { transform: scale(1.03, .98); } 100% { transform: scale(1, 1); } }
+@keyframes hop { 0%, 100% { transform: translateY(0) scale(1, 1); } 30% { transform: translateY(0) scale(1.12, .88); } 55% { transform: translateY(-8px) scale(.94, 1.08); } 80% { transform: translateY(0) scale(1.06, .95); } }
+@keyframes digit { from { transform: translateY(14px) scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+.done { border: none; border-radius: 12px; padding: 6px 12px; font-size: 12px; font-weight: 700; background: var(--accent); color: var(--on); box-shadow: 0 6px 14px var(--glow); white-space: nowrap; }
+.done[hidden] { display: none; }

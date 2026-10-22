@@ -623,10 +623,26 @@
     $('alphaV').textContent = s.alpha + '%';
     $('sideAlphaV').textContent = s.sideAlpha + '%';
     $('autoStart').setAttribute('aria-pressed', String(!!s.autoStart));
+    const cm = s.clockMode == null ? 30 : s.clockMode;
+    document.querySelectorAll('[data-cm]').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.cm) === cm)));
+    $('clockOpts').hidden = !cm;
+    if (document.activeElement !== $('clockAlpha')) $('clockAlpha').value = s.clockAlpha != null ? s.clockAlpha : 75;
+    $('clockAlphaV').textContent = (s.clockAlpha != null ? s.clockAlpha : 75) + '%';
+    if (document.activeElement !== $('clockScale')) $('clockScale').value = s.clockScale || 100;
+    $('clockScaleV').textContent = (s.clockScale || 100) + '%';
+    $('clockDark').setAttribute('aria-pressed', String(!!s.clockDark));
     window.M.syncRanges($('vStyle'));
     $('bodyBg').setAttribute('aria-pressed', String(!!s.bodyBg));
   }
   $('skins').addEventListener('click', (e) => { const b = e.target.closest('[data-skin]'); if (b) api.setSettings({ skin: b.dataset.skin }); });
+  document.querySelectorAll('[data-cm]').forEach((b) => b.addEventListener('click', () => api.setSettings({ clockMode: Number(b.dataset.cm) })));
+  $('clockAlpha').addEventListener('input', (e) => { $('clockAlphaV').textContent = e.target.value + '%'; api.setSettings({ clockAlpha: Number(e.target.value) }); });
+  $('clockAlpha').addEventListener('change', () => api.clockPreview());
+  $('clockScale').addEventListener('input', (e) => { $('clockScaleV').textContent = e.target.value + '%'; api.setSettings({ clockScale: Number(e.target.value) }); });
+  $('clockScale').addEventListener('change', () => api.clockPreview());
+  $('clockDark').addEventListener('click', () => { api.setSettings({ clockDark: !S.settings.clockDark }); setTimeout(() => api.clockPreview(), 80); });
+  $('clockPreview').addEventListener('click', () => api.clockPreview());
+  $('clockPlace').addEventListener('click', () => api.clockPlace(true));
   $('fontSel').addEventListener('change', (e) => api.setSettings({ font: e.target.value }));
   $('titleScale').addEventListener('input', (e) => { $('titleScaleV').textContent = e.target.value + '%'; api.setSettings({ titleScale: Number(e.target.value) }); });
   $('titleBold').addEventListener('click', () => api.setSettings({ titleBold: S.settings.titleBold === false }));

@@ -366,3 +366,11 @@ body.dnd .grp, body.dnd .ungrp { border-radius: 14px; transition: background .15
 body.dnd .ungrp { min-height: 40px; }
 .pShared { font-size: 11.5px; color: var(--sub); margin: -4px 2px 0; flex: none; }
 .pShared[hidden], .pEdit[hidden] { display: none; }
+
+/* 말랑이 시계 */
+.cseg { display: flex; padding: 3px; border-radius: 12px; background: rgba(80, 80, 140, .08); }
+.cseg button { flex: 1; height: 30px; border: none; border-radius: 9px; background: transparent; font-size: 12px; font-weight: 600; color: var(--sub); }
+.cseg button[aria-pressed="true"] { background: rgba(var(--glass), .95); color: var(--a1); box-shadow: 0 2px 8px rgba(80, 80, 140, .14); }
+.clockOpts { display: flex; flex-direction: column; gap: 10px; }
+.clockOpts[hidden] { display: none; }
+html.paper .cseg { background: var(--base); }
