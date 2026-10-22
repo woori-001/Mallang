@@ -431,7 +431,7 @@ html.draw .calnav { align-self: flex-start; position: relative; z-index: 3; }
 html.draw .ctext { color: var(--ink); font-weight: 700; }
 html.draw .calDeco { display: block; position: absolute; inset: 0; pointer-events: none; }
 html.draw .calDeco img { position: absolute; left: 43%; bottom: -3px; width: 56px; z-index: 2; }
-html.draw .applogo { filter: grayscale(1) brightness(.62) contrast(1.5); }
+html.draw .applogo { filter: none; height: 40px; margin-top: -4px; }
 html.draw .calDeco svg { position: absolute; fill: #FBFAF5; stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
 html.draw .calDeco .st1 { left: 38%; top: -2px; width: 18px; height: 18px; }
 html.draw .calDeco .st2 { right: 4px; bottom: 24px; width: 14px; height: 14px; display: none; }

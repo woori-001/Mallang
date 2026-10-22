@@ -358,7 +358,7 @@ html.draw .toggleRow, html.draw .pEdit:not(.on) { background: #FBFAF5; box-shado
 html.draw .evList > * { background: transparent; box-shadow: none; border-radius: 0; border-bottom: 1.7px solid #161616; }
 html.draw .editor .edTop { background: repeating-linear-gradient(-45deg, #FBFAF5 0 7px, #E2E1DB 7px 8.5px); border-bottom: 2.5px solid #161616; }
 html.draw .edText { background-image: linear-gradient(to bottom, transparent calc(1.75em - 1.3px), rgba(22, 22, 22, .4) 0); }
-html.draw .brand img { filter: grayscale(1) brightness(.62) contrast(1.5); }
+html.draw .brand img { width: auto; height: 42px; }
 html.draw body { background: #EFEFEC; }
 html.draw .wdays { background: #161616; color: #FBFAF5; border-radius: 999px; padding: 6px 0 5px; margin-bottom: 4px; }
 html.draw .wdays .sun, html.draw .wdays .sat { color: #FBFAF5; }

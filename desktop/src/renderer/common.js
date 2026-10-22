@@ -156,7 +156,7 @@
     document.documentElement.classList.toggle('paper', !!sk.paper);
     document.documentElement.classList.toggle('draw', !!sk.draw);
     // 드로잉 스킨에서는 말랑이도 손그림으로
-    document.querySelectorAll('img[data-bun]').forEach((img) => { const want = sk.draw ? 'bunny-draw.svg' : img.dataset.bun; if (img.getAttribute('src') !== want) img.setAttribute('src', want); });
+    document.querySelectorAll('img[data-bun]').forEach((img) => { const want = sk.draw ? (img.dataset.draw || 'bunny-draw.svg') : img.dataset.bun; if (img.getAttribute('src') !== want) img.setAttribute('src', want); });
     r.setProperty('--base', sk.base);
     r.setProperty('--memo-font', f.fam);
     const scale = (settings.fontScale || 100) / 100;              // 글자 크기 (모든 메모에 한 번에)
