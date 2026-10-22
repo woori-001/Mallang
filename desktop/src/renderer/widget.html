@@ -29,10 +29,10 @@ body { padding: 14px; }
 .n { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .none { font-size: 13px; color: var(--sub); }
 /* 말랑 드로잉 스킨 */
-html.draw .w { background: #FBFAF5 !important; box-shadow: inset 0 0 0 2.2px #161616, 0 2px 5px rgba(0, 0, 0, .10); border-radius: 16px; }
-html.draw .big, html.draw .mon { color: #161616; }
-html.draw .ev { border-bottom: 1.6px solid #161616; padding-bottom: 6px; }
-html.draw .dot { background: #161616 !important; }
+html.draw .w { background: var(--paper-bg, #FBFAF5) !important; box-shadow: inset 0 0 0 2.2px var(--ink), 0 2px 5px rgba(0, 0, 0, .10); border-radius: 16px; }
+html.draw .big, html.draw .mon { color: var(--ink); }
+html.draw .ev { border-bottom: 1.6px solid var(--ink); padding-bottom: 6px; }
+html.draw .dot { background: var(--ink) !important; }
 </style>
 </head>
 <body>

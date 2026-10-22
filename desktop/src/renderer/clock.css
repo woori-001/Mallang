@@ -28,9 +28,12 @@ body { padding: 14px; display: flex; flex-direction: column; align-items: center
 .done[hidden] { display: none; }
 
 /* 말랑 드로잉 스킨: 펜 테두리 알약 + 손그림 말랑이 */
-html.draw .clock { background: rgba(251, 250, 245, var(--op, .75)); box-shadow: inset 0 0 0 2.5px #161616, 4px 4px 0 #161616; }
-html.draw .time { color: #161616; }
-html.draw .clock.dark { background: rgba(22, 22, 22, var(--op, .75)); box-shadow: inset 0 0 0 2.5px #FBFAF5, 4px 4px 0 rgba(0, 0, 0, .35); }
-html.draw .clock.dark .time { color: #FBFAF5; }
+html.draw .clock { background: rgba(251, 250, 245, var(--op, .75)); box-shadow: inset 0 0 0 2.5px var(--ink), 4px 4px 0 var(--ink); }
+html.draw .time { color: var(--ink); }
+html.draw .clock.dark { background: rgba(22, 22, 22, var(--op, .75)); box-shadow: inset 0 0 0 2.5px var(--paper-bg, #FBFAF5), 4px 4px 0 rgba(0, 0, 0, .35); }
+html.draw .clock.dark .time { color: var(--paper-bg, #FBFAF5); }
 html.draw .bun { filter: none; }
-html.draw .done { background: #161616; color: #FBFAF5; box-shadow: 3px 3px 0 rgba(0, 0, 0, .25); }
+html.draw .done { background: var(--ink); color: var(--paper-bg, #FBFAF5); box-shadow: 3px 3px 0 rgba(0, 0, 0, .25); }
+html.halloween .clock.dark .time { color: #FFD34D; }
+html.xmas .clock.dark .time { color: #E7B53C; }
+html.halloween .bun, html.xmas .bun { width: calc(86px * var(--s, 1)); height: calc(66px * var(--s, 1)); }

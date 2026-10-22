@@ -408,22 +408,22 @@ html.paper .cseg { background: var(--base); }
 html.draw .panel { background-color: #EFEFEC !important;
   background-image: linear-gradient(#DCDCD6 1px, transparent 1px), linear-gradient(90deg, #DCDCD6 1px, transparent 1px) !important;
   background-size: 22px 22px !important; box-shadow: inset 2.5px 0 0 var(--ink), inset 0 2.5px 0 var(--ink), inset 0 -2.5px 0 var(--ink); }
-html.draw .tab { background: var(--ink); color: #FBFAF5; opacity: 1; }
+html.draw .tab { background: var(--ink); color: var(--paper-bg, #FBFAF5); opacity: 1; }
 html.draw .seg { background: transparent; box-shadow: inset 0 0 0 2px var(--ink); border-radius: 999px; padding: 0; overflow: hidden; }
 html.draw .segb { border-radius: 0; height: 36px; color: var(--ink); }
 html.draw .segb + .segb { box-shadow: inset 2px 0 0 var(--ink); }
-html.draw .segb.on { background: var(--ink); color: #FBFAF5; box-shadow: none; }
+html.draw .segb.on { background: var(--ink); color: var(--paper-bg, #FBFAF5); box-shadow: none; }
 html.draw .search, html.draw .pill, html.draw .pinbtn, html.draw .navb, html.draw .box, html.draw .ev,
 html.draw .thInfo, html.draw .bkForm, html.draw .toggle:not(.mini), html.draw .acHero {
   background: #FBFAF5; box-shadow: inset 0 0 0 2px var(--ink);
 }
-html.draw .primary, html.draw .smallprimary, html.draw .pinbtn.on { background: var(--ink); color: #FBFAF5; box-shadow: 3px 3px 0 rgba(22, 22, 22, .25); }
+html.draw .primary, html.draw .smallprimary, html.draw .pinbtn.on { background: var(--ink); color: var(--paper-bg, #FBFAF5); box-shadow: 3px 3px 0 rgba(22, 22, 22, .25); }
 html.draw .bhead { color: var(--ink); }
 html.draw .toggle[aria-pressed="true"] .track { background: var(--ink); }
 html.draw .memoPrev, html.draw .ppPrev, html.draw .box .calPrev { background: #F3F2EC; }
 
 /* 캘린더: 검은 요일 띠 + 동글한 숫자 + 일요일은 빈 글씨 + 말랑이 */
-html.draw .calcard { background: #FBFAF5; box-shadow: inset 0 0 0 2.5px var(--ink); border-radius: 16px; padding-top: 12px; }
+html.draw .calcard { background: var(--paper-bg, #FBFAF5); box-shadow: inset 0 0 0 2.5px var(--ink); border-radius: 16px; padding-top: 12px; }
 html.draw .calhead { border-bottom: none; margin-bottom: 0; padding: 0 4px 6px; position: relative; min-height: 64px; align-items: flex-end; }
 html.draw .calttl { color: var(--ink); align-items: flex-end; }
 html.draw .calnum { font-size: 44px; font-weight: 400; line-height: .86; }
@@ -431,13 +431,14 @@ html.draw .calen { font-size: 12px; font-weight: 400; letter-spacing: 1.5px; pad
 html.draw .calnav { align-self: flex-start; position: relative; z-index: 3; }
 html.draw .ctext { color: var(--ink); font-weight: 700; }
 html.draw .calDeco { display: block; position: absolute; inset: 0; pointer-events: none; }
-html.draw .calDeco img { position: absolute; left: 43%; bottom: -3px; width: 56px; z-index: 2; }
+html.draw .calDeco .calBun { position: absolute; left: 43%; bottom: -3px; width: 56px; z-index: 2; }
+html.draw .calDeco .calBun img { width: 100%; display: block; }
 html.draw .applogo { filter: none; height: 40px; margin-top: -4px; }
-html.draw .calDeco svg { position: absolute; fill: #FBFAF5; stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+html.draw .calDeco .st1, html.draw .calDeco .st2 { position: absolute; fill: var(--paper-bg, #FBFAF5); stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
 html.draw .calDeco .st1 { left: 38%; top: -2px; width: 18px; height: 18px; }
 html.draw .calDeco .st2 { right: 4px; bottom: 24px; width: 14px; height: 14px; display: none; }
-html.draw .wdays { background: var(--ink); color: #FBFAF5; border-radius: 999px; border-bottom: none; padding: 5px 0 4px; margin-bottom: 4px; position: relative; z-index: 1; }
-html.draw .wdays .sun, html.draw .wdays .sat { color: #FBFAF5; }
+html.draw .wdays { background: var(--ink); color: var(--paper-bg, #FBFAF5); border-radius: 999px; border-bottom: none; padding: 5px 0 4px; margin-bottom: 4px; position: relative; z-index: 1; }
+html.draw .wdays .sun, html.draw .wdays .sat { color: var(--paper-bg, #FBFAF5); }
 html.draw .day { font-size: calc(14px * var(--cs, 1)); font-weight: 600; color: var(--ink) !important; position: relative; }
 html.draw .day.sun > span:first-child { color: transparent; -webkit-text-stroke: 1.2px var(--ink); }
 html.draw .day:hover { background: rgba(22, 22, 22, .06); }
@@ -445,31 +446,86 @@ html.draw .day.today { box-shadow: none; text-decoration: underline; text-decora
 html.draw .day.sel { background: transparent; box-shadow: none; color: var(--ink) !important; }
 html.draw .day.sel::before { content: ""; position: absolute; inset: 3px 2px; border: 2.4px solid var(--ink); border-radius: 50% 46% 52% 48% / 48% 54% 46% 52%; transform: rotate(-8deg); }
 html.draw .dots i, html.draw .day.sel .dots i { background: var(--ink) !important; }
-html.draw .ev { background: #FBFAF5; box-shadow: none; border-radius: 0; border-bottom: 1.7px solid var(--ink); }
+html.draw .ev { background: var(--paper-bg, #FBFAF5); box-shadow: none; border-radius: 0; border-bottom: 1.7px solid var(--ink); }
 html.draw .evt { color: var(--ink); }
 html.draw .evc { box-shadow: 0 0 0 2px var(--ink); }
 html.draw .evr { background: transparent; box-shadow: inset 0 0 0 1.6px var(--ink); color: var(--ink); }
-html.draw .ev.hasrep .evr, html.draw .evrep { background: var(--ink); color: #FBFAF5; }
+html.draw .ev.hasrep .evr, html.draw .evrep { background: var(--ink); color: var(--paper-bg, #FBFAF5); }
 html.draw .ev.rec { background: transparent; }
 /* 달력 말랑이: 살랑살랑 + 가끔 폴짝 */
-html.draw .calDeco img { transform-origin: 50% 100%; animation: bunSway 3.6s ease-in-out infinite, bunHop 7s ease-in-out 2s infinite; }
+html.draw .calDeco .calBun { transform-origin: 50% 100%; animation: bunSway 3.6s ease-in-out infinite, bunHop 7s ease-in-out 2s infinite; }
 html.draw .calDeco .st1 { transform-origin: 50% 50%; animation: starTwinkle 2.8s ease-in-out infinite; }
 @keyframes bunSway { 0%, 100% { rotate: -3deg; } 50% { rotate: 3deg; } }
 @keyframes bunHop { 0%, 84%, 100% { translate: 0 0; scale: 1 1; } 88% { translate: 0 0; scale: 1.12 .88; } 92% { translate: 0 -7px; scale: .94 1.08; } 96% { translate: 0 0; scale: 1.06 .95; } }
 @keyframes starTwinkle { 0%, 100% { scale: 1; rotate: 0deg; } 50% { scale: 1.18; rotate: 14deg; } }
-@media (prefers-reduced-motion: reduce) { html.draw .calDeco img, html.draw .calDeco .st1 { animation: none; } }
+@media (prefers-reduced-motion: reduce) { html.draw .calDeco .calBun, html.draw .calDeco .st1 { animation: none; } }
 
 /* 드로잉 스킨: 목록은 공책처럼 줄로 나누고, 글꼴은 고른 메모 글꼴로 */
 html.draw .panel, html.draw .panel button, html.draw .panel input, html.draw .panel select { font-family: var(--memo-font); }
 html.draw .segb, html.draw .primary, html.draw .smallprimary, html.draw .pill, html.draw .search input, html.draw .gname, html.draw .nogrp, html.draw .bhead, html.draw .todaytxt, html.draw .rmeta, html.draw .ctext, html.draw .sellabel { font-size-adjust: .47; white-space: nowrap; }
-html.draw .row { background: #FBFAF5 !important; box-shadow: none; border-radius: 0; border-bottom: 1px solid rgba(22, 22, 22, .2); min-height: 46px; }
+html.draw .row { background: var(--paper-bg, #FBFAF5) !important; box-shadow: none; border-radius: 0; border-bottom: 1px solid rgba(22, 22, 22, .2); min-height: 46px; }
 html.draw .row:hover { background: #F2F1EA !important; transform: none; }
 html.draw .list { gap: 0; }
 html.draw .grp, html.draw .ungrp { gap: 0; }
-html.draw .ghead { background: #FBFAF5; box-shadow: none; border-radius: 0; border-bottom: 2px solid var(--ink); min-height: 40px; }
+html.draw .ghead { background: var(--paper-bg, #FBFAF5); box-shadow: none; border-radius: 0; border-bottom: 2px solid var(--ink); min-height: 40px; }
 html.draw .ghead .gtog { color: var(--ink); }
 html.draw .gname { font-size: 14px; }
-html.draw .gcnt { background: var(--ink); color: #FBFAF5; border-radius: 999px; }
+html.draw .gcnt { background: var(--ink); color: var(--paper-bg, #FBFAF5); border-radius: 999px; }
 html.draw .gbody { gap: 0; margin-left: 15px; padding-left: 6px; border-left: 2px solid var(--ink); }
 html.draw .grp + .grp, html.draw .grp + .nogrp { margin-top: 2px; }
-html.draw .nogrp { background: #FBFAF5; padding-left: 8px; color: var(--ink); padding-top: 14px; border-bottom: 2px solid var(--ink); padding-bottom: 6px; margin-right: 20px; }
+html.draw .nogrp { background: var(--paper-bg, #FBFAF5); padding-left: 8px; color: var(--ink); padding-top: 14px; border-bottom: 2px solid var(--ink); padding-bottom: 6px; margin-right: 20px; }
+
+/* ───────── 계절 스킨 (할로윈 · 크리스마스) ───────── */
+.sky { display: none; position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; border-radius: inherit; }
+html.halloween .panel, html.xmas .panel { isolation: isolate; }
+html.halloween .sky, html.xmas .sky { display: block; }
+.sky i { position: absolute; display: block; }
+.sky .snow { top: -20px; color: #FFFFFF; opacity: .85; animation: skySnow linear infinite; }
+.sky .bat { animation: skyBat ease-in-out infinite; }
+.sky svg { display: block; }
+body:not(.open) .sky i { animation-play-state: paused; }
+@keyframes skySnow { to { transform: translateY(105vh) rotate(var(--r, 180deg)); } }
+@keyframes skyBat { 0%, 100% { transform: translate(0, 0) scaleY(1); } 25% { transform: translate(26px, -12px) scaleY(.6); } 50% { transform: translate(52px, 0) scaleY(1); } 75% { transform: translate(78px, -10px) scaleY(.6); } }
+@media (prefers-reduced-motion: reduce) { .sky { display: none !important; } }
+
+html.halloween .panel { background-color: #2B2238 !important; background-image: linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px) !important; }
+html.xmas .panel { background-color: #1F4A35 !important; background-image: linear-gradient(rgba(255,255,255,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.07) 1px, transparent 1px) !important; }
+html.halloween .todaytxt, html.halloween .sellabel, html.halloween .foot, html.halloween .footrow .ctext, html.halloween .view > .empty, html.halloween .evlist > .empty, html.halloween .list > .empty, html.halloween .pShared,
+html.xmas .todaytxt, html.xmas .sellabel, html.xmas .foot, html.xmas .footrow .ctext, html.xmas .view > .empty, html.xmas .evlist > .empty, html.xmas .list > .empty, html.xmas .pShared { color: var(--paper-bg); }
+html.halloween .seg, html.xmas .seg { background: var(--paper-bg); }
+html.halloween .wdays { background: var(--ink); color: #FFD34D; }
+html.halloween .wdays .sun, html.halloween .wdays .sat { color: #FFD34D; }
+html.xmas .wdays { background: #D7393B; color: #fff; }
+html.xmas .wdays .sun, html.xmas .wdays .sat { color: #fff; }
+html.halloween .calnum { color: #F2862B; }
+html.xmas .calnum { color: #D7393B; }
+html.halloween .day.sel::before { border-color: #F2862B; }
+html.xmas .day.sel::before { border-color: #D7393B; }
+html.halloween .dots i, html.halloween .day.sel .dots i { background: #7B5CC4 !important; }
+html.xmas .dots i, html.xmas .day.sel .dots i { background: #2F7A4F !important; }
+html.halloween .ev.hasrep .evr, html.halloween .evrep { background: #F2862B; color: #fff; }
+html.xmas .ev.hasrep .evr, html.xmas .evrep { background: #D7393B; color: #fff; }
+html.halloween .primary, html.halloween .smallprimary { background: #F2862B; color: #1E1630; }
+html.xmas .primary, html.xmas .smallprimary { background: #D7393B; color: #fff; }
+html.halloween .calDeco .st1, html.xmas .calDeco .st1 { display: none; }
+.sDeco { display: none; }
+html.halloween .sDeco.dH, html.xmas .sDeco.dX { display: block; }
+.sDeco svg { position: absolute; }
+.sDeco .bat { left: 30%; top: 0; width: 34px; height: 17px; animation: skyBat 3.2s ease-in-out infinite; }
+.sDeco .ghost { left: 72%; top: 6px; width: 20px; height: 24px; animation: bunSway 2.6s ease-in-out infinite; }
+.sDeco .tree { left: 28%; top: 2px; width: 24px; height: 30px; }
+html.xmas .calDeco .calBun, html.halloween .calDeco .calBun { bottom: -1px; width: 66px; left: auto; right: 82px; }
+/* 계절 스킨: 일요일은 꽉 찬 글씨 (할로윈 주황 · 크리스마스 초록) */
+html.halloween .day.sun > span:first-child { color: #F2862B; -webkit-text-stroke: 0; font-weight: 700; }
+html.xmas .day.sun > span:first-child { color: #2F7A4F; -webkit-text-stroke: 0; font-weight: 700; }
+html.halloween .applogo, html.xmas .applogo { height: 50px; margin-top: -6px; }
+/* 드로잉 스킨: 종이 칸을 살짝 비치게 (뒤 모눈이 아주 옅게 보이도록) */
+html.draw:not(.halloween):not(.xmas) .box, html.draw:not(.halloween):not(.xmas) .calcard,
+html.draw:not(.halloween):not(.xmas) .search, html.draw:not(.halloween):not(.xmas) .pill,
+html.draw:not(.halloween):not(.xmas) .toggle:not(.mini), html.draw:not(.halloween):not(.xmas) .acHero,
+html.draw:not(.halloween):not(.xmas) .thInfo, html.draw:not(.halloween):not(.xmas) .bkForm,
+html.draw:not(.halloween):not(.xmas) .ghead, html.draw:not(.halloween):not(.xmas) .nogrp,
+html.draw:not(.halloween):not(.xmas) .ev { background: rgba(251, 250, 245, var(--draw-paper-a, .72)); }
+html.draw:not(.halloween):not(.xmas) .row { background: rgba(251, 250, 245, var(--draw-paper-a, .72)) !important; }
+html.draw:not(.halloween):not(.xmas) .row:hover { background: rgba(242, 241, 234, .92) !important; }
+html.draw:not(.halloween):not(.xmas) .memoPrev, html.draw:not(.halloween):not(.xmas) .ppPrev, html.draw:not(.halloween):not(.xmas) .box .calPrev { background: rgba(236, 235, 228, .7); }

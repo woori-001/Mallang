@@ -75,3 +75,4 @@ input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.12); }
 input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.2); }
 input[type="range"]:focus-visible { outline: none; }
 input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px color-mix(in srgb, var(--a1) 25%, transparent); }
+

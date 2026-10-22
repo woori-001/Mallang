@@ -5,12 +5,12 @@ body { padding: 14px; }
   width: 260px; height: 220px;
   border-radius: 22px;
   border: none;
-  box-shadow: 0 6px 14px rgba(70, 60, 150, .16);
+  box-shadow: 0 2px 4px rgba(70, 60, 150, .2);
   display: flex; flex-direction: column; overflow: hidden;
   transition: width .32s var(--ease), height .32s var(--ease), border-radius .32s ease,
     opacity .32s var(--ease), transform .4s var(--ease), background .6s ease, box-shadow .3s ease;
 }
-.card:hover { box-shadow: 0 8px 16px rgba(70, 60, 150, .22); }
+.card:hover { box-shadow: 0 2px 4px rgba(70, 60, 150, .28); }
 .card.enter { animation: pop .5s var(--ease); }
 .card.leaving { opacity: 0; transform: translateY(10px) scale(.92); pointer-events: none; }
 .card.flash { animation: flash .5s var(--ease); }
@@ -208,9 +208,9 @@ body { padding: 14px; }
 
 /* 종이 스킨: 흰 종이 + 색 머리띠 + 점선 */
 html.paper .card {
-  border-radius: 12px; box-shadow: 0 0 0 1px var(--paper-line), 0 3px 10px rgba(30, 40, 80, .10);
+  border-radius: 12px; box-shadow: 0 0 0 1px var(--paper-line), 0 2px 4px rgba(30, 40, 80, .14);
 }
-html.paper .card:hover { box-shadow: 0 0 0 1px var(--paper-line), 0 6px 16px rgba(30, 40, 80, .14); }
+html.paper .card:hover { box-shadow: 0 0 0 1px var(--paper-line), 0 2px 4px rgba(30, 40, 80, .18); }
 html.paper .card .head { background: var(--tint); border-radius: 12px 12px 0 0; border-bottom: 2px dotted var(--paper-dot); }
 html.paper .card.folded { border-radius: 9px; }
 html.paper .card.folded .head { border-bottom: none; border-radius: 9px; }
@@ -307,8 +307,8 @@ html.paper .chip { background: var(--tint); }
 html.dark { --link: #8DB4FF; }
 
 /* ───────── 말랑 드로잉 스킨: 아이보리 종이 + 검은 펜 ───────── */
-html.draw .card { border-radius: 14px; box-shadow: inset 0 0 0 2.2px var(--ink), 0 2px 5px rgba(0, 0, 0, .10); }
-html.draw .card:hover { box-shadow: inset 0 0 0 2.2px var(--ink), 0 3px 8px rgba(0, 0, 0, .14); }
+html.draw .card { border-radius: 14px; box-shadow: inset 0 0 0 2.2px var(--ink), 0 2px 4px rgba(0, 0, 0, .10); }
+html.draw .card:hover { box-shadow: inset 0 0 0 2.2px var(--ink), 0 2px 4px rgba(0, 0, 0, .14); }
 html.draw .card .head {
   border-radius: 14px 14px 0 0; border-bottom: 2.5px solid var(--ink); margin: 0;
   background: repeating-linear-gradient(-45deg, transparent 0 7px, rgba(22, 22, 22, .13) 7px 8.5px);
@@ -328,11 +328,19 @@ html.draw .item:hover { background: rgba(22, 22, 22, .04); }
 html.draw .chk { width: 18px; height: 16px; border: 2px solid var(--ink); background: transparent; border-radius: 48% 52% 45% 55% / 55% 45% 55% 45%; }
 html.draw .item.done .chk { background: transparent; transform: none; }
 html.draw .item.done .chk svg { color: var(--ink); stroke: var(--ink); }
-html.draw .tools, html.draw .picker { background: #FBFAF5; box-shadow: inset 0 0 0 2px var(--ink), 3px 3px 0 var(--ink); }
+html.draw .tools, html.draw .picker { background: var(--paper-bg, #FBFAF5); box-shadow: inset 0 0 0 2px var(--ink), 3px 3px 0 var(--ink); }
 html.draw .tools .ib.on { background: rgba(22, 22, 22, .1); }
-html.draw .chip { background: #FBFAF5; box-shadow: inset 0 0 0 1.8px var(--ink); color: var(--ink); }
-html.draw .tblScroll { background: #FBFAF5; }
+html.draw .chip { background: var(--paper-bg, #FBFAF5); box-shadow: inset 0 0 0 1.8px var(--ink); color: var(--ink); }
+html.draw .tblScroll { background: var(--paper-bg, #FBFAF5); }
 html.draw .grip::after { border-color: var(--ink); }
-html.draw .findBar { box-shadow: inset 0 0 0 2px var(--ink), 3px 3px 0 var(--ink); background: #FBFAF5; }
-html.draw .cbox { box-shadow: inset 0 0 0 2px var(--ink), 4px 4px 0 var(--ink); background: #FBFAF5; }
+html.draw .findBar { box-shadow: inset 0 0 0 2px var(--ink), 3px 3px 0 var(--ink); background: var(--paper-bg, #FBFAF5); }
+html.draw .cbox { box-shadow: inset 0 0 0 2px var(--ink), 4px 4px 0 var(--ink); background: var(--paper-bg, #FBFAF5); }
 html.draw ::highlight(mlink) { color: var(--ink); text-decoration-thickness: 2px; }
+
+/* 계절 스킨 */
+html.halloween .card:not(.folded) .head { background: repeating-linear-gradient(-45deg, #FFE3C4 0 8px, #F9C99A 8px 16px); }
+html.xmas .card:not(.folded) .head { background: repeating-linear-gradient(-45deg, #FFFFFF 0 8px, #F3B9B6 8px 16px); }
+html.halloween .item.done .chk svg { stroke: #F2862B; }
+html.xmas .item.done .chk svg { stroke: #D7393B; }
+html.halloween .text .dv { border-top-color: #F2862B; }
+html.xmas .text .dv { border-top-color: #D7393B; }

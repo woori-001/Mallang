@@ -69,6 +69,17 @@
       a1: '#161616', a2: '#3A3A38', ink: '#161616', sub: '#6E6E66', sun: '#161616', sat: '#161616', glow: 'rgba(0,0,0,0.16)', on: '#FBFAF5',
       pal: [[[251, 250, 245], [251, 250, 245]], [[251, 250, 245], [251, 250, 245]], [[251, 250, 245], [251, 250, 245]], [[251, 250, 245], [251, 250, 245]], [[251, 250, 245], [251, 250, 245]]]
     },
+    // 계절 스킨 (드로잉 스킨에 옷 입히기) — SEASONS_ON 이 true 일 때만 목록에 보임
+    halloween: {
+      name: '말랑 할로윈', paper: true, draw: true, season: 'halloween', paperBg: '#FFF7EC', base: '#2B2238', b: ['#3A2E4C', '#2B2238', '#463858', '#2B2238'],
+      a1: '#1E1630', a2: '#3A2E4C', ink: '#1E1630', sub: '#7A6E86', sun: '#1E1630', sat: '#1E1630', glow: 'rgba(0,0,0,0.18)', on: '#FFF7EC',
+      pal: [[[255, 247, 236], [255, 247, 236]], [[255, 247, 236], [255, 247, 236]], [[255, 247, 236], [255, 247, 236]], [[255, 247, 236], [255, 247, 236]], [[255, 247, 236], [255, 247, 236]]]
+    },
+    xmas: {
+      name: '말랑 크리스마스', paper: true, draw: true, season: 'xmas', paperBg: '#FFFDF6', base: '#1F4A35', b: ['#2A5A42', '#1F4A35', '#346A4E', '#1F4A35'],
+      a1: '#1C2B22', a2: '#2F4A3A', ink: '#1C2B22', sub: '#6E7C72', sun: '#1C2B22', sat: '#1C2B22', glow: 'rgba(0,0,0,0.18)', on: '#FFFDF6',
+      pal: [[[255, 253, 246], [255, 253, 246]], [[255, 253, 246], [255, 253, 246]], [[255, 253, 246], [255, 253, 246]], [[255, 253, 246], [255, 253, 246]], [[255, 253, 246], [255, 253, 246]]]
+    },
     midnight: {
       name: '미드나잇', dark: true, base: '#16181D', b: ['#2A3A64', '#1E3442', '#3A2C52', '#1C3448'],
       a1: '#4C8DFF', a2: '#6FB3FF', ink: '#E9ECF1', sub: '#AEB6C4', sun: '#FF8FA8', sat: '#7FBDFF', glow: 'rgba(76,141,255,0.30)', on: '#FFFFFF',
@@ -155,8 +166,11 @@
     document.documentElement.classList.toggle('dark', !!sk.dark);
     document.documentElement.classList.toggle('paper', !!sk.paper);
     document.documentElement.classList.toggle('draw', !!sk.draw);
+    document.documentElement.classList.toggle('halloween', sk.season === 'halloween');
+    document.documentElement.classList.toggle('xmas', sk.season === 'xmas');
+    r.setProperty('--paper-bg', sk.paperBg || '#FBFAF5');
     // 드로잉 스킨에서는 말랑이도 손그림으로
-    document.querySelectorAll('img[data-bun]').forEach((img) => { const want = sk.draw ? (img.dataset.draw || 'bunny-draw.svg') : img.dataset.bun; if (img.getAttribute('src') !== want) img.setAttribute('src', want); });
+    document.querySelectorAll('img[data-bun]').forEach((img) => { const want = !sk.draw ? img.dataset.bun : img.dataset.draw ? (sk.season ? 'logo-' + sk.season + '.png' : img.dataset.draw) : (sk.season ? 'bunny-' + sk.season + '.png' : 'bunny-draw.svg'); if (img.getAttribute('src') !== want) img.setAttribute('src', want); });
     r.setProperty('--base', sk.base);
     r.setProperty('--memo-font', f.fam);
     const scale = (settings.fontScale || 100) / 100;              // 글자 크기 (모든 메모에 한 번에)
@@ -746,7 +760,7 @@
   function fitShape(card, pad) {
     const api = window.api;
     if (!api || !api.setShape) return;
-    pad = pad == null ? 2 : pad;
+    pad = pad == null ? 6 : pad;   // 그림자가 잘리지 않을 만큼만 (옆 메모는 이 정도만 덮음)
     let last = '', until = 0, raf = 0;
     const send = () => {
       const r = card.getBoundingClientRect();
@@ -763,5 +777,6 @@
     card.addEventListener('transitionend', () => burst(200));
     burst(1200);
   }
-  window.M = { fitShape, REPEATS, REPEAT_NAME, repeatsOn, recurring, eventsOn, GROUP_COLORS, syncRanges, TBL, CONTACT_HEAD, fixContactRows, contactView, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
+  const SEASONS_ON = false;   // 계절 스킨 꺼내기: true 로 바꾸면 스킨 목록에 나타남
+  window.M = { SEASONS_ON, fitShape, REPEATS, REPEAT_NAME, repeatsOn, recurring, eventsOn, GROUP_COLORS, syncRanges, TBL, CONTACT_HEAD, fixContactRows, contactView, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
 })();

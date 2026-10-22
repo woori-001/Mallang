@@ -37,8 +37,12 @@ body.detail { align-items: flex-start; justify-content: stretch; }
 @keyframes peek { 0%, 70%, 100% { transform: translateY(0) rotate(0); } 78% { transform: translateY(-4px) rotate(-6deg); } 86% { transform: translateY(0) rotate(4deg); } }
 
 /* 말랑 드로잉 스킨 */
-html.draw .toast, html.draw .modal { background: #FBFAF5; box-shadow: inset 0 0 0 2.5px #161616, 4px 4px 0 #161616; }
-html.draw .btn.pri { background: #161616; color: #FBFAF5; }
-html.draw .btn.ghost { background: transparent; box-shadow: inset 0 0 0 2px #161616; color: #161616; }
+html.draw .toast, html.draw .modal { background: var(--paper-bg, #FBFAF5); box-shadow: inset 0 0 0 2.5px var(--ink), 4px 4px 0 var(--ink); }
+html.draw .btn.pri { background: var(--ink); color: var(--paper-bg, #FBFAF5); }
+html.draw .btn.ghost { background: transparent; box-shadow: inset 0 0 0 2px var(--ink); color: var(--ink); }
 html.draw .bun img { filter: none; }
-html.draw .ver { background: #161616; color: #FBFAF5; }
+html.draw .ver { background: var(--ink); color: var(--paper-bg, #FBFAF5); }
+html.halloween .ver { background: #F2862B; color: #fff; }
+html.xmas .ver { background: #D7393B; color: #fff; }
+html.halloween .btn.pri { background: #F2862B; color: #1E1630; }
+html.xmas .btn.pri { background: #D7393B; color: #fff; }

@@ -752,7 +752,7 @@
     $('calScaleV').textContent = (prefs.calScale || 100) + '%';
     window.M.syncRanges();
     $('avatar').textContent = ((session && session.username) || '?').slice(0, 1).toUpperCase();
-    $('skins').innerHTML = Object.keys(SKINS).map((id) => {
+    $('skins').innerHTML = Object.keys(SKINS).filter((id) => !SKINS[id].season || window.M.SEASONS_ON || prefs.skin === id).map((id) => {
       const k = SKINS[id];
       return '<button class="skin' + (prefs.skin === id ? ' on' : '') + '" type="button" data-skin="' + id + '" aria-pressed="' + (prefs.skin === id) + '" style="--sc:' + k.a1 + ';--sg:' + k.glow + '">' +
         '<span class="prev" style="background:linear-gradient(135deg,' + k.b[0] + ',' + k.b[1] + ' 55%,' + k.b[2] + ')"><i style="background:' + rgba(k.pal[0][0], 0.9) + '"></i><i style="background:' + rgba(k.pal[1][1], 0.9) + '"></i><b style="background:' + k.a1 + '"></b></span>' +

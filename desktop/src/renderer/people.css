@@ -1,7 +1,7 @@
 body { padding: 14px; }
 .card {
   position: absolute; left: 14px; top: 14px; width: calc(100% - 28px); height: calc(100% - 28px); border-radius: 22px;
-  box-shadow: 0 6px 14px rgba(70, 60, 150, .16);
+  box-shadow: 0 2px 4px rgba(70, 60, 150, .2);
   display: flex; flex-direction: column; overflow: hidden;
   transition: width .32s var(--ease), height .32s var(--ease), border-radius .32s ease,
     opacity .32s var(--ease), transform .4s var(--ease), background .6s ease, box-shadow .3s ease;
@@ -13,7 +13,7 @@ body { padding: 14px; }
 .card.folded .htitle { font-size: 13px; }
 .card.folded .hIcon svg { width: 15px; height: 15px; }
 .fold { margin-left: -6px; }
-.card:hover { box-shadow: 0 8px 16px rgba(70, 60, 150, .22); }
+.card:hover { box-shadow: 0 2px 4px rgba(70, 60, 150, .28); }
 .card.enter { animation: pop .5s var(--ease); }
 .card.leaving { opacity: 0; transform: translateY(10px) scale(.92); pointer-events: none; }
 .head { flex: none; height: 46px; transition: height .32s var(--ease); display: flex; align-items: center; gap: 4px; padding: 0 8px 0 14px; cursor: grab; }
@@ -47,7 +47,7 @@ body { padding: 14px; }
   border-right: 2px solid var(--sub); border-bottom: 2px solid var(--sub); opacity: 0; border-radius: 0 0 3px 0; transition: opacity .2s ease;
 }
 .card:hover .grip::after { opacity: .45; }
-html.paper .card { border-radius: 14px; box-shadow: 0 0 0 1px var(--paper-line), 0 4px 14px rgba(30, 40, 80, .12); }
+html.paper .card { border-radius: 14px; box-shadow: 0 0 0 1px var(--paper-line), 0 2px 4px rgba(30, 40, 80, .14); }
 html.paper .head { border-bottom: 2px dotted var(--paper-dot); margin-bottom: 8px; }
 html.paper .search { background: #fff; box-shadow: 0 0 0 1px var(--paper-line); }
 html.paper .gv { --gv-surface: #fff; }
@@ -55,9 +55,9 @@ html.paper .card.folded .head { border-bottom: none; margin: 0; }
 .ib.txt[hidden] { display: none; }
 
 /* 말랑 드로잉 스킨 */
-html.draw .card { background: #FBFAF5 !important; box-shadow: inset 0 0 0 2.2px #161616, 0 2px 5px rgba(0, 0, 0, .10); border-radius: 14px; }
+html.draw .card { background: var(--paper-bg, #FBFAF5) !important; box-shadow: inset 0 0 0 2.2px var(--ink), 0 2px 4px rgba(0, 0, 0, .10); border-radius: 14px; }
 html.draw .card.folded { border-radius: 11px; }
-html.draw .head { border-bottom: 2.5px solid #161616; background: repeating-linear-gradient(-45deg, transparent 0 7px, rgba(22, 22, 22, .13) 7px 8.5px); margin-bottom: 8px; border-radius: 14px 14px 0 0; }
+html.draw .head { border-bottom: 2.5px solid var(--ink); background: repeating-linear-gradient(-45deg, transparent 0 7px, rgba(22, 22, 22, .13) 7px 8.5px); margin-bottom: 8px; border-radius: 14px 14px 0 0; }
 html.draw .card.folded .head { border-bottom: none; background: transparent; margin: 0; }
-html.draw .search { background: #FBFAF5; box-shadow: inset 0 0 0 2px #161616; }
-html.draw .gv { --gv-surface: #FBFAF5; }
+html.draw .search { background: var(--paper-bg, #FBFAF5); box-shadow: inset 0 0 0 2px var(--ink); }
+html.draw .gv { --gv-surface: var(--paper-bg, #FBFAF5); }

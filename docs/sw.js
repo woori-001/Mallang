@@ -1,5 +1,5 @@
 // 말랑메모: 인터넷이 없어도 앱 화면이 열리도록 앱 파일만 저장 (메모 내용은 저장하지 않음)
-const CACHE = 'mallang-v30';
+const CACHE = 'mallang-v31';
 const FILES = ['./', 'index.html', 'app.css', 'app.js', 'common.js', 'table.css', 'cloud-core.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/apple-touch-icon.png', 'logo.png', 'bunny.png', 'bunny-draw.svg', 'logo-draw.svg', 'install-early.js'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => {

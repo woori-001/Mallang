@@ -84,6 +84,7 @@
     st.setProperty('--sun', sk.sun);
     st.setProperty('--sat', sk.sat);
     panel.style.background = sk.paper ? sk.base : 'rgba(var(--glass),' + ((S.settings.sideAlpha != null ? S.settings.sideAlpha : 55) / 100) + ')';
+    updateSky(sk.season);
     const d = new Date();
     const c = S.cloud || {};
     const dateTxt = (d.getMonth() + 1) + '월 ' + d.getDate() + '일 ' + WD[d.getDay()] + '요일';
@@ -623,9 +624,27 @@
   $('todayToggle').addEventListener('click', () => api.setSettings({ showToday: !S.settings.showToday }));
 
   // ───────── 꾸미기 ─────────
+  // 계절 스킨: 목록바 배경에 눈 내리기 / 박쥐 날기
+  let skyKind = null;
+  function updateSky(kind) {
+    if (kind === skyKind) return;
+    skyKind = kind || null;
+    const sky = $('sky');
+    if (!sky) return;
+    let h = '';
+    if (kind === 'xmas') {
+      const flake = (z) => '<svg width="' + z + '" height="' + z + '" viewBox="0 0 24 24"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7M12 2l-2 2.5M12 2l2 2.5M12 22l-2-2.5M12 22l2-2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>';
+      for (let i = 0; i < 18; i++) h += '<i class="snow" style="left:' + ((i * 37) % 100) + '%;--r:' + (i % 2 ? 200 : -160) + 'deg;animation-duration:' + (10 + (i * 13) % 9) + 's;animation-delay:-' + ((i * 7) % 14) + 's">' + flake(8 + (i * 7) % 9) + '</i>';
+    } else if (kind === 'halloween') {
+      const bat = '<svg width="34" height="17" viewBox="0 0 60 30"><path d="M30 10 C27 6 25 6 24 9 C18 4 8 4 2 12 C8 11 12 14 13 19 C16 15 20 15 22 19 C24 16 27 17 30 22 C33 17 36 16 38 19 C40 15 44 15 47 19 C48 14 52 11 58 12 C52 4 42 4 36 9 C35 6 33 6 30 10 Z" fill="#0F0A18" opacity=".85"/><circle cx="28" cy="12" r="1.3" fill="#FFD34D"/><circle cx="32" cy="12" r="1.3" fill="#FFD34D"/></svg>';
+      for (let i = 0; i < 6; i++) h += '<i class="bat" style="left:' + (4 + (i * 29) % 70) + '%;top:' + (10 + (i * 41) % 80) + '%;animation-duration:' + (2.6 + (i % 3) * .6) + 's;animation-delay:-' + (i * .7) + 's">' + bat + '</i>';
+    }
+    sky.innerHTML = h;
+  }
+
   function renderStyle() {
     const s = S.settings;
-    $('skins').innerHTML = Object.keys(SKINS).map((id) => {
+    $('skins').innerHTML = Object.keys(SKINS).filter((id) => !SKINS[id].season || window.M.SEASONS_ON || s.skin === id).map((id) => {
       const k = SKINS[id];
       return '<button class="skin' + (s.skin === id ? ' on' : '') + '" type="button" data-skin="' + id + '" aria-pressed="' + (s.skin === id) + '" title="' + esc(k.name) + '" style="--sc:' + k.a1 + '">' +
         (k.draw ? '<span class="sw swDraw"><img src="bunny-draw.svg" alt="" draggable="false"></span>'
