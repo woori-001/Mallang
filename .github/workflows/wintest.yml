@@ -4,6 +4,8 @@ on:
   push:
     branches: [wintest]
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   test:
     runs-on: windows-latest
@@ -30,8 +32,11 @@ jobs:
             WT_TAG=$tag MALLANG_NO_SHAPE=$ns WT_SKIN=$skin timeout 60 npx electron . > "../wt-out/$tag.log" 2>&1 || true
             cat "../wt-out/$tag.txt" || tail -20 "../wt-out/$tag.log"
           done
-      - uses: actions/upload-artifact@v4
+      - name: 결과를 wintest-results 브랜치에 올리기
         if: always()
-        with:
-          name: wt-out
-          path: wt-out
+        working-directory: wt-out
+        run: |
+          git init -q -b wintest-results
+          git -c user.name=ci -c user.email=ci@example.com add -A
+          git -c user.name=ci -c user.email=ci@example.com commit -qm "results $GITHUB_SHA"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY" wintest-results
