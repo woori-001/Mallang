@@ -1015,7 +1015,7 @@ ipcMain.on('memo:foldAll', foldAll);
 ipcMain.on('memo:unfoldAll', unfoldAll);
 // ───────── 자석 정렬: 옮길 때 다른 메모·화면 가장자리에 착 붙음 ─────────
 const SNAP = 14;   // 이 거리(px) 안에 들어오면 붙음
-const GAP = 0;     // 붙었을 때 메모 사이 간격 (메모잇·에스메모처럼 딱 붙게)
+const GAP = 3;     // 붙었을 때 메모 사이 간격 (그림자가 겹쳐 보이지 않을 만큼만 살짝)
 function snapPos(m, x, y, skip) {
   const w = m.folded ? foldW(m) : m.w;
   const h = m.folded ? foldH(m) : m.h;
@@ -1027,8 +1027,8 @@ function snapPos(m, x, y, skip) {
   const tryX = (v) => { const d = Math.abs(v - x); if (d < dx) { dx = d; bx = v; } };
   const tryY = (v) => { const d = Math.abs(v - y); if (d < dy) { dy = d; by = v; } };
   // 화면 가장자리
-  tryX(disp.x + GAP); tryX(disp.x + disp.width - w - GAP);
-  tryY(disp.y + GAP); tryY(disp.y + disp.height - h - GAP);
+  tryX(disp.x); tryX(disp.x + disp.width - w);   // 화면 가장자리에는 딱 붙게
+  tryY(disp.y); tryY(disp.y + disp.height - h);
   for (const o of others) {
     // 세로로 가까운 메모끼리만 가로 정렬, 가로로 가까운 메모끼리만 세로 정렬
     const nearV = y < o.y + o.h + SNAP * 3 && y + h > o.y - SNAP * 3;
