@@ -8,6 +8,7 @@
   const $ = (s) => document.getElementById(s);
 
   const card = $('card'), head = $('head'), title = $('title'), text = $('text');
+  window.M.fitShape(card);
   const checks = $('checks'), itemsEl = $('items'), chip = $('chip'), picker = $('picker'), grip = $('grip');
   const FOLD_W = 180, FOLD_H = 32, MIN_W = 180, MIN_H = 110;
   // 접은 크기 (%) : 이 메모 값 → 없으면 전체 설정

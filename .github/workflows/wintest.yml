@@ -1,0 +1,37 @@
+# 윈도우 실제 환경에서 메모 창 클릭·모양 점검 (배포 안 함)
+name: 윈도우 점검
+on:
+  push:
+    branches: [wintest]
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: desktop
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - run: npm ci
+      - name: 점검 (고치기 전 / 고친 뒤)
+        run: |
+          mkdir -p ../wt-out
+          export MALLANG_DEBUG_SCRIPT="$(cygpath -w "$PWD/../wintest/stack-test.js")"
+          export WT_OUT="$(cygpath -w "$PWD/../wt-out")"
+          for run in "noshape:1:lav" "shape::lav" "shape-draw::draw"; do
+            IFS=: read tag ns skin <<< "$run"
+            rm -rf "$APPDATA/MallangMemo" 2>/dev/null || true
+            WT_TAG=$tag MALLANG_NO_SHAPE=$ns WT_SKIN=$skin timeout 60 npx electron . > "../wt-out/$tag.log" 2>&1 || true
+            cat "../wt-out/$tag.txt" || tail -20 "../wt-out/$tag.log"
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wt-out
+          path: wt-out

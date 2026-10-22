@@ -4,6 +4,7 @@
   const { ICONS, applyTheme } = window.M;
   const $ = (s) => document.getElementById(s);
   const card = $('card'), head = $('head'), q = $('q');
+  window.M.fitShape(card);
   const P = 14, MIN_W = 260, MIN_H = 180;
   let S = null, editing = false, dirty = false, timer = null, sentAt = 0;
 
