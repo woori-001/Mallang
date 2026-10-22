@@ -8,6 +8,7 @@
   const $ = (s) => document.getElementById(s);
 
   const card = $('card'), head = $('head'), title = $('title'), text = $('text');
+  window.M.fitShape(card);
   const checks = $('checks'), itemsEl = $('items'), chip = $('chip'), picker = $('picker'), grip = $('grip');
   const FOLD_W = 180, FOLD_H = 32, MIN_W = 180, MIN_H = 110;
   // 접은 크기 (%) : 이 메모 값 → 없으면 전체 설정
@@ -794,7 +795,8 @@
     settings = s.settings;
     groups = s.groups || [];
     const m = s.memos.find((x) => x.id === id);
-    if (!m) return;
+    // 이 창의 메모가 더는 없으면 (지워졌거나 다른 PC에서 정리됨) 혼자 남은 창을 닫기
+    if (!m) { if (memo && !(s.trash || []).some((t) => t.id === id)) window.close(); return; }
     memo = { ...m };
     render(false);
   });

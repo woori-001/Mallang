@@ -1206,11 +1206,16 @@ ipcMain.on('widget:size', (e, h) => {
   widget.setBounds({ x: b.x, y: b.y, width: WIDGET_W, height: Math.round(Math.min(600, Math.max(80, h))) });
 });
 ipcMain.on('open:data', () => shell.openPath(dataDir));
-// 메모·연락망·위젯 창: 카드 바깥(투명한 여백)은 클릭이 아래 창으로 통과하게
-// (딱 붙여 둔 옆 메모의 여백이 이 메모를 가려 클릭·이동이 안 되던 문제)
-ipcMain.on('win:ignore', (e, v) => {
+// 메모·연락망·위젯 창: 창 모양을 카드 크기로 잘라서, 투명한 여백이 옆에 붙은 메모를 가리지 않게
+// (여백이 옆 메모 위를 덮어 클릭·이동이 안 되던 문제)
+ipcMain.on('win:shape', (e, r) => {
+  if (process.env.MALLANG_NO_SHAPE) return;
   const w = BrowserWindow.fromWebContents(e.sender);
-  if (w && !w.isDestroyed() && w !== side) w.setIgnoreMouseEvents(!!v, { forward: true });
+  if (!w || w.isDestroyed() || w === side || !w.setShape || !r) return;
+  const n = (v) => (typeof v === 'number' && isFinite(v) ? Math.round(v) : null);
+  const x = n(r.x), y = n(r.y), wd = n(r.w), ht = n(r.h);
+  if (x == null || y == null || wd == null || ht == null || wd < 4 || ht < 4) return;
+  try { w.setShape([{ x: Math.max(0, x), y: Math.max(0, y), width: wd, height: ht }]); } catch (err) { /* 지원 안 하는 환경 */ }
 });
 // 따로 정한 접은 크기 모두 지우고 전체 설정 따르기
 ipcMain.on('fold:resetAll', () => { for (const m of store.memos.filter((x) => x.fs && !x.deleting)) updateMemo(m.id, { fs: null }); });

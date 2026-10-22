@@ -742,27 +742,26 @@
     return own.concat(more).sort((p, q) => (p.ev.t || '').localeCompare(q.ev.t || ''));
   }
 
-  // 카드 바깥 투명 여백은 클릭 통과 (누르고 끄는 중에는 그대로)
-  function passThrough(getCard) {
+  // 창 모양을 카드에 맞춰 자름: 투명 여백이 옆 메모를 덮지 않게 (크기가 바뀌는 동안만 따라감)
+  function fitShape(card, pad) {
     const api = window.api;
-    if (!api || !api.setIgnore) return;
-    let cur = null, pressing = false;
-    const set = (v) => { if (v !== cur) { cur = v; api.setIgnore(v); } };
-    const check = (e) => {
-      if (pressing) return;
-      const c = getCard();
-      if (!c) return;
-      const r = c.getBoundingClientRect();
-      const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
-      set(!inside);
+    if (!api || !api.setShape) return;
+    pad = pad == null ? 2 : pad;
+    let last = '', until = 0, raf = 0;
+    const send = () => {
+      const r = card.getBoundingClientRect();
+      const o = { x: r.left - pad, y: r.top - pad, w: r.width + pad * 2, h: r.height + pad * 2 };
+      const k = [o.x, o.y, o.w, o.h].map(Math.round).join(',');
+      if (k !== last) { last = k; api.setShape(o); }
     };
-    document.addEventListener('mousemove', check, true);
-    document.addEventListener('pointerdown', () => { pressing = true; set(false); }, true);
-    const up = (e) => { pressing = false; if (e && e.clientX != null) check(e); };
-    document.addEventListener('pointerup', up, true);
-    document.addEventListener('pointercancel', up, true);
-    window.addEventListener('blur', () => { pressing = false; });
-    set(true);
+    const loop = () => { raf = 0; send(); if (Date.now() < until) raf = requestAnimationFrame(loop); };
+    const burst = (ms) => { until = Math.max(until, Date.now() + (ms || 900)); if (!raf) raf = requestAnimationFrame(loop); };
+    if (window.ResizeObserver) new ResizeObserver(() => burst(400)).observe(card);
+    new MutationObserver(() => burst(900)).observe(card, { attributes: true, attributeFilter: ['class', 'style'] });
+    window.addEventListener('resize', () => burst(600));
+    card.addEventListener('transitionrun', () => burst(900));
+    card.addEventListener('transitionend', () => burst(200));
+    burst(1200);
   }
-  window.M = { passThrough, REPEATS, REPEAT_NAME, repeatsOn, recurring, eventsOn, GROUP_COLORS, syncRanges, TBL, CONTACT_HEAD, fixContactRows, contactView, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
+  window.M = { fitShape, REPEATS, REPEAT_NAME, repeatsOn, recurring, eventsOn, GROUP_COLORS, syncRanges, TBL, CONTACT_HEAD, fixContactRows, contactView, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
 })();

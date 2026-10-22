@@ -412,11 +412,10 @@ html.draw .segb { border-radius: 0; height: 36px; color: var(--ink); }
 html.draw .segb + .segb { box-shadow: inset 2px 0 0 var(--ink); }
 html.draw .segb.on { background: var(--ink); color: #FBFAF5; box-shadow: none; }
 html.draw .search, html.draw .pill, html.draw .pinbtn, html.draw .navb, html.draw .box, html.draw .ev,
-html.draw .thInfo, html.draw .bkForm, html.draw .toggle:not(.mini), html.draw .acHero, html.draw .ghead {
+html.draw .thInfo, html.draw .bkForm, html.draw .toggle:not(.mini), html.draw .acHero {
   background: #FBFAF5; box-shadow: inset 0 0 0 2px var(--ink);
 }
 html.draw .primary, html.draw .smallprimary, html.draw .pinbtn.on { background: var(--ink); color: #FBFAF5; box-shadow: 3px 3px 0 rgba(22, 22, 22, .25); }
-html.draw .row { box-shadow: inset 0 0 0 2px var(--ink); }
 html.draw .bhead { color: var(--ink); }
 html.draw .toggle[aria-pressed="true"] .track { background: var(--ink); }
 html.draw .memoPrev, html.draw .ppPrev, html.draw .box .calPrev { background: #F3F2EC; }
@@ -457,3 +456,18 @@ html.draw .calDeco .st1 { transform-origin: 50% 50%; animation: starTwinkle 2.8s
 @keyframes bunHop { 0%, 84%, 100% { translate: 0 0; scale: 1 1; } 88% { translate: 0 0; scale: 1.12 .88; } 92% { translate: 0 -7px; scale: .94 1.08; } 96% { translate: 0 0; scale: 1.06 .95; } }
 @keyframes starTwinkle { 0%, 100% { scale: 1; rotate: 0deg; } 50% { scale: 1.18; rotate: 14deg; } }
 @media (prefers-reduced-motion: reduce) { html.draw .calDeco img, html.draw .calDeco .st1 { animation: none; } }
+
+/* 드로잉 스킨: 목록은 공책처럼 줄로 나누고, 글꼴은 고른 메모 글꼴로 */
+html.draw .panel, html.draw .panel button, html.draw .panel input, html.draw .panel select { font-family: var(--memo-font); }
+html.draw .segb, html.draw .primary, html.draw .smallprimary, html.draw .pill, html.draw .search input, html.draw .gname, html.draw .nogrp, html.draw .bhead, html.draw .todaytxt, html.draw .rmeta, html.draw .ctext, html.draw .sellabel { font-size-adjust: .47; white-space: nowrap; }
+html.draw .row { background: transparent !important; box-shadow: none; border-radius: 0; border-bottom: 1px solid rgba(22, 22, 22, .2); min-height: 46px; }
+html.draw .row:hover { background: rgba(22, 22, 22, .05) !important; transform: none; }
+html.draw .list { gap: 0; }
+html.draw .grp, html.draw .ungrp { gap: 0; }
+html.draw .ghead { background: transparent; box-shadow: none; border-radius: 0; border-bottom: 2px solid var(--ink); min-height: 40px; }
+html.draw .ghead .gtog { color: var(--ink); }
+html.draw .gname { font-size: 14px; }
+html.draw .gcnt { background: var(--ink); color: #FBFAF5; border-radius: 999px; }
+html.draw .gbody { gap: 0; margin-left: 15px; padding-left: 6px; border-left: 2px solid var(--ink); }
+html.draw .grp + .grp, html.draw .grp + .nogrp { margin-top: 2px; }
+html.draw .nogrp { color: var(--ink); padding-top: 14px; border-bottom: 2px solid var(--ink); padding-bottom: 6px; margin-right: 20px; }
