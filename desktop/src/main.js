@@ -199,6 +199,7 @@ function snapshot() {
     contacts: store.shared.contacts || (store.contacts ? store.contacts.rows : null),
     contactsShared: !!store.shared.contacts,
     notices: store.shared.notices || [],
+    openSkins: store.shared.openSkins || [],   // 관리자가 모두에게 공개한 계절 스킨
     isAdmin: !!(store.cloud && store.cloud.admin),                         // 회사 공통 연락망
     canEditContacts: !store.shared.contacts || !!store.cloud.admin,   // 공통 연락망은 관리자만 고침
     groups: store.groups,
@@ -1714,6 +1715,9 @@ async function syncShared() {
     // 공지 (관리자가 올린 것)
     const nt = await Cloud.getShared(holder, 'notices');
     if (nt && nt.data && Array.isArray(nt.data.list)) store.shared.notices = cleanNotices(nt.data.list);
+    // 계절 스킨 공개 목록 (관리자가 먼저 써 보고 공개)
+    const sk = await Cloud.getShared(holder, 'skins');
+    store.shared.openSkins = sk && sk.data && Array.isArray(sk.data.open) ? sk.data.open.filter((x) => typeof x === 'string').slice(0, 20) : [];
     broadcast();
     checkNotice();
   } catch (e) { console.error('공통 연락망·공지', e && e.code); }
@@ -1768,6 +1772,22 @@ ipcMain.on('notice:size', (e, h) => {
 });
 ipcMain.on('notice:close', () => { if (noticeWin && !noticeWin.isDestroyed()) noticeWin.close(); });
 ipcMain.on('notice:open', (e, id) => { if (typeof id === 'string') openNotice(id, true); });
+ipcMain.handle('skins:open', async (e, id, open) => {
+  if (!store.cloud.admin || !holder.session) return { error: '관리자 계정으로 로그인해야 공개할 수 있어요' };
+  if (typeof id !== 'string' || id.length > 40) return { error: '스킨을 찾지 못했어요' };
+  try {
+    const cur = await Cloud.getShared(holder, 'skins');
+    const list = new Set((cur && cur.data && Array.isArray(cur.data.open) ? cur.data.open : []).filter((x) => typeof x === 'string'));
+    if (open) list.add(id); else list.delete(id);
+    const arr = [...list].slice(0, 20);
+    await Cloud.putShared(holder, 'skins', { open: arr });
+    store.shared.openSkins = arr;
+    save(); broadcast();
+    return { ok: true };
+  } catch (err) {
+    return { error: Cloud.message(err) };
+  }
+});
 ipcMain.handle('notice:send', async (e, n) => {
   if (!store.cloud.admin || !holder.session) return { error: '관리자 계정으로 로그인해야 보낼 수 있어요' };
   if (!n || typeof n.title !== 'string' || !n.title.trim()) return { error: '제목을 써 주세요' };

@@ -43,6 +43,7 @@ contextBridge.exposeInMainWorld('api', {
   noticeClose: () => ipcRenderer.send('notice:close'),
   noticeOpen: (id) => ipcRenderer.send('notice:open', id),
   noticeSend: (n) => ipcRenderer.invoke('notice:send', n),
+  skinOpen: (id, open) => ipcRenderer.invoke('skins:open', id, !!open),
   clockDone: () => ipcRenderer.send('clock:done'),
   clockMove: (x, y, done, inset) => ipcRenderer.send('clock:move', x, y, !!done, inset),
   clockPlace: (on) => ipcRenderer.send('clock:place', !!on),

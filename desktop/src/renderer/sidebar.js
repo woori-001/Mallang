@@ -644,12 +644,13 @@
 
   function renderStyle() {
     const s = S.settings;
-    $('skins').innerHTML = Object.keys(SKINS).filter((id) => !SKINS[id].season || window.M.SEASONS_ON || s.skin === id).map((id) => {
+    const openSk = S.openSkins || [];
+    $('skins').innerHTML = Object.keys(SKINS).filter((id) => !SKINS[id].season || openSk.includes(id) || S.isAdmin || s.skin === id).map((id) => {
       const k = SKINS[id];
       return '<button class="skin' + (s.skin === id ? ' on' : '') + '" type="button" data-skin="' + id + '" aria-pressed="' + (s.skin === id) + '" title="' + esc(k.name) + '" style="--sc:' + k.a1 + '">' +
         (k.draw ? '<span class="sw swDraw"><img src="bunny-draw.svg" alt="" draggable="false"></span>'
           : '<span class="sw" style="background:linear-gradient(135deg,' + k.b[0] + ',' + k.b[2] + ')"><b style="background:linear-gradient(135deg,' + k.a1 + ',' + k.a2 + ')"></b></span>') +
-        '<span class="sn">' + esc(k.name) + '</span></button>';
+        '<span class="sn">' + esc(k.name) + (k.season && !openSk.includes(id) ? '<em class="sbeta">베타</em>' : '') + '</span></button>';
     }).join('');
     if (document.activeElement !== $('fontSel')) {
       $('fontSel').innerHTML = FONTS.map((f) => '<option value="' + f.id + '"' + (s.font === f.id ? ' selected' : '') + '>' + esc(f.name) + '</option>').join('');
@@ -747,7 +748,27 @@
     if (s2 < 3600) return Math.round(s2 / 60) + '분 전';
     return new Date(t).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
   }
+  // 관리자: 계절 스킨 공개·숨기기
+  function renderSkinAdmin() {
+    $('skAdmin').hidden = !S.isAdmin;
+    if (!S.isAdmin) return;
+    const openSk = S.openSkins || [];
+    $('skList').innerHTML = Object.keys(SKINS).filter((id) => SKINS[id].season).map((id) => {
+      const on = openSk.includes(id);
+      return '<div class="skRow"><span class="skName">' + esc(SKINS[id].name) + '</span><span class="skState' + (on ? ' on' : '') + '">' + (on ? '모두 공개 중' : '나만 보기 (베타)') + '</span>' +
+        '<button type="button" class="pill soft skBtn" data-skopen="' + id + '" data-on="' + (on ? '0' : '1') + '">' + (on ? '숨기기' : '공개하기') + '</button></div>';
+    }).join('');
+  }
+  $('skList').addEventListener('click', async (e) => {
+    const b = e.target.closest('[data-skopen]'); if (!b) return;
+    b.disabled = true; $('skMsg').textContent = '';
+    const r = await api.skinOpen(b.dataset.skopen, b.dataset.on === '1');
+    b.disabled = false;
+    $('skMsg').className = 'bkMsg ' + (r && r.ok ? 'ok' : 'err');
+    $('skMsg').textContent = r && r.ok ? (b.dataset.on === '1' ? '공개했어요. 다른 사람들 PC에는 몇 분 안에 보여요.' : '숨겼어요. 이미 쓰고 있는 사람은 그대로 써요.') : ((r && r.error) || '잠시 후 다시 해 주세요');
+  });
   function renderNotices() {
+    renderSkinAdmin();
     $('ntAdmin').hidden = !S.isAdmin;
     const list = S.notices || [];
     const pad = (n) => (n < 10 ? '0' : '') + n;
