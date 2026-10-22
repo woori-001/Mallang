@@ -110,3 +110,6 @@
 html.paper .gvSec { box-shadow: 0 0 0 1px var(--paper-line); }
 html.paper .gvHead { background: transparent; }
 html.paper .gvSec:not(.closed):not(.solo) .gvHead { box-shadow: none; border-bottom: 2px dotted var(--paper-dot); }
+html.draw .gvSec { box-shadow: inset 0 0 0 2px #161616; background: #FBFAF5; }
+html.draw .gvSec:not(.closed):not(.solo) .gvHead { box-shadow: none; border-bottom: 2px solid #161616; }
+html.draw .gvHead { font-family: 'Gaegu', var(--pp-font); }

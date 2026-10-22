@@ -57,7 +57,7 @@
       // 종이 스킨: 흰 종이 + 메모 색 머리띠 (투명도 없음)
       const p = sk.pal[(memo.slot || 0) % 5][0];
       card.style.setProperty('--tint', 'rgb(' + p.join(',') + ')');
-      card.style.background = memo.folded ? 'var(--tint)' : '#FFFFFF';
+      card.style.background = sk.draw ? '#FBFAF5' : (memo.folded ? 'var(--tint)' : '#FFFFFF');
     } else card.style.background = grad(sk, memo.slot || 0, a);
     // 오른쪽 기준으로 접고 펼 때는 메모가 오른쪽 끝에 붙은 채로 줄고 늘어나게
     // 아래쪽 메모는 아래 끝에 붙은 채로 (위로 펼쳐짐)

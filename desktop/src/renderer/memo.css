@@ -305,3 +305,39 @@ html.paper .chip { background: var(--tint); }
 ::highlight(mlink) { color: var(--link, #2A62C9); text-decoration: underline; text-decoration-color: currentColor; }
 .text.onlink, .tblArea.onlink td { cursor: pointer; }
 html.dark { --link: #8DB4FF; }
+
+/* ───────── 말랑 드로잉 스킨: 아이보리 종이 + 검은 펜 ───────── */
+html.draw .card { border-radius: 14px; box-shadow: inset 0 0 0 2.5px var(--ink), 4px 4px 0 var(--ink); }
+html.draw .card:hover { box-shadow: inset 0 0 0 2.5px var(--ink), 5px 5px 0 var(--ink); }
+html.draw .card .head {
+  border-radius: 14px 14px 0 0; border-bottom: 2.5px solid var(--ink); margin: 0;
+  background: repeating-linear-gradient(-45deg, transparent 0 7px, rgba(22, 22, 22, .13) 7px 8.5px);
+}
+html.draw .card.folded { border-radius: 11px; }
+html.draw .card.folded .head { border-bottom: none; border-radius: 11px; background: transparent; }
+html.draw .title { font-family: 'Gaegu', var(--memo-font); font-size: calc(var(--memo-title-size, 14px) * 1.32); font-weight: 700; letter-spacing: .2px; }
+html.draw .card.folded .title { font-size: calc(var(--fold-title-size, 13px) * 1.3); }
+html.draw .title:not([readonly]) { background: rgba(255, 255, 255, .7); }
+html.draw .head .ib { width: 26px; height: 26px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--ink); margin: 0 1px; opacity: 1; }
+html.draw .head .ib:hover { background: #fff; }
+html.draw .head .ib svg { width: 13px; height: 13px; }
+html.draw .text {
+  padding-top: 8px;
+  background-image: linear-gradient(to bottom, transparent calc(1.7em - 1.6px), rgba(22, 22, 22, .82) 0);
+  background-size: 100% 1.7em; background-position: 0 0; background-attachment: local;
+  background-origin: content-box; background-clip: content-box;
+}
+html.draw .text .dv { height: 0; background: none; opacity: 1; border-top: 2px dashed var(--ink); }
+html.draw .item { border-radius: 0; border-bottom: 1.6px solid rgba(22, 22, 22, .82); padding-top: 4px; }
+html.draw .item:hover { background: rgba(22, 22, 22, .04); }
+html.draw .chk { width: 18px; height: 16px; border: 2px solid var(--ink); background: transparent; border-radius: 48% 52% 45% 55% / 55% 45% 55% 45%; }
+html.draw .item.done .chk { background: transparent; transform: none; }
+html.draw .item.done .chk svg { color: var(--ink); stroke: var(--ink); }
+html.draw .tools, html.draw .picker { background: #FBFAF5; box-shadow: inset 0 0 0 2px var(--ink), 3px 3px 0 var(--ink); }
+html.draw .tools .ib.on { background: rgba(22, 22, 22, .1); }
+html.draw .chip { background: #FBFAF5; box-shadow: inset 0 0 0 1.8px var(--ink); color: var(--ink); }
+html.draw .tblScroll { background: #FBFAF5; }
+html.draw .grip::after { border-color: var(--ink); }
+html.draw .findBar { box-shadow: inset 0 0 0 2px var(--ink), 3px 3px 0 var(--ink); background: #FBFAF5; }
+html.draw .cbox { box-shadow: inset 0 0 0 2px var(--ink), 4px 4px 0 var(--ink); background: #FBFAF5; }
+html.draw ::highlight(mlink) { color: var(--ink); text-decoration-thickness: 2px; }

@@ -63,6 +63,12 @@
       a1: '#E0708F', a2: '#E98FA8', ink: '#4A2A36', sub: '#8A6070', sun: '#E0708F', sat: '#2F9C7B', glow: 'rgba(224,112,143,0.22)', on: '#FFFFFF',
       pal: [[[253, 224, 232], [253, 224, 232]], [[214, 242, 232], [214, 242, 232]], [[237, 228, 249], [237, 228, 249]], [[234, 244, 212], [234, 244, 212]], [[216, 237, 249], [216, 237, 249]]]
     },
+    // draw: 손그림 말랑이 + 검은 펜 + 아이보리 종이 (흑백)
+    draw: {
+      name: '말랑 드로잉', paper: true, draw: true, base: '#EFEFEC', b: ['#E9E9E5', '#F3F3F0', '#E3E3DE', '#F7F7F3'],
+      a1: '#161616', a2: '#3A3A38', ink: '#161616', sub: '#6E6E66', sun: '#161616', sat: '#161616', glow: 'rgba(0,0,0,0.16)', on: '#FBFAF5',
+      pal: [[[251, 250, 245], [251, 250, 245]], [[251, 250, 245], [251, 250, 245]], [[251, 250, 245], [251, 250, 245]], [[251, 250, 245], [251, 250, 245]], [[251, 250, 245], [251, 250, 245]]]
+    },
     midnight: {
       name: '미드나잇', dark: true, base: '#16181D', b: ['#2A3A64', '#1E3442', '#3A2C52', '#1C3448'],
       a1: '#4C8DFF', a2: '#6FB3FF', ink: '#E9ECF1', sub: '#AEB6C4', sun: '#FF8FA8', sat: '#7FBDFF', glow: 'rgba(76,141,255,0.30)', on: '#FFFFFF',
@@ -148,6 +154,9 @@
     r.setProperty('--line-soft', sk.dark ? 'rgba(255,255,255,.12)' : 'rgba(80,80,140,.18)');
     document.documentElement.classList.toggle('dark', !!sk.dark);
     document.documentElement.classList.toggle('paper', !!sk.paper);
+    document.documentElement.classList.toggle('draw', !!sk.draw);
+    // 드로잉 스킨에서는 말랑이도 손그림으로
+    document.querySelectorAll('img[data-bun]').forEach((img) => { const want = sk.draw ? 'bunny-draw.svg' : img.dataset.bun; if (img.getAttribute('src') !== want) img.setAttribute('src', want); });
     r.setProperty('--base', sk.base);
     r.setProperty('--memo-font', f.fam);
     const scale = (settings.fontScale || 100) / 100;              // 글자 크기 (모든 메모에 한 번에)
@@ -589,7 +598,7 @@
 
   /* 연락망 보기 (부서별로 묶어서 이름·내선을 촘촘하게)
      el 안에 그려요. opts.onPick(값, 줄, 요소) 누를 때 · opts.store 접어 둔 부서 기억용 키 */
-  const DEPT_ICON = '<img src="bunny.png" alt="" width="18" height="18" draggable="false">';
+  const deptIcon = () => '<img src="' + (document.documentElement.classList.contains('draw') ? 'bunny-draw.svg' : 'bunny.png') + '" alt="" width="18" height="18" draggable="false">';
   function contactView(el, opts) {
     opts = opts || {};
     let rows = null, query = '';
@@ -626,7 +635,7 @@
         // 부서 줄: [접기 · 부서 이름 · 인원] [대표번호]
         html += '<section class="gvSec' + (isClosed ? ' closed' : '') + (people.length ? '' : ' solo') + '">' +
           '<div class="gvHead"><button type="button" class="gvTog" data-g="' + esc(g.name) + '" aria-expanded="' + !isClosed + '"' + (people.length ? '' : ' tabindex="-1"') + '>' +
-            '<span class="gvIco" aria-hidden="true">' + DEPT_ICON + '</span>' +
+            '<span class="gvIco" aria-hidden="true">' + deptIcon() + '</span>' +
             (people.length ? '<span class="gvChev" aria-hidden="true">' + ICONS.chev + '</span>' : '') +
             '<b>' + (q ? hl(g.name, q) : esc(g.name)) + '</b>' +
             (g.people.length ? '<span class="gvCnt">' + g.people.length + '명</span>' : '') + '</button>' +

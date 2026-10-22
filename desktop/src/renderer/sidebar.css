@@ -400,3 +400,55 @@ html.paper .cseg { background: var(--base); }
 .evrep { flex: none; display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; color: var(--a1); background: color-mix(in srgb, var(--a1) 12%, transparent); border-radius: 8px; padding: 3px 7px; }
 .fsClear { align-self: flex-start; border: none; background: transparent; color: var(--a1); font-size: 11.5px; font-weight: 700; padding: 2px 0 4px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; font-family: inherit; }
 .fsClear[hidden] { display: none; }
+
+/* ───────── 말랑 드로잉 스킨 ───────── */
+.calDeco { display: none; }
+.skin .swDraw { background: #FBFAF5; box-shadow: inset 0 0 0 2px #161616; display: grid; place-items: center; }
+.skin .swDraw img { width: 30px; height: auto; }
+html.draw .panel { background: #FBFAF5 !important; box-shadow: inset 2.5px 0 0 var(--ink), inset 0 2.5px 0 var(--ink), inset 0 -2.5px 0 var(--ink); }
+html.draw .tab { background: var(--ink); color: #FBFAF5; opacity: 1; }
+html.draw .seg { background: transparent; box-shadow: inset 0 0 0 2px var(--ink); border-radius: 999px; padding: 0; overflow: hidden; }
+html.draw .segb { border-radius: 0; height: 36px; font-family: 'Gaegu', var(--memo-font); font-size: 16px; font-weight: 700; color: var(--ink); }
+html.draw .segb + .segb { box-shadow: inset 2px 0 0 var(--ink); }
+html.draw .segb.on { background: var(--ink); color: #FBFAF5; box-shadow: none; }
+html.draw .search, html.draw .pill, html.draw .pinbtn, html.draw .navb, html.draw .box, html.draw .ev,
+html.draw .thInfo, html.draw .bkForm, html.draw .toggle:not(.mini), html.draw .acHero, html.draw .ghead {
+  background: #FBFAF5; box-shadow: inset 0 0 0 2px var(--ink);
+}
+html.draw .primary, html.draw .smallprimary, html.draw .pinbtn.on { background: var(--ink); color: #FBFAF5; box-shadow: 3px 3px 0 rgba(22, 22, 22, .25); }
+html.draw .row { box-shadow: inset 0 0 0 2px var(--ink); }
+html.draw .rtitle span { font-family: 'Gaegu', var(--memo-font); font-size: calc(17px * min(var(--ts, 1), 1.2)); font-weight: 700; }
+html.draw .bhead { font-family: 'Gaegu', var(--memo-font); font-size: 16px; color: var(--ink); }
+html.draw .toggle[aria-pressed="true"] .track { background: var(--ink); }
+html.draw .memoPrev, html.draw .ppPrev, html.draw .box .calPrev { background: #F3F2EC; }
+
+/* 캘린더: 검은 요일 띠 + 동글한 숫자 + 일요일은 빈 글씨 + 말랑이 */
+html.draw .calcard { background: #FBFAF5; box-shadow: inset 0 0 0 2.5px var(--ink); border-radius: 16px; padding-top: 12px; }
+html.draw .calhead { border-bottom: none; margin-bottom: 0; padding: 0 4px 6px; position: relative; min-height: 64px; align-items: flex-end; }
+html.draw .calttl { color: var(--ink); font-family: 'Jua', var(--cal-font); align-items: flex-end; }
+html.draw .calnum { font-size: 44px; font-weight: 400; line-height: .86; }
+html.draw .calen { font-size: 12px; font-weight: 400; letter-spacing: 1.5px; padding-bottom: 3px; }
+html.draw .calnav { align-self: flex-start; position: relative; z-index: 3; }
+html.draw .ctext { color: var(--ink); font-family: 'Gaegu', var(--memo-font); font-size: 15px; font-weight: 700; }
+html.draw .calDeco { display: block; position: absolute; inset: 0; pointer-events: none; }
+html.draw .calDeco img { position: absolute; left: 43%; bottom: -3px; width: 56px; z-index: 2; }
+html.draw .applogo { filter: grayscale(1) brightness(.62) contrast(1.5); }
+html.draw .calDeco svg { position: absolute; fill: #FBFAF5; stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+html.draw .calDeco .st1 { left: 38%; top: -2px; width: 18px; height: 18px; }
+html.draw .calDeco .st2 { right: 4px; bottom: 24px; width: 14px; height: 14px; display: none; }
+html.draw .wdays { background: var(--ink); color: #FBFAF5; border-radius: 999px; border-bottom: none; padding: 5px 0 4px; margin-bottom: 4px; font-family: 'Jua', var(--cal-font); font-weight: 400; position: relative; z-index: 1; }
+html.draw .wdays .sun, html.draw .wdays .sat { color: #FBFAF5; }
+html.draw .day { font-family: 'Jua', var(--cal-font); font-weight: 400; font-size: calc(15px * var(--cs, 1)); color: var(--ink) !important; position: relative; }
+html.draw .day.sun > span:first-child { color: transparent; -webkit-text-stroke: 1.2px var(--ink); }
+html.draw .day:hover { background: rgba(22, 22, 22, .06); }
+html.draw .day.today { box-shadow: none; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+html.draw .day.sel { background: transparent; box-shadow: none; color: var(--ink) !important; }
+html.draw .day.sel::before { content: ""; position: absolute; inset: 3px 2px; border: 2.4px solid var(--ink); border-radius: 50% 46% 52% 48% / 48% 54% 46% 52%; transform: rotate(-8deg); }
+html.draw .dots i, html.draw .day.sel .dots i { background: var(--ink) !important; }
+html.draw .sellabel { font-family: 'Gaegu', var(--memo-font); font-size: 18px; }
+html.draw .ev { background: transparent; box-shadow: none; border-radius: 0; border-bottom: 1.7px solid var(--ink); }
+html.draw .evt { font-family: 'Jua', var(--cal-font); color: var(--ink); }
+html.draw .evc { box-shadow: 0 0 0 2px var(--ink); }
+html.draw .evr { background: transparent; box-shadow: inset 0 0 0 1.6px var(--ink); color: var(--ink); }
+html.draw .ev.hasrep .evr, html.draw .evrep { background: var(--ink); color: #FBFAF5; }
+html.draw .ev.rec { background: transparent; }

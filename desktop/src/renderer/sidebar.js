@@ -507,7 +507,7 @@
       const evs = window.M.eventsOn(S.events, k, rec).map((x) => x.ev);
       const wd = dt.getDay();
       const color = wd === 0 ? 'var(--sun)' : (wd === 6 ? 'var(--sat)' : 'var(--ink)');
-      html += '<div class="cell"><button class="day' + (k === todayK ? ' today' : '') + (k === sel ? ' sel' : '') + '" type="button" data-k="' + k + '" style="color:' + color + '" aria-pressed="' + (k === sel) + '" aria-label="' + (dt.getMonth() + 1) + '월 ' + dt.getDate() + '일' + (evs.length ? ', 일정 ' + evs.length + '개' : '') + '">' +
+      html += '<div class="cell"><button class="day' + (wd === 0 ? ' sun' : '') + (k === todayK ? ' today' : '') + (k === sel ? ' sel' : '') + '" type="button" data-k="' + k + '" style="color:' + color + '" aria-pressed="' + (k === sel) + '" aria-label="' + (dt.getMonth() + 1) + '월 ' + dt.getDate() + '일' + (evs.length ? ', 일정 ' + evs.length + '개' : '') + '">' +
         '<span>' + dt.getDate() + '</span><span class="dots">' + evs.slice(0, 3).map((ev) => '<i style="background:' + EVENT_COLORS[ev.c] + '"></i>').join('') + '</span></button></div>';
     }
     $('grid').innerHTML = html;
@@ -628,7 +628,8 @@
     $('skins').innerHTML = Object.keys(SKINS).map((id) => {
       const k = SKINS[id];
       return '<button class="skin' + (s.skin === id ? ' on' : '') + '" type="button" data-skin="' + id + '" aria-pressed="' + (s.skin === id) + '" title="' + esc(k.name) + '" style="--sc:' + k.a1 + '">' +
-        '<span class="sw" style="background:linear-gradient(135deg,' + k.b[0] + ',' + k.b[2] + ')"><b style="background:linear-gradient(135deg,' + k.a1 + ',' + k.a2 + ')"></b></span>' +
+        (k.draw ? '<span class="sw swDraw"><img src="bunny-draw.svg" alt="" draggable="false"></span>'
+          : '<span class="sw" style="background:linear-gradient(135deg,' + k.b[0] + ',' + k.b[2] + ')"><b style="background:linear-gradient(135deg,' + k.a1 + ',' + k.a2 + ')"></b></span>') +
         '<span class="sn">' + esc(k.name) + '</span></button>';
     }).join('');
     if (document.activeElement !== $('fontSel')) {
