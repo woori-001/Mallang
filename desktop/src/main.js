@@ -24,6 +24,7 @@ const foldW = (m) => Math.round(FOLD_W * foldScale(m) / 100);
 const foldH = () => FOLD_H;   // 높이는 그대로, 가로만 조절
 const SIDE_W = 370;            // 목록 패널 340 + 탭 30
 const WIDGET_W = 284;
+const CALW_W = 300;   // 달력 위젯
 const MIN_W = 180, MIN_H = 110, MAX_W = 1400, MAX_H = 1200;
 const R = (f) => path.join(__dirname, 'renderer', f);
 const PRELOAD = path.join(__dirname, 'preload.js');
@@ -44,7 +45,7 @@ let dataDir, dataFile, store, saveTimer, quitting = false;
 function defaults() {
   return {
     version: 1,
-    settings: { skin: 'lav', font: 'gowun', fontScale: 100, titleScale: 100, titleBold: true, calFont: 'same', calScale: 100, peopleFont: 'same', peopleScale: 100, bodyBg: false, alpha: 60, sideAlpha: 55, showToday: true, showPeople: false, clockMode: 30, clockAlpha: 75, clockScale: 100, clockDark: false, foldScale: 100, noticeOn: true, pinned: false, autoStart: false },
+    settings: { skin: 'lav', font: 'gowun', fontScale: 100, titleScale: 100, titleBold: true, calFont: 'same', calScale: 100, peopleFont: 'same', peopleScale: 100, bodyBg: false, alpha: 60, sideAlpha: 55, showToday: true, showCal: false, showPeople: false, clockMode: 30, clockAlpha: 75, clockScale: 100, clockDark: false, foldScale: 100, noticeOn: true, pinned: false, autoStart: false },
     nextId: 2,
     memos: [{
       id: 1, slot: 0, x: null, y: null, w: 290, h: 240, type: 'text', title: '말랑메모 시작하기',
@@ -60,6 +61,7 @@ function defaults() {
     shared: {},
     cloud: {},
     widget: { x: null, y: null },
+    calWidget: { x: null, y: null },
     peopleWin: { x: null, y: null, w: 430, h: 380, top: false }
   };
 }
@@ -78,7 +80,7 @@ function load() {
   }
   const d = defaults();
   store = s
-    ? { ...d, ...s, settings: { ...d.settings, ...(s.settings || {}) }, widget: { ...d.widget, ...(s.widget || {}) }, peopleWin: { ...d.peopleWin, ...(s.peopleWin || {}) }, events: s.events || {} }
+    ? { ...d, ...s, settings: { ...d.settings, ...(s.settings || {}) }, widget: { ...d.widget, ...(s.widget || {}) }, calWidget: { ...d.calWidget, ...(s.calWidget || {}) }, peopleWin: { ...d.peopleWin, ...(s.peopleWin || {}) }, events: s.events || {} }
     : d;
   store.memos = store.memos.filter((m) => m && typeof m.id === 'number').map((m) => ({
     slot: 0, w: 260, h: 220, type: 'text', title: '', text: '', items: [], layer: 'normal', hidden: false, folded: false, ...m, deleting: false
@@ -338,6 +340,12 @@ function createHost() {
       const wy = store.widget.y != null ? store.widget.y : wa.y + wa.height - 260;
       return { action: 'allow', overrideBrowserWindowOptions: { ...baseWinOpts, x: Math.round(wx), y: Math.round(wy), width: WIDGET_W, height: 200 } };
     }
+    if (kind === 'calw') {
+      const wa = workArea();
+      const cx = store.calWidget.x != null ? store.calWidget.x : wa.x + 20 + WIDGET_W + 10;
+      const cy = store.calWidget.y != null ? store.calWidget.y : wa.y + wa.height - 520;
+      return { action: 'allow', overrideBrowserWindowOptions: { ...baseWinOpts, x: Math.round(cx), y: Math.round(cy), width: CALW_W, height: 420 } };
+    }
     if (kind === 'notice') {
       const detail = u.searchParams.get('view') === '1';
       return { action: 'allow', overrideBrowserWindowOptions: { ...baseWinOpts, ...(detail ? noticeDetailBounds() : noticeToastBounds()), alwaysOnTop: true } };
@@ -363,6 +371,7 @@ function createHost() {
     win.removeMenu();
     if (kind === 'memo') setupMemoWin(win, Number(u.searchParams.get('id')));
     if (kind === 'widget') setupWidget(win);
+    if (kind === 'calw') setupCalW(win);
     if (kind === 'people') setupPeople(win);
     if (kind === 'search') setupSearch(win);
     if (kind === 'clock') setupClock(win, u.searchParams.get('mode'));
@@ -733,6 +742,29 @@ function setupWidget(win) {
     }
   });
 }
+// 바탕화면 '달력' 위젯 (날짜를 누르면 아래에 그날 일정)
+let calW = null;
+function openCalW() {
+  if (calW && !calW.isDestroyed()) return;
+  hostOpen('calwidget.html?kind=calw', 'calw-' + Date.now());
+}
+function setupCalW(win) {
+  calW = win;
+  win.once('ready-to-show', () => { if (!win.isDestroyed()) { win.showInactive(); sendToBottom(win); } });
+  win.on('blur', () => sendToBottom(win));
+  win.on('closed', () => {
+    if (calW === win) calW = null;
+    if (!win.__intentional && !quitting && store.settings.showCal) { store.settings.showCal = false; save(); broadcast(); }
+  });
+}
+function closeCalW() {
+  if (!calW || calW.isDestroyed()) return;
+  const w = calW;
+  w.__intentional = true;
+  calW = null;
+  w.webContents.send('cmd', { type: 'leave' });
+  setTimeout(() => { if (!w.isDestroyed()) w.close(); }, 330);
+}
 function closeWidget() {
   if (!widget || widget.isDestroyed()) return;
   const w = widget;
@@ -943,7 +975,7 @@ function updateSettings(patch) {
   if ('bodyBg' in patch) patch.bodyBg = !!patch.bodyBg;
   if ('titleBold' in patch) patch.titleBold = !!patch.titleBold;
   if ('titleScale' in patch) patch.titleScale = Math.min(170, Math.max(70, Number(patch.titleScale) || 100));
-  const keys = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'showPeople', 'clockMode', 'clockAlpha', 'clockScale', 'clockDark', 'foldScale', 'sideDisplay', 'noticeOn', 'pinned', 'autoStart'];
+  const keys = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'showCal', 'showPeople', 'clockMode', 'clockAlpha', 'clockScale', 'clockDark', 'foldScale', 'sideDisplay', 'noticeOn', 'pinned', 'autoStart'];
   if ('noticeOn' in patch) patch.noticeOn = !!patch.noticeOn;
   if ('sideDisplay' in patch) patch.sideDisplay = typeof patch.sideDisplay === 'number' && isFinite(patch.sideDisplay) ? patch.sideDisplay : null;
   if ('foldScale' in patch) patch.foldScale = clampFs(patch.foldScale);
@@ -969,12 +1001,24 @@ function updateSettings(patch) {
   }
   if (s.sideDisplay !== prev.sideDisplay && side && !side.isDestroyed()) setB(side, sideBounds());
   if (s.showToday !== prev.showToday) { if (s.showToday) openWidget(); else closeWidget(); }
+  if (s.showCal !== prev.showCal) { if (s.showCal) openCalW(); else closeCalW(); }
   if (s.showPeople !== prev.showPeople) { if (s.showPeople) openPeople(); else closePeople(); buildTrayMenu(); }
   save();
   broadcast();
   buildTrayMenu();
 }
 
+// 모든 메모 한꺼번에: 숨기기 / 항상 위·보통·항상 아래
+function hideAllMemos() {
+  for (const m of store.memos.filter((x) => !x.hidden && !x.deleting)) updateMemo(m.id, { hidden: true });
+}
+function layerAllMemos(layer) {
+  if (!['top', 'normal', 'bottom'].includes(layer)) return;
+  for (const m of store.memos.filter((x) => !x.deleting && x.layer !== layer)) updateMemo(m.id, { layer });
+}
+ipcMain.on('memo:hideAll', hideAllMemos);
+ipcMain.on('memo:showAll', () => showAllHidden());
+ipcMain.on('memo:layerAll', (e, layer) => layerAllMemos(layer));
 function showAllHidden() {
   for (const m of store.memos) if (m.hidden && !m.deleting) updateMemo(m.id, { hidden: false });
 }
@@ -987,9 +1031,11 @@ function buildTrayMenu() {
     { label: '메모 검색  (Ctrl+Alt+F)', click: () => toggleSearch() },
     { label: '모두 접기  (Ctrl+Alt+↑)', click: () => foldAll() },
     { label: '모두 펴기  (Ctrl+Alt+↓)', click: () => unfoldAll() },
+    { label: '메모 모두 숨기기', click: hideAllMemos },
     { label: '숨긴 메모 모두 보이기', click: showAllHidden },
     { type: 'separator' },
     { label: '오늘 일정 위젯', type: 'checkbox', checked: !!store.settings.showToday, click: (i) => updateSettings({ showToday: i.checked }) },
+    { label: '달력 위젯', type: 'checkbox', checked: !!store.settings.showCal, click: (i) => updateSettings({ showCal: i.checked }) },
     { label: '연락망 띄우기', type: 'checkbox', checked: !!store.settings.showPeople, click: (i) => updateSettings({ showPeople: i.checked }) },
     { label: '윈도우 시작 시 자동 실행', type: 'checkbox', checked: !!store.settings.autoStart, click: (i) => updateSettings({ autoStart: i.checked }) },
     { label: '메모 저장 폴더 열기', click: () => shell.openPath(dataDir) },
@@ -1019,6 +1065,7 @@ ipcMain.handle('init', () => snapshot());
 ipcMain.on('host:ready', () => {
   for (const m of store.memos) if (!m.hidden && !m.deleting) openMemoWin(m);
   if (store.settings.showToday) openWidget();
+  if (store.settings.showCal) openCalW();
   if (store.settings.showPeople) openPeople();
 });
 ipcMain.on('memo:update', (e, id, patch) => updateMemo(id, patch));
@@ -1215,6 +1262,18 @@ ipcMain.on('widget:move', (e, x, y, done) => {
   if (!widget || widget.isDestroyed() || x == null || y == null) return;
   widget.setPosition(Math.round(x), Math.round(y));
   if (done) { store.widget = { x: Math.round(x), y: Math.round(y) }; save(); }
+});
+ipcMain.on('calw:move', (e, x, y, done) => {
+  x = num(x); y = num(y);
+  if (!calW || calW.isDestroyed() || x == null || y == null) return;
+  calW.setPosition(Math.round(x), Math.round(y));
+  if (done) { store.calWidget = { x: Math.round(x), y: Math.round(y) }; save(); }
+});
+ipcMain.on('calw:size', (e, h) => {
+  h = num(h);
+  if (!calW || calW.isDestroyed() || h == null) return;
+  const b = calW.getBounds();
+  calW.setBounds({ x: b.x, y: b.y, width: CALW_W, height: Math.round(Math.min(760, Math.max(200, h))) });
 });
 ipcMain.on('widget:size', (e, h) => {
   h = num(h);

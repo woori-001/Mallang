@@ -486,6 +486,16 @@
     }
   });
   $('newMemo').addEventListener('click', () => api.create({}));
+  $('hideAll').innerHTML = ICONS.eyeOff + '<span>숨기기</span>';
+  $('showAll').innerHTML = ICONS.eye + '<span>보이기</span>';
+  $('topAll').innerHTML = ICONS.front + '<span>항상 위</span>';
+  $('normAll').innerHTML = '<span>보통</span>';
+  $('bottomAll').innerHTML = ICONS.back + '<span>항상 아래</span>';
+  $('hideAll').addEventListener('click', () => api.hideAll());
+  $('showAll').addEventListener('click', () => api.showAll());
+  $('topAll').addEventListener('click', () => api.layerAll('top'));
+  $('normAll').addEventListener('click', () => api.layerAll('normal'));
+  $('bottomAll').addEventListener('click', () => api.layerAll('bottom'));
   $('foldAll').title = '모두 접기 (Ctrl+Alt+↑)';
   $('unfoldAll').title = '모두 펴기 (Ctrl+Alt+↓)';
   $('foldAll').addEventListener('click', () => api.foldAll());
@@ -517,6 +527,7 @@
     const sp = sel.split('-').map(Number);
     const sd = new Date(sp[0], sp[1] - 1, sp[2]);
     $('selLabel').textContent = (sd.getMonth() + 1) + '월 ' + sd.getDate() + '일 ' + WD[sd.getDay()] + '요일';
+    $('calToggle').setAttribute('aria-pressed', String(!!S.settings.showCal));
     const tt = $('todayToggle');
     tt.setAttribute('aria-pressed', String(!!S.settings.showToday));
     if (evKey !== sel || !$('evList').contains(document.activeElement)) {
@@ -624,6 +635,7 @@
   $('evList').addEventListener('focusin', () => api.sideFocus());
   $('evList').addEventListener('focusout', () => { if (evSaveT) saveEvents(true); });
   $('todayToggle').addEventListener('click', () => api.setSettings({ showToday: !S.settings.showToday }));
+  $('calToggle').addEventListener('click', () => api.setSettings({ showCal: !S.settings.showCal }));
 
   // ───────── 꾸미기 ─────────
   // 계절 스킨: 목록바 배경에 눈 내리기 / 박쥐 날기

@@ -49,6 +49,13 @@
           <button id="unfoldAll" class="pill soft" type="button"></button>
           <button id="newGroup" class="pill soft" type="button" title="그룹 만들기 — 같은 그룹 메모는 함께 옮기고 함께 숨겨요"></button>
         </div>
+        <div class="row2 allRow" role="group" aria-label="모든 메모 한꺼번에">
+          <button id="hideAll" class="pill soft mini" type="button" title="모든 메모 숨기기 (목록에서 다시 보이기)"></button>
+          <button id="showAll" class="pill soft mini" type="button" title="숨긴 메모 모두 보이기"></button>
+          <button id="topAll" class="pill soft mini" type="button" title="모든 메모 항상 위"></button>
+          <button id="normAll" class="pill soft mini" type="button" title="모든 메모 보통 (위·아래 고정 풀기)"></button>
+          <button id="bottomAll" class="pill soft mini" type="button" title="모든 메모 항상 아래"></button>
+        </div>
       </div>
       <div id="trashHead" class="trashHead" hidden>
         <div class="thTop">
@@ -86,6 +93,9 @@
       <div id="evList" class="evlist"></div>
       <button id="todayToggle" class="toggle soft" type="button" aria-pressed="false">
         <span>바탕화면에 오늘 일정 띄우기</span><span class="track"><span class="knob"></span></span>
+      </button>
+      <button id="calToggle" class="toggle soft" type="button" aria-pressed="false">
+        <span>바탕화면에 달력 띄우기</span><span class="track"><span class="knob"></span></span>
       </button>
     </section>
 

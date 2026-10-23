@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:">
+<title>달력</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="base.css">
+<style>
+body { padding: 14px; }
+.w {
+  border-radius: 22px; box-shadow: 0 6px 14px rgba(70, 60, 150, .16); padding: 14px 12px 12px;
+  display: flex; flex-direction: column; gap: 6px; font-family: var(--cal-font); animation: pop .5s var(--ease);
+  transition: opacity .32s var(--ease), transform .4s var(--ease), background .6s ease;
+}
+.w.leaving { opacity: 0; transform: translateY(10px) scale(.92); }
+.hd { display: flex; align-items: center; gap: 8px; padding: 0 4px 4px; cursor: grab; }
+.hd:active { cursor: grabbing; }
+.ttl { display: flex; align-items: baseline; gap: 7px; color: var(--a1); flex: 1; min-width: 0; }
+.num { font-size: calc(26px * var(--cs, 1)); font-weight: 700; line-height: 1; }
+.en { font-size: calc(11px * var(--cs, 1)); font-weight: 600; letter-spacing: 1px; }
+.nav { width: 28px; height: 28px; border-radius: 10px; background: rgba(var(--glass), .6); }
+.today { border: none; background: transparent; font-size: 12px; color: var(--sub); padding: 4px 6px; border-radius: 8px; }
+.today:hover { background: rgba(var(--glass), .6); color: var(--ink); }
+.wd, .grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.wd { text-align: center; font-size: calc(11px * var(--cs, 1)); font-weight: 600; color: var(--sub); padding-bottom: 2px; }
+.wd .sun { color: var(--sun); } .wd .sat { color: var(--sat); }
+.cell { display: flex; justify-content: center; }
+.day {
+  width: 36px; height: calc(36px * max(1, var(--cs, 1))); border: none; border-radius: 12px; background: transparent; padding: 0;
+  font-size: calc(13px * var(--cs, 1)); font-weight: 500; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  transition: background .25s ease, transform .2s var(--spring);
+}
+.day:hover { background: rgba(var(--glass), .7); }
+.day:active { transform: scale(.92); }
+.day.today { box-shadow: inset 0 0 0 1.5px var(--a1); font-weight: 700; }
+.day.sel { background: var(--accent); color: var(--on) !important; font-weight: 700; }
+.dots { display: flex; gap: 2px; height: 4px; }
+.dots i { width: 4px; height: 4px; border-radius: 50%; display: block; }
+.day.sel .dots i { background: #fff !important; }
+.evh { font-size: 12.5px; font-weight: 700; padding: 6px 4px 0; border-top: 1px solid var(--line-soft); margin-top: 2px; }
+.ev { display: flex; align-items: center; gap: 9px; font-size: calc(13px * var(--cs, 1)); padding: 3px 4px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.t { font-size: calc(11.5px * var(--cs, 1)); color: var(--sub); width: calc(38px * max(1, var(--cs, 1))); flex: none; }
+.n { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rep { font-size: 10.5px; font-weight: 700; color: var(--a1); flex: none; margin-left: auto; }
+.none { font-size: 12.5px; color: var(--sub); padding: 2px 4px 2px; }
+/* 말랑 드로잉 스킨 */
+html.draw .w { background: var(--paper-bg, #FBFAF5) !important; box-shadow: inset 0 0 0 2.2px var(--ink), 0 2px 5px rgba(0, 0, 0, .10); border-radius: 16px; }
+html.draw .ttl { color: var(--ink); }
+html.draw .wd { background: var(--ink); color: var(--paper-bg, #FBFAF5); border-radius: 999px; padding: 4px 0 3px; }
+html.draw .wd .sun, html.draw .wd .sat { color: var(--paper-bg, #FBFAF5); }
+html.draw .day { color: var(--ink) !important; }
+html.draw .day.today { box-shadow: none; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+html.draw .day.sel { background: transparent; position: relative; }
+html.draw .day.sel::before { content: ""; position: absolute; inset: 2px 3px; border: 2.2px solid var(--ink); border-radius: 50% 46% 52% 48% / 48% 54% 46% 52%; transform: rotate(-8deg); }
+html.draw .dots i, html.draw .day.sel .dots i { background: var(--ink) !important; }
+html.draw .evh { border-top: 2px solid var(--ink); }
+html.draw .nav { background: transparent; box-shadow: inset 0 0 0 2px var(--ink); border-radius: 50%; }
+</style>
+</head>
+<body>
+<div id="w" class="w">
+  <div id="hd" class="hd" title="끌어서 옮길 수 있어요">
+    <div class="ttl"><span id="num" class="num"></span><span id="en" class="en"></span></div>
+    <button id="today" class="today" type="button">오늘</button>
+    <button id="prev" class="ib nav" type="button" aria-label="이전 달"></button>
+    <button id="next" class="ib nav" type="button" aria-label="다음 달"></button>
+  </div>
+  <div class="wd" aria-hidden="true"><span class="sun">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span class="sat">토</span></div>
+  <div id="grid" class="grid"></div>
+  <div id="evh" class="evh"></div>
+  <div id="list"></div>
+</div>
+<script src="common.js"></script>
+<script src="calwidget.js"></script>
+</body>
+</html>

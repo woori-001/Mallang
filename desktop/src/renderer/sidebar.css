@@ -577,3 +577,9 @@ html.gseason .todaytxt, html.gseason .sellabel, html.gseason .foot, html.gseason
 html.gseason .list > .empty, html.gseason .pShared, html.gseason .nogrp, html.gseason #vAcct .slabel, html.gseason .gempty { color: rgba(255, 255, 255, .88); }
 html.g-xmas .sky .snow { color: rgba(255, 255, 255, .8); }
 html.g-halloween .sky .bat svg path { fill: #120B22; }
+
+/* 모든 메모 한꺼번에 (숨기기·보이기·항상 위·보통·항상 아래) */
+.allRow { gap: 4px; }
+.allRow .pill.mini { height: 30px; font-size: 11px; padding: 0 4px; gap: 3px; border-radius: 15px; flex: 1 1 auto; min-width: 0; white-space: nowrap; }
+.allRow .pill.mini svg { width: 13px; height: 13px; flex: none; }
+.allRow #normAll { flex: 0 0 auto; padding: 0 9px; }
