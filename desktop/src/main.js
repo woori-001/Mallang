@@ -1017,6 +1017,76 @@ function layerAllMemos(layer) {
   if (!['top', 'normal', 'bottom'].includes(layer)) return;
   for (const m of store.memos.filter((x) => !x.deleting && x.layer !== layer)) updateMemo(m.id, { layer });
 }
+// ───────── 자동 정렬: 가로(왼→오, 넘치면 다음 줄) / 세로(위→아래, 넘치면 다음 칸) ─────────
+// 목록바가 있는 모니터 왼쪽 위부터. 그룹 메모는 붙어 있게, 그 안에서는 지금 위치 순서대로
+function arrangeArea() {
+  const wa = sideDisplay().workArea;
+  return { x: wa.x, y: wa.y, w: wa.width - 44, h: wa.height };   // 오른쪽 끝 목록바 탭 자리는 비움
+}
+function arrangeList() {
+  const gi = new Map(store.groups.map((g, i) => [g.id, i]));
+  return store.memos.filter((m) => !m.hidden && !m.deleting).slice().sort((a, b) => {
+    const ga = a.group && gi.has(a.group) ? gi.get(a.group) : 999, gb = b.group && gi.has(b.group) ? gi.get(b.group) : 999;
+    return ga - gb || (a.y || 0) - (b.y || 0) || (a.x || 0) - (b.x || 0);
+  });
+}
+function arrangePlan(mode, fold) {
+  const A = arrangeArea(), list = arrangeList();
+  const size = (m) => (fold || m.folded ? { w: foldW(m), h: foldH(m) } : { w: m.w, h: m.h });
+  const pos = [];
+  let x = A.x, y = A.y, lines = list.length ? 1 : 0, lineMax = 0, fits = true;
+  for (const m of list) {
+    const s = size(m);
+    if (mode === 'row') {
+      if (x > A.x && x + s.w > A.x + A.w) { x = A.x; y += lineMax + GAP; lineMax = 0; lines++; }
+      pos.push({ m, x, y }); x += s.w + GAP; lineMax = Math.max(lineMax, s.h);
+      if (y + s.h > A.y + A.h) fits = false;
+    } else {
+      if (y > A.y && y + s.h > A.y + A.h) { y = A.y; x += lineMax + GAP; lineMax = 0; lines++; }
+      pos.push({ m, x, y }); y += s.h + GAP; lineMax = Math.max(lineMax, s.w);
+      if (x + s.w > A.x + A.w) fits = false;
+    }
+  }
+  return { pos, lines, fits, count: list.length };
+}
+let lastArrange = null;   // 되돌리기용 (직전 자리·접힘)
+ipcMain.handle('arrange:plan', (e, mode) => {
+  mode = mode === 'col' ? 'col' : 'row';
+  const a = arrangePlan(mode, false), b = arrangePlan(mode, true);
+  return { count: a.count, lines: a.lines, fits: a.fits, foldLines: b.lines, foldFits: b.fits, allFolded: arrangeList().every((m) => m.folded) };
+});
+ipcMain.handle('arrange:do', (e, mode, fold) => {
+  mode = mode === 'col' ? 'col' : 'row';
+  const list = arrangeList();
+  lastArrange = list.map((m) => ({ id: m.id, x: m.x, y: m.y, folded: !!m.folded }));
+  if (fold) for (const m of list) if (!m.folded) { m.folded = true; }
+  const plan = arrangePlan(mode, !!fold);
+  for (const p of plan.pos) {
+    p.m.x = Math.round(p.x); p.m.y = Math.round(p.y);
+    delete p.m.ox; delete p.m.oy; delete p.m.fh; delete p.m.uh; p.m.ar = false; p.m.ab = false;
+  }
+  layoutTouched(null, list);
+  save(); broadcast();
+  for (const p of plan.pos) {
+    const win = memoWins.get(p.m.id);
+    if (win && !win.isDestroyed()) { if (fold) setB(win, boundsFor(p.m)); else animateTo(win, boundsFor(p.m), 420); }
+  }
+  return { ok: true, lines: plan.lines };
+});
+ipcMain.handle('arrange:undo', () => {
+  if (!lastArrange) return { ok: false };
+  const list = lastArrange; lastArrange = null;
+  const ms = [];
+  for (const o of list) {
+    const m = getMemo(o.id);
+    if (!m || m.deleting) continue;
+    m.x = o.x; m.y = o.y; m.folded = o.folded; delete m.fh; delete m.uh; m.ar = false; m.ab = false; ms.push(m);
+  }
+  layoutTouched(null, ms);
+  save(); broadcast();
+  for (const m of ms) { const win = memoWins.get(m.id); if (win && !win.isDestroyed()) setB(win, boundsFor(m)); }
+  return { ok: true };
+});
 ipcMain.on('memo:hideAll', hideAllMemos);
 ipcMain.on('memo:showAll', () => showAllHidden());
 ipcMain.on('memo:layerAll', (e, layer) => layerAllMemos(layer));

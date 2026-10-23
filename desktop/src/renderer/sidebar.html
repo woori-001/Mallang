@@ -49,6 +49,11 @@
           <button id="unfoldAll" class="pill soft" type="button"></button>
           <button id="newGroup" class="pill soft" type="button" title="그룹 만들기 — 같은 그룹 메모는 함께 옮기고 함께 숨겨요"></button>
         </div>
+        <div class="row2 arrRow">
+          <button id="arrRow" class="pill soft mini" type="button" title="메모를 왼쪽 위부터 가로로 줄 맞춰 정렬"></button>
+          <button id="arrCol" class="pill soft mini" type="button" title="메모를 왼쪽 위부터 세로로 칸 맞춰 정렬"></button>
+          <button id="arrUndo" class="pill soft mini" type="button" hidden title="정렬 전 자리로 되돌리기"></button>
+        </div>
         <div class="row2 allRow" role="group" aria-label="모든 메모 한꺼번에">
           <button id="hideAll" class="pill soft mini" type="button" title="모든 메모 숨기기 (목록에서 다시 보이기)"></button>
           <button id="showAll" class="pill soft mini" type="button" title="숨긴 메모 모두 보이기"></button>
@@ -286,6 +291,7 @@
         <div id="scDesc" class="scdesc"></div>
         <div class="scbtns">
           <button id="scNo" class="scno" type="button">취소</button>
+          <button id="scAlt" class="scno scalt" type="button" hidden></button>
           <button id="scYes" class="scyes" type="button"></button>
         </div>
       </div>

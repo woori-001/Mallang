@@ -282,10 +282,12 @@
   }
   // 확인 팝업
   let confirmResolve = null;
-  function askConfirm(title, desc, yesLabel) {
+  function askConfirm(title, desc, yesLabel, altLabel) {
     $('scTitle').textContent = title;
     $('scDesc').textContent = desc;
     $('scYes').textContent = yesLabel;
+    $('scAlt').hidden = !altLabel;
+    $('scAlt').textContent = altLabel || '';
     $('sConfirm').hidden = false;
     api.sideFocus();
     setTimeout(() => $('scNo').focus(), 30);
@@ -297,6 +299,7 @@
   }
   $('scNo').addEventListener('click', () => answerConfirm(false));
   $('scYes').addEventListener('click', () => answerConfirm(true));
+  $('scAlt').addEventListener('click', () => answerConfirm('alt'));
   $('sConfirm').addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); answerConfirm(false); } });
   $('sConfirm').addEventListener('pointerdown', (e) => { if (e.target === $('sConfirm')) answerConfirm(false); });
   $('trashBtn').addEventListener('click', () => { trashMode = true; renderMemos(); });
@@ -486,6 +489,38 @@
     }
   });
   $('newMemo').addEventListener('click', () => api.create({}));
+  // 자동 정렬 (가로 / 세로) — 몇 줄이 되는지 먼저 알려 주고 정렬
+  const ROWI = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="7" height="6" rx="1.5"/><rect x="14" y="4" width="7" height="6" rx="1.5"/><rect x="3" y="14" width="7" height="6" rx="1.5"/></svg>';
+  const COLI = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="3" width="6" height="7" rx="1.5"/><rect x="4" y="14" width="6" height="7" rx="1.5"/><rect x="14" y="3" width="6" height="7" rx="1.5"/></svg>';
+  $('arrRow').innerHTML = ROWI + '<span>가로 정렬</span>';
+  $('arrCol').innerHTML = COLI + '<span>세로 정렬</span>';
+  $('arrUndo').innerHTML = '<span>↶ 정렬 되돌리기</span>';
+  let arrUndoT = null;
+  async function arrange(mode) {
+    const p = await api.arrangePlan(mode);
+    if (!p || !p.count) { await askConfirm('정렬할 메모가 없어요', '화면에 보이는 메모가 없어요. 숨긴 메모는 정렬하지 않아요.', '확인'); return; }
+    const word = mode === 'row' ? '가로' : '세로', unit = mode === 'row' ? '줄' : '칸', ro = mode === 'row' ? '줄로' : '칸으로';
+    let title = '메모 ' + p.count + '개를 ' + word + '로 정렬할까요?';
+    let desc = '목록바가 있는 화면 왼쪽 위부터 ' + word + ' ' + p.lines + ro + ' 정렬돼요. 같은 그룹 메모는 붙어 있어요.';
+    let alt = null;
+    if (!p.fits) {
+      desc = '지금 크기 그대로면 ' + word + ' ' + p.lines + unit + '이 되는데, 화면에 다 들어가지 않아서 일부 메모가 화면 밖으로 나가요.';
+      if (!p.allFolded) {
+        desc += ' 모두 접어서 정렬하면 ' + p.foldLines + (p.foldFits ? ro + ' 화면에 다 들어가요.' : unit + '이 돼요 (그래도 화면이 좀 모자라요).');
+        alt = '그대로 정렬';
+      }
+    }
+    const ok = await askConfirm(title, desc, !p.fits && !p.allFolded ? '접어서 정렬' : '정렬하기', alt);
+    if (!ok) return;
+    const fold = !p.fits && !p.allFolded && ok === true;
+    await api.arrangeDo(mode, fold);
+    $('arrUndo').hidden = false;
+    clearTimeout(arrUndoT);
+    arrUndoT = setTimeout(() => { $('arrUndo').hidden = true; }, 60000);
+  }
+  $('arrRow').addEventListener('click', () => arrange('row'));
+  $('arrCol').addEventListener('click', () => arrange('col'));
+  $('arrUndo').addEventListener('click', async () => { await api.arrangeUndo(); $('arrUndo').hidden = true; });
   $('hideAll').innerHTML = ICONS.eyeOff + '<span>숨기기</span>';
   $('showAll').innerHTML = ICONS.eye + '<span>보이기</span>';
   $('topAll').innerHTML = ICONS.front + '<span>항상 위</span>';
