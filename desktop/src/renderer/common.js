@@ -65,20 +65,33 @@
     },
     // draw: 손그림 말랑이 + 검은 펜 + 아이보리 종이 (흑백)
     draw: {
-      name: '말랑 드로잉', paper: true, draw: true, base: '#EFEFEC', b: ['#E9E9E5', '#F3F3F0', '#E3E3DE', '#F7F7F3'],
+      name: '말랑 드로잉', paper: true, draw: true, bunny: 'bunny-draw.svg', logo: 'logo-draw.svg', base: '#EFEFEC', b: ['#E9E9E5', '#F3F3F0', '#E3E3DE', '#F7F7F3'],
       a1: '#161616', a2: '#3A3A38', ink: '#161616', sub: '#6E6E66', sun: '#161616', sat: '#161616', glow: 'rgba(0,0,0,0.16)', on: '#FBFAF5',
       pal: [[[251, 250, 245], [251, 250, 245]], [[251, 250, 245], [251, 250, 245]], [[251, 250, 245], [251, 250, 245]], [[251, 250, 245], [251, 250, 245]], [[251, 250, 245], [251, 250, 245]]]
     },
     // 계절 스킨 (드로잉 스킨에 옷 입히기) — SEASONS_ON 이 true 일 때만 목록에 보임
     halloween: {
-      name: '말랑 할로윈', paper: true, draw: true, season: 'halloween', paperBg: '#FFF7EC', base: '#2B2238', b: ['#3A2E4C', '#2B2238', '#463858', '#2B2238'],
+      name: '드로잉 할로윈', paper: true, draw: true, season: 'halloween', bunny: 'bunny-halloween.png', logo: 'logo-halloween.png', paperBg: '#FFF7EC', base: '#2B2238', b: ['#3A2E4C', '#2B2238', '#463858', '#2B2238'],
       a1: '#1E1630', a2: '#3A2E4C', ink: '#1E1630', sub: '#7A6E86', sun: '#1E1630', sat: '#1E1630', glow: 'rgba(0,0,0,0.18)', on: '#FFF7EC',
       pal: [[[255, 247, 236], [255, 247, 236]], [[255, 247, 236], [255, 247, 236]], [[255, 247, 236], [255, 247, 236]], [[255, 247, 236], [255, 247, 236]], [[255, 247, 236], [255, 247, 236]]]
     },
     xmas: {
-      name: '말랑 크리스마스', paper: true, draw: true, season: 'xmas', paperBg: '#FFFDF6', base: '#1F4A35', b: ['#2A5A42', '#1F4A35', '#346A4E', '#1F4A35'],
+      name: '드로잉 크리스마스', paper: true, draw: true, season: 'xmas', bunny: 'bunny-xmas.png', logo: 'logo-xmas.png', paperBg: '#FFFDF6', base: '#1F4A35', b: ['#2A5A42', '#1F4A35', '#346A4E', '#1F4A35'],
       a1: '#1C2B22', a2: '#2F4A3A', ink: '#1C2B22', sub: '#6E7C72', sun: '#1C2B22', sat: '#1C2B22', glow: 'rgba(0,0,0,0.18)', on: '#FFFDF6',
       pal: [[[255, 253, 246], [255, 253, 246]], [[255, 253, 246], [255, 253, 246]], [[255, 253, 246], [255, 253, 246]], [[255, 253, 246], [255, 253, 246]], [[255, 253, 246], [255, 253, 246]]]
+    },
+    // 기본 말랑이(유리) 계절 스킨 — 차분한 색, 그라데이션 대신 한 가지 포인트 색
+    ghalloween: {
+      name: '말랑 할로윈', season: 'halloween', glassSeason: true, solidAccent: true, bunny: 'bunny-3d-halloween.png', logo: 'logo-3d-halloween.png',
+      base: '#EDE7F0', b: ['#E9D9C8', '#DCD5E8', '#EFE6D6', '#D8CFE6'],
+      a1: '#D9772F', a2: '#6F5F92', ink: '#2F2836', sub: '#77707E', sun: '#D9772F', sat: '#6F5F92', glow: 'rgba(217,119,47,0.26)', on: '#FFFFFF',
+      pal: [[[250, 226, 204], [243, 212, 186]], [[226, 220, 236], [212, 204, 228]], [[240, 232, 218], [230, 220, 202]], [[244, 218, 204], [236, 204, 190]], [[222, 224, 236], [208, 212, 230]]]
+    },
+    gxmas: {
+      name: '말랑 크리스마스', season: 'xmas', glassSeason: true, solidAccent: true, bunny: 'bunny-3d-xmas.png', logo: 'logo-3d-xmas.png',
+      base: '#EEF2EE', b: ['#EED6D4', '#D6E6DA', '#F2ECDE', '#DCE8E0'],
+      a1: '#B8434A', a2: '#5E8A6E', ink: '#2A302C', sub: '#6E7770', sun: '#B8434A', sat: '#5E8A6E', glow: 'rgba(184,67,74,0.24)', on: '#FFFFFF',
+      pal: [[[246, 218, 216], [238, 204, 202]], [[218, 232, 220], [204, 222, 208]], [[246, 240, 226], [236, 228, 210]], [[240, 226, 214], [232, 212, 200]], [[224, 234, 236], [210, 226, 228]]]
     },
     midnight: {
       name: '미드나잇', dark: true, base: '#16181D', b: ['#2A3A64', '#1E3442', '#3A2C52', '#1C3448'],
@@ -159,18 +172,22 @@
     r.setProperty('--a1', sk.a1);
     r.setProperty('--a2', sk.a2);
     r.setProperty('--glow', sk.glow);
-    r.setProperty('--accent', 'linear-gradient(135deg, ' + sk.a1 + ', ' + sk.a2 + ')');
+    r.setProperty('--accent', sk.solidAccent ? sk.a1 : 'linear-gradient(135deg, ' + sk.a1 + ', ' + sk.a2 + ')');
     r.setProperty('--on', sk.on || '#FFFFFF');
     r.setProperty('--glass', sk.dark ? '46, 51, 62' : '255, 255, 255');
     r.setProperty('--line-soft', sk.dark ? 'rgba(255,255,255,.12)' : 'rgba(80,80,140,.18)');
     document.documentElement.classList.toggle('dark', !!sk.dark);
     document.documentElement.classList.toggle('paper', !!sk.paper);
     document.documentElement.classList.toggle('draw', !!sk.draw);
-    document.documentElement.classList.toggle('halloween', sk.season === 'halloween');
-    document.documentElement.classList.toggle('xmas', sk.season === 'xmas');
+    // 드로잉 계절 스킨: html.halloween / html.xmas · 유리(기본 말랑이) 계절 스킨: html.gseason + g-halloween / g-xmas
+    document.documentElement.classList.toggle('halloween', !!sk.draw && sk.season === 'halloween');
+    document.documentElement.classList.toggle('xmas', !!sk.draw && sk.season === 'xmas');
+    document.documentElement.classList.toggle('gseason', !!sk.glassSeason);
+    document.documentElement.classList.toggle('g-halloween', !!sk.glassSeason && sk.season === 'halloween');
+    document.documentElement.classList.toggle('g-xmas', !!sk.glassSeason && sk.season === 'xmas');
     r.setProperty('--paper-bg', sk.paperBg || '#FBFAF5');
     // 드로잉 스킨에서는 말랑이도 손그림으로
-    document.querySelectorAll('img[data-bun]').forEach((img) => { const want = !sk.draw ? img.dataset.bun : img.dataset.draw ? (sk.season ? 'logo-' + sk.season + '.png' : img.dataset.draw) : (sk.season ? 'bunny-' + sk.season + '.png' : 'bunny-draw.svg'); if (img.getAttribute('src') !== want) img.setAttribute('src', want); });
+    document.querySelectorAll('img[data-bun]').forEach((img) => { const want = img.dataset.draw ? (sk.logo || img.dataset.bun) : (sk.bunny || img.dataset.bun); if (img.getAttribute('src') !== want) img.setAttribute('src', want); });
     r.setProperty('--base', sk.base);
     r.setProperty('--memo-font', f.fam);
     const scale = (settings.fontScale || 100) / 100;              // 글자 크기 (모든 메모에 한 번에)

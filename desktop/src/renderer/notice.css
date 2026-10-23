@@ -46,3 +46,5 @@ html.halloween .ver { background: #F2862B; color: #fff; }
 html.xmas .ver { background: #D7393B; color: #fff; }
 html.halloween .btn.pri { background: #F2862B; color: #1E1630; }
 html.xmas .btn.pri { background: #D7393B; color: #fff; }
+html.gseason .bun { width: 72px; height: 54px; }
+html.gseason .bun.big { width: 88px; height: 66px; }

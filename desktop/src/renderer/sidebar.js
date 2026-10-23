@@ -648,7 +648,7 @@
     $('skins').innerHTML = Object.keys(SKINS).filter((id) => !SKINS[id].season || openSk.includes(id) || S.isAdmin || s.skin === id).map((id) => {
       const k = SKINS[id];
       return '<button class="skin' + (s.skin === id ? ' on' : '') + '" type="button" data-skin="' + id + '" aria-pressed="' + (s.skin === id) + '" title="' + esc(k.name) + '" style="--sc:' + k.a1 + '">' +
-        (k.draw ? '<span class="sw swDraw"><img src="bunny-draw.svg" alt="" draggable="false"></span>'
+        (k.bunny ? '<span class="sw swDraw" style="background:' + (k.season ? k.b[0] : '') + '"><img src="' + k.bunny + '" alt="" draggable="false"></span>'
           : '<span class="sw" style="background:linear-gradient(135deg,' + k.b[0] + ',' + k.b[2] + ')"><b style="background:linear-gradient(135deg,' + k.a1 + ',' + k.a2 + ')"></b></span>') +
         '<span class="sn">' + esc(k.name) + (k.season && !openSk.includes(id) ? '<em class="sbeta">베타</em>' : '') + '</span></button>';
     }).join('');

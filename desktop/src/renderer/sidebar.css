@@ -538,3 +538,22 @@ html.draw:not(.halloween):not(.xmas) .memoPrev, html.draw:not(.halloween):not(.x
 .skState { font-size: 11.5px; color: var(--sub); }
 .skState.on { color: #1E7A57; font-weight: 700; }
 .skBtn { flex: none; height: 30px; padding: 0 12px; }
+
+/* ───────── 기본 말랑이(유리) 계절 스킨 ───────── */
+html.gseason .panel { isolation: isolate; }
+html.gseason .sky { display: block; }
+html.g-xmas .sky .snow { color: rgba(94, 138, 110, .55); }
+html.g-halloween .sky .bat svg path { fill: rgba(47, 40, 54, .55); }
+html.gseason .calhead { position: relative; min-height: 62px; align-items: flex-end; }
+html.gseason .calnav { align-self: flex-start; position: relative; z-index: 3; }
+html.gseason .calDeco { display: block; position: absolute; inset: 0; pointer-events: none; }
+html.gseason .calDeco .st1, html.gseason .calDeco .st2 { display: none; }
+html.gseason .calDeco .calBun { position: absolute; right: 86px; bottom: -8px; width: 76px; z-index: 2; transform-origin: 50% 100%; animation: bunSway 3.6s ease-in-out infinite, bunHop 7s ease-in-out 2s infinite; }
+html.gseason .calDeco .calBun img { width: 100%; display: block; filter: drop-shadow(0 3px 4px rgba(60, 40, 80, .18)); }
+html.g-halloween .sDeco.dH, html.g-xmas .sDeco.dX { display: block; }
+html.gseason .sDeco .bat { left: 34%; top: 2px; }
+html.gseason .sDeco .ghost { display: none; }
+html.gseason .sDeco .tree { left: 34%; top: 4px; }
+html.gseason .applogo { height: 46px; margin-top: -8px; filter: drop-shadow(0 2px 4px rgba(60, 40, 80, .15)); }
+.skin .swDraw img { width: 34px; }
+@media (prefers-reduced-motion: reduce) { html.gseason .calDeco .calBun { animation: none; } }

@@ -37,3 +37,5 @@ html.draw .done { background: var(--ink); color: var(--paper-bg, #FBFAF5); box-s
 html.halloween .clock.dark .time { color: #FFD34D; }
 html.xmas .clock.dark .time { color: #E7B53C; }
 html.halloween .bun, html.xmas .bun { width: calc(86px * var(--s, 1)); height: calc(66px * var(--s, 1)); }
+html.gseason .bun { width: calc(84px * var(--s, 1)); height: calc(62px * var(--s, 1)); }
+html.gseason .bun img { filter: drop-shadow(0 3px 4px rgba(60, 40, 80, .2)); }
