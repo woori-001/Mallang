@@ -179,6 +179,15 @@
     document.documentElement.classList.toggle('dark', !!sk.dark);
     document.documentElement.classList.toggle('paper', !!sk.paper);
     document.documentElement.classList.toggle('draw', !!sk.draw);
+    // 메모 모서리: 꾸미기에서 정하면 모든 스킨 위에 덮어씀 (안 정하면 스킨 기본)
+    // 0% = 각진 사각형, 100% = 지금 스킨 그대로
+    const mp = typeof settings.memoRound === 'number' ? settings.memoRound : 100;
+    document.documentElement.classList.toggle('customR', mp !== 100);
+    if (mp !== 100) {
+      const base = sk.draw ? 14 : sk.paper ? 12 : 22, fbase = sk.draw ? 11 : sk.paper ? 9 : 16;
+      r.setProperty('--memo-r', Math.round(base * mp) / 100 + 'px');
+      r.setProperty('--memo-rf', Math.round(fbase * mp) / 100 + 'px');
+    }
     // 드로잉 계절 스킨: html.halloween / html.xmas · 유리(기본 말랑이) 계절 스킨: html.gseason + g-halloween / g-xmas
     document.documentElement.classList.toggle('halloween', !!sk.draw && sk.season === 'halloween');
     document.documentElement.classList.toggle('xmas', !!sk.draw && sk.season === 'xmas');

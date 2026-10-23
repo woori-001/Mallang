@@ -61,3 +61,9 @@ html.draw .head { border-bottom: 2.5px solid var(--ink); background: repeating-l
 html.draw .card.folded .head { border-bottom: none; background: transparent; margin: 0; }
 html.draw .search { background: var(--paper-bg, #FBFAF5); box-shadow: inset 0 0 0 2px var(--ink); }
 html.draw .gv { --gv-surface: var(--paper-bg, #FBFAF5); }
+
+/* 모서리 둥글기 (꾸미기에서 직접 정했을 때) */
+html.customR .card { border-radius: var(--memo-r) !important; }
+html.customR .card.folded { border-radius: var(--memo-rf) !important; }
+html.customR .card .head { border-top-left-radius: var(--memo-r) !important; border-top-right-radius: var(--memo-r) !important; }
+html.customR .card.folded .head { border-radius: var(--memo-rf) !important; }

@@ -672,6 +672,9 @@
     const tsv = s.titleScale || 100;
     if (document.activeElement !== $('titleScale')) $('titleScale').value = tsv;
     $('titleScaleV').textContent = tsv + '%';
+    const mrv = typeof s.memoRound === 'number' ? s.memoRound : 100;
+    if (document.activeElement !== $('memoRound')) $('memoRound').value = mrv;
+    $('memoRoundV').textContent = mrv + '%';
     const fdv = s.foldScale || 100;
     if (document.activeElement !== $('foldScale')) $('foldScale').value = fdv;
     $('foldScaleV').textContent = fdv + '%';
@@ -721,6 +724,7 @@
   $('clockPlace').addEventListener('click', () => api.clockPlace(true));
   $('noticeOn').addEventListener('click', () => api.setSettings({ noticeOn: S.settings.noticeOn === false }));
   $('fontSel').addEventListener('change', (e) => api.setSettings({ font: e.target.value }));
+  $('memoRound').addEventListener('input', (e) => { $('memoRoundV').textContent = e.target.value + '%'; api.setSettings({ memoRound: Number(e.target.value) }); });
   $('foldScale').addEventListener('input', (e) => { $('foldScaleV').textContent = e.target.value + '%'; api.setSettings({ foldScale: Number(e.target.value) }); });
   $('fsClear').addEventListener('click', () => api.foldSizeReset());
   $('titleScale').addEventListener('input', (e) => { $('titleScaleV').textContent = e.target.value + '%'; api.setSettings({ titleScale: Number(e.target.value) }); });

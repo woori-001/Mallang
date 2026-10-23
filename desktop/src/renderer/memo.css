@@ -344,3 +344,9 @@ html.halloween .item.done .chk svg { stroke: #F2862B; }
 html.xmas .item.done .chk svg { stroke: #D7393B; }
 html.halloween .text .dv { border-top-color: #F2862B; }
 html.xmas .text .dv { border-top-color: #D7393B; }
+
+/* 모서리 둥글기 (꾸미기에서 직접 정했을 때) */
+html.customR .card { border-radius: var(--memo-r) !important; }
+html.customR .card.folded { border-radius: var(--memo-rf) !important; }
+html.customR .card .head { border-top-left-radius: var(--memo-r) !important; border-top-right-radius: var(--memo-r) !important; }
+html.customR .card.folded .head { border-radius: var(--memo-rf) !important; }
