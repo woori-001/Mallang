@@ -557,3 +557,12 @@ html.gseason .sDeco .tree { left: 34%; top: 4px; }
 html.gseason .applogo { height: 46px; margin-top: -8px; filter: drop-shadow(0 2px 4px rgba(60, 40, 80, .15)); }
 .skin .swDraw img { width: 34px; }
 @media (prefers-reduced-motion: reduce) { html.gseason .calDeco .calBun { animation: none; } }
+
+/* 달력 말랑이 자리: 머리 칸을 조금 높이고 오른쪽 아래(이동 버튼 밑)에 앉혀서 날짜·연도를 가리지 않게 */
+html.draw .calhead, html.gseason .calhead { min-height: 92px; position: relative; }
+html.draw .calDeco .calBun, html.gseason .calDeco .calBun { left: auto !important; right: 6px !important; bottom: -2px !important; width: 64px !important; }
+html.halloween .calDeco .calBun, html.xmas .calDeco .calBun, html.gseason .calDeco .calBun { width: 76px !important; }
+html.draw .calDeco .st1 { left: auto; right: 82px; top: 40px; }
+html.halloween .sDeco .bat, html.gseason .sDeco .bat { left: auto; right: 112px; top: 6px; }
+html.halloween .sDeco .ghost { left: auto; right: 84px; top: 38px; }
+html.xmas .sDeco .tree, html.gseason .sDeco .tree { left: auto; right: 86px; top: 46px; }
