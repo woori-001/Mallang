@@ -199,7 +199,9 @@ function snapshot() {
     contacts: store.shared.contacts || (store.contacts ? store.contacts.rows : null),
     contactsShared: !!store.shared.contacts,
     notices: store.shared.notices || [],
-    openSkins: store.shared.openSkins || [],   // 관리자가 모두에게 공개한 계절 스킨
+    openSkins: store.shared.openSkins || [],
+    displays: displayList(),
+    sideDisplay: sideDisplay().id,   // 관리자가 모두에게 공개한 계절 스킨
     isAdmin: !!(store.cloud && store.cloud.admin),                         // 회사 공통 연락망
     canEditContacts: !store.shared.contacts || !!store.cloud.admin,   // 공통 연락망은 관리자만 고침
     groups: store.groups,
@@ -683,8 +685,19 @@ function unfoldAll() {
 }
 
 // ───────────────────────── 목록바 ─────────────────────────
+// 목록바를 둘 모니터: 꾸미기에서 고른 모니터 (없어졌으면 주 모니터)
+function sideDisplay() {
+  const id = store.settings.sideDisplay;
+  const all = screen.getAllDisplays();
+  return (id != null && all.find((d) => d.id === id)) || screen.getPrimaryDisplay();
+}
+function displayList() {
+  const prim = screen.getPrimaryDisplay().id;
+  return screen.getAllDisplays().slice().sort((a, b) => a.bounds.x - b.bounds.x || a.bounds.y - b.bounds.y)
+    .map((d, i) => ({ id: d.id, n: i + 1, primary: d.id === prim, w: d.size.width, h: d.size.height }));
+}
 function sideBounds() {
-  const wa = workArea();
+  const wa = sideDisplay().workArea;
   return { x: wa.x + wa.width - SIDE_W, y: wa.y, width: SIDE_W, height: wa.height };
 }
 function createSide() {
@@ -698,6 +711,7 @@ function createSide() {
 }
 function placeSide() {
   if (side && !side.isDestroyed()) setB(side, sideBounds());
+  broadcast();   // 모니터 목록이 바뀌면 꾸미기 화면도 갱신
 }
 function openSide() {
   if (side && !side.isDestroyed()) side.webContents.send('cmd', { type: 'open' });
@@ -929,8 +943,9 @@ function updateSettings(patch) {
   if ('bodyBg' in patch) patch.bodyBg = !!patch.bodyBg;
   if ('titleBold' in patch) patch.titleBold = !!patch.titleBold;
   if ('titleScale' in patch) patch.titleScale = Math.min(170, Math.max(70, Number(patch.titleScale) || 100));
-  const keys = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'showPeople', 'clockMode', 'clockAlpha', 'clockScale', 'clockDark', 'foldScale', 'noticeOn', 'pinned', 'autoStart'];
+  const keys = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'showPeople', 'clockMode', 'clockAlpha', 'clockScale', 'clockDark', 'foldScale', 'sideDisplay', 'noticeOn', 'pinned', 'autoStart'];
   if ('noticeOn' in patch) patch.noticeOn = !!patch.noticeOn;
+  if ('sideDisplay' in patch) patch.sideDisplay = typeof patch.sideDisplay === 'number' && isFinite(patch.sideDisplay) ? patch.sideDisplay : null;
   if ('foldScale' in patch) patch.foldScale = clampFs(patch.foldScale);
   if ('clockMode' in patch) patch.clockMode = [0, 30, 60].includes(Number(patch.clockMode)) ? Number(patch.clockMode) : 30;
   if ('clockAlpha' in patch) patch.clockAlpha = Math.min(100, Math.max(20, Number(patch.clockAlpha) || 75));
@@ -952,6 +967,7 @@ function updateSettings(patch) {
   if (s.autoStart !== prev.autoStart) {
     try { app.setLoginItemSettings({ openAtLogin: !!s.autoStart }); } catch (e) { console.error(e); }
   }
+  if (s.sideDisplay !== prev.sideDisplay && side && !side.isDestroyed()) setB(side, sideBounds());
   if (s.showToday !== prev.showToday) { if (s.showToday) openWidget(); else closeWidget(); }
   if (s.showPeople !== prev.showPeople) { if (s.showPeople) openPeople(); else closePeople(); buildTrayMenu(); }
   save();

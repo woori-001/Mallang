@@ -683,6 +683,9 @@
     $('alphaV').textContent = s.alpha + '%';
     $('sideAlphaV').textContent = s.sideAlpha + '%';
     $('autoStart').setAttribute('aria-pressed', String(!!s.autoStart));
+    const mons = S.displays || [];
+    $('sideMonBox').hidden = mons.length < 2;
+    $('sideMon').innerHTML = mons.map((d) => '<button type="button" data-mon="' + d.id + '" aria-pressed="' + (d.id === S.sideDisplay) + '">모니터 ' + d.n + (d.primary ? ' (주)' : '') + '</button>').join('');
     $('noticeOn').setAttribute('aria-pressed', String(s.noticeOn !== false));
     const cm = s.clockMode == null ? 30 : s.clockMode;
     document.querySelectorAll('[data-cm]').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.cm) === cm)));
@@ -725,6 +728,7 @@
   });
   $('bodyBg').addEventListener('click', () => api.setSettings({ bodyBg: !S.settings.bodyBg }));
   $('autoStart').addEventListener('click', () => api.setSettings({ autoStart: !S.settings.autoStart }));
+  $('sideMon').addEventListener('click', (e) => { const b = e.target.closest('[data-mon]'); if (b) api.setSettings({ sideDisplay: Number(b.dataset.mon) }); });
   $('openData').addEventListener('click', () => api.openData());
 
   // ───────── 업데이트 ─────────
