@@ -563,9 +563,17 @@ html.draw .calhead, html.gseason .calhead { min-height: 92px; position: relative
 html.draw .calDeco .calBun, html.gseason .calDeco .calBun { left: auto !important; right: 6px !important; bottom: -2px !important; width: 64px !important; }
 html.halloween .calDeco .calBun, html.xmas .calDeco .calBun, html.gseason .calDeco .calBun { width: 76px !important; }
 html.draw .calDeco .st1 { left: auto; right: 82px; top: 40px; }
-html.halloween .sDeco .bat, html.gseason .sDeco .bat { left: auto; right: 112px; top: 6px; }
+html.halloween .sDeco .bat, html.gseason .sDeco .bat { left: 24%; right: auto; top: 0; }
 html.halloween .sDeco .ghost { left: auto; right: 84px; top: 38px; }
 html.xmas .sDeco .tree, html.gseason .sDeco .tree { left: auto; right: 86px; top: 46px; }
-/* 기본 말랑이 계절 스킨: 목록바에 모눈 (투명도는 꾸미기 › 목록바 투명도 그대로 따름) */
-html.g-halloween .panel { background-image: linear-gradient(rgba(111, 95, 146, .16) 1px, transparent 1px), linear-gradient(90deg, rgba(111, 95, 146, .16) 1px, transparent 1px) !important; background-size: 22px 22px !important; }
-html.g-xmas .panel { background-image: linear-gradient(rgba(94, 138, 110, .18) 1px, transparent 1px), linear-gradient(90deg, rgba(94, 138, 110, .18) 1px, transparent 1px) !important; background-size: 22px 22px !important; }
+/* 기본 말랑이 계절 스킨: 목록바는 예시처럼 밤하늘 네이비(할로윈) · 소나무 초록(크리스마스) + 모눈 (진하기는 목록바 투명도 그대로) */
+html.gseason .panel { background-image: linear-gradient(rgba(255, 255, 255, .07) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .07) 1px, transparent 1px) !important; background-size: 22px 22px !important; }
+html.gseason .calcard, html.gseason .box, html.gseason .search, html.gseason .pill, html.gseason .ev, html.gseason .ghead,
+html.gseason .toggle:not(.mini), html.gseason .acHero, html.gseason .thInfo, html.gseason .bkForm, html.gseason .pinbtn, html.gseason .navb { background: rgba(255, 255, 255, .84); }
+html.gseason .seg { background: rgba(255, 255, 255, .18); box-shadow: none; }
+html.gseason .segb { color: rgba(255, 255, 255, .85); }
+html.gseason .segb.on { color: var(--a1); }
+html.gseason .todaytxt, html.gseason .sellabel, html.gseason .foot, html.gseason .footrow .ctext, html.gseason .view > .empty, html.gseason .evlist > .empty,
+html.gseason .list > .empty, html.gseason .pShared, html.gseason .nogrp, html.gseason #vAcct .slabel, html.gseason .gempty { color: rgba(255, 255, 255, .88); }
+html.g-xmas .sky .snow { color: rgba(255, 255, 255, .8); }
+html.g-halloween .sky .bat svg path { fill: #120B22; }

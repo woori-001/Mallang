@@ -83,7 +83,9 @@
     const st = document.documentElement.style;
     st.setProperty('--sun', sk.sun);
     st.setProperty('--sat', sk.sat);
-    panel.style.background = sk.paper ? sk.base : 'rgba(var(--glass),' + ((S.settings.sideAlpha != null ? S.settings.sideAlpha : 55) / 100) + ')';
+    const sideA = (S.settings.sideAlpha != null ? S.settings.sideAlpha : 55) / 100;
+    // 계절 스킨 목록바는 밤하늘·소나무 색이 살아 있게 조금 더 진하게 (조절바로 여전히 조절)
+    panel.style.background = sk.paper ? sk.base : 'rgba(' + (sk.panelRGB || 'var(--glass)') + ',' + (sk.panelRGB ? Math.round((0.35 + 0.65 * sideA) * 100) / 100 : sideA) + ')';
     updateSky(sk.season);
     const d = new Date();
     const c = S.cloud || {};
@@ -718,7 +720,7 @@
   $('alpha').addEventListener('input', (e) => { $('alphaV').textContent = e.target.value + '%'; api.setSettings({ alpha: Number(e.target.value) }); });
   $('sideAlpha').addEventListener('input', (e) => {
     $('sideAlphaV').textContent = e.target.value + '%';
-    if (!sk || !sk.paper) panel.style.background = 'rgba(var(--glass),' + (Number(e.target.value) / 100) + ')';
+    if (!sk || !sk.paper) { const v = Number(e.target.value) / 100; panel.style.background = 'rgba(' + ((sk && sk.panelRGB) || 'var(--glass)') + ',' + (sk && sk.panelRGB ? Math.round((0.35 + 0.65 * v) * 100) / 100 : v) + ')'; }
     api.setSettings({ sideAlpha: Number(e.target.value) });
   });
   $('bodyBg').addEventListener('click', () => api.setSettings({ bodyBg: !S.settings.bodyBg }));

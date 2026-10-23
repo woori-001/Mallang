@@ -82,13 +82,13 @@
     },
     // 기본 말랑이(유리) 계절 스킨 — 차분한 색, 그라데이션 대신 한 가지 포인트 색
     ghalloween: {
-      name: '말랑 할로윈', season: 'halloween', glassSeason: true, solidAccent: true, bunny: 'bunny-3d-halloween.png', logo: 'logo-3d-halloween.png',
+      name: '말랑 할로윈', season: 'halloween', glassSeason: true, solidAccent: true, panelRGB: '42, 35, 56', bunny: 'bunny-3d-halloween.png', logo: 'logo-3d-halloween.png',
       base: '#EDE7F0', b: ['#E9D9C8', '#DCD5E8', '#EFE6D6', '#D8CFE6'],
       a1: '#D9772F', a2: '#6F5F92', ink: '#2F2836', sub: '#77707E', sun: '#D9772F', sat: '#6F5F92', glow: 'rgba(217,119,47,0.26)', on: '#FFFFFF',
       pal: [[[250, 226, 204], [243, 212, 186]], [[226, 220, 236], [212, 204, 228]], [[240, 232, 218], [230, 220, 202]], [[244, 218, 204], [236, 204, 190]], [[222, 224, 236], [208, 212, 230]]]
     },
     gxmas: {
-      name: '말랑 크리스마스', season: 'xmas', glassSeason: true, solidAccent: true, bunny: 'bunny-3d-xmas.png', logo: 'logo-3d-xmas.png',
+      name: '말랑 크리스마스', season: 'xmas', glassSeason: true, solidAccent: true, panelRGB: '32, 56, 46', bunny: 'bunny-3d-xmas.png', logo: 'logo-3d-xmas.png',
       base: '#EEF2EE', b: ['#EED6D4', '#D6E6DA', '#F2ECDE', '#DCE8E0'],
       a1: '#B8434A', a2: '#5E8A6E', ink: '#2A302C', sub: '#6E7770', sun: '#B8434A', sat: '#5E8A6E', glow: 'rgba(184,67,74,0.24)', on: '#FFFFFF',
       pal: [[[246, 218, 216], [238, 204, 202]], [[218, 232, 220], [204, 222, 208]], [[246, 240, 226], [236, 228, 210]], [[240, 226, 214], [232, 212, 200]], [[224, 234, 236], [210, 226, 228]]]
