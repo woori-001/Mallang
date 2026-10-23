@@ -566,3 +566,6 @@ html.draw .calDeco .st1 { left: auto; right: 82px; top: 40px; }
 html.halloween .sDeco .bat, html.gseason .sDeco .bat { left: auto; right: 112px; top: 6px; }
 html.halloween .sDeco .ghost { left: auto; right: 84px; top: 38px; }
 html.xmas .sDeco .tree, html.gseason .sDeco .tree { left: auto; right: 86px; top: 46px; }
+/* 기본 말랑이 계절 스킨: 목록바에 모눈 (투명도는 꾸미기 › 목록바 투명도 그대로 따름) */
+html.g-halloween .panel { background-image: linear-gradient(rgba(111, 95, 146, .16) 1px, transparent 1px), linear-gradient(90deg, rgba(111, 95, 146, .16) 1px, transparent 1px) !important; background-size: 22px 22px !important; }
+html.g-xmas .panel { background-image: linear-gradient(rgba(94, 138, 110, .18) 1px, transparent 1px), linear-gradient(90deg, rgba(94, 138, 110, .18) 1px, transparent 1px) !important; background-size: 22px 22px !important; }
