@@ -589,3 +589,10 @@ html.g-halloween .sky .bat svg path { fill: #120B22; }
 .arrRow .pill.mini { height: 30px; font-size: 11.5px; padding: 0 8px; gap: 4px; border-radius: 15px; flex: 1 1 auto; white-space: nowrap; }
 .arrRow .pill.mini[hidden] { display: none; }
 .scalt[hidden] { display: none; }
+
+/* 주간 플래너 탭 (목록바 탭 바로 아래) */
+.ptab { top: 192px; height: 52px; background: var(--a2); }
+.ptab[hidden] { display: none; }
+.ptab.on { box-shadow: inset 3px 0 0 rgba(255, 255, 255, .7); opacity: 1; }
+html.draw .ptab { background: var(--paper-bg, #FBFAF5); color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
+html.draw .ptab.on { background: var(--ink); color: var(--paper-bg, #FBFAF5); }

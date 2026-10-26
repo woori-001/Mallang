@@ -55,7 +55,7 @@
   // 마우스가 탭·목록 위에 있을 때만 클릭을 받고, 나머지는 아래 창으로 통과
   document.addEventListener('mousemove', (e) => {
     const t = e.target;
-    setIgnore(!(tab.contains(t) || (isOpen() && panel.contains(t))));
+    setIgnore(!(tab.contains(t) || (!$('ptab').hidden && $('ptab').contains(t)) || (isOpen() && panel.contains(t))));
   });
   document.addEventListener('mouseleave', () => setIgnore(true));
   // 열기·닫기는 ◀▶ 탭을 눌러서만 (마우스가 지나가도 열리지 않음)
@@ -78,6 +78,7 @@
   // ───────── 전체 그리기 ─────────
   function renderAll() {
     if (!S) return;
+    $('ptab').hidden = !(S.isAdmin || (S.openSkins || []).includes('planner'));
     const t = applyTheme(S.settings);
     sk = t.sk;
     const st = document.documentElement.style;
@@ -810,9 +811,10 @@
     $('skAdmin').hidden = !S.isAdmin;
     if (!S.isAdmin) return;
     const openSk = S.openSkins || [];
-    $('skList').innerHTML = Object.keys(SKINS).filter((id) => SKINS[id].season).map((id) => {
+    const items = Object.keys(SKINS).filter((id) => SKINS[id].season).map((id) => [id, SKINS[id].name]).concat([['planner', '주간 플래너 (새 기능)']]);
+    $('skList').innerHTML = items.map(([id, name]) => {
       const on = openSk.includes(id);
-      return '<div class="skRow"><span class="skName">' + esc(SKINS[id].name) + '</span><span class="skState' + (on ? ' on' : '') + '">' + (on ? '모두 공개 중' : '나만 보기 (베타)') + '</span>' +
+      return '<div class="skRow"><span class="skName">' + esc(name) + '</span><span class="skState' + (on ? ' on' : '') + '">' + (on ? '모두 공개 중' : '나만 보기 (베타)') + '</span>' +
         '<button type="button" class="pill soft skBtn" data-skopen="' + id + '" data-on="' + (on ? '0' : '1') + '">' + (on ? '숨기기' : '공개하기') + '</button></div>';
     }).join('');
   }
@@ -928,7 +930,15 @@
   $('acOpen').addEventListener('click', () => api.openMobileUrl());
 
   // ───────── 연결 ─────────
-  api.onCmd((c) => { if (c.type === 'open') { open(); api.sideFocus(); } });
+  api.onCmd((c) => {
+    if (c.type === 'open') { open(); api.sideFocus(); }
+    if (c.type === 'planner') { $('ptab').classList.toggle('on', !!c.open); $('ptab').setAttribute('aria-expanded', String(!!c.open)); }
+  });
+  // 주간 플래너 탭 (관리자 베타 · 관리자가 공개하면 모두)
+  $('ptab').addEventListener('click', () => {
+    if (isOpen() && !pinned()) { body.classList.remove('open'); tab.setAttribute('aria-expanded', 'false'); }
+    api.plannerToggle();
+  });
   api.onState((s) => { S = s; renderAll(); });
   api.init().then((s) => { S = s; renderAll(); });
   setInterval(() => { if (isOpen()) renderAll(); }, 60000);

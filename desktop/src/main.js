@@ -62,6 +62,7 @@ function defaults() {
     cloud: {},
     widget: { x: null, y: null },
     calWidget: { x: null, y: null },
+    planner: { weeks: {}, std: { in: '09:00', out: '18:00' } },   // 주간 플래너 (관리자 베타)
     peopleWin: { x: null, y: null, w: 430, h: 380, top: false }
   };
 }
@@ -80,7 +81,7 @@ function load() {
   }
   const d = defaults();
   store = s
-    ? { ...d, ...s, settings: { ...d.settings, ...(s.settings || {}) }, widget: { ...d.widget, ...(s.widget || {}) }, calWidget: { ...d.calWidget, ...(s.calWidget || {}) }, peopleWin: { ...d.peopleWin, ...(s.peopleWin || {}) }, events: s.events || {} }
+    ? { ...d, ...s, settings: { ...d.settings, ...(s.settings || {}) }, widget: { ...d.widget, ...(s.widget || {}) }, calWidget: { ...d.calWidget, ...(s.calWidget || {}) }, planner: { weeks: {}, std: { in: '09:00', out: '18:00' }, ...(s.planner || {}) }, peopleWin: { ...d.peopleWin, ...(s.peopleWin || {}) }, events: s.events || {} }
     : d;
   store.memos = store.memos.filter((m) => m && typeof m.id === 'number').map((m) => ({
     slot: 0, w: 260, h: 220, type: 'text', title: '', text: '', items: [], layer: 'normal', hidden: false, folded: false, ...m, deleting: false
@@ -340,6 +341,9 @@ function createHost() {
       const wy = store.widget.y != null ? store.widget.y : wa.y + wa.height - 260;
       return { action: 'allow', overrideBrowserWindowOptions: { ...baseWinOpts, x: Math.round(wx), y: Math.round(wy), width: WIDGET_W, height: 200 } };
     }
+    if (kind === 'planner') {
+      return { action: 'allow', overrideBrowserWindowOptions: { ...baseWinOpts, ...plannerBounds(), alwaysOnTop: true } };
+    }
     if (kind === 'calw') {
       const wa = workArea();
       const cx = store.calWidget.x != null ? store.calWidget.x : wa.x + 20 + WIDGET_W + 10;
@@ -372,6 +376,7 @@ function createHost() {
     if (kind === 'memo') setupMemoWin(win, Number(u.searchParams.get('id')));
     if (kind === 'widget') setupWidget(win);
     if (kind === 'calw') setupCalW(win);
+    if (kind === 'planner') setupPlanner(win);
     if (kind === 'people') setupPeople(win);
     if (kind === 'search') setupSearch(win);
     if (kind === 'clock') setupClock(win, u.searchParams.get('mode'));
@@ -742,6 +747,64 @@ function setupWidget(win) {
     }
   });
 }
+// ───────── 주간 플래너 (관리자 베타): 목록바 아래 두 번째 탭으로 열고 닫음 ─────────
+let plannerWin = null;
+function plannerBounds() {
+  const wa = sideDisplay().workArea;
+  const w = Math.min(1180, wa.width - 60), h = Math.min(640, wa.height - 40);
+  return { x: Math.round(wa.x + wa.width - 30 - w), y: Math.round(wa.y + Math.max(10, (wa.height - h) / 2 - 60)), width: w, height: h };
+}
+function plannerAllowed() { return !!(store.cloud && store.cloud.admin) || (store.shared.openSkins || []).includes('planner'); }
+function setupPlanner(win) {
+  plannerWin = win;
+  win.once('ready-to-show', () => { if (!win.isDestroyed()) { win.show(); win.focus(); } });
+  win.on('closed', () => { if (plannerWin === win) plannerWin = null; if (side && !side.isDestroyed()) side.webContents.send('cmd', { type: 'planner', open: false }); });
+}
+function togglePlanner(force) {
+  const isOpen = plannerWin && !plannerWin.isDestroyed();
+  const want = force == null ? !isOpen : !!force;
+  if (want && !plannerAllowed()) return;
+  if (want && !isOpen) hostOpen('planner.html?kind=planner', 'planner-' + Date.now());
+  if (!want && isOpen) { const w = plannerWin; plannerWin = null; w.webContents.send('cmd', { type: 'leave' }); setTimeout(() => { if (!w.isDestroyed()) w.close(); }, 260); }
+  if (side && !side.isDestroyed()) side.webContents.send('cmd', { type: 'planner', open: want });
+}
+const PL_COLORS = ['peach', 'mint', 'sky', 'lav', 'lemon', 'pink', 'stripe', 'dot'];
+function cleanWeek(w) {
+  const str = (v, n) => String(v == null ? '' : v).slice(0, n);
+  const time = (v) => (/^\d{2}:\d{2}$/.test(v) ? v : '');
+  const o = { notes: str(w && w.notes, 4000), days: [], tapes: [], stickers: [], habits: [] };
+  for (let i = 0; i < 7; i++) {
+    const d = (w && Array.isArray(w.days) && w.days[i]) || {};
+    o.days.push({ in: time(d.in), out: time(d.out), items: (Array.isArray(d.items) ? d.items : []).slice(0, 40).map((it) => ({ t: str(it && it.t, 300), d: !!(it && it.d) })) });
+  }
+  o.tapes = (w && Array.isArray(w.tapes) ? w.tapes : []).slice(0, 20).map((t) => ({ a: Math.min(6, Math.max(0, t.a | 0)), b: Math.min(6, Math.max(0, t.b | 0)), text: str(t.text, 60), c: PL_COLORS.includes(t.c) ? t.c : 'peach' })).map((t) => (t.b < t.a ? { ...t, a: t.b, b: t.a } : t));
+  o.stickers = (w && Array.isArray(w.stickers) ? w.stickers : []).slice(0, 60).map((s) => ({ e: str(s.e, 8), x: Math.min(100, Math.max(0, Number(s.x) || 0)), y: Math.min(100, Math.max(0, Number(s.y) || 0)), r: Math.min(20, Math.max(-20, Number(s.r) || 0)) })).filter((s) => s.e);
+  o.habits = (w && Array.isArray(w.habits) ? w.habits : []).slice(0, 4).map((h) => ({ t: str(h && h.t, 30), d: Array.from({ length: 7 }, (_, i) => !!(h && Array.isArray(h.d) && h.d[i])) }));
+  return o;
+}
+ipcMain.on('planner:toggle', (e, force) => togglePlanner(force));
+ipcMain.handle('planner:get', (e, key) => {
+  if (typeof key !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(key)) return null;
+  return { week: cleanWeek(store.planner.weeks[key]), std: store.planner.std };
+});
+ipcMain.on('planner:set', (e, key, w) => {
+  if (typeof key !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(key)) return;
+  const c = cleanWeek(w);
+  const empty = !c.notes && !c.tapes.length && !c.stickers.length && !c.habits.some((h) => h.t || h.d.some(Boolean)) && c.days.every((d) => !d.in && !d.out && !d.items.some((it) => it.t));
+  if (empty) delete store.planner.weeks[key]; else store.planner.weeks[key] = c;
+  save();
+});
+ipcMain.on('planner:std', (e, std) => {
+  const t = (v, d) => (/^\d{2}:\d{2}$/.test(v) ? v : d);
+  store.planner.std = { in: t(std && std.in, '09:00'), out: t(std && std.out, '18:00') };
+  save();
+});
+ipcMain.on('planner:move', (e, x, y) => {
+  x = num(x); y = num(y);
+  if (!plannerWin || plannerWin.isDestroyed() || x == null || y == null) return;
+  plannerWin.setPosition(Math.round(x), Math.round(y));
+});
+
 // 바탕화면 '달력' 위젯 (날짜를 누르면 아래에 그날 일정)
 let calW = null;
 function openCalW() {
@@ -1422,7 +1485,8 @@ ipcMain.handle('backup:export', async (e, password) => {
       app: '말랑메모', exported: Date.now(),
       memos: store.memos.filter((m) => !m.deleting).map(({ deleting, dirty, ...m }) => m),
       events: store.events, settings: store.settings,
-      contacts: store.contacts ? store.contacts.rows : null
+      contacts: store.contacts ? store.contacts.rows : null,
+      planner: store.planner
     };
     fs.writeFileSync(r.filePath, encryptBackup(payload, password));
     return { ok: true, file: path.basename(r.filePath), count: payload.memos.length };
@@ -1582,6 +1646,9 @@ ipcMain.handle('backup:import', async (e, password) => {
     added++;
   }
   let evAdded = 0;
+  if (data.planner && data.planner.weeks && typeof data.planner.weeks === 'object') {   // 주간 플래너: 없는 주만 채움
+    for (const [k, w] of Object.entries(data.planner.weeks)) if (/^\d{4}-\d{2}-\d{2}$/.test(k) && !store.planner.weeks[k]) store.planner.weeks[k] = cleanWeek(w);
+  }
   if (data.events && typeof data.events === 'object') {
     for (const [k, list] of Object.entries(data.events)) {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(k) || !Array.isArray(list)) continue;
