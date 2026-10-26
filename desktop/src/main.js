@@ -800,6 +800,13 @@ ipcMain.handle('planner:get', (e, key) => {
   if (typeof key !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(key)) return null;
   return { week: cleanWeek(store.planner.weeks[key]), std: store.planner.std };
 });
+// 월간 합계용: 여러 주를 한 번에 (없는 주는 빼고)
+ipcMain.handle('planner:weeks', (e, keys) => {
+  const out = {};
+  if (!Array.isArray(keys)) return out;
+  for (const k of keys.slice(0, 8)) if (typeof k === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(k) && store.planner.weeks[k]) out[k] = cleanWeek(store.planner.weeks[k]);
+  return out;
+});
 ipcMain.on('planner:set', (e, key, w) => {
   if (typeof key !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(key)) return;
   const c = cleanWeek(w);

@@ -45,6 +45,7 @@ contextBridge.exposeInMainWorld('api', {
   noticeSend: (n) => ipcRenderer.invoke('notice:send', n),
   plannerToggle: (force) => ipcRenderer.send('planner:toggle', force == null ? null : !!force),
   plannerGet: (key) => ipcRenderer.invoke('planner:get', key),
+  plannerWeeks: (keys) => ipcRenderer.invoke('planner:weeks', keys),
   plannerSet: (key, w) => ipcRenderer.send('planner:set', key, w),
   plannerStd: (std) => ipcRenderer.send('planner:std', std),
   plannerShape: (on) => ipcRenderer.send('planner:shape', !!on),

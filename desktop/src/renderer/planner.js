@@ -40,8 +40,9 @@
   function nowT() { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
 
   // 조출·야근 계산 (주말은 근무 시간 전체)
-  function overtime(i) {
-    const d = W.days[i], a = toMin(d.in);
+  function overtime(i) { return otDay(W.days[i], i); }
+  function otDay(d, i) {
+    const a = toMin(d.in);
     let b = toMin(d.out);
     const r = { e: 0, l: 0, w: 0 };
     if (i >= 5) { if (a != null && b != null) { if (b < a) b += 1440; r.w = b - a; } return r; }
@@ -92,14 +93,47 @@
     $('range').textContent = th.getFullYear() + '. ' + (a.getMonth() + 1) + '. ' + a.getDate() + ' – ' + (b.getMonth() + 1) + '. ' + b.getDate();
     $('today').classList.toggle('on', keyOf() === dateKey(mondayOf(new Date())));
   }
+  function sumBlock(t) {
+    return '<div>조출 <b>' + fmt(t.e) + '</b> · 야근 <b>' + fmt(t.l) + '</b></div>' +
+      (t.w ? '<div>주말 근무 <b>' + fmt(t.w) + '</b></div>' : '') +
+      '<div class="tot">' + t.label + ' <b>' + fmt(t.e + t.l + t.w) + '</b> <span class="muted">· ' + t.days + '일 기록</span></div>';
+  }
+  function weekTotal() {
+    const t = { e: 0, l: 0, w: 0, days: 0, label: '주간 합계' };
+    for (let i = 0; i < 7; i++) { const o = overtime(i); t.e += o.e; t.l += o.l; t.w += o.w; if (W.days[i].in || W.days[i].out) t.days++; }
+    return t;
+  }
+  // 월간 합계: 이번 주 목요일이 속한 달의 날짜만 (앞뒤 주에 걸친 날짜도 그 달이면 포함)
+  let monthSeq = 0;
+  async function monthTotal() {
+    const th = dayAt(3), y = th.getFullYear(), m = th.getMonth(), seq = ++monthSeq;
+    const keys = [];
+    for (let d = mondayOf(new Date(y, m, 1)); d <= new Date(y, m + 1, 0); d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 7)) keys.push(dateKey(d));
+    const weeks = await api.plannerWeeks(keys);
+    if (seq !== monthSeq) return null;
+    weeks[keyOf()] = W;   // 지금 보고 있는 주는 화면 것(아직 저장 전 포함)
+    const t = { e: 0, l: 0, w: 0, days: 0, label: '월간 합계', m: m + 1 };
+    for (const k of keys) {
+      const wk = weeks[k]; if (!wk) continue;
+      const p = k.split('-').map(Number);
+      for (let i = 0; i < 7; i++) {
+        const dt = new Date(p[0], p[1] - 1, p[2] + i);
+        if (dt.getMonth() !== m || !wk.days[i]) continue;
+        const o = otDay(wk.days[i], i); t.e += o.e; t.l += o.l; t.w += o.w; if (wk.days[i].in || wk.days[i].out) t.days++;
+      }
+    }
+    return t;
+  }
+  let sumT = 0;
   function renderSum() {
-    let e = 0, l = 0, w = 0, days = 0;
-    for (let i = 0; i < 7; i++) { const o = overtime(i); e += o.e; l += o.l; w += o.w; if (W.days[i].in || W.days[i].out) days++; }
-    $('sum').innerHTML =
-      '<div>조출 <b>' + fmt(e) + '</b></div><div>야근 <b>' + fmt(l) + '</b></div>' +
-      (w ? '<div>주말 근무 <b>' + fmt(w) + '</b></div>' : '') +
-      '<div class="tot">합계 <b>' + fmt(e + l + w) + '</b> <span class="muted">· ' + days + '일 기록</span></div>' +
-      '<div class="muted">기준 ' + std.in + ' ~ ' + std.out + '</div>';
+    const w = weekTotal();
+    $('sum').innerHTML = '<div class="mh">' + (keyOf() === dateKey(mondayOf(new Date())) ? '이번 주' : '이 주') + '</div>' + sumBlock(w) + '<div id="msum" class="msum"></div><div class="muted std">기준 ' + std.in + ' ~ ' + std.out + '</div>';
+    clearTimeout(sumT);
+    sumT = setTimeout(async () => {
+      const t = await monthTotal();
+      const el = $('msum'); if (!t || !el) return;
+      el.innerHTML = '<div class="mh">' + t.m + '월</div>' + sumBlock(t);
+    }, 120);
   }
   function renderDays() {
     let ch = '', hh = '', th = '', lh = '';
