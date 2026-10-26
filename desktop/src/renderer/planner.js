@@ -118,8 +118,9 @@
   const nowBtn = (f) => '<button type="button" class="now" data-f="' + f + '" title="지금 시간으로 체크">지금</button>';
   function timeLine(i, f, label) {
     const v = W.days[i][f];
-    return '<div class="tl"><span class="k">' + label + '</span><input type="text" inputmode="numeric" maxlength="5" placeholder="--:--" data-f="' + f + '" value="' + esc(v) + '" aria-label="' + KO[i] + '요일 ' + label + ' 시간">' +
-      (!v && isToday(i) ? nowBtn(f) : '') + '</div>';
+    // 오늘 비어 있는 칸은 입력칸 대신 '지금' 버튼 (누르면 지금 시간이 찍히고, 그다음엔 고칠 수 있음)
+    return '<div class="tl"><span class="k">' + label + '</span>' + (!v && isToday(i) ? nowBtn(f) : '') +
+      '<input type="text" inputmode="numeric" maxlength="5" placeholder="--:--" data-f="' + f + '" value="' + esc(v) + '" aria-label="' + KO[i] + '요일 ' + label + ' 시간"' + (!v && isToday(i) ? ' hidden' : '') + '></div>';
   }
   function otChips(i) {
     const o = overtime(i);
@@ -142,8 +143,8 @@
     const inp = tm.querySelector('input[data-f="' + f + '"]'), v = W.days[i][f];
     if (document.activeElement !== inp) inp.value = v;
     const now = tm.querySelector('.now[data-f="' + f + '"]');
-    if (v && now) now.remove();
-    if (!v && !now && isToday(i)) inp.insertAdjacentHTML('afterend', nowBtn(f));
+    if (v && now) { now.remove(); inp.hidden = false; }
+    if (!v && !now && isToday(i) && document.activeElement !== inp) { inp.insertAdjacentHTML('beforebegin', nowBtn(f)); inp.hidden = true; }
     tm.querySelector('.ot').innerHTML = otChips(i);
     renderSum();
   }
@@ -418,6 +419,26 @@
 
   window.addEventListener('beforeunload', () => { if (saveT) flush(); });
   const slider = $('slider');
+  // 왼쪽 끝을 끌어서 넓이 조절
+  const grip = $('grip');
+  let gdrag = null, graf = 0, gw = 0;
+  grip.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    gdrag = { sx: e.screenX, w: window.innerWidth - 30 };
+    grip.classList.add('on'); grip.setPointerCapture(e.pointerId); api.plannerShape(false);
+  });
+  grip.addEventListener('pointermove', (e) => {
+    if (!gdrag) return;
+    gw = gdrag.w - (e.screenX - gdrag.sx);
+    if (graf) return;
+    graf = requestAnimationFrame(() => { graf = 0; api.plannerWidth(gw, false); });
+  });
+  grip.addEventListener('pointerup', (e) => {
+    if (!gdrag) return;
+    const w = gdrag.w - (e.screenX - gdrag.sx); gdrag = null; grip.classList.remove('on');
+    api.plannerWidth(w, true); fit();
+  });
   api.onCmd((c) => { if (c.type === 'leave') { if (saveT) flush(); closePop(); stopPlace(); api.plannerShape(false); slider.classList.remove('in'); } });
   slider.addEventListener('transitionend', (e) => { if (e.target === slider && slider.classList.contains('in')) api.plannerShape(true); });
   $('ptab').addEventListener('click', () => { if (saveT) flush(); api.plannerToggle(false); });

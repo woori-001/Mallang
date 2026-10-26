@@ -750,7 +750,12 @@ function setupWidget(win) {
 // ───────── 주간 플래너 (관리자 베타): 목록바 아래 두 번째 탭으로 열고 닫음 ─────────
 let plannerWin = null;
 const PL_TAB = 30;
-function plannerPanelW(wa) { return Math.max(640, Math.min(1240, wa.width - 140)); }
+function plannerPanelW(wa) {
+  // 기본은 화면의 60% 정도 (720~960), 왼쪽 끝을 끌어서 넓이 조절한 값이 있으면 그 값
+  const def = Math.round(Math.min(960, Math.max(720, wa.width * 0.6)));
+  const want = num(store.planner.pw) || def;
+  return Math.round(Math.max(640, Math.min(want, wa.width - 140)));
+}
 function plannerBounds() {
   // 목록바처럼 화면 오른쪽 끝에 붙어서, 탭과 함께 오른쪽→왼쪽으로 밀려 나옴
   const wa = sideDisplay().workArea, w = plannerPanelW(wa) + PL_TAB;
@@ -805,12 +810,24 @@ ipcMain.on('planner:std', (e, std) => {
 // 펼쳐진 뒤에는 탭·패널 부분만 클릭을 받고 나머지 투명한 곳은 아래 창으로 통과
 ipcMain.on('planner:shape', (e, on) => {
   const w = BrowserWindow.fromWebContents(e.sender);
-  if (!w || w.isDestroyed() || w !== plannerWin || !w.setShape) return;
+  if (w && w === plannerWin) plannerShape(w, on);
+});
+ipcMain.on('planner:width', (e, pw, done) => {
+  const w = BrowserWindow.fromWebContents(e.sender);
+  pw = num(pw);
+  if (!w || w.isDestroyed() || w !== plannerWin || pw == null) return;
+  store.planner.pw = Math.round(pw);
+  w.setBounds(plannerBounds());
+  store.planner.pw = plannerPanelW(sideDisplay().workArea);
+  if (done) { save(); plannerShape(w, true); }
+});
+function plannerShape(w, on) {
+  if (!w || w.isDestroyed() || !w.setShape) return;
   const b = w.getBounds();
   try {
     w.setShape(on ? [{ x: 0, y: 120, width: PL_TAB, height: 64 }, { x: 0, y: 188, width: PL_TAB, height: 64 }, { x: PL_TAB, y: 8, width: b.width - PL_TAB, height: b.height - 16 }] : []);
   } catch (err) { /* 지원 안 하는 환경 */ }
-});
+}
 ipcMain.on('planner:list', () => {
   togglePlanner(false);
   setTimeout(() => { if (side && !side.isDestroyed()) side.webContents.send('cmd', { type: 'open' }); }, 440);
