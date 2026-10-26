@@ -93,10 +93,10 @@
     $('range').textContent = th.getFullYear() + '. ' + (a.getMonth() + 1) + '. ' + a.getDate() + ' – ' + (b.getMonth() + 1) + '. ' + b.getDate();
     $('today').classList.toggle('on', keyOf() === dateKey(mondayOf(new Date())));
   }
-  function sumBlock(t) {
-    return '<div>조출 <b>' + fmt(t.e) + '</b> · 야근 <b>' + fmt(t.l) + '</b></div>' +
-      (t.w ? '<div>주말 근무 <b>' + fmt(t.w) + '</b></div>' : '') +
-      '<div class="tot">' + t.label + ' <b>' + fmt(t.e + t.l + t.w) + '</b> <span class="muted">· ' + t.days + '일 기록</span></div>';
+  // 한 줄: "주간 합계 1:00" (마우스를 올리면 조출·야근 나눠서)
+  function sumLine(t) {
+    const tip = '조출 ' + fmt(t.e) + ' · 야근 ' + fmt(t.l) + (t.w ? ' · 주말 ' + fmt(t.w) : '') + ' · ' + t.days + '일 기록';
+    return '<div class="sl" title="' + tip + '"><span>' + t.label + '</span><b>' + fmt(t.e + t.l + t.w) + '</b></div>';
   }
   function weekTotal() {
     const t = { e: 0, l: 0, w: 0, days: 0, label: '주간 합계' };
@@ -126,13 +126,12 @@
   }
   let sumT = 0;
   function renderSum() {
-    const w = weekTotal();
-    $('sum').innerHTML = '<div class="mh">' + (keyOf() === dateKey(mondayOf(new Date())) ? '이번 주' : '이 주') + '</div>' + sumBlock(w) + '<div id="msum" class="msum"></div><div class="muted std">기준 ' + std.in + ' ~ ' + std.out + '</div>';
+    $('sum').innerHTML = sumLine(weekTotal()) + '<div id="msum">' + (($('msum') && $('msum').innerHTML) || '') + '</div><div class="muted std">기준 ' + std.in + ' ~ ' + std.out + '</div>';
     clearTimeout(sumT);
     sumT = setTimeout(async () => {
       const t = await monthTotal();
       const el = $('msum'); if (!t || !el) return;
-      el.innerHTML = '<div class="mh">' + t.m + '월</div>' + sumBlock(t);
+      el.innerHTML = sumLine(t);
     }, 120);
   }
   function renderDays() {
