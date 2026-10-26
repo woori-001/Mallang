@@ -236,7 +236,7 @@
   $('notes').addEventListener('input', (e) => { W.notes = e.target.value; save(); });
 
   // ───────── 마스킹테이프
-  function colAt(x) { const r = lane.getBoundingClientRect(); return Math.min(6, Math.max(0, Math.floor((x - r.left) / ((r.width + 8) / 7)))); }
+  function colAt(x) { const r = lane.getBoundingClientRect(); return Math.min(6, Math.max(0, Math.floor((x - r.left) / (r.width / 7)))); }
   let tdrag = null;
   lane.addEventListener('pointerdown', (e) => {
     if (e.button !== 0) return;
