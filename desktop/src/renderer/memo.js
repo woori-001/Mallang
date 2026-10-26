@@ -122,6 +122,7 @@
     if (memo.hidden) card.classList.add('leaving');
     if (memo.clip && !squash(fullText()).includes(squash(memo.clip))) { memo.clip = null; api.update(id, { clip: null }); }
     renderClip();
+    if (typeof paintClip === 'function') paintClip();
   }
 
   // ───────── 체크리스트 ─────────
@@ -723,6 +724,7 @@
     memo.clip = str;
     api.update(id, { clip: str });
     renderClip();
+    paintClip();
   }
   function renderClip() {
     const c = memo && memo.clip;
@@ -742,7 +744,28 @@
     const s = window.getSelection ? String(window.getSelection()) : '';
     return s;
   }
-  const watchSel = (e) => { const el = e.target; if (el && (text.contains(el) || tblEl.contains(el))) { const s = String(getSelection()).replace(/\u00A0/g, ' '); if (s) remember(s); return; } if (el && el.classList && el.classList.contains('itxt')) { const s = selFrom(el); if (s) remember(s); } };
+  // 드래그해 둔 부분을 다른 메모로 옮겨 가도·접었다 펴도 계속 칠해 둠 (창 포커스와 상관없이 보이게)
+  const CHL = window.CSS && CSS.highlights;
+  let clipRange = null;
+  const hlName = 'mclip';
+  function paintClip() {
+    if (!CHL) return;
+    if (clipRange && !clipRange.collapsed && text.contains(clipRange.commonAncestorContainer) && memo && memo.clip && squash(String(clipRange)) === squash(memo.clip)) CHL.set(hlName, new Highlight(clipRange));
+    else { CHL.delete(hlName); if (clipRange && (!memo || !memo.clip || clipRange.collapsed)) clipRange = null; }
+  }
+  function keepRange() {
+    const sel = getSelection();
+    if (!sel || !sel.rangeCount || sel.isCollapsed) return;
+    const r = sel.getRangeAt(0);
+    if (text.contains(r.commonAncestorContainer)) { clipRange = r.cloneRange(); setTimeout(paintClip, 0); }
+  }
+  text.addEventListener('input', () => setTimeout(paintClip, 0));
+  // 다른 창으로 가면 흐린 회색 선택 대신 색으로 칠해 둔 표시만 남김 (Ctrl+C 하면 그 부분이 복사됨)
+  window.addEventListener('blur', () => {
+    keepRange(); paintClip();
+    if (CHL && CHL.has(hlName)) { try { getSelection().removeAllRanges(); } catch (e) { /* 무시 */ } }
+  });
+  const watchSel = (e) => { const el = e.target; if (el && (text.contains(el) || tblEl.contains(el))) { const s = String(getSelection()).replace(/\u00A0/g, ' '); if (s) { remember(s); keepRange(); } return; } if (el && el.classList && el.classList.contains('itxt')) { const s = selFrom(el); if (s) remember(s); } };
   for (const ev of ['select', 'mouseup', 'keyup']) document.addEventListener(ev, watchSel, true);
   // 제목을 고칠 때 전체 선택되는 것까지 기억하면 안 되므로, 내용 칸에서 복사한 것만 기억
   document.addEventListener('copy', () => { const a = document.activeElement; if (a === title) return; const s = liveSelection(); if (s) remember(s); });
@@ -760,7 +783,8 @@
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && (e.key.toLowerCase() === 'c' || e.code === 'KeyC') && !e.isComposing) {
       // 접힌 메모는 내용이 안 보이므로 남아 있는 선택과 상관없이 기억해 둔 부분을 복사
-      if (memo && memo.clip && (memo.folded || !liveSelection())) {
+      const onTitle = document.activeElement === title && title.readOnly;
+      if (memo && memo.clip && (memo.folded || onTitle || !liveSelection())) {
         e.preventDefault();
         api.copyText(memo.clip);
         flashCopied();

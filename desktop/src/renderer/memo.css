@@ -291,6 +291,7 @@ html.paper .chip { background: var(--tint); }
 .findBar .ib { width: 26px; height: 26px; color: var(--sub); }
 .card.finding .body { padding-top: 40px; }
 .card.folded .findBar { display: none; }
+::highlight(mclip) { background-color: color-mix(in srgb, var(--a1) 26%, transparent); }
 ::highlight(mfind) { background-color: color-mix(in srgb, var(--a1) 28%, transparent); }
 ::highlight(mfindcur) { background-color: #FFD54A; color: #1A1A1A; }
 .item.fhit { background: color-mix(in srgb, var(--a1) 12%, transparent); }
