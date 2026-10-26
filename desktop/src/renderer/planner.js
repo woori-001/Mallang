@@ -45,9 +45,11 @@
     const a = toMin(d.in);
     let b = toMin(d.out);
     const r = { e: 0, l: 0, w: 0 };
-    if (i >= 5) { if (a != null && b != null) { if (b < a) b += 1440; r.w = b - a; } return r; }
-    if (a != null) r.e = Math.max(0, toMin(std.in) - a);
-    if (b != null) { if (a != null && b < a) b += 1440; r.l = Math.max(0, b - toMin(std.out)); }
+    // 연장근무는 30분 단위로만 인정 (예: 18:30 퇴근 기준, 20:01 퇴근 → 1:30)
+    const u30 = (m) => Math.floor(Math.max(0, m) / 30) * 30;
+    if (i >= 5) { if (a != null && b != null) { if (b < a) b += 1440; r.w = u30(b - a); } return r; }
+    if (a != null) r.e = u30(toMin(std.in) - a);
+    if (b != null) { if (a != null && b < a) b += 1440; r.l = u30(b - toMin(std.out)); }
     return r;
   }
 
