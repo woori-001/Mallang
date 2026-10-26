@@ -9,6 +9,13 @@
 <link rel="stylesheet" href="planner.css">
 </head>
 <body>
+<div id="slider" class="slider">
+<button id="ltab" class="tab" type="button" aria-label="메모 목록 열기" title="메모 목록">
+  <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M8.5 1.5v9L2.5 6z" fill="currentColor"/></svg>
+</button>
+<button id="ptab" class="tab ptab on" type="button" aria-label="주간 플래너 접기" title="주간 플래너 접기">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4M8 14h2M12 14h2M16 14h2M8 18h2M12 18h2"/></svg>
+</button>
 <div id="pl" class="pl">
   <div id="hd" class="hd">
     <span class="bun"><img src="bunny.png" data-bun="bunny.png" alt="" draggable="false"></span>
@@ -48,6 +55,7 @@
     <div id="stk" class="stk"></div>
   </div>
   <div id="hint" class="hint" hidden></div>
+</div>
 </div>
 <div id="pop" class="pop" hidden></div>
 <script src="common.js"></script>

@@ -933,11 +933,12 @@
   // ───────── 연결 ─────────
   api.onCmd((c) => {
     if (c.type === 'open') { open(); api.sideFocus(); }
-    if (c.type === 'planner') { $('ptab').classList.toggle('on', !!c.open); $('ptab').setAttribute('aria-expanded', String(!!c.open)); }
+    if (c.type === 'planner') { body.classList.toggle('plOpen', !!c.open); $('ptab').setAttribute('aria-expanded', String(!!c.open)); }
   });
   // 주간 플래너 탭 (관리자 베타 · 관리자가 공개하면 모두)
   $('ptab').addEventListener('click', () => {
-    if (isOpen() && !pinned()) { body.classList.remove('open'); tab.setAttribute('aria-expanded', 'false'); }
+    // 목록이 펼쳐져 있으면 먼저 접고, 탭이 화면 끝으로 돌아온 뒤 플래너를 펼침
+    if (isOpen() && !pinned()) { body.classList.remove('open'); tab.setAttribute('aria-expanded', 'false'); setTimeout(() => api.plannerToggle(true), 360); return; }
     api.plannerToggle();
   });
   api.onState((s) => { S = s; renderAll(); });

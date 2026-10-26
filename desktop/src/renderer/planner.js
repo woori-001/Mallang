@@ -65,16 +65,19 @@
   }
   function go(d) { if (saveT) flush(); closePop(); monday = d; load(); }
 
-  // ───────── 크기: 내용만큼 창 높이를 맞춤 (화면보다 크면 안에서 스크롤)
-  let sizeRaf = 0;
+  // ───────── 줄 수: 기본 8줄, 화면이 높으면 남는 높이만큼 줄을 더 깔아 둠
+  let baseRows = BASE_ROWS, fitRaf = 0;
   function fit() {
-    if (sizeRaf) return;
-    sizeRaf = requestAnimationFrame(() => {
-      sizeRaf = 0;
-      const hdH = $('hd').offsetHeight;
-      const need = 16 + 32 + hdH + 12 + sheet.scrollHeight;
-      api.plannerSize(need);
-      sheet.style.setProperty('--sheet-max', Math.max(200, window.innerHeight - 16 - 32 - hdH - 12) + 'px');
+    if (fitRaf) return;
+    fitRaf = requestAnimationFrame(() => {
+      fitRaf = 0;
+      const first = lists.querySelector('.ls');
+      if (first) {
+        const top = first.getBoundingClientRect().top - sheet.getBoundingClientRect().top + sheet.scrollTop;
+        const rh = (first.querySelector('.it') || {}).offsetHeight || 30;
+        const n = Math.max(BASE_ROWS, Math.floor((sheet.clientHeight - top - 12) / rh));
+        if (n !== baseRows && !lists.contains(document.activeElement)) { baseRows = n; for (let i = 0; i < 7; i++) colEl(i).innerHTML = itemsHTML(i); }
+      }
       stk.style.setProperty('--stk-h', sheet.scrollHeight + 'px');
     });
   }
@@ -127,7 +130,7 @@
     const it = W.days[i].items;
     let last = -1;
     for (let j = it.length - 1; j >= 0; j--) if (it[j].t.trim()) { last = j; break; }
-    return Math.max(BASE_ROWS, last + 2, it.length);
+    return Math.max(baseRows, last + 2, it.length);
   }
   function rowHTML(i, j) {
     const it = W.days[i].items[j] || { t: '', d: false }, blank = !it.t.trim();
@@ -414,9 +417,13 @@
   }
 
   window.addEventListener('beforeunload', () => { if (saveT) flush(); });
-  api.onCmd((c) => { if (c.type === 'leave') { if (saveT) flush(); closePop(); pl.classList.remove('in'); pl.classList.add('leaving'); } });
+  const slider = $('slider');
+  api.onCmd((c) => { if (c.type === 'leave') { if (saveT) flush(); closePop(); stopPlace(); api.plannerShape(false); slider.classList.remove('in'); } });
+  slider.addEventListener('transitionend', (e) => { if (e.target === slider && slider.classList.contains('in')) api.plannerShape(true); });
+  $('ptab').addEventListener('click', () => { if (saveT) flush(); api.plannerToggle(false); });
+  $('ltab').addEventListener('click', () => { if (saveT) flush(); api.plannerList(); });
   api.onState((s) => { S = s; theme(); });
-  api.init().then((s) => { S = s; theme(); load().then(() => requestAnimationFrame(() => requestAnimationFrame(() => pl.classList.add('in')))); });
+  api.init().then((s) => { S = s; theme(); load().then(() => requestAnimationFrame(() => requestAnimationFrame(() => slider.classList.add('in')))); });
   // 자정이 지나면 오늘 표시 갱신
   let lastDay = dateKey(new Date());
   setInterval(() => { const k = dateKey(new Date()); if (k !== lastDay) { lastDay = k; renderDays(); renderHead(); fit(); } }, 60000);

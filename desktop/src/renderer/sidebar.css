@@ -597,3 +597,5 @@ html.g-halloween .sky .bat svg path { fill: #120B22; }
 .ptab svg { transition: transform .35s var(--spring); }
 .ptab.on svg { transform: scale(1.12); }
 html.draw .ptab { background: var(--ink); color: var(--paper-bg, #FBFAF5); opacity: 1; }
+/* 플래너가 펼쳐져 있는 동안엔 플래너 창이 탭을 함께 끌고 나가므로 여기 탭은 숨김 */
+body.plOpen .tab { visibility: hidden; }

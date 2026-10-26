@@ -749,26 +749,26 @@ function setupWidget(win) {
 }
 // ───────── 주간 플래너 (관리자 베타): 목록바 아래 두 번째 탭으로 열고 닫음 ─────────
 let plannerWin = null;
-function plannerBounds(h) {
-  // 목록바 탭 바로 왼쪽에 붙어서 오른쪽→왼쪽으로 펼쳐짐 (목록이 고정돼 있으면 목록 왼쪽)
-  const wa = sideDisplay().workArea;
-  const right = wa.x + wa.width - (store.settings.pinned ? SIDE_W : 30);
-  const w = Math.max(640, Math.min(1320, right - wa.x - 20));
-  return { x: Math.round(right - w), y: wa.y, width: w, height: Math.round(Math.min(wa.height, Math.max(320, h || 600))) };
+const PL_TAB = 30;
+function plannerPanelW(wa) { return Math.max(640, Math.min(1240, wa.width - 140)); }
+function plannerBounds() {
+  // 목록바처럼 화면 오른쪽 끝에 붙어서, 탭과 함께 오른쪽→왼쪽으로 밀려 나옴
+  const wa = sideDisplay().workArea, w = plannerPanelW(wa) + PL_TAB;
+  return { x: wa.x + wa.width - w, y: wa.y, width: w, height: wa.height };
 }
 function plannerAllowed() { return !!(store.cloud && store.cloud.admin) || (store.shared.openSkins || []).includes('planner'); }
+function sidePlanner(open) { if (side && !side.isDestroyed()) side.webContents.send('cmd', { type: 'planner', open }); }
 function setupPlanner(win) {
   plannerWin = win;
-  win.once('ready-to-show', () => { if (!win.isDestroyed()) { win.show(); win.focus(); } });
-  win.on('closed', () => { if (plannerWin === win) plannerWin = null; if (side && !side.isDestroyed()) side.webContents.send('cmd', { type: 'planner', open: false }); });
+  win.once('ready-to-show', () => { if (!win.isDestroyed()) { win.show(); win.focus(); sidePlanner(true); } });
+  win.on('closed', () => { if (plannerWin === win) plannerWin = null; sidePlanner(false); });
 }
 function togglePlanner(force) {
   const isOpen = plannerWin && !plannerWin.isDestroyed();
   const want = force == null ? !isOpen : !!force;
   if (want && !plannerAllowed()) return;
   if (want && !isOpen) hostOpen('planner.html?kind=planner', 'planner-' + Date.now());
-  if (!want && isOpen) { const w = plannerWin; plannerWin = null; w.webContents.send('cmd', { type: 'leave' }); setTimeout(() => { if (!w.isDestroyed()) w.close(); }, 380); }
-  if (side && !side.isDestroyed()) side.webContents.send('cmd', { type: 'planner', open: want });
+  if (!want && isOpen) { const w = plannerWin; plannerWin = null; w.webContents.send('cmd', { type: 'leave' }); setTimeout(() => { if (!w.isDestroyed()) w.close(); }, 430); }
 }
 const PL_COLORS = ['peach', 'mint', 'sky', 'lav', 'lemon', 'pink', 'stripe', 'dot'];
 function cleanWeek(w) {
@@ -802,11 +802,18 @@ ipcMain.on('planner:std', (e, std) => {
   store.planner.std = { in: t(std && std.in, '09:00'), out: t(std && std.out, '18:00'), alpha: al == null ? null : Math.min(100, Math.max(20, Math.round(al))) };
   save();
 });
-ipcMain.on('planner:size', (e, h) => {
-  h = num(h);
-  if (!plannerWin || plannerWin.isDestroyed() || h == null) return;
-  const b = plannerBounds(h), cur = plannerWin.getBounds();
-  if (b.x !== cur.x || b.width !== cur.width || b.height !== cur.height || b.y !== cur.y) plannerWin.setBounds(b);
+// 펼쳐진 뒤에는 탭·패널 부분만 클릭을 받고 나머지 투명한 곳은 아래 창으로 통과
+ipcMain.on('planner:shape', (e, on) => {
+  const w = BrowserWindow.fromWebContents(e.sender);
+  if (!w || w.isDestroyed() || w !== plannerWin || !w.setShape) return;
+  const b = w.getBounds();
+  try {
+    w.setShape(on ? [{ x: 0, y: 120, width: PL_TAB, height: 64 }, { x: 0, y: 188, width: PL_TAB, height: 64 }, { x: PL_TAB, y: 8, width: b.width - PL_TAB, height: b.height - 16 }] : []);
+  } catch (err) { /* 지원 안 하는 환경 */ }
+});
+ipcMain.on('planner:list', () => {
+  togglePlanner(false);
+  setTimeout(() => { if (side && !side.isDestroyed()) side.webContents.send('cmd', { type: 'open' }); }, 440);
 });
 
 // 바탕화면 '달력' 위젯 (날짜를 누르면 아래에 그날 일정)
