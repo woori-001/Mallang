@@ -10,46 +10,41 @@
 </head>
 <body>
 <div id="pl" class="pl">
-  <div id="rings" class="rings" aria-hidden="true"></div>
-  <div id="hd" class="hd" title="끌어서 옮길 수 있어요">
+  <div id="hd" class="hd">
+    <span class="bun"><img src="bunny.png" data-bun="bunny.png" alt="" draggable="false"></span>
     <div class="ttl">
-      <span class="wk">WEEKLY</span>
-      <span id="label" class="label"></span>
-      <span id="range" class="range"></span>
-      <span class="beta">베타</span>
+      <div class="t1"><span id="label" class="label"></span><span class="beta">베타</span></div>
+      <div id="range" class="range"></div>
     </div>
     <div class="nav">
-      <button id="prev" class="pb" type="button" aria-label="지난 주">‹</button>
+      <button id="prev" class="pb" type="button" aria-label="지난 주"></button>
       <button id="today" class="pb txt" type="button">이번 주</button>
-      <button id="next" class="pb" type="button" aria-label="다음 주">›</button>
+      <button id="next" class="pb" type="button" aria-label="다음 주"></button>
     </div>
     <div class="tools">
       <button id="tTape" class="pb txt" type="button" title="연속 일정에 마스킹테이프 붙이기">🎀 테이프</button>
       <button id="tSticker" class="pb txt" type="button" title="이모지 스티커 붙이기">🌷 스티커</button>
-      <button id="tStd" class="pb txt" type="button" title="조출·야근 기준 시간">⏰ 기준 시간</button>
-      <button id="close" class="pb" type="button" aria-label="플래너 닫기" title="닫기 (Esc)">✕</button>
+      <button id="tSet" class="pb txt" type="button" title="기준 시간 · 투명도">⚙️ 설정</button>
+      <button id="close" class="pb" type="button" aria-label="플래너 접기" title="접기 (Esc)"></button>
     </div>
   </div>
 
   <div id="sheet" class="sheet">
     <aside class="side">
-      <div class="box">
-        <div class="bh"><span>습관 체크</span><span class="mtw" aria-hidden="true"><i>m</i><i>t</i><i>w</i><i>t</i><i>f</i><i class="sa">s</i><i class="su">s</i></span></div>
-        <div id="habits"></div>
-      </div>
-      <div class="box">
-        <div class="bh"><span>이번 주 근무</span></div>
+      <section class="card">
+        <div class="ch">이번 주 근무</div>
         <div id="sum" class="sum"></div>
-      </div>
-      <div class="box grow">
-        <div class="bh"><span>메모</span></div>
+      </section>
+      <section class="card grow">
+        <div class="ch">메모</div>
         <textarea id="notes" class="notes" spellcheck="false" placeholder="이번 주에 기억할 것"></textarea>
-      </div>
+      </section>
     </aside>
-    <div id="heads" class="row heads"></div>
-    <div id="times" class="row times"></div>
+    <div id="cols" class="row"></div>
+    <div id="heads" class="row"></div>
+    <div id="times" class="row"></div>
     <div id="lane" class="lane" title="날짜를 가로로 끌면 테이프를 붙일 수 있어요"></div>
-    <div id="lists" class="row lists"></div>
+    <div id="lists" class="row"></div>
     <div id="stk" class="stk"></div>
   </div>
   <div id="hint" class="hint" hidden></div>

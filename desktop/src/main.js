@@ -749,10 +749,12 @@ function setupWidget(win) {
 }
 // ───────── 주간 플래너 (관리자 베타): 목록바 아래 두 번째 탭으로 열고 닫음 ─────────
 let plannerWin = null;
-function plannerBounds() {
+function plannerBounds(h) {
+  // 목록바 탭 바로 왼쪽에 붙어서 오른쪽→왼쪽으로 펼쳐짐 (목록이 고정돼 있으면 목록 왼쪽)
   const wa = sideDisplay().workArea;
-  const w = Math.min(1180, wa.width - 60), h = Math.min(640, wa.height - 40);
-  return { x: Math.round(wa.x + wa.width - 30 - w), y: Math.round(wa.y + Math.max(10, (wa.height - h) / 2 - 60)), width: w, height: h };
+  const right = wa.x + wa.width - (store.settings.pinned ? SIDE_W : 30);
+  const w = Math.max(640, Math.min(1320, right - wa.x - 20));
+  return { x: Math.round(right - w), y: wa.y, width: w, height: Math.round(Math.min(wa.height, Math.max(320, h || 600))) };
 }
 function plannerAllowed() { return !!(store.cloud && store.cloud.admin) || (store.shared.openSkins || []).includes('planner'); }
 function setupPlanner(win) {
@@ -765,7 +767,7 @@ function togglePlanner(force) {
   const want = force == null ? !isOpen : !!force;
   if (want && !plannerAllowed()) return;
   if (want && !isOpen) hostOpen('planner.html?kind=planner', 'planner-' + Date.now());
-  if (!want && isOpen) { const w = plannerWin; plannerWin = null; w.webContents.send('cmd', { type: 'leave' }); setTimeout(() => { if (!w.isDestroyed()) w.close(); }, 260); }
+  if (!want && isOpen) { const w = plannerWin; plannerWin = null; w.webContents.send('cmd', { type: 'leave' }); setTimeout(() => { if (!w.isDestroyed()) w.close(); }, 380); }
   if (side && !side.isDestroyed()) side.webContents.send('cmd', { type: 'planner', open: want });
 }
 const PL_COLORS = ['peach', 'mint', 'sky', 'lav', 'lemon', 'pink', 'stripe', 'dot'];
@@ -796,13 +798,15 @@ ipcMain.on('planner:set', (e, key, w) => {
 });
 ipcMain.on('planner:std', (e, std) => {
   const t = (v, d) => (/^\d{2}:\d{2}$/.test(v) ? v : d);
-  store.planner.std = { in: t(std && std.in, '09:00'), out: t(std && std.out, '18:00') };
+  const al = num(std && std.alpha);
+  store.planner.std = { in: t(std && std.in, '09:00'), out: t(std && std.out, '18:00'), alpha: al == null ? null : Math.min(100, Math.max(20, Math.round(al))) };
   save();
 });
-ipcMain.on('planner:move', (e, x, y) => {
-  x = num(x); y = num(y);
-  if (!plannerWin || plannerWin.isDestroyed() || x == null || y == null) return;
-  plannerWin.setPosition(Math.round(x), Math.round(y));
+ipcMain.on('planner:size', (e, h) => {
+  h = num(h);
+  if (!plannerWin || plannerWin.isDestroyed() || h == null) return;
+  const b = plannerBounds(h), cur = plannerWin.getBounds();
+  if (b.x !== cur.x || b.width !== cur.width || b.height !== cur.height || b.y !== cur.y) plannerWin.setBounds(b);
 });
 
 // 바탕화면 '달력' 위젯 (날짜를 누르면 아래에 그날 일정)

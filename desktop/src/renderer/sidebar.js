@@ -60,6 +60,7 @@
   document.addEventListener('mouseleave', () => setIgnore(true));
   // 열기·닫기는 ◀▶ 탭을 눌러서만 (마우스가 지나가도 열리지 않음)
   tab.addEventListener('click', () => {
+    if (!isOpen()) api.plannerToggle(false);   // 목록을 펼치면 플래너는 접기
     if (isOpen()) {
       if (pinned()) api.setSettings({ pinned: false });
       body.classList.remove('open');

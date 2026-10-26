@@ -47,7 +47,7 @@ contextBridge.exposeInMainWorld('api', {
   plannerGet: (key) => ipcRenderer.invoke('planner:get', key),
   plannerSet: (key, w) => ipcRenderer.send('planner:set', key, w),
   plannerStd: (std) => ipcRenderer.send('planner:std', std),
-  plannerMove: (x, y) => ipcRenderer.send('planner:move', x, y),
+  plannerSize: (h) => ipcRenderer.send('planner:size', h),
   calwMove: (x, y, done) => ipcRenderer.send('calw:move', x, y, !!done),
   calwSize: (h) => ipcRenderer.send('calw:size', h),
   hideAll: () => ipcRenderer.send('memo:hideAll'),
