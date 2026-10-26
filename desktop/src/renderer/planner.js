@@ -438,6 +438,15 @@
     const w = gdrag.w - (e.screenX - gdrag.sx); gdrag = null; grip.classList.remove('on');
     api.plannerWidth(w, true); fit();
   });
+  // 다른 PC에서 고친 내용이 들어오면 다시 그림 (지금 쓰는 중이면 손 뗀 뒤에)
+  let reloadT = 0;
+  function remoteReload() {
+    clearTimeout(reloadT);
+    const busy = saveT || placing || !pop.hidden || (document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName));
+    if (busy) { reloadT = setTimeout(remoteReload, 2000); return; }
+    const y = sheet.scrollTop; load().then(() => { sheet.scrollTop = y; });
+  }
+  api.onCmd((c) => { if (c.type === 'plReload') remoteReload(); });
   api.onCmd((c) => { if (c.type === 'leave') { if (saveT) flush(); closePop(); stopPlace(); api.plannerShape(false); slider.classList.remove('in'); } });
   slider.addEventListener('transitionend', (e) => { if (e.target === slider && slider.classList.contains('in')) api.plannerShape(true); });
   $('ptab').addEventListener('click', () => { if (saveT) flush(); api.plannerToggle(false); });

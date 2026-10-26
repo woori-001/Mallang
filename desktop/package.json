@@ -1,6 +1,6 @@
 {
   "name": "mallang-memo",
-  "version": "2.8.6",
+  "version": "2.9.0",
   "description": "투명하고 말랑한 데스크톱 메모 앱",
   "main": "src/main.js",
   "scripts": {

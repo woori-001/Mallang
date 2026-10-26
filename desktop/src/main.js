@@ -87,6 +87,12 @@ function load() {
     slot: 0, w: 260, h: 220, type: 'text', title: '', text: '', items: [], layer: 'normal', hidden: false, folded: false, ...m, deleting: false
   }));
   store.trash = Array.isArray(store.trash) ? store.trash.filter((t) => t && typeof t.id === 'number') : [];
+  // 주간 플래너 동기화 표시: 처음엔 이 PC에 있던 주를 서버 것과 합친 뒤 올림
+  if (!store.planner.meta || typeof store.planner.meta !== 'object') {
+    store.planner.meta = {};
+    for (const k of Object.keys(store.planner.weeks || {})) store.planner.meta[k] = { mt: 0, dirty: true, merge: true };
+  }
+  if (!store.planner.stdMeta) store.planner.stdMeta = { mt: 1, dirty: true };
   // 동기화용: 메모마다 고유번호(uid)와 내용 수정 시각(mt)
   for (const m of [...store.memos, ...store.trash]) {
     if (!m.uid) { m.uid = Cloud.uid(); m.dirty = true; }
@@ -799,13 +805,35 @@ ipcMain.on('planner:set', (e, key, w) => {
   const c = cleanWeek(w);
   const empty = !c.notes && !c.tapes.length && !c.stickers.length && !c.habits.some((h) => h.t || h.d.some(Boolean)) && c.days.every((d) => !d.in && !d.out && !d.items.some((it) => it.t));
   if (empty) delete store.planner.weeks[key]; else store.planner.weeks[key] = c;
+  plannerTouch(key);
   save();
+  scheduleSync();
 });
+function plannerTouch(key) {
+  const old = store.planner.meta[key];
+  store.planner.meta[key] = { mt: Math.max(Date.now(), ((old && old.mt) || 0) + 1), dirty: true };
+}
+// 서버에서 받은 주와 이 PC의 주를 합침 (처음 로그인·업데이트 때 한 번) — 어느 쪽도 버리지 않음
+function mergeWeek(a, b) {
+  a = cleanWeek(a); b = cleanWeek(b);
+  const notes = !a.notes ? b.notes : !b.notes || a.notes.includes(b.notes) ? a.notes : b.notes.includes(a.notes) ? b.notes : a.notes + '\n' + b.notes;
+  const uniq = (arr, key) => { const seen = new Set(); return arr.filter((x) => { const k = key(x); if (seen.has(k)) return false; seen.add(k); return true; }); };
+  return cleanWeek({
+    notes,
+    days: a.days.map((d, i) => ({ in: d.in || b.days[i].in, out: d.out || b.days[i].out, items: uniq(d.items.filter((x) => x.t.trim()).concat(b.days[i].items.filter((x) => x.t.trim())), (x) => x.t) })),
+    tapes: uniq(a.tapes.concat(b.tapes), (t) => t.a + '|' + t.b + '|' + t.text),
+    stickers: uniq(a.stickers.concat(b.stickers), (x) => x.e + '|' + x.x + '|' + x.y),
+    habits: a.habits.length ? a.habits : b.habits
+  });
+}
+function plannerReload() { if (plannerWin && !plannerWin.isDestroyed()) plannerWin.webContents.send('cmd', { type: 'plReload' }); }
 ipcMain.on('planner:std', (e, std) => {
   const t = (v, d) => (/^\d{2}:\d{2}$/.test(v) ? v : d);
   const al = num(std && std.alpha);
   store.planner.std = { in: t(std && std.in, '09:00'), out: t(std && std.out, '18:00'), alpha: al == null ? null : Math.min(100, Math.max(20, Math.round(al))) };
+  store.planner.stdMeta = { mt: Math.max(Date.now(), (store.planner.stdMeta.mt || 0) + 1), dirty: true };
   save();
+  scheduleSync();
 });
 // 펼쳐진 뒤에는 탭·패널 부분만 클릭을 받고 나머지 투명한 곳은 아래 창으로 통과
 ipcMain.on('planner:shape', (e, on) => {
@@ -1684,7 +1712,7 @@ ipcMain.handle('backup:import', async (e, password) => {
   }
   let evAdded = 0;
   if (data.planner && data.planner.weeks && typeof data.planner.weeks === 'object') {   // 주간 플래너: 없는 주만 채움
-    for (const [k, w] of Object.entries(data.planner.weeks)) if (/^\d{4}-\d{2}-\d{2}$/.test(k) && !store.planner.weeks[k]) store.planner.weeks[k] = cleanWeek(w);
+    for (const [k, w] of Object.entries(data.planner.weeks)) if (/^\d{4}-\d{2}-\d{2}$/.test(k) && !store.planner.weeks[k]) { store.planner.weeks[k] = cleanWeek(w); plannerTouch(k); }
   }
   if (data.events && typeof data.events === 'object') {
     for (const [k, list] of Object.entries(data.events)) {
@@ -2115,6 +2143,31 @@ function payloadOf(m, trashed) {
 
 let needSecureSave = false;
 function applyRemote(item) {
+  if (item.kind === 'planner') {
+    const k = item.id, P = store.planner;
+    if (k === 'std') {
+      if (!item.deleted && item.data) {
+        const t = (v, d) => (/^\d{2}:\d{2}$/.test(v) ? v : d);
+        const al = num(item.data.alpha);
+        P.std = { in: t(item.data.in, '09:00'), out: t(item.data.out, '18:00'), alpha: al == null ? null : Math.min(100, Math.max(20, Math.round(al))) };
+      }
+      P.stdMeta = { mt: item.ts, dirty: false };
+      plannerReload();
+      return;
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(k)) return;
+    const meta = P.meta[k] || {};
+    if (meta.merge) {
+      const mine = P.weeks[k];
+      if (!item.deleted && item.data) P.weeks[k] = mine ? mergeWeek(mine, item.data) : cleanWeek(item.data);
+      P.meta[k] = { mt: Math.max(Date.now(), item.ts + 1), dirty: true };
+    } else {
+      if (item.deleted || !item.data) delete P.weeks[k]; else P.weeks[k] = cleanWeek(item.data);
+      P.meta[k] = { mt: item.ts, dirty: false };
+    }
+    plannerReload();
+    return;
+  }
   if (item.kind === 'event') {
     const k = item.id;
     if (!/^\d{4}-\d{2}-\d{2}$/.test(k)) return;
@@ -2201,6 +2254,11 @@ function applyRemote(item) {
 function localTs(kind, id) {
   if (kind === 'event') return (store.evMeta[id] && !store.evMeta[id].merge && store.evMeta[id].mt) || 0;
   if (kind === 'contact') return (store.contacts && store.contacts.mt) || 0;
+  if (kind === 'planner') {
+    if (id === 'std') return store.planner.stdMeta.mt || 0;
+    const pm = store.planner.meta[id];
+    return (pm && !pm.merge && pm.mt) || 0;
+  }
   if (kind === 'layout') return 0;   // 배치는 메모마다 시각을 비교해 합침
   const m = store.memos.find((x) => x.uid === id) || store.trash.find((x) => x.uid === id);
   if (m) return m.mt || 0;
@@ -2218,10 +2276,21 @@ function dirtyList() {
   }
   if (store.contacts && store.contacts.dirty) out.push({ kind: 'contact', id: 'main', ts: store.contacts.mt, data: { rows: store.contacts.rows } });
   if (store.layoutSync && store.layoutSync.dirty) out.push({ kind: 'layout', id: 'pc', ts: store.layoutSync.mt, data: layoutPayload() });
+  for (const [k, pm] of Object.entries(store.planner.meta)) {
+    if (!pm || !pm.dirty || pm.merge) continue;
+    const w = store.planner.weeks[k];
+    out.push(w ? { kind: 'planner', id: k, ts: pm.mt, data: w } : { kind: 'planner', id: k, ts: pm.mt, deleted: true });
+  }
+  if (store.planner.stdMeta.dirty) { const st = store.planner.std; out.push({ kind: 'planner', id: 'std', ts: store.planner.stdMeta.mt, data: { in: st.in, out: st.out, alpha: st.alpha == null ? null : st.alpha } }); }
   return out;
 }
 
 function markPushed(kind, id, ts) {
+  if (kind === 'planner') {
+    const pm = id === 'std' ? store.planner.stdMeta : store.planner.meta[id];
+    if (pm && pm.mt === ts) pm.dirty = false;
+    return;
+  }
   if (kind === 'contact') { if (store.contacts && store.contacts.mt === ts) store.contacts.dirty = false; return; }
   if (kind === 'layout') { if (store.layoutSync && store.layoutSync.mt === ts) store.layoutSync.dirty = false; return; }
   if (kind === 'event') {
@@ -2247,6 +2316,7 @@ async function runSync() {
     });
     // 처음 로그인 때 합치기 표시 정리
     for (const meta of Object.values(store.evMeta)) if (meta && meta.merge) { meta.merge = false; meta.dirty = true; meta.mt = Date.now(); syncAgain = true; }
+    for (const pm of Object.values(store.planner.meta)) if (pm && pm.merge) { pm.merge = false; pm.dirty = true; pm.mt = Date.now(); syncAgain = true; }
     store.cloud.cursor = r.cursor || store.cloud.cursor;
     await syncShared();
     // 오래된 지움 표시 정리 (30일)
@@ -2284,6 +2354,9 @@ async function cloudSignIn(mode, username, password) {
     for (const m of [...store.memos, ...store.trash]) m.dirty = true;
     for (const tb of store.tombs) tb.done = false;
     for (const k2 of Object.keys(store.events)) store.evMeta[k2] = { mt: 0, dirty: true, merge: true };
+    store.planner.meta = {};
+    for (const k2 of Object.keys(store.planner.weeks)) store.planner.meta[k2] = { mt: 0, dirty: true, merge: true };
+    store.planner.stdMeta = { mt: 1, dirty: true };
     if (store.contacts) store.contacts.dirty = true;
     // 배치: 다른 PC에서 정한 배치를 먼저 받고, 이 PC에서 옮긴 메모는 그 뒤에 올림
     store.layoutSync = { mt: 0, dirty: false, groupsT: 0, settingsT: 0 };
@@ -2324,6 +2397,10 @@ async function cloudSignOut(force) {
   store.events = {};
   store.evMeta = {};
   store.contacts = null;
+  // 주간 플래너도 이 PC에서 지움 (다시 로그인하면 서버에서 돌아옴)
+  if (plannerWin && !plannerWin.isDestroyed()) togglePlanner(false);
+  store.planner.weeks = {};
+  store.planner.meta = {};
   cloudLogout(true);
   saveSecure();
   broadcast();
