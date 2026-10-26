@@ -749,17 +749,17 @@ function setupWidget(win) {
 }
 // ───────── 주간 플래너 (관리자 베타): 목록바 아래 두 번째 탭으로 열고 닫음 ─────────
 let plannerWin = null;
-const PL_TAB = 30;
+const PL_TAB = 30, PL_TOP = 88;   // 창 맨 위 = 화면 위 + 88 → 탭이 목록 탭과 같은 높이(120)에 옴
+let plannerH = 560;              // 내용 높이에 맞춰 렌더러가 알려 줌
 function plannerPanelW(wa) {
-  // 기본은 화면의 60% 정도 (720~960), 왼쪽 끝을 끌어서 넓이 조절한 값이 있으면 그 값
-  const def = Math.round(Math.min(960, Math.max(720, wa.width * 0.6)));
-  const want = num(store.planner.pw) || def;
+  // 가로는 넉넉하게 (왼쪽 끝을 끌어서 조절한 값이 있으면 그 값)
+  const want = num(store.planner.pw) || 1240;
   return Math.round(Math.max(640, Math.min(want, wa.width - 140)));
 }
 function plannerBounds() {
-  // 목록바처럼 화면 오른쪽 끝에 붙어서, 탭과 함께 오른쪽→왼쪽으로 밀려 나옴
+  // 목록바처럼 화면 오른쪽 끝에 붙어서, 탭과 함께 오른쪽→왼쪽으로 밀려 나옴 (높이는 내용만큼)
   const wa = sideDisplay().workArea, w = plannerPanelW(wa) + PL_TAB;
-  return { x: wa.x + wa.width - w, y: wa.y, width: w, height: wa.height };
+  return { x: wa.x + wa.width - w, y: wa.y + PL_TOP, width: w, height: Math.round(Math.max(260, Math.min(plannerH, wa.height - PL_TOP))) };
 }
 function plannerAllowed() { return !!(store.cloud && store.cloud.admin) || (store.shared.openSkins || []).includes('planner'); }
 function sidePlanner(open) { if (side && !side.isDestroyed()) side.webContents.send('cmd', { type: 'planner', open }); }
@@ -812,6 +812,14 @@ ipcMain.on('planner:shape', (e, on) => {
   const w = BrowserWindow.fromWebContents(e.sender);
   if (w && w === plannerWin) plannerShape(w, on);
 });
+ipcMain.on('planner:size', (e, h) => {
+  const w = BrowserWindow.fromWebContents(e.sender);
+  h = num(h);
+  if (!w || w.isDestroyed() || w !== plannerWin || h == null) return;
+  plannerH = h;
+  const b = plannerBounds(), cur = w.getBounds();
+  if (b.height !== cur.height || b.width !== cur.width || b.x !== cur.x || b.y !== cur.y) { w.setBounds(b); if (w.__shaped) plannerShape(w, true); }
+});
 ipcMain.on('planner:width', (e, pw, done) => {
   const w = BrowserWindow.fromWebContents(e.sender);
   pw = num(pw);
@@ -825,7 +833,8 @@ function plannerShape(w, on) {
   if (!w || w.isDestroyed() || !w.setShape) return;
   const b = w.getBounds();
   try {
-    w.setShape(on ? [{ x: 0, y: 120, width: PL_TAB, height: 64 }, { x: 0, y: 188, width: PL_TAB, height: 64 }, { x: PL_TAB, y: 8, width: b.width - PL_TAB, height: b.height - 16 }] : []);
+    w.__shaped = !!on;
+    w.setShape(on ? [{ x: 0, y: 120 - PL_TOP, width: PL_TAB, height: 64 }, { x: 0, y: 188 - PL_TOP, width: PL_TAB, height: 64 }, { x: PL_TAB, y: 8, width: b.width - PL_TAB, height: b.height - 16 }] : []);
   } catch (err) { /* 지원 안 하는 환경 */ }
 }
 ipcMain.on('planner:list', () => {

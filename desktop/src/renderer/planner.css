@@ -1,34 +1,35 @@
 /* 주간 플래너 (관리자 베타) — 목록바처럼 탭 옆에서 펼쳐지는 패널 */
 html, body { height: 100%; }
 body { padding: 0; overflow: hidden; }
-:root { --cline2: color-mix(in srgb, var(--ink) 16%, transparent); --row: 30px; --card: rgba(var(--glass), .72); --cline: color-mix(in srgb, var(--ink) 9%, transparent); --hd-ink: var(--ink); --hd-sub: var(--sub); }
+:root { --cline2: color-mix(in srgb, var(--ink) 16%, transparent); --row: 27px; --card: rgba(var(--glass), .72); --cline: color-mix(in srgb, var(--ink) 9%, transparent); --hd-ink: var(--ink); --hd-sub: var(--sub); }
 /* 목록바와 똑같이: 탭이 화면 끝에서 패널과 함께 왼쪽으로 밀려 나옴 */
 .slider { position: absolute; inset: 0; transform: translateX(calc(100% - 30px)); transition: transform .4s var(--ease); }
 .slider.in { transform: none; }
 .tab {
-  position: absolute; left: 0; top: 120px; width: 30px; height: 64px; z-index: 2;
+  position: absolute; left: 0; top: 32px; width: 30px; height: 64px; z-index: 2;
   border: none; border-radius: 16px 0 0 16px; background: var(--accent); color: var(--on); opacity: .92; padding: 0;
   display: flex; align-items: center; justify-content: center; cursor: pointer;
 }
 .tab:hover { opacity: 1; }
-.ptab { top: 188px; background: var(--a2); opacity: 1; }
+.ptab { top: 100px; background: var(--a2); opacity: 1; }
 html.paper .tab { opacity: 1; }
 html.draw .tab { background: var(--ink); color: var(--paper-bg, #FBFAF5); opacity: 1; }
 .pl {
-  position: absolute; left: 30px; top: 8px; bottom: 8px; right: 0; display: flex; flex-direction: column; gap: 12px;
-  border-radius: 24px 0 0 24px; padding: 16px 18px 16px 20px;
+  position: absolute; left: 30px; top: 8px; bottom: 8px; right: 0; display: flex; flex-direction: column; gap: 10px;
+  border-radius: 24px 0 0 24px; padding: 12px 16px 14px 18px;
   background: var(--plbg, rgba(var(--glass), .6));
   font-family: var(--cal-font); color: var(--ink);
 }
 
 /* 머리 */
 .hd { display: flex; align-items: center; gap: 12px; user-select: none; color: var(--hd-ink); }
-.bun { width: 44px; height: 44px; flex: none; display: grid; place-items: center; }
+.bun { width: 40px; height: 40px; flex: none; display: grid; place-items: center; }
 .bun img { width: 100%; height: 100%; object-fit: contain; transform-origin: 50% 100%; animation: bunSway 3.6s ease-in-out infinite; filter: drop-shadow(0 2px 3px rgba(60, 40, 90, .14)); }
 @keyframes bunSway { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
 .bun:hover img { animation: bunHop .6s var(--spring); }
 @keyframes bunHop { 40% { transform: translateY(-7px) rotate(-6deg); } }
-.ttl { flex: 1; min-width: 0; white-space: nowrap; }
+.ttl { flex: none; min-width: 0; white-space: nowrap; }
+.hd .bun { margin-right: auto; }
 .t1 { display: flex; align-items: center; gap: 8px; }
 .label { font-size: 19px; font-weight: 800; letter-spacing: -.2px; }
 .range { font-size: 12.5px; color: var(--hd-sub); margin-top: 1px; }
@@ -50,12 +51,12 @@ html.draw .tab { background: var(--ink); color: var(--paper-bg, #FBFAF5); opacit
   position: relative; display: grid; column-gap: 0;
   grid-template-columns: 168px repeat(7, minmax(0, 1fr));
   background: var(--card); border-radius: 16px;
-  grid-template-rows: auto auto auto 1fr;
-  flex: 1; min-height: 0; overflow: hidden auto;
+  grid-template-rows: auto auto auto auto;
+  flex: 0 1 auto; min-height: 0; overflow: hidden auto;
 }
 .row { display: contents; }
 .side { grid-row: 1 / 5; grid-column: 1; display: flex; flex-direction: column; min-height: 0; padding: 0 12px 10px; }
-.card { padding: 12px 0 10px; display: flex; flex-direction: column; }
+.card { padding: 9px 0 6px; display: flex; flex-direction: column; }
 .card + .card { border-top: 1.5px solid var(--cline2); }
 .card.grow { flex: 1; min-height: 0; }
 .ch { font-size: 12px; font-weight: 800; color: var(--sub); padding-bottom: 6px; border-bottom: 1.5px solid var(--cline2); margin-bottom: 4px; }
@@ -64,7 +65,7 @@ html.draw .tab { background: var(--ink); color: var(--paper-bg, #FBFAF5); opacit
 .sum .tot { margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--cline); }
 .sum .muted { color: var(--sub); font-size: 11.5px; }
 .notes {
-  flex: 1; min-height: 120px; resize: none; border: none; outline: none; padding: 0; margin: 0;
+  flex: 1; min-height: 54px; resize: none; border: none; outline: none; padding: 0; margin: 0;
   font: inherit; font-size: 13px; line-height: var(--row); color: var(--ink); background: transparent;
   background-image: repeating-linear-gradient(to bottom, transparent 0 calc(var(--row) - 1px), var(--cline) calc(var(--row) - 1px) var(--row));
   background-attachment: local;
@@ -75,13 +76,13 @@ html.draw .tab { background: var(--ink); color: var(--paper-bg, #FBFAF5); opacit
 .col { grid-row: 1 / 5; border-left: 1px solid var(--cline2); }
 .col.today { background: color-mix(in srgb, var(--a1) 6%, transparent); }
 .dh, .tm, .ls { min-width: 0; position: relative; }
-.dh { grid-row: 1; display: flex; align-items: baseline; gap: 6px; padding: 12px 12px 8px; border-bottom: 1.5px solid var(--cline2); }
+.dh { grid-row: 1; display: flex; align-items: baseline; gap: 6px; padding: 9px 10px 7px; border-bottom: 1.5px solid var(--cline2); }
 .dh .n { font-size: 22px; font-weight: 800; line-height: 1; }
 .dh .e { font-size: 11.5px; font-weight: 700; letter-spacing: .4px; color: var(--sub); text-transform: uppercase; }
 .dh.today .n { color: var(--on); background: var(--accent); border-radius: 9px; padding: 3px 7px 2px; margin: -3px 0 -2px -4px; }
 .dh.sat .n { color: var(--sat); } .dh.sun .n { color: var(--sun); }
 
-.tm { grid-row: 2; padding: 8px 10px 8px; border-bottom: 1px solid var(--cline); display: flex; flex-direction: column; gap: 4px; }
+.tm { grid-row: 2; padding: 6px 10px 6px; border-bottom: 1px solid var(--cline); display: flex; flex-direction: column; gap: 4px; }
 .tl { display: flex; align-items: center; gap: 5px; font-size: 11.5px; }
 .tl .k { color: var(--sub); font-weight: 700; width: 24px; flex: none; }
 .tl input {
@@ -100,10 +101,10 @@ html.draw .tab { background: var(--ink); color: var(--paper-bg, #FBFAF5); opacit
 .lane {
   grid-row: 3; grid-column: 2 / 10; position: relative; z-index: 2; display: grid; column-gap: 0; border-bottom: 1px solid var(--cline);
   grid-template-columns: repeat(7, minmax(0, 1fr)); grid-auto-rows: 24px; grid-auto-flow: row dense; row-gap: 4px;
-  padding: 4px 0; min-height: 32px; cursor: crosshair; user-select: none;
+  padding: 4px 0; cursor: crosshair; user-select: none;
 }
 .lane .ghost { background: color-mix(in srgb, var(--a1) 22%, transparent); border-radius: 6px; margin: 0 6px; }
-.lane .empty { grid-column: 1 / 8; font-size: 11px; color: color-mix(in srgb, var(--sub) 70%, transparent); padding: 4px 12px; pointer-events: none; }
+.lane .empty { grid-column: 1 / 8; height: 24px; display: flex; align-items: center; font-size: 11px; color: color-mix(in srgb, var(--sub) 70%, transparent); padding: 4px 12px; pointer-events: none; }
 .tape {
   position: relative; margin: 0 6px; padding: 0 12px; display: flex; align-items: center; justify-content: center;
   font-size: 12px; font-weight: 800; color: rgba(40, 40, 60, .82); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -123,7 +124,7 @@ html.draw .tab { background: var(--ink); color: var(--paper-bg, #FBFAF5); opacit
 .tape.dot, .sw.dot { background: radial-gradient(circle, rgba(255, 255, 255, .95) 2px, transparent 2.5px) 0 0 / 10px 10px, rgba(150, 200, 245, .86); }
 
 /* 할 일 (기본 8줄, 채우면 한 줄씩 늘어남) */
-.ls { grid-row: 4; padding: 0 10px 10px 11px; }
+.ls { grid-row: 4; padding: 0 10px 6px 11px; }
 .it { display: flex; align-items: center; gap: 7px; height: var(--row); border-bottom: 1px solid var(--cline); }
 .it .cb {
   width: 15px; height: 15px; flex: none; border-radius: 5px; border: 1.6px solid color-mix(in srgb, var(--ink) 28%, transparent); background: transparent; padding: 0;
@@ -210,7 +211,7 @@ html.halloween .hd .pb, html.xmas .hd .pb { box-shadow: none; }
 /* 기본 말랑이 계절 스킨: 네이비·초록 + 모눈, 흰 카드 */
 html.gseason { --card: rgba(255, 255, 255, .86); --hd-ink: #fff; --hd-sub: rgba(255, 255, 255, .72); }
 html.gseason .pl { background-image: linear-gradient(rgba(255, 255, 255, .07) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .07) 1px, transparent 1px); background-size: 22px 22px; }
-html.gseason .bun, html.halloween .bun, html.xmas .bun { width: 52px; height: 52px; margin: -6px 0 -4px; }
+html.gseason .bun, html.halloween .bun, html.xmas .bun { width: 50px; height: 50px; margin: -6px auto -4px 0; }
 html.halloween .beta, html.halloween .hd .pb.on { background: #E07B2E; color: #fff; }
 html.xmas .beta, html.xmas .hd .pb.on { background: #2F8A57; color: #fff; }
 html.halloween .dh.sun .n { color: #E07B2E; } html.xmas .dh.sun .n { color: #2F8A57; }

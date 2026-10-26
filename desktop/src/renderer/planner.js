@@ -65,19 +65,16 @@
   }
   function go(d) { if (saveT) flush(); closePop(); monday = d; load(); }
 
-  // ───────── 줄 수: 기본 8줄, 화면이 높으면 남는 높이만큼 줄을 더 깔아 둠
-  let baseRows = BASE_ROWS, fitRaf = 0;
+  // ───────── 높이: 내용만큼 창 높이를 맞춤 (화면보다 크면 표 안에서 스크롤)
+  const baseRows = BASE_ROWS;
+  let fitRaf = 0;
   function fit() {
     if (fitRaf) return;
     fitRaf = requestAnimationFrame(() => {
       fitRaf = 0;
-      const first = lists.querySelector('.ls');
-      if (first) {
-        const top = first.getBoundingClientRect().top - sheet.getBoundingClientRect().top + sheet.scrollTop;
-        const rh = (first.querySelector('.it') || {}).offsetHeight || 30;
-        const n = Math.max(BASE_ROWS, Math.floor((sheet.clientHeight - top - 12) / rh));
-        if (n !== baseRows && !lists.contains(document.activeElement)) { baseRows = n; for (let i = 0; i < 7; i++) colEl(i).innerHTML = itemsHTML(i); }
-      }
+      const plS = getComputedStyle(pl);
+      const need = 8 + 8 + parseFloat(plS.paddingTop) + parseFloat(plS.paddingBottom) + $('hd').offsetHeight + parseFloat(plS.rowGap || 10) + sheet.scrollHeight;
+      api.plannerSize(Math.ceil(need));
       stk.style.setProperty('--stk-h', sheet.scrollHeight + 'px');
     });
   }
