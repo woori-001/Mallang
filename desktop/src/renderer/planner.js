@@ -107,7 +107,7 @@
       const d = dayAt(i), cls = (isToday(i) ? ' today' : '') + (i === 5 ? ' sat' : '') + (i === 6 ? ' sun' : ''), gc = 'grid-column:' + (i + 2);
       ch += '<div class="col' + cls + '" style="' + gc + '"></div>';
       hh += '<div class="dh' + cls + '" style="' + gc + '"><span class="n">' + d.getDate() + '</span><span class="e">' + EN[i] + '</span></div>';
-      th += '<div class="tm" style="' + gc + '" data-i="' + i + '">' + timeLine(i, 'in', '출근') + timeLine(i, 'out', '퇴근') + '<div class="ot">' + otChips(i) + '</div></div>';
+      th += '<div class="tm" style="' + gc + '" data-i="' + i + '">' + timeLine(i, 'in', '출근') + timeLine(i, 'out', '퇴근') + '</div>';
       lh += '<div class="ls" style="' + gc + '" data-i="' + i + '">' + itemsHTML(i) + '</div>';
     }
     $('cols').innerHTML = ch; $('heads').innerHTML = hh; $('times').innerHTML = th; lists.innerHTML = lh;
@@ -117,11 +117,13 @@
     const v = W.days[i][f];
     // 오늘 비어 있는 칸은 입력칸 대신 '지금' 버튼 (누르면 지금 시간이 찍히고, 그다음엔 고칠 수 있음)
     return '<div class="tl"><span class="k">' + label + '</span>' + (!v && isToday(i) ? nowBtn(f) : '') +
-      '<input type="text" inputmode="numeric" maxlength="5" placeholder="--:--" data-f="' + f + '" value="' + esc(v) + '" aria-label="' + KO[i] + '요일 ' + label + ' 시간"' + (!v && isToday(i) ? ' hidden' : '') + '></div>';
+      '<input type="text" inputmode="numeric" maxlength="5" placeholder="--:--" data-f="' + f + '" value="' + esc(v) + '" aria-label="' + KO[i] + '요일 ' + label + ' 시간"' + (!v && isToday(i) ? ' hidden' : '') + '><span class="ot" data-ot="' + f + '">' + otChip(i, f) + '</span></div>';
   }
-  function otChips(i) {
+  // 출근 옆엔 조출, 퇴근 옆엔 야근 (주말은 퇴근 옆에 근무 시간)
+  function otChip(i, f) {
     const o = overtime(i);
-    return (o.e ? '<span class="e">조출 ' + fmt(o.e) + '</span>' : '') + (o.l ? '<span class="l">야근 ' + fmt(o.l) + '</span>' : '') + (o.w ? '<span class="w">근무 ' + fmt(o.w) + '</span>' : '');
+    if (f === 'in') return o.e ? '<span class="e">조출 ' + fmt(o.e) + '</span>' : '';
+    return o.l ? '<span class="l">야근 ' + fmt(o.l) + '</span>' : (o.w ? '<span class="w">근무 ' + fmt(o.w) + '</span>' : '');
   }
   // 줄 수 = 기본 8줄, 마지막으로 쓴 줄 아래에 늘 빈 줄 하나
   function rowCount(i) {
@@ -142,7 +144,7 @@
     const now = tm.querySelector('.now[data-f="' + f + '"]');
     if (v && now) { now.remove(); inp.hidden = false; }
     if (!v && !now && isToday(i) && document.activeElement !== inp) { inp.insertAdjacentHTML('beforebegin', nowBtn(f)); inp.hidden = true; }
-    tm.querySelector('.ot').innerHTML = otChips(i);
+    tm.querySelectorAll('.ot').forEach((x) => { x.innerHTML = otChip(i, x.dataset.ot); });
     renderSum();
   }
   function renderLane() {

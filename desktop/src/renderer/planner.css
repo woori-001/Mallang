@@ -82,17 +82,18 @@ html.draw .tab { background: var(--ink); color: var(--paper-bg, #FBFAF5); opacit
 .dh.today .n { color: var(--on); background: var(--accent); border-radius: 9px; padding: 3px 7px 2px; margin: -3px 0 -2px -4px; }
 .dh.sat .n { color: var(--sat); } .dh.sun .n { color: var(--sun); }
 
-.tm { grid-row: 2; padding: 6px 10px 6px; border-bottom: 1px solid var(--cline); display: flex; flex-direction: column; gap: 4px; }
-.tl { display: flex; align-items: center; gap: 5px; font-size: 11.5px; }
-.tl .k { color: var(--sub); font-weight: 700; width: 24px; flex: none; }
+.tm { grid-row: 2; padding: 6px 6px 6px 8px; border-bottom: 1px solid var(--cline); display: flex; flex-direction: column; gap: 4px; }
+.tl { display: flex; align-items: center; gap: 3px; font-size: 11.5px; }
+.tl .k { color: var(--sub); font-weight: 700; width: 23px; flex: none; }
 .tl input {
-  flex: 1; width: 0; max-width: 58px; min-width: 0; height: 24px; border: none; border-radius: 8px; background: rgba(var(--glass), .9);
-  font: inherit; font-size: 12.5px; font-weight: 700; color: var(--ink); text-align: center; padding: 0; outline: none; font-variant-numeric: tabular-nums;
+  flex: none; width: 40px; min-width: 0; height: 24px; border: none; border-radius: 8px; background: rgba(var(--glass), .9);
+  font: inherit; font-size: 12px; font-weight: 700; color: var(--ink); text-align: center; padding: 0; outline: none; font-variant-numeric: tabular-nums;
 }
 .tl input:focus { box-shadow: inset 0 0 0 1.5px var(--a1); }
 .tl .now { flex: 1; max-width: 58px; min-width: 0; height: 24px; border: none; border-radius: 8px; padding: 0; font-size: 11px; font-weight: 800; background: var(--accent); color: var(--on); }
-.ot { display: flex; flex-wrap: wrap; gap: 3px; min-height: 18px; }
-.ot span { font-size: 10.5px; font-weight: 800; border-radius: 999px; padding: 2px 7px; }
+.ot { display: flex; min-width: 0; flex: 0 1 auto; }
+.ot:empty { display: none; }
+.ot span { font-size: 10px; font-weight: 800; border-radius: 999px; padding: 2px 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -.2px; }
 .ot .e { background: #FFF1D6; color: #B86A12; }
 .ot .l { background: #E8E5FF; color: #5A4FC4; }
 .ot .w { background: #DFF3EA; color: #2F7D5B; }
