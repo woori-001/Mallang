@@ -1145,15 +1145,6 @@ function layerAllMemos(layer) {
   if (!['top', 'normal', 'bottom'].includes(layer)) return;
   for (const m of store.memos.filter((x) => !x.deleting && x.layer !== layer)) updateMemo(m.id, { layer });
 }
-// 말랑메모 창(메모·목록바·플래너 등)에 있을 때 Ctrl+↑ 모두 항상 위, Ctrl+↓ 모두 항상 아래
-// (엑셀 등 다른 프로그램의 Ctrl+방향키를 뺏지 않도록 전역 단축키로는 걸지 않음)
-app.on('web-contents-created', (ev, wc) => {
-  wc.on('before-input-event', (e, input) => {
-    if (input.type !== 'keyDown' || !(input.control || input.meta) || input.alt || input.shift) return;
-    if (input.key === 'ArrowUp') { e.preventDefault(); layerAllMemos('top'); }
-    else if (input.key === 'ArrowDown') { e.preventDefault(); layerAllMemos('bottom'); }
-  });
-});
 // ───────── 자동 정렬: 가로(왼→오, 넘치면 다음 줄) / 세로(위→아래, 넘치면 다음 칸) ─────────
 // 목록바가 있는 모니터 왼쪽 위부터. 그룹 메모는 붙어 있게, 그 안에서는 지금 위치 순서대로
 function arrangeArea() {
@@ -2459,6 +2450,9 @@ app.whenReady().then(() => {
     globalShortcut.register('CommandOrControl+Alt+Down', () => unfoldAll());   // 모두 펴기
     globalShortcut.register('CommandOrControl+Alt+Up', () => foldAll());       // 모두 접기
     globalShortcut.register('CommandOrControl+Alt+F', () => toggleSearch());
+    // 어디서나: Ctrl+Alt+Shift+↑ 모든 메모 항상 위 / ↓ 항상 아래
+    globalShortcut.register('CommandOrControl+Alt+Shift+Up', () => layerAllMemos('top'));
+    globalShortcut.register('CommandOrControl+Alt+Shift+Down', () => layerAllMemos('bottom'));
   } catch (e) { console.error('단축키 등록 실패', e); }
   screen.on('display-metrics-changed', placeSide);
   screen.on('display-added', placeSide);
