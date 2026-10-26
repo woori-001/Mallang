@@ -79,7 +79,6 @@
   // ───────── 전체 그리기 ─────────
   function renderAll() {
     if (!S) return;
-    $('ptab').hidden = !(S.isAdmin || (S.openSkins || []).includes('planner'));
     const t = applyTheme(S.settings);
     sk = t.sk;
     const st = document.documentElement.style;
@@ -812,7 +811,7 @@
     $('skAdmin').hidden = !S.isAdmin;
     if (!S.isAdmin) return;
     const openSk = S.openSkins || [];
-    const items = Object.keys(SKINS).filter((id) => SKINS[id].season).map((id) => [id, SKINS[id].name]).concat([['planner', '주간 플래너 (새 기능)']]);
+    const items = Object.keys(SKINS).filter((id) => SKINS[id].season).map((id) => [id, SKINS[id].name]);
     $('skList').innerHTML = items.map(([id, name]) => {
       const on = openSk.includes(id);
       return '<div class="skRow"><span class="skName">' + esc(name) + '</span><span class="skState' + (on ? ' on' : '') + '">' + (on ? '모두 공개 중' : '나만 보기 (베타)') + '</span>' +
@@ -935,7 +934,7 @@
     if (c.type === 'open') { open(); api.sideFocus(); }
     if (c.type === 'planner') { body.classList.toggle('plOpen', !!c.open); $('ptab').setAttribute('aria-expanded', String(!!c.open)); }
   });
-  // 주간 플래너 탭 (관리자 베타 · 관리자가 공개하면 모두)
+  // 주간 플래너 탭
   $('ptab').addEventListener('click', () => {
     // 목록이 펼쳐져 있으면 먼저 접고, 탭이 화면 끝으로 돌아온 뒤 플래너를 펼침
     if (isOpen() && !pinned()) { body.classList.remove('open'); tab.setAttribute('aria-expanded', 'false'); setTimeout(() => api.plannerToggle(true), 360); return; }

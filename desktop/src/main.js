@@ -753,7 +753,7 @@ function setupWidget(win) {
     }
   });
 }
-// ───────── 주간 플래너 (관리자 베타): 목록바 아래 두 번째 탭으로 열고 닫음 ─────────
+// ───────── 주간 플래너: 목록바 아래 두 번째 탭으로 열고 닫음 ─────────
 let plannerWin = null;
 const PL_TAB = 30, PL_TOP = 88;   // 창 맨 위 = 화면 위 + 88 → 탭이 목록 탭과 같은 높이(120)에 옴
 let plannerH = 560;              // 내용 높이에 맞춰 렌더러가 알려 줌
@@ -767,7 +767,7 @@ function plannerBounds() {
   const wa = sideDisplay().workArea, w = plannerPanelW(wa) + PL_TAB;
   return { x: wa.x + wa.width - w, y: wa.y + PL_TOP, width: w, height: Math.round(Math.max(260, Math.min(plannerH, wa.height - PL_TOP))) };
 }
-function plannerAllowed() { return !!(store.cloud && store.cloud.admin) || (store.shared.openSkins || []).includes('planner'); }
+function plannerAllowed() { return true; }   // 2.9.2부터 정식 기능
 function sidePlanner(open) { if (side && !side.isDestroyed()) side.webContents.send('cmd', { type: 'planner', open }); }
 function setupPlanner(win) {
   plannerWin = win;
@@ -1145,6 +1145,15 @@ function layerAllMemos(layer) {
   if (!['top', 'normal', 'bottom'].includes(layer)) return;
   for (const m of store.memos.filter((x) => !x.deleting && x.layer !== layer)) updateMemo(m.id, { layer });
 }
+// 말랑메모 창(메모·목록바·플래너 등)에 있을 때 Ctrl+↑ 모두 항상 위, Ctrl+↓ 모두 항상 아래
+// (엑셀 등 다른 프로그램의 Ctrl+방향키를 뺏지 않도록 전역 단축키로는 걸지 않음)
+app.on('web-contents-created', (ev, wc) => {
+  wc.on('before-input-event', (e, input) => {
+    if (input.type !== 'keyDown' || !(input.control || input.meta) || input.alt || input.shift) return;
+    if (input.key === 'ArrowUp') { e.preventDefault(); layerAllMemos('top'); }
+    else if (input.key === 'ArrowDown') { e.preventDefault(); layerAllMemos('bottom'); }
+  });
+});
 // ───────── 자동 정렬: 가로(왼→오, 넘치면 다음 줄) / 세로(위→아래, 넘치면 다음 칸) ─────────
 // 목록바가 있는 모니터 왼쪽 위부터. 그룹 메모는 붙어 있게, 그 안에서는 지금 위치 순서대로
 function arrangeArea() {
