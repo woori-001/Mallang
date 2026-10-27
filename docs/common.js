@@ -8,9 +8,11 @@
       pal: [[[255, 243, 196], [255, 222, 214]], [[204, 243, 224], [196, 229, 255]], [[255, 214, 222], [255, 200, 232]], [[204, 226, 255], [214, 206, 255]], [[226, 214, 255], [246, 214, 255]]]
     },
     peach: {
-      name: '피치 소다', base: '#FDF1EE', b: ['#FFC9BE', '#FFDCD2', '#FFE9E1', '#FBB8AE'],
-      a1: '#E36F69', a2: '#F59C8D', ink: '#45302E', sub: '#74524F', sun: '#D6456E', sat: '#4A6BD0', glow: 'rgba(227,111,105,0.32)', on: '#FFFFFF',
-      pal: [[[255, 232, 220], [255, 212, 204]], [[255, 242, 230], [255, 224, 210]], [[255, 218, 222], [255, 200, 212]], [[250, 236, 214], [255, 222, 200]], [[255, 226, 234], [248, 214, 230]]]
+      // 디자인 스킨 · 피치 블라썸: 복숭아 핑크 유리 + 3D 벚꽃, 복숭아 말랑이 (예전 '피치 소다' 자리)
+      name: '피치 블라썸', deco: 'peach', glassSeason: true, solidAccent: true, panelRGB: '255, 236, 236', bunny: 'bunny-3d-peach.png', logo: 'logo-3d-peach.png',
+      base: '#FDF1F1', b: ['#FFD6D8', '#FFE4E2', '#FCDCE4', '#FFEBE6'],
+      a1: '#EC7889', a2: '#F7AEB8', ink: '#4A2E36', sub: '#8A6870', sun: '#E0607E', sat: '#4A7BC8', glow: 'rgba(236,120,137,0.26)', on: '#FFFFFF',
+      pal: [[[255, 230, 230], [255, 216, 220]], [[255, 238, 234], [255, 224, 224]], [[255, 228, 236], [252, 214, 228]], [[255, 238, 228], [255, 224, 216]], [[252, 232, 240], [248, 220, 232]]]
     },
     pink: {
       name: '핑크 다이어리', base: '#FDF0F4', b: ['#FFC6D6', '#CBEFDF', '#FFDCE6', '#FBD0DE'],
@@ -23,9 +25,10 @@
       pal: [[[255, 224, 238], [226, 232, 255]], [[214, 234, 255], [236, 226, 255]], [[255, 236, 244], [255, 222, 236]], [[222, 240, 255], [212, 230, 255]], [[244, 228, 255], [255, 228, 240]]]
     },
     aurora: {
-      name: '오로라 글래스', base: '#EFF1FC', b: ['#C9CCFF', '#BFEDE6', '#F6D3EA', '#C7E3F7'],
+      // 디자인 스킨 · 오로라 글래스: 원래 오로라 글래스 색 그대로 + 오로라 띠·반짝이 별, 오로라 말랑이
+      name: '오로라 글래스', deco: 'aurora', glassSeason: true, bunny: 'bunny-3d-aurora.png', logo: 'logo-3d-aurora.png', base: '#EFF1FC', b: ['#C9CCFF', '#BFEDE6', '#F6D3EA', '#C7E3F7'],
       a1: '#5A63E8', a2: '#2E9BC9', ink: '#1B2440', sub: '#4A5578', sun: '#C2416A', sat: '#4C63D8', glow: 'rgba(90,99,232,0.30)', on: '#FFFFFF',
-      pal: [[[226, 228, 255], [214, 240, 248]], [[214, 244, 238], [206, 236, 248]], [[246, 224, 240], [232, 226, 255]], [[222, 236, 252], [214, 226, 255]], [[236, 232, 255], [220, 246, 240]]]
+      pal: [[[208, 210, 246], [194, 204, 240]], [[196, 222, 238], [186, 212, 236]], [[220, 204, 242], [206, 198, 240]], [[200, 214, 246], [190, 204, 244]], [[214, 208, 246], [196, 222, 238]]]
     },
     blue: {
       name: '소프트 블루', base: '#E7ECF4', b: ['#C7D9F6', '#DCE6F7', '#BCD1F2', '#E2E9F6'],
@@ -33,19 +36,25 @@
       pal: [[[232, 240, 252], [212, 226, 250]], [[240, 244, 252], [224, 232, 246]], [[214, 232, 255], [196, 216, 250]], [[236, 240, 248], [220, 226, 242]], [[212, 226, 250], [226, 220, 252]]]
     },
     sky: {
-      name: '스카이 블루', base: '#EEF8FE', b: ['#B5E3F8', '#D3EFFB', '#C8F0EA', '#A9DBF5'],
-      a1: '#1D8ECC', a2: '#56B8EA', ink: '#1D3346', sub: '#4A6276', sun: '#D0496E', sat: '#1D8ECC', glow: 'rgba(33,150,214,0.30)', on: '#FFFFFF',
-      pal: [[[220, 242, 253], [206, 234, 250]], [[226, 247, 244], [208, 240, 236]], [[236, 246, 254], [218, 236, 250]], [[214, 238, 252], [226, 232, 255]], [[232, 250, 240], [214, 240, 252]]]
+      // 디자인 스킨 · 스카이 블루(세일러): 하늘빛 유리 + 구름·물결, 배 타는 세일러 말랑이
+      name: '스카이 블루', deco: 'sky', glassSeason: true, solidAccent: true, panelRGB: '238, 247, 255', bunny: 'bunny-3d-sky.png', logo: 'logo-3d-sky.png',
+      base: '#EEF7FE', b: ['#CFE7FA', '#E0F0FC', '#D6EEF6', '#E8F4FD'],
+      a1: '#4A9BE8', a2: '#9CCBF5', ink: '#1F3448', sub: '#5A7088', sun: '#E0607E', sat: '#4A9BE8', glow: 'rgba(74,155,232,0.28)', on: '#FFFFFF',
+      pal: [[[232, 244, 255], [218, 236, 252]], [[236, 248, 252], [222, 240, 248]], [[240, 246, 255], [226, 236, 252]], [[230, 246, 250], [216, 238, 246]], [[244, 248, 255], [230, 240, 252]]]
     },
     forest: {
-      name: '포레스트 민트', base: '#EFF9F4', b: ['#BDEBD5', '#9FDCCB', '#D2F2E3', '#C4E8DF'],
-      a1: '#13926B', a2: '#3FBE84', ink: '#1C3A30', sub: '#4A6A5E', sun: '#C8466E', sat: '#2F7FB8', glow: 'rgba(19,151,110,0.28)', on: '#FFFFFF',
-      pal: [[[222, 246, 234], [206, 238, 226]], [[214, 242, 238], [200, 234, 228]], [[236, 248, 226], [222, 242, 214]], [[226, 240, 250], [214, 240, 236]], [[244, 250, 232], [226, 244, 230]]]
+      // 디자인 스킨 · 숲속 유리: 짙은 숲색 유리 목록바 + 밝은 카드, 나뭇잎 말랑이
+      name: '포레스트 그린', deco: 'forest', glassSeason: true, solidAccent: true, panelRGB: '241, 238, 230', bunny: 'bunny-3d-forest.png', logo: 'logo-3d-forest.png',
+      base: '#EEF5F0', b: ['#CFE8D8', '#DCEFE2', '#E6F3E8', '#D2E9DC'],
+      a1: '#2F8F67', a2: '#8FCF9F', ink: '#1C3A30', sub: '#5A7568', sun: '#C8466E', sat: '#2F7FB8', glow: 'rgba(47,143,103,0.24)', on: '#FFFFFF',
+      pal: [[[236, 247, 239], [226, 242, 231]], [[230, 244, 238], [220, 238, 230]], [[242, 248, 234], [232, 243, 224]], [[232, 242, 246], [222, 238, 236]], [[246, 248, 236], [236, 244, 230]]]
     },
     honey: {
-      name: '선샤인 허니', base: '#FFF9EA', b: ['#FFE28A', '#FFD27A', '#FFEBA8', '#FFF1C2'],
-      a1: '#E8A408', a2: '#FFC94A', ink: '#3B3018', sub: '#6B5B36', sun: '#C8463C', sat: '#3A6CC0', glow: 'rgba(224,154,0,0.30)', on: '#2A2214',
-      pal: [[[255, 246, 204], [255, 234, 180]], [[255, 240, 214], [255, 226, 190]], [[248, 244, 210], [240, 236, 190]], [[255, 236, 200], [255, 222, 176]], [[252, 248, 226], [246, 238, 200]]]
+      // 디자인 스킨 · 선샤인 레몬: 레몬빛 유리 + 탄산 방울, 레몬 조각·데이지, 레몬 말랑이
+      name: '선샤인 레몬', deco: 'lemon', glassSeason: true, solidAccent: true, panelRGB: '255, 251, 230', bunny: 'bunny-3d-lemon.png', logo: 'logo-3d-lemon.png',
+      base: '#FFFBEA', b: ['#FFF1A8', '#FFF6C8', '#EAF6C8', '#FFF0B8'],
+      a1: '#E9B10C', a2: '#FFE27A', ink: '#3E3518', sub: '#7A6E48', sun: '#E0605A', sat: '#3E8EC8', glow: 'rgba(242,194,27,0.30)', on: '#3E3410',
+      pal: [[[255, 249, 214], [255, 242, 190]], [[250, 252, 220], [242, 248, 204]], [[255, 246, 222], [255, 236, 200]], [[246, 252, 232], [236, 246, 214]], [[255, 251, 230], [252, 244, 208]]]
     },
     // paper: 투명하지 않은 종이·달력 느낌 (메모는 흰 종이 + 색 머리띠)
     office: {
@@ -194,6 +203,7 @@
     document.documentElement.classList.toggle('gseason', !!sk.glassSeason);
     document.documentElement.classList.toggle('g-halloween', !!sk.glassSeason && sk.season === 'halloween');
     document.documentElement.classList.toggle('g-xmas', !!sk.glassSeason && sk.season === 'xmas');
+    for (const d of ['forest', 'peach', 'lemon', 'sky', 'aurora']) document.documentElement.classList.toggle('g-' + d, sk.deco === d);   // 디자인 스킨 장식
     r.setProperty('--paper-bg', sk.paperBg || '#FBFAF5');
     // 드로잉 스킨에서는 말랑이도 손그림으로
     document.querySelectorAll('img[data-bun]').forEach((img) => { const want = img.dataset.draw ? (sk.logo || img.dataset.bun) : (sk.bunny || img.dataset.bun); if (img.getAttribute('src') !== want) img.setAttribute('src', want); });

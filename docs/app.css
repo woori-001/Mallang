@@ -396,3 +396,128 @@ input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px 
 .ev.rec .evt { display: inline-flex; align-items: center; }
 .ev .evgo { display: block; text-align: left; background: transparent; border: none; padding: 0 4px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: inherit; }
 .evrep { flex: none; font-size: 12px; font-weight: 700; color: var(--a1); background: color-mix(in srgb, var(--a1) 12%, transparent); border-radius: 9px; padding: 4px 8px; }
+
+/* ───────── 탭 6개 (좁은 휴대폰에서도 들어가게) ───────── */
+.tabs .tab { min-width: 0; font-size: 10.5px; letter-spacing: -.3px; }
+
+/* ───────── 스킨 분류 ───────── */
+.skins { display: block; }
+.skgh { font-size: 12px; font-weight: 700; color: var(--sub); margin: 14px 2px 8px; }
+.skgh:first-child { margin-top: 0; }
+.skg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.prev .pbun { position: absolute; left: 50%; top: 50%; height: 54px; width: auto; transform: translate(-50%, -50%); filter: drop-shadow(0 3px 6px rgba(60, 60, 120, .18)); }
+
+/* ───────── 주간 플래너 ───────── */
+.plHead { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 4px 0 8px; }
+.plTtl { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.plTtl b { font-size: 20px; color: var(--a1); }
+.plTtl span { font-size: 12px; color: var(--sub); font-weight: 600; letter-spacing: .3px; }
+.plBar { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.plBar .textBtn { flex: none; background: rgba(var(--glass), .55); font-weight: 600; }
+.plBar .textBtn.on { color: var(--a1); }
+.plSum { flex: 1; display: flex; flex-direction: column; align-items: center; font-size: 12px; color: var(--sub); line-height: 1.5; }
+.plSum b { color: var(--a1); font-size: 13px; margin-left: 3px; }
+.plStd { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.plStd label { display: flex; align-items: center; gap: 6px; font-weight: 600; color: var(--ink); }
+.plStd input { border: none; border-radius: 10px; padding: 6px 8px; background: rgba(var(--glass), .9); font-size: 15px; }
+.plStd .small { flex-basis: 100%; margin: 0; }
+.plDays { display: flex; flex-direction: column; gap: 10px; }
+.pDay { background: rgba(var(--glass), .62); border-radius: 18px; padding: 12px 14px 8px; box-shadow: 0 6px 16px rgba(80, 80, 140, .06); }
+.pDay.today { box-shadow: 0 0 0 1.5px var(--a1), 0 8px 18px var(--glow); }
+.pdH { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.pdH b { font-size: 20px; color: var(--ink); line-height: 1; }
+.pdH > span { font-size: 13px; font-weight: 600; color: var(--sub); }
+.pDay.wk5 .pdH b, .pDay.wk5 .pdH > span { color: var(--sat); }
+.pDay.wk6 .pdH b, .pDay.wk6 .pdH > span { color: var(--sun); }
+.pTodayTag { font-style: normal; font-size: 11px; font-weight: 700; color: var(--on); background: var(--accent); border-radius: 8px; padding: 1px 7px; align-self: center; }
+.pTape { align-self: center; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 3px; color: #5a4a50; background: #FFD9C7; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pTape.mint { background: #CDEFDF; } .pTape.sky { background: #CFE6FB; } .pTape.lav { background: #E1DAFB; }
+.pTape.lemon { background: #FFF0B3; } .pTape.pink { background: #FBD3E0; }
+.pTape.stripe { background: repeating-linear-gradient(45deg, #FBD3E0 0 6px, #fff 6px 12px); }
+.pTape.dot { background: #E1DAFB radial-gradient(circle, #fff 1.5px, transparent 2px) 0 0 / 8px 8px; }
+.pdTimes { display: flex; flex-direction: column; gap: 4px; padding: 4px 0 8px; border-bottom: 1px dashed rgba(120, 120, 170, .22); }
+.pdT { display: flex; align-items: center; gap: 8px; min-height: 32px; }
+.pk { font-size: 12px; font-weight: 700; color: var(--sub); width: 28px; flex: none; }
+.pdT input[type=time] { border: none; border-radius: 10px; padding: 4px 8px; background: rgba(var(--glass), .75); font-size: 15px; min-width: 104px; height: 32px; }
+.pNow { border: none; border-radius: 10px; height: 30px; padding: 0 10px; font-size: 12px; font-weight: 700; color: var(--a1); background: rgba(var(--glass), .9); }
+.pOt { font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 9px; }
+.pOt.e { color: #2E7D5B; background: rgba(90, 190, 140, .16); }
+.pOt.l { color: #C0466A; background: rgba(235, 110, 150, .14); }
+.pOt.w { color: #4A5BD6; background: rgba(110, 130, 230, .14); }
+.pItems { display: flex; flex-direction: column; padding-top: 4px; }
+.pIt { display: flex; align-items: center; gap: 8px; min-height: 36px; }
+.pCb { width: 20px; height: 20px; flex: none; border-radius: 6px; border: 1.6px solid rgba(110, 110, 160, .45); background: rgba(var(--glass), .8); padding: 0; display: flex; align-items: center; justify-content: center; }
+.pIt.done .pCb { background: var(--accent); border-color: transparent; }
+.pIt.add .pCb { border-style: dashed; opacity: .55; }
+.pTx { flex: 1; min-width: 0; border: none; background: transparent; padding: 6px 0; font-family: var(--memo-font); font-size: var(--memo-size); }
+.pTx:focus { outline: none; }
+.pIt.done .pTx { text-decoration: line-through; opacity: .5; }
+.pTx::placeholder { color: var(--sub); opacity: .6; }
+.plNotes { margin-top: 12px; }
+.plNh { font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+.plNotes textarea { width: 100%; border: none; resize: vertical; background: rgba(var(--glass), .6); border-radius: 12px; padding: 10px 12px; font-family: var(--memo-font); font-size: var(--memo-size); line-height: 1.6; }
+html.dark .pdT input[type=time], html.dark .plStd input { color-scheme: dark; }
+html.paper .pDay, html.draw .pDay { border-radius: 10px; box-shadow: none; border: 1px solid rgba(60, 60, 80, .14); background: rgba(255, 255, 255, .7); }
+html.draw .pDay { border: 1.6px solid var(--ink); }
+
+/* ───────── 디자인 스킨 장식 (PC와 같은 그림) — 배경 위에 한 겹 ───────── */
+.bg::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
+html.g-forest .bg::after {
+  background-image: url(leaf-top.svg), url(leaf-bot.svg),
+    linear-gradient(180deg, rgba(47, 120, 88, .22), rgba(47, 120, 88, .06) 38%, rgba(47, 120, 88, .04) 62%, rgba(47, 120, 88, .20)), url(wood-white.svg);
+  background-position: right -34px top -30px, left -26px bottom 70px, 0 0, 0 0;
+  background-size: 170px auto, 170px auto, 100% 100%, 168px auto;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+}
+html.g-peach .bg::after {
+  background-image: url(peach-fruit.png), url(blossom-white.png), url(blossom-pink.png), url(peach-fruit.png), url(blossom-white.png), url(blossom-pink.png), url(sakura-petals.svg),
+    linear-gradient(180deg, rgba(250, 176, 160, .32), rgba(250, 186, 176, .06) 38%, rgba(236, 246, 226, .08) 64%, rgba(200, 232, 196, .24));
+  background-position: right -14px top 60px, right 54px top 34px, right 14px top 50%, left -14px bottom 140px, left 52px bottom 122px, left 30px bottom 172px, 0 0, 0 0;
+  background-size: 74px auto, 36px auto, 22px auto, 60px auto, 32px auto, 22px auto, 170px auto, 100% 100%;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat, no-repeat;
+}
+html.g-lemon .bg::after {
+  background-image: url(lemon-slice.png), url(daisy-white.png), url(daisy-white.png), url(lemon-slice.png), url(daisy-white.png), url(soda-bubbles.svg),
+    linear-gradient(180deg, rgba(255, 220, 90, .30), rgba(255, 230, 120, .06) 38%, rgba(220, 240, 160, .06) 64%, rgba(200, 232, 140, .22));
+  background-position: right -18px top 60px, right 50px top 34px, left 44px bottom 124px, left -20px bottom 144px, right 16px top 50%, 0 0, 0 0;
+  background-size: 70px auto, 38px auto, 34px auto, 62px auto, 24px auto, 160px auto, 100% 100%;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat, no-repeat;
+}
+html.g-sky .bg::after {
+  background-image: url(sky-cloud.svg), url(sky-cloud.svg), url(sky-cloud.svg), url(sky-wave.svg), url(sky-wave.svg),
+    linear-gradient(180deg, rgba(150, 205, 250, .30), rgba(190, 225, 252, .06) 34%, rgba(170, 215, 245, .08) 70%, rgba(110, 180, 235, .34));
+  background-position: right -20px top 64px, right 70px top 36px, left -26px top 46%, 0 calc(100% - 100px), 22px calc(100% - 82px), 0 0;
+  background-size: 92px auto, 54px auto, 70px auto, 80px 16px, 80px 16px, 100% 100%;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat-x, repeat-x, no-repeat;
+}
+html.g-aurora .bg::after {
+  background-image: url(aur-spark-gold.png), url(aur-spark-purple.png), url(aur-pearl.png), url(aur-spark-iris.png), url(aur-pearl-gold.png), url(aur-pearl-iris.png),
+    url(aurora-bands.svg),
+    radial-gradient(100% 35% at 85% 0%, rgba(140, 150, 255, .18), transparent 65%),
+    radial-gradient(110% 40% at 15% 100%, rgba(170, 140, 255, .20), transparent 60%),
+    linear-gradient(180deg, rgba(226, 228, 252, .5) 0, rgba(184, 190, 242, .45) 45%, rgba(128, 138, 216, .5) 80%, rgba(106, 114, 198, .55) 100%);
+  background-position: left 168px top 22px, right 40px top 84px, left -10px top 46%, right -8px bottom 190px, left 26px bottom 150px, right 70px bottom 110px, 0 0, 0 0, 0 0, 0 0;
+  background-size: 22px auto, 14px auto, 26px auto, 30px auto, 14px auto, 12px auto, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  background-repeat: no-repeat;
+}
+/* 오로라: 로고 옆 무지개 반짝이가 둥실 */
+html.g-aurora .bg::before {
+  content: ""; position: absolute; z-index: 1; right: 76px; top: calc(16px + var(--safe-t)); width: 30px; height: 35px;
+  background: url(aur-spark-iris.png) center / contain no-repeat; animation: starFloat 5s ease-in-out infinite;
+}
+@keyframes starFloat { 0%, 100% { transform: translateY(0) rotate(-10deg) scale(.95); opacity: .85; } 50% { transform: translateY(-6px) rotate(8deg) scale(1.05); opacity: 1; } }
+/* 스카이: 메모 화면에서만 배 타는 말랑이 (목록이 배 뒤로 지나감) */
+html.g-sky body:has(#vMemos:not([hidden]))::after {
+  content: ""; position: fixed; z-index: 4; pointer-events: none; left: 14px; bottom: calc(80px + var(--safe-b)); width: 130px; height: 81px;
+  background: url(sky-boat.png) center / contain no-repeat; transform-origin: 50% 90%; animation: boatBob 4.2s ease-in-out infinite, boatSail 14s ease-in-out infinite;
+}
+@keyframes boatBob { 0%, 100% { rotate: -3deg; translate: 0 0; } 50% { rotate: 3deg; translate: 0 -3px; } }
+@keyframes boatSail { 0%, 100% { margin-left: 0; } 50% { margin-left: 22px; } }
+html.g-sky #vMemos { padding-bottom: 90px; }
+@media (prefers-reduced-motion: reduce) { html.g-aurora .bg::before, html.g-sky body::after { animation: none; } }
+/* 디자인 스킨: 카드는 맑은 흰 유리로 */
+html.g-forest .memo, html.g-peach .memo, html.g-lemon .memo, html.g-sky .memo { box-shadow: 0 6px 16px rgba(60, 80, 100, .08); }
+html.g-forest .calCard, html.g-peach .calCard, html.g-lemon .calCard, html.g-sky .calCard, html.g-aurora .calCard,
+html.g-forest .pDay, html.g-peach .pDay, html.g-lemon .pDay, html.g-sky .pDay, html.g-aurora .pDay,
+html.g-forest .card, html.g-peach .card, html.g-lemon .card, html.g-sky .card, html.g-aurora .card { background: rgba(255, 255, 255, .72); }
+html.g-lemon .plTtl b, html.g-lemon .calTtl { color: #B8860B; }

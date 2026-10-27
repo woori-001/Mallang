@@ -87,6 +87,27 @@
     <div id="evList" class="evList"></div>
   </section>
 
+  <section id="vPlan" class="view" hidden>
+    <div class="plHead">
+      <button id="plPrev" class="iconBtn sm" type="button" aria-label="지난 주"></button>
+      <div class="plTtl"><b id="plLabel"></b><span id="plRange"></span></div>
+      <button id="plNext" class="iconBtn sm" type="button" aria-label="다음 주"></button>
+    </div>
+    <div class="plBar">
+      <button id="plToday" class="textBtn" type="button">이번 주</button>
+      <div id="plSum" class="plSum"></div>
+      <button id="plStdBtn" class="textBtn" type="button">기준 시간</button>
+    </div>
+    <div id="plStd" class="plStd card" hidden>
+      <label>출근 <input id="plStdIn" type="time"></label>
+      <label>퇴근 <input id="plStdOut" type="time"></label>
+      <button id="plStdOk" class="smallPrimary" type="button">저장</button>
+      <p class="small">기준보다 일찍 오면 조출, 늦게 가면 야근이에요. 30분 단위로 세요.</p>
+    </div>
+    <div id="plDays" class="plDays"></div>
+    <div class="plNotes card"><div class="plNh">메모</div><textarea id="plNotes" rows="4" placeholder="이번 주에 기억할 것"></textarea></div>
+  </section>
+
   <section id="vPeople" class="view" hidden>
     <div class="peopleTop">
       <label class="search"><span id="pSearchIcon" aria-hidden="true"></span><span class="sr">연락망 검색</span>
@@ -145,6 +166,7 @@
   <nav class="tabs" aria-label="화면">
     <button class="tab" type="button" data-view="memos"><span class="ti" data-icon="memo"></span><span>메모</span></button>
     <button class="tab" type="button" data-view="cal"><span class="ti" data-icon="cal"></span><span>캘린더</span></button>
+    <button class="tab" type="button" data-view="plan"><span class="ti" data-icon="plan"></span><span>플래너</span></button>
     <button class="tab" type="button" data-view="people"><span class="ti" data-icon="people"></span><span>연락망</span></button>
     <button class="tab" type="button" data-view="trash"><span class="ti" data-icon="trash"></span><span>휴지통</span></button>
     <button class="tab" type="button" data-view="set"><span class="ti" data-icon="set"></span><span>설정</span></button>

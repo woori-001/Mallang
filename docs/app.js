@@ -23,6 +23,7 @@
     left: icon('<path d="M15 5l-7 7 7 7"/>', 16, 2.2),
     right: icon('<path d="M9 5l7 7-7 7"/>', 16, 2.2),
     x: icon('<path d="M6 6l12 12M18 6L6 18"/>', 16, 2.2),
+    plan: icon('<rect x="3.5" y="4.5" width="17" height="16" rx="4"/><path d="M3.5 9.5h17M8 3v3M16 3v3M7.5 13.5l1.6 1.6 3-3M14 14h3M7.5 18h9"/>'),
     people: icon('<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5a5.5 5.5 0 0 1 11 0"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6M17.5 14.2a5 5 0 0 1 3 5.3"/>'),
     check: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg>'
   };
@@ -31,11 +32,14 @@
 
   // ───────── 저장 ─────────
   function blankState() {
-    return { memos: [], trash: [], tombs: [], events: {}, evMeta: {}, contacts: null, shared: {}, cursor: null };
+    return { memos: [], trash: [], tombs: [], events: {}, evMeta: {}, contacts: null, shared: {}, cursor: null, planner: blankPlanner() };
   }
+  function blankPlanner() { return { weeks: {}, meta: {}, std: { in: '09:00', out: '18:00', alpha: null }, stdMeta: { mt: 0, dirty: false } }; }
   function loadJSON(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v || d; } catch (e) { return d; } }
   let st = Object.assign(blankState(), loadJSON(LS_STATE, {}));
   if (st.contacts && window.M.fixContactRows(st.contacts.rows)) st.contacts = { rows: window.M.fixContactRows(st.contacts.rows), mt: Math.max(Date.now(), (st.contacts.mt || 0) + 1), dirty: true };
+  // 주간 플래너가 생기기 전에 받은 기록은 플래너를 건너뛰었으므로, 처음 한 번은 처음부터 다시 받아요
+  if (!st.planner || !st.planner.weeks) { st.planner = blankPlanner(); st.cursor = null; }
   let prefs = Object.assign({ skin: 'lav', font: 'gowun' }, loadJSON(LS_PREFS, {}));
   let saveT = null;
   function saveState() { clearTimeout(saveT); saveT = setTimeout(saveStateNow, 200); }
@@ -167,6 +171,7 @@
   }
   const findMemo = (u) => st.memos.find((m) => m.uid === u) || st.trash.find((m) => m.uid === u);
   function localTs(kind, id) {
+    if (kind === 'planner') return id === 'std' ? (st.planner.stdMeta.mt || 0) : ((st.planner.meta[id] && st.planner.meta[id].mt) || 0);
     if (kind === 'event') return (st.evMeta[id] && st.evMeta[id].mt) || 0;
     if (kind === 'contact') return (st.contacts && st.contacts.mt) || 0;
     const m = findMemo(id);
@@ -187,6 +192,7 @@
     };
   }
   function apply(item) {
+    if (item.kind === 'planner') { applyPlanner(item); return; }
     if (item.kind === 'contact') {
       if (item.id !== 'main') return;
       const rows = item.deleted ? null : window.M.cleanTable(item.data, window.M.CONTACT_HEAD).rows;
@@ -243,9 +249,16 @@
     for (const t of st.tombs) if (!t.done) out.push({ kind: 'memo', id: t.uid, ts: t.ts, deleted: true });
     for (const [k, meta] of Object.entries(st.evMeta)) if (meta && meta.dirty) out.push({ kind: 'event', id: k, ts: meta.mt, data: { list: st.events[k] || [] } });
     if (st.contacts && st.contacts.dirty) out.push({ kind: 'contact', id: 'main', ts: st.contacts.mt, data: { rows: st.contacts.rows } });
+    for (const [k, pm] of Object.entries(st.planner.meta)) {
+      if (!pm || !pm.dirty) continue;
+      const w = st.planner.weeks[k];
+      out.push(w ? { kind: 'planner', id: k, ts: pm.mt, data: w } : { kind: 'planner', id: k, ts: pm.mt, deleted: true });
+    }
+    if (st.planner.stdMeta.dirty) out.push({ kind: 'planner', id: 'std', ts: st.planner.stdMeta.mt, data: st.planner.std });
     return out;
   }
   function pushed(kind, id, ts) {
+    if (kind === 'planner') { const pm = id === 'std' ? st.planner.stdMeta : st.planner.meta[id]; if (pm && pm.mt === ts) pm.dirty = false; return; }
     if (kind === 'contact') { if (st.contacts && st.contacts.mt === ts) st.contacts.dirty = false; return; }
     if (kind === 'event') { const m = st.evMeta[id]; if (m && m.mt === ts) m.dirty = false; return; }
     const m = findMemo(id);
@@ -377,6 +390,7 @@
     $('vCal').hidden = view !== 'cal';
     $('vTrash').hidden = view !== 'trash';
     $('vPeople').hidden = view !== 'people';
+    $('vPlan').hidden = view !== 'plan';
     $('vSet').hidden = view !== 'set';
     $('fab').hidden = view !== 'memos';
     renderSync();
@@ -385,6 +399,7 @@
     if (view === 'trash') renderTrash();
     if (view === 'set') renderSet();
     if (view === 'people') renderPeople();
+    if (view === 'plan') renderPlan();
     if (view !== 'people' && peopleEditing) setPeopleEdit(false);
   }
 
@@ -738,6 +753,152 @@
     }
   };
 
+  // ───────── 주간 플래너 (PC와 같은 데이터 · 같은 계산) ─────────
+  const PL_EN = ['월', '화', '수', '목', '금', '토', '일'];
+  const PL_COLORS = ['peach', 'mint', 'sky', 'lav', 'lemon', 'pink', 'stripe', 'dot'];
+  const isT = (v) => /^\d{2}:\d{2}$/.test(v || '');
+  function plWeek(w) {
+    // 받은 주를 안전하게 정리 (테이프·스티커 등 휴대폰에서 안 쓰는 칸도 그대로 보관)
+    w = w && typeof w === 'object' ? w : {};
+    const days = Array.from({ length: 7 }, (_, i) => {
+      const d = (Array.isArray(w.days) && w.days[i]) || {};
+      return { in: isT(d.in) ? d.in : '', out: isT(d.out) ? d.out : '', items: (Array.isArray(d.items) ? d.items : []).slice(0, 40).map((it) => ({ t: String((it && it.t) || '').slice(0, 300), d: !!(it && it.d) })) };
+    });
+    return { notes: String(w.notes || '').slice(0, 4000), days, tapes: Array.isArray(w.tapes) ? w.tapes : [], stickers: Array.isArray(w.stickers) ? w.stickers : [], habits: Array.isArray(w.habits) ? w.habits : [] };
+  }
+  function applyPlanner(item) {
+    const P = st.planner;
+    if (item.id === 'std') {
+      if (!item.deleted && item.data) P.std = { in: isT(item.data.in) ? item.data.in : '09:00', out: isT(item.data.out) ? item.data.out : '18:00', alpha: item.data.alpha == null ? null : item.data.alpha };
+      P.stdMeta = { mt: item.ts, dirty: false };
+    } else if (/^\d{4}-\d{2}-\d{2}$/.test(item.id)) {
+      if (item.deleted || !item.data) delete P.weeks[item.id]; else P.weeks[item.id] = plWeek(item.data);
+      P.meta[item.id] = { mt: item.ts, dirty: false };
+    }
+    if (view === 'plan') plRemote();
+  }
+  const plMonday = (d) => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
+  let plMon = plMonday(new Date());
+  const plDay = (i) => new Date(plMon.getFullYear(), plMon.getMonth(), plMon.getDate() + i);
+  const plKey = () => dateKey(plMon);
+  const plGet = () => st.planner.weeks[plKey()] || plWeek(null);
+  const toM = (t) => (isT(t) ? +t.slice(0, 2) * 60 + +t.slice(3) : null);
+  const fmtM = (m) => Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0');
+  function plOt(d, i) {
+    const a = toM(d.in); let b = toM(d.out);
+    const r = { e: 0, l: 0, w: 0 };
+    const u30 = (m) => Math.floor(Math.max(0, m) / 30) * 30;   // 연장근무는 30분 단위
+    if (i >= 5) { if (a != null && b != null) { if (b < a) b += 1440; r.w = u30(b - a); } return r; }
+    if (a != null) r.e = u30(toM(st.planner.std.in) - a);
+    if (b != null) { if (a != null && b < a) b += 1440; r.l = u30(b - toM(st.planner.std.out)); }
+    return r;
+  }
+  function plSave(w) {
+    const k = plKey();
+    const empty = !w.notes && !w.tapes.length && !w.stickers.length && w.days.every((d) => !d.in && !d.out && !d.items.some((x) => x.t.trim()));
+    const clean = { ...w, days: w.days.map((d) => { const items = d.items.slice(); while (items.length && !items[items.length - 1].t.trim()) items.pop(); return { ...d, items }; }) };
+    if (empty) delete st.planner.weeks[k]; else st.planner.weeks[k] = clean;
+    const old = st.planner.meta[k];
+    st.planner.meta[k] = { mt: Math.max(Date.now(), ((old && old.mt) || 0) + 1), dirty: true };
+    saveState();
+    scheduleSync();
+  }
+  let plW = null, plPending = false;
+  function plRemote() {
+    // 쓰는 중이면 손 뗀 뒤에 다시 그림
+    if ($('vPlan').contains(document.activeElement) && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) { plPending = true; return; }
+    renderPlan();
+  }
+  function renderPlan() {
+    plW = JSON.parse(JSON.stringify(plGet()));
+    const th = plDay(3), first = plMonday(new Date(th.getFullYear(), th.getMonth(), 1));
+    let n = Math.round((plMon - first) / (7 * DAY)) + 1;
+    if (new Date(first.getTime() + 3 * DAY).getMonth() !== th.getMonth()) n -= 1;
+    const a = plDay(0), b = plDay(6);
+    $('plLabel').textContent = (th.getMonth() + 1) + '월 ' + n + '주차';
+    $('plRange').textContent = (a.getMonth() + 1) + '. ' + a.getDate() + ' – ' + (b.getMonth() + 1) + '. ' + b.getDate();
+    $('plToday').classList.toggle('on', plKey() === dateKey(plMonday(new Date())));
+    renderPlSum();
+    const todayK = dateKey(new Date());
+    $('plDays').innerHTML = plW.days.map((d, i) => {
+      const dt = plDay(i), today = dateKey(dt) === todayK, o = plOt(d, i);
+      const tapes = plW.tapes.filter((t) => t && t.a <= i && i <= t.b);
+      const tl = (f, label, chip) => '<div class="pdT"><span class="pk">' + label + '</span><input type="time" data-i="' + i + '" data-f="' + f + '" value="' + esc(d[f]) + '">' +
+        (!d[f] && today ? '<button class="pNow" type="button" data-i="' + i + '" data-f="' + f + '">지금</button>' : '') + chip + '</div>';
+      const items = d.items.map((it, j) => '<div class="pIt' + (it.d ? ' done' : '') + '"><button class="pCb" type="button" data-i="' + i + '" data-j="' + j + '" aria-label="완료">' + (it.d ? I.check : '') + '</button>' +
+        '<input class="pTx" type="text" maxlength="300" data-i="' + i + '" data-j="' + j + '" value="' + esc(it.t) + '"></div>').join('');
+      return '<div class="pDay' + (today ? ' today' : '') + (i >= 5 ? ' wk' + i : '') + '">' +
+        '<div class="pdH"><b>' + dt.getDate() + '</b><span>' + PL_EN[i] + '요일</span>' + (today ? '<em class="pTodayTag">오늘</em>' : '') +
+        tapes.map((t) => '<span class="pTape ' + (PL_COLORS.includes(t.c) ? t.c : 'peach') + '">' + esc(t.text || ' ') + '</span>').join('') + '</div>' +
+        '<div class="pdTimes">' + tl('in', '출근', o.e ? '<span class="pOt e">조출 ' + fmtM(o.e) + '</span>' : '') +
+        tl('out', '퇴근', o.l ? '<span class="pOt l">야근 ' + fmtM(o.l) + '</span>' : o.w ? '<span class="pOt w">근무 ' + fmtM(o.w) + '</span>' : '') + '</div>' +
+        '<div class="pItems">' + items + '<div class="pIt add"><span class="pCb"></span><input class="pTx" type="text" maxlength="300" data-i="' + i + '" data-add="1" placeholder="+ 할 일"></div></div>' +
+      '</div>';
+    }).join('');
+    if (document.activeElement !== $('plNotes')) $('plNotes').value = plW.notes;
+    $('plStdIn').value = st.planner.std.in; $('plStdOut').value = st.planner.std.out;
+  }
+  function renderPlSum() {
+    const wk = { e: 0, l: 0, w: 0 };
+    plW.days.forEach((d, i) => { const o = plOt(d, i); wk.e += o.e; wk.l += o.l; wk.w += o.w; });
+    const th = plDay(3), m = th.getMonth(), y = th.getFullYear();
+    const mo = { e: 0, l: 0, w: 0 };
+    for (let d = plMonday(new Date(y, m, 1)); d <= new Date(y, m + 1, 0); d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 7)) {
+      const k = dateKey(d), w = k === plKey() ? plW : st.planner.weeks[k];
+      if (!w) continue;
+      w.days.forEach((dd, i) => { const dt = new Date(d.getFullYear(), d.getMonth(), d.getDate() + i); if (dt.getMonth() !== m) return; const o = plOt(dd, i); mo.e += o.e; mo.l += o.l; mo.w += o.w; });
+    }
+    $('plSum').innerHTML = '<span>주간 합계 <b>' + fmtM(wk.e + wk.l + wk.w) + '</b></span><span>월간 합계 <b>' + fmtM(mo.e + mo.l + mo.w) + '</b></span>';
+  }
+  const plNowT = () => { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+  $('plPrev').innerHTML = I.left; $('plNext').innerHTML = I.right;
+  $('plPrev').onclick = () => { plMon = plDay(-7); renderPlan(); };
+  $('plNext').onclick = () => { plMon = plDay(7); renderPlan(); };
+  $('plToday').onclick = () => { plMon = plMonday(new Date()); renderPlan(); };
+  $('plStdBtn').onclick = () => { $('plStd').hidden = !$('plStd').hidden; };
+  $('plStdOk').onclick = () => {
+    st.planner.std = { ...st.planner.std, in: isT($('plStdIn').value) ? $('plStdIn').value : '09:00', out: isT($('plStdOut').value) ? $('plStdOut').value : '18:00' };
+    st.planner.stdMeta = { mt: Math.max(Date.now(), (st.planner.stdMeta.mt || 0) + 1), dirty: true };
+    saveState(); scheduleSync(); $('plStd').hidden = true; renderPlan(); toast('기준 시간을 바꿨어요');
+  };
+  $('plDays').addEventListener('click', (e) => {
+    const now = e.target.closest('.pNow');
+    if (now) { plW.days[+now.dataset.i][now.dataset.f] = plNowT(); plSave(plW); renderPlan(); return; }
+    const cb = e.target.closest('button.pCb');
+    if (cb) { const it = plW.days[+cb.dataset.i].items[+cb.dataset.j]; if (it && it.t.trim()) { it.d = !it.d; plSave(plW); renderPlan(); } }
+  });
+  $('plDays').addEventListener('change', (e) => {
+    const t = e.target;
+    if (t.type === 'time') { plW.days[+t.dataset.i][t.dataset.f] = isT(t.value) ? t.value : ''; plSave(plW); renderPlan(); }
+  });
+  $('plDays').addEventListener('input', (e) => {
+    const t = e.target; if (!t.classList.contains('pTx')) return;
+    const d = plW.days[+t.dataset.i];
+    if (t.dataset.add) {
+      if (!t.value) return;
+      d.items.push({ t: t.value, d: false }); plSave(plW);
+      const i = t.dataset.i; renderPlan();
+      const ins = $('plDays').querySelectorAll('.pTx[data-i="' + i + '"]:not([data-add])'); const last = ins[ins.length - 1];
+      if (last) { last.focus(); last.setSelectionRange(last.value.length, last.value.length); }
+      return;
+    }
+    d.items[+t.dataset.j].t = t.value; plSave(plW);
+  });
+  $('plDays').addEventListener('keydown', (e) => {
+    const t = e.target; if (!t.classList || !t.classList.contains('pTx') || e.isComposing) return;
+    if (e.key === 'Enter') { e.preventDefault(); const add = $('plDays').querySelector('.pTx[data-add][data-i="' + t.dataset.i + '"]'); if (add) add.focus(); }
+  });
+  $('plDays').addEventListener('focusout', (e) => {
+    const t = e.target; if (!t.classList || !t.classList.contains('pTx') || t.dataset.add) return;
+    setTimeout(() => {
+      const d = plW.days[+t.dataset.i];
+      if (d && d.items[+t.dataset.j] && !d.items[+t.dataset.j].t.trim()) { d.items.splice(+t.dataset.j, 1); plSave(plW); renderPlan(); }
+      else if (plPending && !$('vPlan').contains(document.activeElement)) { plPending = false; renderPlan(); }
+    }, 0);
+  });
+  $('plNotes').addEventListener('input', (e) => { plW.notes = e.target.value; plSave(plW); });
+  $('plNotes').addEventListener('blur', () => { if (plPending) { plPending = false; renderPlan(); } });
+
   // 설정
   function renderSet() {
     $('acctName').textContent = (session && session.username) || '';
@@ -752,12 +913,19 @@
     $('calScaleV').textContent = (prefs.calScale || 100) + '%';
     window.M.syncRanges();
     $('avatar').textContent = ((session && session.username) || '?').slice(0, 1).toUpperCase();
-    $('skins').innerHTML = Object.keys(SKINS).filter((id) => !SKINS[id].season || window.M.SEASONS_ON || prefs.skin === id).map((id) => {
+    const GROUPS = [['기본 스킨', ['lav']], ['컬러 스킨', ['pink', 'cotton', 'blue', 'midnight']], ['디자인 스킨', ['peach', 'forest', 'honey', 'sky', 'aurora']],
+      ['페이퍼 스킨', ['office', 'sage', 'berry']], ['말랑 스킨', ['draw']], ['시즌 스킨', ['halloween', 'xmas', 'ghalloween', 'gxmas']]];
+    const listed = new Set(GROUPS.flatMap((g) => g[1]));
+    GROUPS[1][1] = GROUPS[1][1].concat(Object.keys(SKINS).filter((id) => !listed.has(id)));
+    const visible = (id) => SKINS[id] && (!SKINS[id].season || window.M.SEASONS_ON || prefs.skin === id);
+    const btn = (id) => {
       const k = SKINS[id];
       return '<button class="skin' + (prefs.skin === id ? ' on' : '') + '" type="button" data-skin="' + id + '" aria-pressed="' + (prefs.skin === id) + '" style="--sc:' + k.a1 + ';--sg:' + k.glow + '">' +
-        '<span class="prev" style="background:linear-gradient(135deg,' + k.b[0] + ',' + k.b[1] + ' 55%,' + k.b[2] + ')"><i style="background:' + rgba(k.pal[0][0], 0.9) + '"></i><i style="background:' + rgba(k.pal[1][1], 0.9) + '"></i><b style="background:' + k.a1 + '"></b></span>' +
+        '<span class="prev" style="background:linear-gradient(135deg,' + k.b[0] + ',' + k.b[1] + ' 55%,' + k.b[2] + ')">' +
+        (k.deco ? '<img class="pbun" src="' + k.bunny + '" alt="">' : '<i style="background:' + rgba(k.pal[0][0], 0.9) + '"></i><i style="background:' + rgba(k.pal[1][1], 0.9) + '"></i>') + '<b style="background:' + k.a1 + '"></b></span>' +
         '<span>' + k.name + '</span></button>';
-    }).join('');
+    };
+    $('skins').innerHTML = GROUPS.map(([name, ids]) => { const v = ids.filter(visible); return v.length ? '<div class="skgh">' + name + '</div><div class="skg">' + v.map(btn).join('') + '</div>' : ''; }).join('');
     $('fonts').innerHTML = FONTS.map((f) =>
       '<button class="font' + (prefs.font === f.id ? ' on' : '') + '" type="button" data-font="' + f.id + '" aria-pressed="' + (prefs.font === f.id) + '"><span><span style="font-family:' + f.fam.replace(/"/g, '') + ';font-size:' + (f.size + 2) + 'px">오늘의 메모, 가나다</span><span class="fn">' + f.name + '</span></span></button>'
     ).join('');
