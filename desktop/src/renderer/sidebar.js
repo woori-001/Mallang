@@ -214,8 +214,7 @@
           '<button class="ib" type="button" data-act="fold" aria-label="' + (m.folded ? '펼치기' : '접기') + '" aria-expanded="' + !m.folded + '" title="' + (m.folded ? '펼치기' : '접기') + '">' +
             ICONS.chev.replace('class="chev"', 'class="chev" style="transform:rotate(' + (m.folded ? 0 : 180) + 'deg)"') + '</button>' +
           '<button class="rmain" type="button" data-act="focus" title="메모 보기">' +
-            '<span class="rtitle">' + (m.mark ? markSvg(m.mark, m.markColor || '#E8456B', 16) : '') + '<span>' + esc(m.title || '제목 없음') + '</span>' +
-              (m.layer === 'top' ? '<em class="rchip">위</em>' : m.layer === 'bottom' ? '<em class="rchip">뒤</em>' : '') + '</span>' +
+            '<span class="rtitle">' + (m.mark ? markSvg(m.mark, m.markColor || '#E8456B', 16) : '') + '<span>' + esc(m.title || '제목 없음') + '</span></span>' +
           '</button>' +
           '<button class="ib" type="button" data-act="hide" aria-label="' + (m.hidden ? '다시 보이기' : '숨기기') + '" title="' + (m.hidden ? '다시 보이기' : '숨기기') + '">' + (m.hidden ? ICONS.eyeOff : ICONS.eye) + '</button>' +
           '<button class="ib del" type="button" data-act="del" aria-label="삭제" title="삭제">' + ICONS.trash + '</button>' +
