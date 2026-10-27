@@ -764,3 +764,6 @@ html.dark .tbar .tb::after { background: #E9ECF1; color: #16181D; }
 /* 계정 탭 아래 '이 PC 설정' (목록바 위치 · 시작·백업 · 단축키·정보) */
 .acSettings { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
 .acSetHead { font-size: 12px; font-weight: 800; color: var(--sub); padding: 8px 2px 0; border-top: 1px solid var(--line-soft); }
+
+/* 포레스트 말랑이 그림은 양옆 여백이 넓어서 아이콘에서는 크게 */
+.skin .swDraw.swWide img { width: 52px; max-width: none; }
