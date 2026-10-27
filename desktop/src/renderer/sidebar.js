@@ -712,10 +712,8 @@
           : '<span class="sw" style="background:linear-gradient(135deg,' + k.b[0] + ',' + k.b[2] + ')"><b style="background:linear-gradient(135deg,' + k.a1 + ',' + k.a2 + ')"></b></span>') +
         '<span class="sn">' + esc(k.name) + (k.season && !openSk.includes(id) ? '<em class="sbeta">베타</em>' : '') + '</span></button>';
     };
-    $('skins').innerHTML = GROUPS.map(([name, ids]) => {
-      const v = ids.filter(visible);
-      return v.length ? '<div class="skgh">' + esc(name) + '</div><div class="skg">' + v.map(btn).join('') + '</div>' : '';
-    }).join('');
+    // 분류 순서대로 아이콘만 이어서 (분류 제목 없이 짧게)
+    $('skins').innerHTML = '<div class="skg">' + GROUPS.flatMap((g) => g[1]).filter(visible).map(btn).join('') + '</div>';
     if (document.activeElement !== $('fontSel')) {
       $('fontSel').innerHTML = FONTS.map((f) => '<option value="' + f.id + '"' + (s.font === f.id ? ' selected' : '') + '>' + esc(f.name) + '</option>').join('');
     }

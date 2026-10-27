@@ -925,7 +925,7 @@
           : '<span class="sw" style="background:linear-gradient(135deg,' + k.b[0] + ',' + k.b[2] + ')"><b style="background:linear-gradient(135deg,' + k.a1 + ',' + k.a2 + ')"></b></span>') +
         '<span class="sn">' + k.name + '</span></button>';
     };
-    $('skins').innerHTML = GROUPS.map(([name, ids]) => { const v = ids.filter(visible); return v.length ? '<div class="skgh">' + name + '</div><div class="skg">' + v.map(btn).join('') + '</div>' : ''; }).join('');
+    $('skins').innerHTML = '<div class="skg">' + GROUPS.flatMap((g) => g[1]).filter(visible).map(btn).join('') + '</div>';
     $('fonts').innerHTML = FONTS.map((f) =>
       '<button class="font' + (prefs.font === f.id ? ' on' : '') + '" type="button" data-font="' + f.id + '" aria-pressed="' + (prefs.font === f.id) + '"><span><span style="font-family:' + f.fam.replace(/"/g, '') + ';font-size:' + (f.size + 2) + 'px">오늘의 메모, 가나다</span><span class="fn">' + f.name + '</span></span></button>'
     ).join('');
