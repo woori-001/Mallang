@@ -517,10 +517,10 @@ html.g-aurora .bg::before {
 /* 스카이: 메모 화면에서만 배 타는 말랑이 (목록이 배 뒤로 지나감) */
 html.g-sky body:has(#vMemos:not([hidden]))::after {
   content: ""; position: fixed; z-index: 4; pointer-events: none; left: 14px; bottom: calc(80px + var(--safe-b)); width: 130px; height: 81px;
-  background: url(sky-boat.png) center / contain no-repeat; transform-origin: 50% 90%; animation: boatBob 4.2s ease-in-out infinite, boatSail 14s ease-in-out infinite;
+  background: url(sky-boat.png) center / contain no-repeat; transform-origin: 50% 90%; animation: boatBob 4.2s ease-in-out infinite, boatSail 14s ease-in-out infinite; will-change: transform, rotate, translate; backface-visibility: hidden;
 }
-@keyframes boatBob { 0%, 100% { rotate: -3deg; translate: 0 0; } 50% { rotate: 3deg; translate: 0 -3px; } }
-@keyframes boatSail { 0%, 100% { margin-left: 0; } 50% { margin-left: 22px; } }
+@keyframes boatBob { 0%, 100% { rotate: -2deg; transform: translateY(0); } 50% { rotate: 2deg; transform: translateY(-3px); } }
+@keyframes boatSail { 0%, 100% { translate: 0 0; } 50% { translate: 22px 0; } }
 html.g-sky #vMemos { padding-bottom: 90px; }
 @media (prefers-reduced-motion: reduce) { html.g-aurora .bg::before, html.g-sky body::after { animation: none; } }
 /* 디자인 스킨: 카드는 맑은 흰 유리로 */

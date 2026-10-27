@@ -664,13 +664,13 @@ html.g-sky .panel {
 }
 html.g-sky .panel::after {
   content: ""; position: absolute; z-index: 4; right: 16px; bottom: 34px; width: 150px; height: 93px; pointer-events: none;
-  background: url(sky-boat.png) center / contain no-repeat; transform-origin: 50% 90%; animation: boatBob 4.2s ease-in-out infinite, boatSail 14s ease-in-out infinite;
+  background: url(sky-boat.png) center / contain no-repeat; transform-origin: 50% 90%; animation: boatBob 4.2s ease-in-out infinite, boatSail 14s ease-in-out infinite; will-change: transform, rotate, translate; backface-visibility: hidden;
 }
 /* 배는 메모 탭에서만, 목록 맨 끝은 배 위까지 올라오게 여유를 둠 (스크롤하면 메모가 배 뒤로 지나감) */
 html.g-sky .panel:not(:has(#vMemo:not([hidden])))::after { display: none; }
 html.g-sky .list { padding-bottom: 96px; }
-@keyframes boatBob { 0%, 100% { rotate: -3deg; translate: 0 0; } 50% { rotate: 3deg; translate: 0 -3px; } }
-@keyframes boatSail { 0%, 100% { margin-right: 0; } 50% { margin-right: 22px; } }
+@keyframes boatBob { 0%, 100% { rotate: -2deg; transform: translateY(0); } 50% { rotate: 2deg; transform: translateY(-3px); } }
+@keyframes boatSail { 0%, 100% { translate: 0 0; } 50% { translate: -22px 0; } }
 @media (prefers-reduced-motion: reduce) { html.g-sky .panel::after { animation: none; } }
 html.g-sky .calcard, html.g-sky .box, html.g-sky .search, html.g-sky .pill, html.g-sky .ev, html.g-sky .ghead,
 html.g-sky .toggle:not(.mini), html.g-sky .acHero, html.g-sky .thInfo, html.g-sky .bkForm, html.g-sky .pinbtn, html.g-sky .navb { background: rgba(255, 255, 255, .82); }
