@@ -223,3 +223,19 @@ html.halloween .dh.sun .n { color: #E07B2E; } html.xmas .dh.sun .n { color: #2F8
 .sum .sl span { font-weight: 700; }
 .sum .sl b { font-size: 14px; }
 .sum .std { margin-top: 2px; }
+html.g-forest { --hd-ink: var(--ink); --hd-sub: var(--sub); }
+html.g-forest .pl { background-image: url(leaf-top.svg), url(leaf-bot.svg), linear-gradient(180deg, rgba(47, 120, 88, .18), rgba(47, 120, 88, .04) 45%, rgba(47, 120, 88, .14)), url(wood-white.svg);
+  background-position: right -34px top -26px, left -26px bottom -34px, 0 0, 0 0; background-size: 170px auto, 150px auto, 100% 100%, 168px auto; background-repeat: no-repeat, no-repeat, no-repeat, repeat; }
+html.g-peach { --hd-ink: var(--ink); --hd-sub: var(--sub); }
+html.g-peach .pl { background-image: url(peach-fruit.png), url(blossom-white.png), url(blossom-pink.png), url(sakura-petals.svg), linear-gradient(180deg, rgba(250, 176, 160, .26), rgba(250, 186, 176, .05) 45%, rgba(200, 232, 196, .18));
+  background-position: right -12px top -10px, right 54px top -12px, left -14px bottom -12px, 0 0, 0 0; background-size: 64px auto, 34px auto, 50px auto, 170px auto, 100% 100%; background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat; }
+html.g-lemon { --hd-ink: var(--ink); --hd-sub: var(--sub); }
+html.g-lemon .pl { background-image: url(lemon-slice.png), url(daisy-white.png), url(lemon-slice.png), url(soda-bubbles.svg), linear-gradient(180deg, rgba(255, 220, 90, .24), rgba(255, 230, 120, .05) 45%, rgba(200, 232, 140, .16));
+  background-position: right -14px top -12px, right 50px top -12px, left -16px bottom -16px, 0 0, 0 0; background-size: 62px auto, 34px auto, 54px auto, 160px auto, 100% 100%; background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat; }
+html.g-sky { --hd-ink: var(--ink); --hd-sub: var(--sub); }
+html.g-sky .pl { background-image: url(sky-cloud.svg), url(sky-cloud.svg), url(sky-wave.svg), linear-gradient(180deg, rgba(150, 205, 250, .24), rgba(190, 225, 252, .05) 45%, rgba(110, 180, 235, .22));
+  background-position: right -14px top -6px, right 80px top -14px, 0 calc(100% - 4px), 0 0; background-size: 80px auto, 46px auto, 80px 16px, 100% 100%; background-repeat: no-repeat, no-repeat, repeat-x, no-repeat; }
+html.g-aurora { --card: rgba(255, 255, 255, .72); --hd-ink: var(--ink); --hd-sub: var(--sub); }
+html.g-aurora .pl { background-image: url(aur-spark-iris.png), url(aur-spark-gold.png), url(aur-pearl.png), url(aurora-stars.svg), url(aurora-bands.svg), radial-gradient(120% 70% at 85% 0%, rgba(120, 140, 255, .14), transparent 60%);
+  background-position: right 14px top 6px, right 70px top 8px, left -6px bottom 14px, 0 0, 0 0, 0 0; background-size: 28px auto, 18px auto, 22px auto, 220px auto, 100% 100%, 100% 100%; background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat, no-repeat; }
+html.g-aurora .bun img { filter: drop-shadow(0 0 6px rgba(150, 220, 255, .6)); }

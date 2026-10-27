@@ -86,6 +86,7 @@
     st.setProperty('--sat', sk.sat);
     const sideA = (S.settings.sideAlpha != null ? S.settings.sideAlpha : 55) / 100;
     // 계절 스킨 목록바는 밤하늘·소나무 색이 살아 있게 조금 더 진하게 (조절바로 여전히 조절)
+    panel.style.setProperty('--side-a', String(sideA));   // 장식 그라데이션도 투명도를 따름
     panel.style.background = sk.paper ? sk.base : 'rgba(' + (sk.panelRGB || 'var(--glass)') + ',' + (sk.panelRGB ? Math.round((0.35 + 0.65 * sideA) * 100) / 100 : sideA) + ')';
     updateSky(sk.season);
     const d = new Date();
@@ -209,12 +210,12 @@
     } else {
       const rowOf = (m) => {
         const a = m.hidden ? 0.4 : 0.92;
-        return '<div class="row' + (m.hidden ? ' hidden' : '') + '" draggable="true" data-id="' + m.id + '" title="끌어서 그룹 폴더에 넣거나 뺄 수 있어요" style="background:' + grad(sk, m.slot || 0, a) + '">' +
+        return '<div class="row' + (m.hidden ? ' hidden' : '') + '" draggable="true" data-id="' + m.id + '" title="' + esc(metaOf(m)) + ' — 끌어서 그룹 폴더에 넣거나 뺄 수 있어요" style="background:' + grad(sk, m.slot || 0, a) + '">' +
           '<button class="ib" type="button" data-act="fold" aria-label="' + (m.folded ? '펼치기' : '접기') + '" aria-expanded="' + !m.folded + '" title="' + (m.folded ? '펼치기' : '접기') + '">' +
             ICONS.chev.replace('class="chev"', 'class="chev" style="transform:rotate(' + (m.folded ? 0 : 180) + 'deg)"') + '</button>' +
           '<button class="rmain" type="button" data-act="focus" title="메모 보기">' +
-            '<span class="rtitle">' + (m.mark ? markSvg(m.mark, m.markColor || '#E8456B', 16) : '') + '<span>' + esc(m.title || '제목 없음') + '</span></span>' +
-            '<span class="rmeta">' + esc(metaOf(m)) + '</span>' +
+            '<span class="rtitle">' + (m.mark ? markSvg(m.mark, m.markColor || '#E8456B', 16) : '') + '<span>' + esc(m.title || '제목 없음') + '</span>' +
+              (m.layer === 'top' ? '<em class="rchip">위</em>' : m.layer === 'bottom' ? '<em class="rchip">뒤</em>' : '') + '</span>' +
           '</button>' +
           '<button class="ib" type="button" data-act="hide" aria-label="' + (m.hidden ? '다시 보이기' : '숨기기') + '" title="' + (m.hidden ? '다시 보이기' : '숨기기') + '">' + (m.hidden ? ICONS.eyeOff : ICONS.eye) + '</button>' +
           '<button class="ib del" type="button" data-act="del" aria-label="삭제" title="삭제">' + ICONS.trash + '</button>' +
@@ -491,11 +492,12 @@
   });
   $('newMemo').addEventListener('click', () => api.create({}));
   // 자동 정렬 (가로 / 세로) — 몇 줄이 되는지 먼저 알려 주고 정렬
-  const ROWI = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="7" height="6" rx="1.5"/><rect x="14" y="4" width="7" height="6" rx="1.5"/><rect x="3" y="14" width="7" height="6" rx="1.5"/></svg>';
-  const COLI = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="3" width="6" height="7" rx="1.5"/><rect x="4" y="14" width="6" height="7" rx="1.5"/><rect x="14" y="3" width="6" height="7" rx="1.5"/></svg>';
+  // 가로 정렬: 칸 세 개가 옆으로 + 오른쪽 화살표 / 세로 정렬: 칸 세 개가 아래로 + 아래 화살표
+  const ROWI = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="5" height="6" rx="1.3"/><rect x="9.5" y="5" width="5" height="6" rx="1.3"/><rect x="17" y="5" width="5" height="6" rx="1.3"/><path d="M3 17.5h17M17 14.5l3 3-3 3"/></svg>';
+  const COLI = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="6" height="5" rx="1.3"/><rect x="5" y="9.5" width="6" height="5" rx="1.3"/><rect x="5" y="17" width="6" height="5" rx="1.3"/><path d="M17.5 3v17M14.5 17l3 3 3-3"/></svg>';
   $('arrRow').innerHTML = ROWI + '<span>가로 정렬</span>';
   $('arrCol').innerHTML = COLI + '<span>세로 정렬</span>';
-  $('arrUndo').innerHTML = '<span>↶ 정렬 되돌리기</span>';
+  $('arrUndo').innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg><span>정렬 되돌리기</span>';
   let arrUndoT = null;
   async function arrange(mode) {
     const p = await api.arrangePlan(mode);
@@ -525,7 +527,7 @@
   $('hideAll').innerHTML = ICONS.eyeOff + '<span>숨기기</span>';
   $('showAll').innerHTML = ICONS.eye + '<span>보이기</span>';
   $('topAll').innerHTML = ICONS.front + '<span>항상 위</span>';
-  $('normAll').innerHTML = '<span>보통</span>';
+  $('normAll').innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="7" width="16" height="10" rx="2.5"/></svg><span>보통</span>';
   $('bottomAll').innerHTML = ICONS.back + '<span>항상 아래</span>';
   $('hideAll').addEventListener('click', () => api.hideAll());
   $('showAll').addEventListener('click', () => api.showAll());
@@ -534,6 +536,8 @@
   $('bottomAll').addEventListener('click', () => api.layerAll('bottom'));
   $('foldAll').title = '모두 접기 (Ctrl+Alt+↑)';
   $('unfoldAll').title = '모두 펴기 (Ctrl+Alt+↓)';
+  // 도구 막대 버튼은 아이콘만 보이고, 마우스를 올리면 바로 이름이 떠요 (기본 title 말풍선은 늦게 떠서 data-tip 사용)
+  document.querySelectorAll('.tbar .tb').forEach((b) => { if (b.title && !b.dataset.full) { b.dataset.full = b.title; } b.removeAttribute('title'); b.setAttribute('aria-label', b.dataset.tip); });
   $('foldAll').addEventListener('click', () => api.foldAll());
   $('unfoldAll').addEventListener('click', () => api.unfoldAll());
   $('q').addEventListener('input', (e) => { q = e.target.value.trim(); renderMemos(); });
@@ -695,12 +699,23 @@
   function renderStyle() {
     const s = S.settings;
     const openSk = S.openSkins || [];
-    $('skins').innerHTML = Object.keys(SKINS).filter((id) => !SKINS[id].season || openSk.includes(id) || S.isAdmin || s.skin === id).map((id) => {
+    // 스킨은 분류별로 묶어서 (계절 스킨은 공개됐거나 관리자이거나 지금 쓰는 중일 때만)
+    const GROUPS = [['기본 스킨', ['lav']], ['컬러 스킨', ['pink', 'cotton', 'blue', 'midnight']], ['디자인 스킨', ['peach', 'forest', 'honey', 'sky', 'aurora']],
+      ['페이퍼 스킨', ['office', 'sage', 'berry']], ['말랑 스킨', ['draw']], ['시즌 스킨', ['halloween', 'xmas', 'ghalloween', 'gxmas']]];
+    const listed = new Set(GROUPS.flatMap((g) => g[1]));
+    const rest = Object.keys(SKINS).filter((id) => !listed.has(id));
+    if (rest.length) GROUPS[1][1] = GROUPS[1][1].concat(rest);   // 혹시 빠진 스킨은 컬러 스킨에
+    const visible = (id) => SKINS[id] && (!SKINS[id].season || openSk.includes(id) || S.isAdmin || s.skin === id);
+    const btn = (id) => {
       const k = SKINS[id];
       return '<button class="skin' + (s.skin === id ? ' on' : '') + '" type="button" data-skin="' + id + '" aria-pressed="' + (s.skin === id) + '" title="' + esc(k.name) + '" style="--sc:' + k.a1 + '">' +
-        (k.bunny ? '<span class="sw swDraw" style="background:' + (k.season ? k.b[0] : '') + '"><img src="' + k.bunny + '" alt="" draggable="false"></span>'
+        (k.bunny ? '<span class="sw swDraw' + (k.deco || k.glassSeason ? ' swDeco' : '') + '" style="background:' + (k.season || k.deco ? k.b[0] : '') + '"><img src="' + k.bunny + '" alt="" draggable="false"></span>'
           : '<span class="sw" style="background:linear-gradient(135deg,' + k.b[0] + ',' + k.b[2] + ')"><b style="background:linear-gradient(135deg,' + k.a1 + ',' + k.a2 + ')"></b></span>') +
         '<span class="sn">' + esc(k.name) + (k.season && !openSk.includes(id) ? '<em class="sbeta">베타</em>' : '') + '</span></button>';
+    };
+    $('skins').innerHTML = GROUPS.map(([name, ids]) => {
+      const v = ids.filter(visible);
+      return v.length ? '<div class="skgh">' + esc(name) + '</div><div class="skg">' + v.map(btn).join('') + '</div>' : '';
     }).join('');
     if (document.activeElement !== $('fontSel')) {
       $('fontSel').innerHTML = FONTS.map((f) => '<option value="' + f.id + '"' + (s.font === f.id ? ' selected' : '') + '>' + esc(f.name) + '</option>').join('');

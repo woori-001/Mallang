@@ -176,7 +176,10 @@ body.open .tabArrow { transform: rotate(180deg); }
 .srow { display: flex; justify-content: space-between; align-items: center; }
 .sval { font-size: 13px; color: var(--sub); }
 input[type="range"] { width: 100%; }
-.skins { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px 4px; }
+.skins { display: flex; flex-direction: column; gap: 6px; }
+.skins .skgh { font-size: 11.5px; font-weight: 700; color: var(--sub); padding: 4px 2px 0; }
+.skins .skg { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px 4px; }
+.skin .swDeco { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .06); }
 .skin { border: none; background: transparent; padding: 2px 0; display: flex; flex-direction: column; align-items: center; gap: 5px; }
 .skin .sw {
   width: 40px; height: 40px; border-radius: 14px; position: relative; display: block;
@@ -599,3 +602,165 @@ html.g-halloween .sky .bat svg path { fill: #120B22; }
 html.draw .ptab { background: var(--ink); color: var(--paper-bg, #FBFAF5); opacity: 1; }
 /* 플래너가 펼쳐져 있는 동안엔 플래너 창이 탭을 함께 끌고 나가므로 여기 탭은 숨김 */
 body.plOpen .tab { visibility: hidden; }
+/* ───────── 포레스트 그린(숲속 유리): 화이트 우드 + 숲빛 + 나뭇잎 가지 (모눈 없음) ───────── */
+html.g-forest .panel {
+  background-image: url(leaf-top.svg), url(leaf-bot.svg),
+    linear-gradient(180deg, rgba(47, 120, 88, .22), rgba(47, 120, 88, .06) 38%, rgba(47, 120, 88, .04) 62%, rgba(47, 120, 88, .20)),
+    url(wood-white.svg) !important;
+  background-position: right -34px top -30px, left -26px bottom 18px, 0 0, 0 0 !important;
+  background-size: 150px auto, 150px auto, 100% 100%, 168px auto !important;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat !important;
+}
+html.g-forest .calcard, html.g-forest .box, html.g-forest .search, html.g-forest .pill, html.g-forest .ev, html.g-forest .ghead,
+html.g-forest .toggle:not(.mini), html.g-forest .acHero, html.g-forest .thInfo, html.g-forest .bkForm, html.g-forest .pinbtn, html.g-forest .navb { background: rgba(255, 255, 255, .78); }
+html.g-forest .seg { background: rgba(47, 120, 88, .10); }
+html.g-forest .segb { color: var(--sub); }
+html.g-forest .segb.on { color: var(--a1); }
+html.g-forest .todaytxt, html.g-forest .sellabel, html.g-forest .foot, html.g-forest .footrow .ctext, html.g-forest .view > .empty, html.g-forest .evlist > .empty,
+html.g-forest .list > .empty, html.g-forest .pShared, html.g-forest .nogrp, html.g-forest #vAcct .slabel, html.g-forest .gempty { color: var(--sub); }
+html.g-forest .calDeco .calBun { width: 104px !important; right: 4px !important; bottom: 14px !important; }
+/* ───────── 피치 블라썸: 복숭아 핑크 유리 + 3D 벚꽃 (모눈 없음) ───────── */
+html.g-peach .panel {
+  background-image: url(peach-fruit.png), url(blossom-white.png), url(blossom-pink.png), url(peach-fruit.png), url(blossom-white.png), url(blossom-pink.png),
+    url(sakura-petals.svg),
+    linear-gradient(180deg, rgba(250, 176, 160, .32), rgba(250, 186, 176, .06) 38%, rgba(236, 246, 226, .08) 64%, rgba(200, 232, 196, .24)) !important;
+  background-position: right -14px top 30px, right 54px top 4px, right 14px top 50%, left -14px bottom 80px, left 52px bottom 62px, left 30px bottom 112px, 0 0, 0 0 !important;
+  background-size: 74px auto, 36px auto, 22px auto, 60px auto, 32px auto, 22px auto, 170px auto, 100% 100% !important;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat, no-repeat !important;
+}
+html.g-peach .calcard, html.g-peach .box, html.g-peach .search, html.g-peach .pill, html.g-peach .ev, html.g-peach .ghead,
+html.g-peach .toggle:not(.mini), html.g-peach .acHero, html.g-peach .thInfo, html.g-peach .bkForm, html.g-peach .pinbtn, html.g-peach .navb { background: rgba(255, 255, 255, .8); }
+html.g-peach .seg { background: rgba(236, 120, 137, .10); }
+html.g-peach .segb { color: var(--sub); }
+html.g-peach .segb.on { color: var(--a1); }
+html.g-peach .todaytxt, html.g-peach .sellabel, html.g-peach .foot, html.g-peach .footrow .ctext, html.g-peach .view > .empty, html.g-peach .evlist > .empty,
+html.g-peach .list > .empty, html.g-peach .pShared, html.g-peach .nogrp, html.g-peach #vAcct .slabel, html.g-peach .gempty { color: var(--sub); }
+html.g-peach .calDeco .calBun { width: 78px !important; right: 8px !important; bottom: 4px !important; }
+/* ───────── 선샤인 레몬: 레몬빛 유리 + 탄산 방울 + 레몬 조각·데이지 (모눈 없음) ───────── */
+html.g-lemon .panel {
+  background-image: url(lemon-slice.png), url(daisy-white.png), url(daisy-white.png), url(lemon-slice.png), url(daisy-white.png),
+    url(soda-bubbles.svg),
+    linear-gradient(180deg, rgba(255, 220, 90, .30), rgba(255, 230, 120, .06) 38%, rgba(220, 240, 160, .06) 64%, rgba(200, 232, 140, .22)) !important;
+  background-position: right -18px top 30px, right 50px top 4px, left 44px bottom 64px, left -20px bottom 84px, right 16px top 50%, 0 0, 0 0 !important;
+  background-size: 70px auto, 38px auto, 34px auto, 62px auto, 24px auto, 160px auto, 100% 100% !important;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat, no-repeat !important;
+}
+html.g-lemon .calcard, html.g-lemon .box, html.g-lemon .search, html.g-lemon .pill, html.g-lemon .ev, html.g-lemon .ghead,
+html.g-lemon .toggle:not(.mini), html.g-lemon .acHero, html.g-lemon .thInfo, html.g-lemon .bkForm, html.g-lemon .pinbtn, html.g-lemon .navb { background: rgba(255, 255, 255, .82); }
+html.g-lemon .seg { background: rgba(242, 194, 27, .14); }
+html.g-lemon .segb { color: var(--sub); }
+html.g-lemon .segb.on { color: #B8860B; }
+html.g-lemon .todaytxt, html.g-lemon .sellabel, html.g-lemon .foot, html.g-lemon .footrow .ctext, html.g-lemon .view > .empty, html.g-lemon .evlist > .empty,
+html.g-lemon .list > .empty, html.g-lemon .pShared, html.g-lemon .nogrp, html.g-lemon #vAcct .slabel, html.g-lemon .gempty { color: var(--sub); }
+html.g-lemon .calDeco .calBun { width: 78px !important; right: 8px !important; bottom: 4px !important; }
+/* ───────── 스카이 블루(세일러): 하늘빛 유리 + 구름 + 아래쪽 물결, 배 타는 말랑이가 둥실둥실 ───────── */
+html.g-sky .panel {
+  background-image: url(sky-cloud.svg), url(sky-cloud.svg), url(sky-cloud.svg),
+    url(sky-wave.svg), url(sky-wave.svg),
+    linear-gradient(180deg, rgba(150, 205, 250, .30), rgba(190, 225, 252, .06) 34%, rgba(170, 215, 245, .08) 70%, rgba(110, 180, 235, .34)) !important;
+  background-position: right -20px top 34px, right 70px top 6px, left -26px top 46%, 0 calc(100% - 66px), 22px calc(100% - 48px), 0 0 !important;
+  background-size: 92px auto, 54px auto, 70px auto, 80px 16px, 80px 16px, 100% 100% !important;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat-x, repeat-x, no-repeat !important;
+}
+html.g-sky .panel::after {
+  content: ""; position: absolute; z-index: 4; right: 16px; bottom: 34px; width: 150px; height: 93px; pointer-events: none;
+  background: url(sky-boat.png) center / contain no-repeat; transform-origin: 50% 90%; animation: boatBob 4.2s ease-in-out infinite, boatSail 14s ease-in-out infinite;
+}
+/* 배는 메모 탭에서만, 목록 맨 끝은 배 위까지 올라오게 여유를 둠 (스크롤하면 메모가 배 뒤로 지나감) */
+html.g-sky .panel:not(:has(#vMemo:not([hidden])))::after { display: none; }
+html.g-sky .list { padding-bottom: 96px; }
+@keyframes boatBob { 0%, 100% { rotate: -3deg; translate: 0 0; } 50% { rotate: 3deg; translate: 0 -3px; } }
+@keyframes boatSail { 0%, 100% { margin-right: 0; } 50% { margin-right: 22px; } }
+@media (prefers-reduced-motion: reduce) { html.g-sky .panel::after { animation: none; } }
+html.g-sky .calcard, html.g-sky .box, html.g-sky .search, html.g-sky .pill, html.g-sky .ev, html.g-sky .ghead,
+html.g-sky .toggle:not(.mini), html.g-sky .acHero, html.g-sky .thInfo, html.g-sky .bkForm, html.g-sky .pinbtn, html.g-sky .navb { background: rgba(255, 255, 255, .82); }
+html.g-sky .seg { background: rgba(74, 155, 232, .12); }
+html.g-sky .segb { color: var(--sub); }
+html.g-sky .segb.on { color: var(--a1); }
+html.g-sky .todaytxt, html.g-sky .sellabel, html.g-sky .foot, html.g-sky .footrow .ctext, html.g-sky .view > .empty, html.g-sky .evlist > .empty,
+html.g-sky .list > .empty, html.g-sky .pShared, html.g-sky .nogrp, html.g-sky #vAcct .slabel, html.g-sky .gempty { color: var(--sub); }
+html.g-sky .calDeco .calBun { width: 78px !important; right: 8px !important; bottom: 4px !important; }
+/* ───────── 오로라 글래스: 원래 밝은 유리 그대로 + 위아래 오로라 띠 + 직접 그린 반짝이·진주 ───────── */
+html.g-aurora .panel {
+  /* 밝은 오로라 유리 + 오로라 나이트를 반반: 위는 연한 페리윙클, 아래로 갈수록 맑은 푸른 보랏빛 (투명도 조절을 그대로 따름) */
+  background-color: transparent !important;
+  background-image:
+    url(aur-spark-gold.png), url(aur-spark-purple.png), url(aur-pearl.png), url(aur-spark-iris.png), url(aur-pearl-gold.png), url(aur-pearl-iris.png),
+    url(aurora-bands.svg),
+    radial-gradient(100% 35% at 85% 0%, rgba(140, 150, 255, .18), transparent 65%),
+    radial-gradient(110% 40% at 15% 100%, rgba(170, 140, 255, .20), transparent 60%),
+    linear-gradient(160deg, rgba(255, 255, 255, .14), rgba(255, 255, 255, 0) 35%),
+    linear-gradient(180deg,
+      rgba(226, 228, 252, calc(.62 * var(--side-a, .55) + .18)) 0,
+      rgba(184, 190, 242, calc(.6 * var(--side-a, .55) + .16)) 45%,
+      rgba(128, 138, 216, calc(.58 * var(--side-a, .55) + .16)) 80%,
+      rgba(106, 114, 198, calc(.58 * var(--side-a, .55) + .18)) 100%) !important;
+  background-position: left 168px top 14px, right 132px top 54px, left -10px top 46%, right -8px bottom 150px, left 26px bottom 110px, right 70px bottom 60px, 0 0, 0 0, 0 0, 0 0, 0 0 !important;
+  background-size: 22px auto, 14px auto, 26px auto, 30px auto, 14px auto, 12px auto, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100% !important;
+  background-repeat: no-repeat !important;
+}
+html.g-aurora .foot, html.g-aurora .footrow .ctext { color: rgba(255, 255, 255, .9) !important; }
+/* 무지개빛 반짝이 하나가 로고 옆에서 둥실 */
+html.g-aurora .panel::after {
+  content: ""; position: absolute; z-index: 1; right: 86px; top: 18px; width: 30px; height: 35px; pointer-events: none;
+  background: url(aur-spark-iris.png) center / contain no-repeat; animation: starFloat 5s ease-in-out infinite;
+}
+@keyframes starFloat { 0%, 100% { transform: translateY(0) rotate(-10deg) scale(.95); opacity: .85; } 50% { transform: translateY(-6px) rotate(8deg) scale(1.05); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { html.g-aurora .panel::after { animation: none; } }
+/* 밝은 바탕이라 글씨·카드는 원래 오로라 글래스처럼 */
+html.g-aurora .calcard, html.g-aurora .box, html.g-aurora .search, html.g-aurora .pill, html.g-aurora .ev, html.g-aurora .ghead,
+html.g-aurora .toggle:not(.mini), html.g-aurora .acHero, html.g-aurora .thInfo, html.g-aurora .bkForm, html.g-aurora .pinbtn, html.g-aurora .navb { background: rgba(255, 255, 255, calc(.3 + .5 * var(--side-a, .55))); }
+/* 달력 판도 목록바 투명도를 따라 비침 */
+html.g-aurora .calcard { background: rgba(255, 255, 255, calc(.22 + .5 * var(--side-a, .55))) !important; }
+html.g-aurora .seg { background: rgba(255, 255, 255, .5); }
+html.g-aurora .segb { color: var(--sub); }
+html.g-aurora .segb.on { color: var(--a1); }
+html.g-aurora .todaytxt, html.g-aurora .sellabel, html.g-aurora .foot, html.g-aurora .footrow .ctext, html.g-aurora .view > .empty, html.g-aurora .evlist > .empty,
+html.g-aurora .list > .empty, html.g-aurora .pShared, html.g-aurora .nogrp, html.g-aurora #vAcct .slabel, html.g-aurora .gempty { color: var(--sub); }
+html.g-aurora .applogo { filter: drop-shadow(0 2px 4px rgba(80, 70, 160, .18)); }
+html.g-aurora .calDeco .calBun { width: 86px !important; right: 6px !important; bottom: 6px !important; }
+/* 디자인 스킨 달력 판도 목록바 투명도를 따라 비침 */
+html.g-forest .calcard, html.g-peach .calcard, html.g-lemon .calcard, html.g-sky .calcard { background: rgba(255, 255, 255, calc(.22 + .5 * var(--side-a, .55))) !important; }
+
+/* ───────── 목록바 정리: 새 메모 + 검색 한 줄, 모든 메모 도구는 아이콘 한 줄 ───────── */
+.memoTools { gap: 8px; }
+.tbTop { display: flex; gap: 6px; flex: none; }
+.tbTop .newMini { height: 38px; border-radius: 13px; padding: 0 12px; font-size: 13px; gap: 5px; flex: none; box-shadow: 0 4px 10px var(--glow); }
+.tbTop .newMini svg { width: 14px; height: 14px; }
+.tbTop .search { flex: 1; min-width: 0; height: 38px; border-radius: 13px; padding: 0 12px; }
+.tbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 3px; flex: none; }
+.tbar .tg { display: flex; gap: 1px; padding: 2px; border-radius: 12px; background: rgba(var(--glass), .55); }
+.tbar .tb {
+  position: relative; width: 26px; height: 28px; border: none; border-radius: 9px; background: transparent; color: var(--ink);
+  display: grid; place-items: center; padding: 0; transition: background .2s ease, transform .15s var(--spring);
+}
+.tbar .tb[hidden] { display: none; }
+.tbar .tb span { display: none; }
+.tbar .tb svg { width: 15px; height: 15px; }
+.tbar .tb:hover { background: rgba(var(--glass), .95); }
+.tbar .tb:active { transform: scale(.9); }
+.tbar .tb::after {
+  content: attr(data-tip); position: absolute; left: 50%; top: calc(100% + 6px); transform: translate(-50%, -2px); z-index: 30;
+  white-space: nowrap; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 8px; background: var(--ink); color: rgb(var(--glass));
+  opacity: 0; pointer-events: none; transition: opacity .12s ease, transform .12s ease;
+}
+.tbar .tb:hover::after, .tbar .tb:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
+.tbar .tg:first-child .tb:first-child::after { left: 0; transform: translate(0, -2px); }
+.tbar .tg:first-child .tb:first-child:hover::after { transform: translate(0, 0); }
+.tbar .tg:last-child .tb:last-child::after { left: auto; right: 0; transform: translate(0, -2px); }
+.tbar .tg:last-child .tb:last-child:hover::after { transform: translate(0, 0); }
+html.paper .tbar .tg { background: #fff; box-shadow: 0 0 0 1px var(--paper-line); }
+html.draw .tbar .tg { background: #FBFAF5; box-shadow: inset 0 0 0 2px var(--ink); }
+html.gseason .tbar .tg { background: rgba(255, 255, 255, .8); }
+html.g-aurora .tbar .tg { background: rgba(255, 255, 255, calc(.3 + .5 * var(--side-a, .55))); }
+html.dark .tbar .tb::after { background: #E9ECF1; color: #16181D; }
+
+/* 목록: 제목만 한 줄 (내용은 마우스를 올리면) */
+#list .row:not(.trow) { min-height: 38px; }
+#list .row:not(.trow) .rmeta { display: none; }
+#list .row .ib { width: 26px; height: 26px; }
+.rchip { font-style: normal; flex: none; font-size: 10px; font-weight: 700; color: var(--sub); background: rgba(var(--glass), .7); border-radius: 6px; padding: 1px 5px; margin-left: 2px; }
+
+/* 계정 탭 아래 '이 PC 설정' (목록바 위치 · 시작·백업 · 단축키·정보) */
+.acSettings { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+.acSetHead { font-size: 12px; font-weight: 800; color: var(--sub); padding: 8px 2px 0; border-top: 1px solid var(--line-soft); }

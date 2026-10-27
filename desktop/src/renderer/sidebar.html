@@ -42,28 +42,34 @@
     <!-- 메모 -->
     <section id="vMemo" class="view">
       <div id="memoTools" class="memoTools">
-        <button id="newMemo" class="primary soft" type="button"></button>
-        <label class="search">
-          <span id="searchIcon"></span>
-          <span class="sr">메모 검색</span>
-          <input id="q" type="text" placeholder="메모 검색" spellcheck="false">
-        </label>
-        <div class="row2">
-          <button id="foldAll" class="pill soft" type="button"></button>
-          <button id="unfoldAll" class="pill soft" type="button"></button>
-          <button id="newGroup" class="pill soft" type="button" title="그룹 만들기 — 같은 그룹 메모는 함께 옮기고 함께 숨겨요"></button>
+        <div class="tbTop">
+          <button id="newMemo" class="primary soft newMini" type="button" title="새 메모 (Ctrl+Alt+N)"></button>
+          <label class="search">
+            <span id="searchIcon"></span>
+            <span class="sr">메모 검색</span>
+            <input id="q" type="text" placeholder="메모 검색" spellcheck="false">
+          </label>
         </div>
-        <div class="row2 arrRow">
-          <button id="arrRow" class="pill soft mini" type="button" title="메모를 왼쪽 위부터 가로로 줄 맞춰 정렬"></button>
-          <button id="arrCol" class="pill soft mini" type="button" title="메모를 왼쪽 위부터 세로로 칸 맞춰 정렬"></button>
-          <button id="arrUndo" class="pill soft mini" type="button" hidden title="정렬 전 자리로 되돌리기"></button>
-        </div>
-        <div class="row2 allRow" role="group" aria-label="모든 메모 한꺼번에">
-          <button id="hideAll" class="pill soft mini" type="button" title="모든 메모 숨기기 (목록에서 다시 보이기)"></button>
-          <button id="showAll" class="pill soft mini" type="button" title="숨긴 메모 모두 보이기"></button>
-          <button id="topAll" class="pill soft mini" type="button" title="모든 메모 항상 위 (Ctrl+Alt+Shift+↑)"></button>
-          <button id="normAll" class="pill soft mini" type="button" title="모든 메모 보통 (위·아래 고정 풀기)"></button>
-          <button id="bottomAll" class="pill soft mini" type="button" title="모든 메모 항상 아래 (Ctrl+Alt+Shift+↓)"></button>
+        <div class="tbar" role="toolbar" aria-label="모든 메모 한꺼번에">
+          <div class="tg">
+            <button id="foldAll" class="tb" type="button" data-tip="모두 접기"></button>
+            <button id="unfoldAll" class="tb" type="button" data-tip="모두 펴기"></button>
+            <button id="newGroup" class="tb" type="button" data-tip="새 그룹" title="그룹 만들기 — 같은 그룹 메모는 함께 옮기고 함께 숨겨요"></button>
+          </div>
+          <div class="tg">
+            <button id="arrRow" class="tb" type="button" data-tip="가로 정렬" title="메모를 왼쪽 위부터 가로로 줄 맞춰 정렬"></button>
+            <button id="arrCol" class="tb" type="button" data-tip="세로 정렬" title="메모를 왼쪽 위부터 세로로 칸 맞춰 정렬"></button>
+            <button id="arrUndo" class="tb" type="button" hidden data-tip="정렬 되돌리기" title="정렬 전 자리로 되돌리기"></button>
+          </div>
+          <div class="tg">
+            <button id="hideAll" class="tb" type="button" data-tip="모두 숨기기" title="모든 메모 숨기기 (목록에서 다시 보이기)"></button>
+            <button id="showAll" class="tb" type="button" data-tip="모두 보이기" title="숨긴 메모 모두 보이기"></button>
+          </div>
+          <div class="tg">
+            <button id="topAll" class="tb" type="button" data-tip="모두 항상 위" title="모든 메모 항상 위 (Ctrl+Alt+Shift+↑)"></button>
+            <button id="normAll" class="tb" type="button" data-tip="모두 보통" title="모든 메모 보통 (위·아래 고정 풀기)"></button>
+            <button id="bottomAll" class="tb" type="button" data-tip="모두 항상 아래" title="모든 메모 항상 아래 (Ctrl+Alt+Shift+↓)"></button>
+          </div>
         </div>
       </div>
       <div id="trashHead" class="trashHead" hidden>
@@ -184,6 +190,51 @@
           </div>
           <div class="bkInfo">로그아웃하면 이 PC에서 메모와 일정이 사라지고, 다시 로그인하면 그대로 돌아와요.</div>
         </div>
+        <div class="acSettings">
+          <div class="acSetHead">이 PC 설정</div>
+        <div id="sideMonBox" class="box" hidden>
+          <div class="bhead">목록바 위치</div>
+          <div class="bkInfo">모니터가 여러 대일 때 목록바를 어느 모니터 오른쪽 끝에 둘지 골라요.</div>
+          <div id="sideMon" class="cseg" role="group" aria-label="목록바를 둘 모니터"></div>
+        </div>
+
+        <div class="box">
+          <div class="bhead">시작 · 백업</div>
+          <button id="autoStart" class="toggle mini" type="button" aria-pressed="false"><span>윈도우 시작 시 자동 실행</span><span class="track"><span class="knob"></span></span></button>
+          <button id="noticeOn" class="toggle mini" type="button" aria-pressed="true"><span>업데이트 공지 받기</span><span class="track"><span class="knob"></span></span></button>
+          <div class="bkInfo">메모·일정·연락망을 비밀번호로 잠근 파일로 내보내요. PC를 바꿀 때 되살릴 수 있어요.</div>
+          <div class="row2">
+            <button id="bkExportBtn" class="pill soft" type="button">백업 내보내기</button>
+            <button id="bkImportBtn" class="pill soft" type="button">백업 가져오기</button>
+          </div>
+          <button id="memoitBtn" class="pill soft" type="button">메모잇 백업에서 한 번에 가져오기</button>
+          <form id="bkForm" class="bkForm" hidden>
+            <div id="bkTitle" class="bkTitle"></div>
+            <label class="bkField"><span>비밀번호</span><input id="bkPw" type="password" autocomplete="new-password" spellcheck="false"></label>
+            <label id="bkPw2Wrap" class="bkField"><span>비밀번호 확인</span><input id="bkPw2" type="password" autocomplete="new-password" spellcheck="false"></label>
+            <div id="bkHint" class="bkHint"></div>
+            <div class="bkBtns">
+              <button id="bkCancel" class="ctext" type="button">취소</button>
+              <button id="bkGo" class="smallprimary soft" type="submit"></button>
+            </div>
+          </form>
+          <div id="bkMsg" class="bkMsg" role="status" aria-live="polite"></div>
+        </div>
+
+        <div class="box help">
+          <div class="bhead">단축키 · 정보</div>
+          <div><b>Ctrl + Alt + N</b> 어디서나 새 메모</div>
+          <div><b>Ctrl + Alt + ↑ / ↓</b> 모두 접기 / 모두 펴기</div>
+          <div><b>Ctrl + Alt + F</b> 어디서나 메모 검색</div>
+          <div><b>Ctrl + Alt + Shift + ↑ / ↓</b> 어디서나 모든 메모 항상 위 / 항상 아래</div>
+          <div><b>Ctrl + F</b> 메모 안에서 찾기 (Enter 다음 · Shift+Enter 이전)</div>
+          <div><b>Ctrl + Shift + X</b> 드래그한 부분을 새 메모로 분리</div>
+          <div><b>제목줄 더블클릭</b> 접기 / 펴기</div>
+          <div><b>제목 클릭</b> 이름 바꾸기 · <b>오른쪽 아래 모서리</b> 크기 조절</div>
+          <button id="openData" class="ctext" type="button">메모 저장 폴더 열기</button>
+          <div class="verRow"><span id="verTxt"></span><button id="verCheck" class="ctext" type="button">업데이트 확인</button></div>
+        </div>
+        </div>
       </div>
     </section>
 
@@ -193,6 +244,12 @@
         <div class="box">
           <div class="bhead">스킨</div>
           <div id="skins" class="skins"></div>
+        </div>
+
+        <div class="box">
+          <div class="bhead">투명도</div>
+          <div class="line"><label for="alpha">메모</label><input id="alpha" type="range" min="25" max="95" step="1"><span id="alphaV" class="sval"></span></div>
+          <div class="line"><label for="sideAlpha">목록바</label><input id="sideAlpha" type="range" min="15" max="95" step="1"><span id="sideAlphaV" class="sval"></span></div>
         </div>
 
         <div class="box">
@@ -240,54 +297,7 @@
           </div>
         </div>
 
-        <div class="box">
-          <div class="bhead">투명도</div>
-          <div class="line"><label for="alpha">메모</label><input id="alpha" type="range" min="25" max="95" step="1"><span id="alphaV" class="sval"></span></div>
-          <div class="line"><label for="sideAlpha">목록바</label><input id="sideAlpha" type="range" min="15" max="95" step="1"><span id="sideAlphaV" class="sval"></span></div>
-        </div>
 
-        <div id="sideMonBox" class="box" hidden>
-          <div class="bhead">목록바 위치</div>
-          <div class="bkInfo">모니터가 여러 대일 때 목록바를 어느 모니터 오른쪽 끝에 둘지 골라요.</div>
-          <div id="sideMon" class="cseg" role="group" aria-label="목록바를 둘 모니터"></div>
-        </div>
-
-        <div class="box">
-          <div class="bhead">시작 · 백업</div>
-          <button id="autoStart" class="toggle mini" type="button" aria-pressed="false"><span>윈도우 시작 시 자동 실행</span><span class="track"><span class="knob"></span></span></button>
-          <button id="noticeOn" class="toggle mini" type="button" aria-pressed="true"><span>업데이트 공지 받기</span><span class="track"><span class="knob"></span></span></button>
-          <div class="bkInfo">메모·일정·연락망을 비밀번호로 잠근 파일로 내보내요. PC를 바꿀 때 되살릴 수 있어요.</div>
-          <div class="row2">
-            <button id="bkExportBtn" class="pill soft" type="button">백업 내보내기</button>
-            <button id="bkImportBtn" class="pill soft" type="button">백업 가져오기</button>
-          </div>
-          <button id="memoitBtn" class="pill soft" type="button">메모잇 백업에서 한 번에 가져오기</button>
-          <form id="bkForm" class="bkForm" hidden>
-            <div id="bkTitle" class="bkTitle"></div>
-            <label class="bkField"><span>비밀번호</span><input id="bkPw" type="password" autocomplete="new-password" spellcheck="false"></label>
-            <label id="bkPw2Wrap" class="bkField"><span>비밀번호 확인</span><input id="bkPw2" type="password" autocomplete="new-password" spellcheck="false"></label>
-            <div id="bkHint" class="bkHint"></div>
-            <div class="bkBtns">
-              <button id="bkCancel" class="ctext" type="button">취소</button>
-              <button id="bkGo" class="smallprimary soft" type="submit"></button>
-            </div>
-          </form>
-          <div id="bkMsg" class="bkMsg" role="status" aria-live="polite"></div>
-        </div>
-
-        <div class="box help">
-          <div class="bhead">단축키 · 정보</div>
-          <div><b>Ctrl + Alt + N</b> 어디서나 새 메모</div>
-          <div><b>Ctrl + Alt + ↑ / ↓</b> 모두 접기 / 모두 펴기</div>
-          <div><b>Ctrl + Alt + F</b> 어디서나 메모 검색</div>
-          <div><b>Ctrl + Alt + Shift + ↑ / ↓</b> 어디서나 모든 메모 항상 위 / 항상 아래</div>
-          <div><b>Ctrl + F</b> 메모 안에서 찾기 (Enter 다음 · Shift+Enter 이전)</div>
-          <div><b>Ctrl + Shift + X</b> 드래그한 부분을 새 메모로 분리</div>
-          <div><b>제목줄 더블클릭</b> 접기 / 펴기</div>
-          <div><b>제목 클릭</b> 이름 바꾸기 · <b>오른쪽 아래 모서리</b> 크기 조절</div>
-          <button id="openData" class="ctext" type="button">메모 저장 폴더 열기</button>
-          <div class="verRow"><span id="verTxt"></span><button id="verCheck" class="ctext" type="button">업데이트 확인</button></div>
-        </div>
       </div>
     </section>
     <div id="sConfirm" class="sconfirm" hidden role="alertdialog" aria-modal="true" aria-labelledby="scTitle" aria-describedby="scDesc">
