@@ -920,10 +920,10 @@
     const visible = (id) => SKINS[id] && (!SKINS[id].season || window.M.SEASONS_ON || prefs.skin === id);
     const btn = (id) => {
       const k = SKINS[id];
-      return '<button class="skin' + (prefs.skin === id ? ' on' : '') + '" type="button" data-skin="' + id + '" aria-pressed="' + (prefs.skin === id) + '" style="--sc:' + k.a1 + ';--sg:' + k.glow + '">' +
-        '<span class="prev" style="background:linear-gradient(135deg,' + k.b[0] + ',' + k.b[1] + ' 55%,' + k.b[2] + ')">' +
-        (k.deco ? '<img class="pbun" src="' + k.bunny + '" alt="">' : '<i style="background:' + rgba(k.pal[0][0], 0.9) + '"></i><i style="background:' + rgba(k.pal[1][1], 0.9) + '"></i>') + '<b style="background:' + k.a1 + '"></b></span>' +
-        '<span>' + k.name + '</span></button>';
+      return '<button class="skin' + (prefs.skin === id ? ' on' : '') + '" type="button" data-skin="' + id + '" aria-pressed="' + (prefs.skin === id) + '" style="--sc:' + k.a1 + '">' +
+        (k.bunny ? '<span class="sw swDraw' + (k.deco || k.glassSeason ? ' swDeco' : '') + '" style="background:' + (k.season || k.deco ? k.b[0] : '') + '"><img src="' + k.bunny + '" alt=""></span>'
+          : '<span class="sw" style="background:linear-gradient(135deg,' + k.b[0] + ',' + k.b[2] + ')"><b style="background:linear-gradient(135deg,' + k.a1 + ',' + k.a2 + ')"></b></span>') +
+        '<span class="sn">' + k.name + '</span></button>';
     };
     $('skins').innerHTML = GROUPS.map(([name, ids]) => { const v = ids.filter(visible); return v.length ? '<div class="skgh">' + name + '</div><div class="skg">' + v.map(btn).join('') + '</div>' : ''; }).join('');
     $('fonts').innerHTML = FONTS.map((f) =>

@@ -401,11 +401,19 @@ input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px 
 .tabs .tab { min-width: 0; font-size: 10.5px; letter-spacing: -.3px; }
 
 /* ───────── 스킨 분류 ───────── */
-.skins { display: block; }
-.skgh { font-size: 12px; font-weight: 700; color: var(--sub); margin: 14px 2px 8px; }
-.skgh:first-child { margin-top: 0; }
-.skg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.prev .pbun { position: absolute; left: 50%; top: 50%; height: 54px; width: auto; transform: translate(-50%, -50%); filter: drop-shadow(0 3px 6px rgba(60, 60, 120, .18)); }
+.skins { display: flex; flex-direction: column; gap: 6px; }
+.skgh { font-size: 12px; font-weight: 700; color: var(--sub); padding: 6px 2px 0; }
+.skg { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px 4px; }
+.skins .skin { border: none; background: transparent; padding: 2px 0; display: flex; flex-direction: column; align-items: center; gap: 5px; box-shadow: none; border-radius: 0; }
+.skins .skin .sw { width: 46px; height: 46px; border-radius: 15px; position: relative; display: block; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .06); transition: transform .25s var(--spring), box-shadow .25s ease; }
+.skins .skin .sw b { position: absolute; right: 7px; bottom: 7px; width: 13px; height: 13px; border-radius: 50%; }
+.skins .skin .swDraw { background: #FBFAF5; box-shadow: inset 0 0 0 2px #161616; display: grid; place-items: center; }
+.skins .skin .swDeco { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .06); }
+.skins .skin .swDraw img { width: 36px; height: auto; }
+.skins .skin:active .sw { transform: scale(.92); }
+.skins .skin.on .sw { box-shadow: 0 0 0 2px rgb(var(--glass)), 0 0 0 4px var(--sc); }
+.skins .skin .sn { font-size: 11px; line-height: 1.25; font-weight: 500; padding: 0; color: var(--sub); text-align: center; word-break: keep-all; max-width: 100%; }
+.skins .skin.on .sn { color: var(--ink); font-weight: 700; }
 
 /* ───────── 주간 플래너 ───────── */
 .plHead { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 4px 0 8px; }
