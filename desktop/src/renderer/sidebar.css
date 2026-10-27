@@ -618,7 +618,7 @@ html.g-forest .segb { color: var(--sub); }
 html.g-forest .segb.on { color: var(--a1); }
 html.g-forest .todaytxt, html.g-forest .sellabel, html.g-forest .foot, html.g-forest .footrow .ctext, html.g-forest .view > .empty, html.g-forest .evlist > .empty,
 html.g-forest .list > .empty, html.g-forest .pShared, html.g-forest .nogrp, html.g-forest #vAcct .slabel, html.g-forest .gempty { color: var(--sub); }
-html.g-forest .calDeco .calBun { width: 104px !important; right: 4px !important; bottom: 14px !important; }
+html.g-forest .calDeco .calBun { width: 78px !important; right: 8px !important; bottom: 4px !important; }
 /* ───────── 피치 블라썸: 복숭아 핑크 유리 + 3D 벚꽃 (모눈 없음) ───────── */
 html.g-peach .panel {
   background-image: url(peach-fruit.png), url(blossom-white.png), url(blossom-pink.png), url(peach-fruit.png), url(blossom-white.png), url(blossom-pink.png),
@@ -765,5 +765,3 @@ html.dark .tbar .tb::after { background: #E9ECF1; color: #16181D; }
 .acSettings { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
 .acSetHead { font-size: 12px; font-weight: 800; color: var(--sub); padding: 8px 2px 0; border-top: 1px solid var(--line-soft); }
 
-/* 포레스트 말랑이 그림은 양옆 여백이 넓어서 아이콘에서는 크게 */
-.skin .swDraw.swWide img { width: 52px; max-width: none; }

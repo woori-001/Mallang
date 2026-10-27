@@ -289,26 +289,58 @@ function animateTo(win, target, ms = 340) {
 }
 
 // 맨 뒤 배치 (Windows API 사용)
-let SetWindowPos = null;
+// HWND_BOTTOM 으로만 보내면 가끔 바탕화면 창(Progman/WorkerW)보다 아래로 내려가서
+// 메모가 '사라졌다가' 다른 창이 움직일 때 다시 나타나요 → 바탕화면 바로 위에 두도록 고침
+let SetWindowPos = null, GetWindow = null, FindWindowExW = null, IsWindowVisible = null;
 if (isWin) {
   try {
     const koffi = require('koffi');
     const user32 = koffi.load('user32.dll');
     SetWindowPos = user32.func('__stdcall', 'SetWindowPos', 'bool', ['intptr', 'intptr', 'int', 'int', 'int', 'int', 'uint']);
+    try {
+      GetWindow = user32.func('__stdcall', 'GetWindow', 'intptr', ['intptr', 'uint']);
+      FindWindowExW = user32.func('__stdcall', 'FindWindowExW', 'intptr', ['intptr', 'intptr', 'str16', 'str16']);
+      IsWindowVisible = user32.func('__stdcall', 'IsWindowVisible', 'bool', ['intptr']);
+    } catch (e) { GetWindow = FindWindowExW = IsWindowVisible = null; }
   } catch (e) {
     console.error('맨 뒤 배치 기능을 불러오지 못했어요', e);
   }
 }
-function sendToBottom(win) {
-  if (!win || win.isDestroyed()) return;
-  if (SetWindowPos) {
-    try {
-      const buf = win.getNativeWindowHandle();
-      const h = buf.length >= 8 ? Number(buf.readBigUInt64LE(0)) : buf.readUInt32LE(0);
-      // HWND_BOTTOM = 1, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE = 0x13
-      SetWindowPos(h, 1, 0, 0, 0, 0, 0x0013);
-    } catch (e) { console.error(e); }
+const hwndOf = (win) => { const buf = win.getNativeWindowHandle(); return buf.length >= 8 ? Number(buf.readBigUInt64LE(0)) : buf.readUInt32LE(0); };
+// 바탕화면을 그리는 창들 (Progman + 배경용 WorkerW)
+function desktopHwnds() {
+  const set = new Set();
+  if (!FindWindowExW) return set;
+  const pm = Number(FindWindowExW(0, 0, 'Progman', null)) || 0;
+  if (pm) set.add(pm);
+  let w = 0;
+  for (let i = 0; i < 50; i++) {
+    w = Number(FindWindowExW(0, w, 'WorkerW', null)) || 0;
+    if (!w) break;
+    if (!IsWindowVisible || IsWindowVisible(w)) set.add(w);
   }
+  return set;
+}
+function sendToBottom(win) {
+  if (!win || win.isDestroyed() || !SetWindowPos) return;
+  try {
+    const h = hwndOf(win);
+    // HWND_BOTTOM = 1, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE = 0x13
+    SetWindowPos(h, 1, 0, 0, 0, 0, 0x0013);
+    if (!GetWindow) return;
+    // 내 창보다 위에 바탕화면 창이 있으면 → 가장 위쪽 바탕화면 창 바로 위로 올림
+    const desk = desktopHwnds();
+    if (!desk.size) return;
+    let top = 0, cur = h;
+    for (let i = 0; i < 400; i++) {
+      cur = Number(GetWindow(cur, 3)) || 0;   // GW_HWNDPREV = 3 (한 칸 위 창)
+      if (!cur) break;
+      if (desk.has(cur)) top = cur;
+    }
+    if (!top) return;
+    const above = Number(GetWindow(top, 3)) || 0;
+    if (above && above !== h) SetWindowPos(h, above, 0, 0, 0, 0, 0x0013);   // above 바로 아래 = 바탕화면 바로 위
+  } catch (e) { console.error(e); }
 }
 
 function ensurePos(m) {

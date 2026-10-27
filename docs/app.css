@@ -530,5 +530,3 @@ html.g-forest .pDay, html.g-peach .pDay, html.g-lemon .pDay, html.g-sky .pDay, h
 html.g-forest .card, html.g-peach .card, html.g-lemon .card, html.g-sky .card, html.g-aurora .card { background: rgba(255, 255, 255, .72); }
 html.g-lemon .plTtl b, html.g-lemon .calTtl { color: #B8860B; }
 
-/* 포레스트 말랑이 그림은 양옆 여백이 넓어서 아이콘에서는 크게 */
-.skins .skin .swDraw.swWide img { width: 62px; max-width: none; }
