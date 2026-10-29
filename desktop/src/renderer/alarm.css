@@ -43,12 +43,16 @@ body { font-family: 'IBM Plex Sans KR', sans-serif; }
 @keyframes jig { from { transform: translate(-1.5px, 0); } to { transform: translate(1.5px, -1px); } }
 @keyframes rattle { from { transform: rotate(-5deg) translateY(0); } to { transform: rotate(5deg) translateY(-2px); } }
 
-/* 효과 ① 뾰잉 점프: 카드가 통통 */
-body.fx-boing .card { animation: cardBoing 1.6s ease-in-out infinite; transform-origin: 50% 100%; }
-@keyframes cardBoing { 0%, 55%, 100% { transform: none; } 12% { transform: scale(1.03, .96); } 26% { transform: translateY(-14px) scale(.98, 1.03); } 40% { transform: scale(1.02, .98); } }
-/* 말랑이도 카드랑 같은 박자로 (따로 뛰지 않게) */
-body.fx-boing .art { animation: cardBoing 1.6s ease-in-out infinite; transform-origin: 50% 100%; }
-body.fx-boing .art .bunny { animation: none; }
+/* 효과 ① 뾰잉 점프: 카드는 가만히, 말랑이만 폴짝폴짝 */
+body.fx-boing .art .bunny { animation: hop 1s cubic-bezier(.3, 0, .3, 1) infinite; transform-origin: 60% 66%; }
+@keyframes hop {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  12% { transform: translateY(0) scale(1.1, .86); }
+  40% { transform: translateY(-34px) scale(.94, 1.08); }
+  62% { transform: translateY(0) scale(1.12, .84); }
+  76% { transform: translateY(-5px) scale(.98, 1.03); }
+  88% { transform: translateY(0) scale(1.02, .98); }
+}
 /* 효과 ② 흔들흔들: 진동처럼 부르르 */
 body.fx-shake .wrap.in { animation: cardIn .65s cubic-bezier(.34, 1.56, .64, 1) forwards, buzz 1.4s linear .7s infinite; }
 @keyframes buzz { 0%, 40%, 100% { translate: 0 0; rotate: 0deg; } 4% { translate: -6px 0; rotate: -1.5deg; } 8% { translate: 6px 0; rotate: 1.5deg; } 12% { translate: -6px 0; rotate: -1.5deg; } 16% { translate: 6px 0; rotate: 1.5deg; } 20% { translate: -4px 0; rotate: -1deg; } 24% { translate: 4px 0; rotate: 1deg; } 28% { translate: -2px 0; rotate: 0deg; } 32% { translate: 0 0; } }
