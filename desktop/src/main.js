@@ -1113,11 +1113,29 @@ function setupAlarm(win) {
   win.setAlwaysOnTop(true, 'screen-saver');
   win.setVisibleOnAllWorkspaces && win.setVisibleOnAllWorkspaces(true);
   win.setIgnoreMouseEvents(true, { forward: true });   // 카드 밖은 아래 창으로 클릭이 그대로
+  alarmMouseOn = false;
   win.once('ready-to-show', () => { if (!win.isDestroyed()) win.showInactive(); });
   win.on('closed', () => { if (alarmWin === win) alarmWin = null; });
 }
 ipcMain.handle('alarm:get', () => alarmCur);
-ipcMain.on('alarm:mouse', (e, on) => { if (alarmWin && !alarmWin.isDestroyed()) alarmWin.setIgnoreMouseEvents(!on, { forward: true }); });
+let alarmRect = null, alarmMouseOn = false, alarmPoll = null;
+function alarmSetMouse(on) {
+  if (!alarmWin || alarmWin.isDestroyed() || on === alarmMouseOn) return;
+  alarmMouseOn = on;
+  alarmWin.setIgnoreMouseEvents(!on, { forward: true });
+}
+ipcMain.on('alarm:mouse', (e, on) => { if (on) alarmSetMouse(true); });
+// 마우스가 카드 위에 오면 클릭을 받도록 (창 밖 마우스 이벤트가 안 오는 경우에도 확실하게)
+ipcMain.on('alarm:rect', (e, r) => {
+  if (!r || typeof r !== 'object') return;
+  alarmRect = { x: num(r.x) || 0, y: num(r.y) || 0, w: num(r.w) || 0, h: num(r.h) || 0 };
+  if (alarmPoll) return;
+  alarmPoll = setInterval(() => {
+    if (!alarmWin || alarmWin.isDestroyed() || !alarmCur) { clearInterval(alarmPoll); alarmPoll = null; alarmMouseOn = false; return; }
+    const p = screen.getCursorScreenPoint(), b = alarmWin.getBounds(), q = alarmRect;
+    alarmSetMouse(p.x >= b.x + q.x && p.x <= b.x + q.x + q.w && p.y >= b.y + q.y && p.y <= b.y + q.y + q.h);
+  }, 80);
+});
 ipcMain.on('alarm:act', (e, act) => {
   const a = alarmCur;
   alarmCur = null;

@@ -3,7 +3,7 @@
   const api = window.api;
   const $ = (s) => document.getElementById(s);
   const M = window.M;
-  let S = null, cur = null, stopSound = () => {}, soundT = null;
+  let S = null, cur = null, stopSound = () => {}, soundT = null, testT = null;
   const pad = (n) => (n < 10 ? '0' : '') + n;
   const DAYN = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -55,9 +55,15 @@
     stopSound(); clearTimeout(soundT);
     stopSound = M.alarmSound(a.snd || 'ding', { once: !!a.test });
     soundT = setTimeout(() => stopSound(), 60 * 1000);
+    setTimeout(sendRect, 700);
+    // 미리보기는 20초 뒤 저절로 닫힘
+    clearTimeout(testT);
+    if (a.test) testT = setTimeout(() => act('ok'), 20 * 1000);
   }
   function act(x) {
+    clearTimeout(testT);
     stopSound(); clearTimeout(soundT);
+    over = false;
     api.alarmMouse(false);
     api.alarmAct(x);
   }
@@ -65,8 +71,16 @@
   $('s10').addEventListener('click', () => act('snooze10'));
   $('ok').addEventListener('click', () => act('ok'));
   // 카드 위에 마우스가 있을 때만 클릭을 받음 (나머지는 아래 창으로)
-  $('card').addEventListener('mouseenter', () => api.alarmMouse(true));
-  $('card').addEventListener('mouseleave', () => api.alarmMouse(false));
+  // 창 쪽에서 마우스 위치로 판단하도록 카드 자리를 알려 줌 (Windows에서 확실하게)
+  function sendRect() {
+    const r = $('card').getBoundingClientRect();
+    api.alarmRect({ x: Math.round(r.left), y: Math.round(r.top) - 20, w: Math.round(r.width), h: Math.round(r.height) + 40 });
+  }
+  let over = false;
+  document.addEventListener('mousemove', (e) => {
+    const on = $('card').contains(e.target);
+    if (on !== over) { over = on; api.alarmMouse(on); }
+  });
 
   api.onCmd((c) => {
     if (c.type === 'alarm') show(c.alarm);

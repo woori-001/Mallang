@@ -68,6 +68,7 @@ contextBridge.exposeInMainWorld('api', {
   alarmTest: (a) => ipcRenderer.send('alarm:test', a),
   alarmGet: () => ipcRenderer.invoke('alarm:get'),
   alarmMouse: (on) => ipcRenderer.send('alarm:mouse', !!on),
+  alarmRect: (r) => ipcRenderer.send('alarm:rect', r),
   alarmAct: (act) => ipcRenderer.send('alarm:act', act),
   clockMove: (x, y, done, inset) => ipcRenderer.send('clock:move', x, y, !!done, inset),
   clockPlace: (on) => ipcRenderer.send('clock:place', !!on),
