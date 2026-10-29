@@ -752,9 +752,10 @@
     } else if (b.dataset.d != null) { const i = Number(b.dataset.d); ae.days = ae.days.includes(i) ? ae.days.filter((x) => x !== i) : ae.days.concat(i).sort(); }
     else if (b.dataset.q) ae.days = b.dataset.q === 'once' ? [] : b.dataset.q === 'all' ? [0, 1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 5];
     else if (b.dataset.fx) ae.fx = b.dataset.fx;
-    else if (b.dataset.snd) { ae.snd = b.dataset.snd; const stop = window.M.alarmSound(ae.snd, { once: true }); setTimeout(stop, 2500); }
+    else if (b.dataset.snd) { ae.snd = b.dataset.snd; if (!S.alarmTesting) { const stop = window.M.alarmSound(ae.snd, { once: true }); setTimeout(stop, 2500); } }
     else return;
     renderAe();
+    livePreview();
   });
   // 마우스 휠로 시·분 돌리기
   ['aeH', 'aeM'].forEach((id) => $(id).addEventListener('wheel', (e) => {
@@ -771,6 +772,10 @@
   $('sAlarm').addEventListener('pointerdown', (e) => { if (e.target === $('sAlarm')) closeAe(); });
   $('sAlarm').addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); closeAe(); } });
   const aeData = () => ({ ...ae, memo: $('aeMemo').value.trim() });
+  // 미리보기를 한 번 띄워 두면, 효과·소리·시간·메모를 바꿀 때마다 바로 다시 보여 줌
+  let liveT = null;
+  function livePreview() { if (!ae || !S.alarmTesting) return; clearTimeout(liveT); liveT = setTimeout(() => { if (ae && S.alarmTesting) api.alarmTest(aeData()); }, 120); }
+  $('aeMemo').addEventListener('input', () => { clearTimeout(liveT); if (ae && S.alarmTesting) liveT = setTimeout(() => api.alarmTest(aeData()), 500); });
   $('aeSave').addEventListener('click', async () => {
     if (!ae) return;
     const r = await api.alarmSave({ ...aeData(), on: true });

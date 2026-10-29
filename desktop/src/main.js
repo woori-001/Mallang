@@ -216,6 +216,7 @@ function snapshot() {
     sideDisplay: sideDisplay().id,   // 관리자가 모두에게 공개한 계절 스킨
     isAdmin: !!(store.cloud && store.cloud.admin),                         // 회사 공통 연락망
     alarmOn: alarmAllowed(),
+    alarmTesting: !!(alarmCur && alarmCur.test),
     alarms: alarmAllowed() ? store.alarms : [],
     canEditContacts: !store.shared.contacts || !!store.cloud.admin,   // 공통 연락망은 관리자만 고침
     groups: store.groups,
@@ -1102,9 +1103,10 @@ function alarmBounds() {
 function ringAlarm(a) {
   const item = { ...a, at: Date.now() };
   // 미리보기가 떠 있으면: 새 미리보기·진짜 알람으로 바로 바꿈
-  if (alarmCur && alarmCur.test && alarmWin && !alarmWin.isDestroyed()) { alarmCur = item; alarmWin.webContents.send('cmd', { type: 'alarm', alarm: item }); return; }
+  if (alarmCur && alarmCur.test && alarmWin && !alarmWin.isDestroyed()) { alarmCur = item; alarmWin.webContents.send('cmd', { type: 'alarm', alarm: item }); broadcast(); return; }
   if (alarmCur) { if (!item.test) alarmQueue.push(item); return; }
   alarmCur = item;
+  broadcast();
   if (alarmWin && !alarmWin.isDestroyed()) { alarmWin.setBounds(alarmBounds()); alarmWin.webContents.send('cmd', { type: 'alarm', alarm: item }); return; }
   hostOpen('alarm.html?kind=alarm', 'alarm-' + Date.now());
 }
@@ -1139,6 +1141,7 @@ ipcMain.on('alarm:rect', (e, r) => {
 ipcMain.on('alarm:act', (e, act) => {
   const a = alarmCur;
   alarmCur = null;
+  broadcast();
   if (a && !a.test && (act === 'snooze5' || act === 'snooze10')) {
     store.alarmSnooze.push({ id: a.id, at: Date.now() + (act === 'snooze5' ? 5 : 10) * 60000, mins: act === 'snooze5' ? 5 : 10 });
     save();

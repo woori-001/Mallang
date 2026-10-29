@@ -44,11 +44,13 @@
     $('tm').innerHTML = '<small>' + (h < 12 ? '오전' : '오후') + '</small>' + ((h % 12) || 12) + ':' + pad(d.getMinutes());
     $('lab').textContent = '⏰ 알람' + (a.test ? ' · 미리보기' : a.snoozed ? ' · ' + a.snoozed + '분 뒤 다시 알림' : a.days && a.days.length ? ' · ' + (a.days.length === 7 ? '매일' : a.days.map((x) => DAYN[x]).join(' ')) : ' · 오늘 한 번');
     $('memo').textContent = a.memo || '';
-    document.body.className = 'fx-' + (a.fx || 'boing');
+    document.body.className = '';
+    void document.body.offsetWidth;   // 효과를 처음부터 (말랑이·카드 박자 맞춤)
     const sk = skin();
     document.documentElement.style.setProperty('--fl', sk.draw ? 'rgba(22,22,22,.55)' : (sk.glow || 'rgba(110,100,230,.5)').replace(/[\d.]+\)$/, '.85)'));
     art();
     party(a.fx === 'party');
+    document.body.className = 'fx-' + (a.fx || 'boing');
     const w = $('wrap');
     w.classList.remove('in', 'out'); void w.offsetWidth; w.classList.add('in');
     // 소리: 1분 동안 울리고 그 뒤로는 화면만 (미리보기는 한 번만)
