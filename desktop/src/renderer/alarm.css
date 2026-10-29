@@ -32,7 +32,8 @@ body { font-family: 'IBM Plex Sans KR', sans-serif; }
 .sb { background: color-mix(in srgb, var(--a1) 14%, transparent); color: var(--a1); }
 .ok { flex: 1.25 !important; background: var(--accent); color: var(--on, #fff); box-shadow: 0 8px 18px var(--glow); font-size: 16px !important; }
 
-/* 그림: 말랑이 앞발 선이 카드 윗변에 */
+/* 그림: 말랑이 앞발 선이 카드 윗변에 · 시계는 왼쪽 모서리, 말랑이는 오른쪽 */
+.art .bunny, .art .excl, .art .lines { translate: 176px 0; }
 .art { position: absolute; z-index: 6; pointer-events: none; }
 .art img { position: absolute; left: 0; top: 0; width: 100%; }
 .art.g3 { left: -40px; top: -81px; width: 268px; height: 131px; }
