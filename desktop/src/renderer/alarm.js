@@ -70,7 +70,7 @@
     style();
     const d = new Date(), h = d.getHours();
     $('tm').innerHTML = '<small>' + (h < 12 ? '오전' : '오후') + '</small>' + ((h % 12) || 12) + ':' + pad(d.getMinutes());
-    $('lab').textContent = '⏰ 알람' + (a.test ? ' · 미리보기' : a.snoozed ? ' · ' + a.snoozed + '분 뒤 다시 알림' : a.days && a.days.length ? ' · ' + (a.days.length === 7 ? '매일' : a.days.map((x) => DAYN[x]).join(' ')) : ' · 오늘 한 번');
+    $('lab').textContent = '알람' + (a.test ? ' · 미리보기' : a.snoozed ? ' · ' + a.snoozed + '분 뒤 다시 알림' : a.days && a.days.length ? ' · ' + (a.days.length === 7 ? '매일' : a.days.map((x) => DAYN[x]).join(' ')) : ' · 오늘 한 번');
     $('memo').textContent = a.memo || '';
     document.body.className = '';
     void document.body.offsetWidth;   // 효과를 처음부터 (말랑이·카드 박자 맞춤)
