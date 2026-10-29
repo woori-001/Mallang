@@ -46,7 +46,7 @@ let dataDir, dataFile, store, saveTimer, quitting = false;
 function defaults() {
   return {
     version: 1,
-    settings: { skin: 'lav', font: 'gowun', fontScale: 100, titleScale: 100, titleBold: true, calFont: 'same', calScale: 100, peopleFont: 'same', peopleScale: 100, bodyBg: false, alpha: 60, sideAlpha: 55, showToday: true, showCal: false, showPeople: false, clockMode: 30, clockAlpha: 75, clockScale: 100, clockDark: false, foldScale: 100, memoRound: 100, noticeOn: true, pinned: false, autoStart: false },
+    settings: { skin: 'lav', font: 'gowun', fontScale: 100, titleScale: 100, titleBold: true, calFont: 'same', calScale: 100, peopleFont: 'same', peopleScale: 100, bodyBg: false, alpha: 60, sideAlpha: 55, showToday: true, showCal: false, showPeople: false, clockMode: 30, clockAlpha: 75, clockScale: 100, clockDark: false, alarmScale: 80, alarmPos: 'tc', foldScale: 100, memoRound: 100, noticeOn: true, pinned: false, autoStart: false },
     nextId: 2,
     memos: [{
       id: 1, slot: 0, x: null, y: null, w: 290, h: 240, type: 'text', title: '말랑메모 시작하기',
@@ -1035,8 +1035,7 @@ function tickClock() {
 
 
 // ───────────────────────── 알람 (내가 맞춘 시간에 요란하게) ─────────────────────────
-// 지금은 관리자만 (확인되면 공용으로)
-function alarmAllowed() { return !!(store.cloud && store.cloud.admin); }
+function alarmAllowed() { return true; }   // 3.2.0부터 모두 사용
 const ALARM_FX = ['boing', 'shake', 'flash', 'party'], ALARM_SND = ['ding', 'pop', 'ring', 'none'];
 function cleanAlarm(a) {
   if (!a || typeof a !== 'object') return null;
@@ -1304,7 +1303,7 @@ function updateSettings(patch) {
   if ('bodyBg' in patch) patch.bodyBg = !!patch.bodyBg;
   if ('titleBold' in patch) patch.titleBold = !!patch.titleBold;
   if ('titleScale' in patch) patch.titleScale = Math.min(170, Math.max(70, Number(patch.titleScale) || 100));
-  const keys = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'showCal', 'showPeople', 'clockMode', 'clockAlpha', 'clockScale', 'clockDark', 'foldScale', 'memoRound', 'sideDisplay', 'noticeOn', 'pinned', 'autoStart'];
+  const keys = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'showCal', 'showPeople', 'clockMode', 'clockAlpha', 'clockScale', 'clockDark', 'alarmScale', 'alarmPos', 'foldScale', 'memoRound', 'sideDisplay', 'noticeOn', 'pinned', 'autoStart'];
   if ('noticeOn' in patch) patch.noticeOn = !!patch.noticeOn;
   if ('sideDisplay' in patch) patch.sideDisplay = typeof patch.sideDisplay === 'number' && isFinite(patch.sideDisplay) ? patch.sideDisplay : null;
   if ('foldScale' in patch) patch.foldScale = clampFs(patch.foldScale);
@@ -1313,6 +1312,8 @@ function updateSettings(patch) {
   if ('clockAlpha' in patch) patch.clockAlpha = Math.min(100, Math.max(20, Number(patch.clockAlpha) || 75));
   if ('clockScale' in patch) patch.clockScale = Math.min(150, Math.max(70, Number(patch.clockScale) || 100));
   if ('clockDark' in patch) patch.clockDark = !!patch.clockDark;
+  if ('alarmScale' in patch) patch.alarmScale = Math.min(120, Math.max(50, Number(patch.alarmScale) || 80));
+  if ('alarmPos' in patch) patch.alarmPos = ['tl', 'tc', 'tr', 'ml', 'mc', 'mr', 'bl', 'bc', 'br'].includes(patch.alarmPos) ? patch.alarmPos : 'tc';
   if ('fontScale' in patch) patch.fontScale = Math.min(170, Math.max(70, Number(patch.fontScale) || 100));
   const oldFold = new Map(store.memos.filter((m) => m.folded && m.fs == null && m.x != null && !m.hidden && !m.deleting).map((m) => [m, [foldW(m), foldH(m)]]));
   for (const k of keys) if (k in patch) store.settings[k] = patch[k];

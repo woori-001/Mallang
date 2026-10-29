@@ -8,7 +8,12 @@
   const DAYN = ['일', '월', '화', '수', '목', '금', '토'];
 
   function skin() { return (S && M.SKINS[S.settings.skin]) || M.SKINS.lav; }
-  function style() { if (S) M.applyTheme(S.settings); }
+  function style() {
+    if (!S) return;
+    M.applyTheme(S.settings);
+    document.documentElement.style.setProperty('--sc', String((S.settings.alarmScale || 80) / 100));
+    $('pos').className = 'pos p-' + (S.settings.alarmPos || 'tc');
+  }
 
   function art() {
     const sk = skin(), draw = !!(sk.draw || sk.paper);
@@ -17,6 +22,29 @@
       ? ['ring', 'clock', 'excl', 'bunny', 'lines'].map((n) => '<img class="' + n + '" src="alarm/almd-' + n + '.png" alt="" draggable="false">').join('')
       : ['shine', 'bunny', 'clock', 'excl', 'lines'].map((n) => '<img class="' + n + '" src="alarm/alm3-' + n + '.png" alt="" draggable="false">').join('');
   }
+
+  // 스킨 그림: 목록바와 같은 소품을 카드 모서리에 (카드 밖으로 살짝 걸치게)
+  const BAT = '<svg viewBox="0 0 60 30" width="46" height="23"><path d="M30 10 C27 6 25 6 24 9 C18 4 8 4 2 12 C8 11 12 14 13 19 C16 15 20 15 22 19 C24 16 27 17 30 22 C33 17 36 16 38 19 C40 15 44 15 47 19 C48 14 52 11 58 12 C52 4 42 4 36 9 C35 6 33 6 30 10 Z" fill="#1E1630"/><circle cx="28" cy="12" r="1.2" fill="#FFD34D"/><circle cx="32" cy="12" r="1.2" fill="#FFD34D"/></svg>';
+  const GHOST = '<svg viewBox="0 0 40 46" width="38" height="44"><path d="M6 20 C6 8 14 2 20 2 C26 2 34 8 34 20 L34 42 L29 38 L24 43 L20 38 L16 43 L11 38 L6 42 Z" fill="#FFFFFF" stroke="#1E1630" stroke-width="2.6" stroke-linejoin="round"/><circle cx="15" cy="18" r="2.2" fill="#1E1630"/><circle cx="25" cy="18" r="2.2" fill="#1E1630"/><ellipse cx="20" cy="25" rx="2.4" ry="3" fill="#1E1630"/></svg>';
+  const TREE = '<svg viewBox="0 0 40 50" width="40" height="50"><path d="M20 4 L32 20 L26 20 L36 34 L28 34 L38 44 L2 44 L12 34 L4 34 L14 20 L8 20 Z" fill="#2F7A4F" stroke="#1C2B22" stroke-width="2.6" stroke-linejoin="round"/><rect x="16" y="44" width="8" height="5" fill="#8B5A3C" stroke="#1C2B22" stroke-width="2"/><circle cx="17" cy="26" r="2.2" fill="#D7393B"/><circle cx="25" cy="34" r="2.2" fill="#E7B53C"/><circle cx="14" cy="38" r="2.2" fill="#E7B53C"/><circle cx="22" cy="16" r="2" fill="#D7393B"/></svg>';
+  const FLAKE = (z, c) => '<svg width="' + z + '" height="' + z + '" viewBox="0 0 24 24"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7" stroke="' + c + '" stroke-width="2" stroke-linecap="round" fill="none"/></svg>';
+  const im = (src, css, cls) => '<img src="' + src + '" alt="" class="' + (cls || '') + '" style="' + css + '">';
+  function deco() {
+    const sk = skin(), id = S.settings.skin;
+    let h = '';
+    if (sk.deco === 'forest') h = im('leaf-top.svg', 'right:-44px;top:-30px;width:132px', 'sw') + im('leaf-bot.svg', 'left:-58px;bottom:-48px;width:118px');
+    else if (sk.deco === 'peach') h = im('peach-fruit.png', 'right:-22px;bottom:-20px;width:70px;transform:rotate(10deg)') + im('blossom-pink.png', 'right:42px;bottom:-16px;width:34px', 'sw') + im('blossom-white.png', 'right:-16px;bottom:44px;width:28px') + im('blossom-pink.png', 'left:-12px;bottom:30px;width:26px', 'sw');
+    else if (sk.deco === 'lemon') h = im('lemon-slice.png', 'right:-24px;bottom:-22px;width:72px;transform:rotate(-12deg)') + im('daisy-white.png', 'right:40px;bottom:-16px;width:36px', 'sw') + im('daisy-white.png', 'left:-14px;bottom:24px;width:30px') + im('lemon-slice.png', 'left:30px;bottom:-14px;width:30px');
+    else if (sk.deco === 'sky') h = im('sky-cloud.svg', 'right:-34px;top:40px;width:92px', 'sw') + im('sky-cloud.svg', 'left:-28px;top:120px;width:64px') + im('sky-cloud.svg', 'right:60px;bottom:-22px;width:58px');
+    else if (sk.deco === 'aurora') h = im('aur-spark-iris.png', 'right:-14px;top:20px;width:34px', 'sw') + im('aur-pearl.png', 'left:-10px;top:110px;width:26px') + im('aur-spark-gold.png', 'right:30px;bottom:-14px;width:26px') + im('aur-pearl-iris.png', 'left:24px;bottom:-10px;width:18px') + im('aur-spark-purple.png', 'right:-8px;bottom:60px;width:18px', 'sw');
+    else if (id === 'midnight') h = im('alarm/stk3-moon.png', 'right:-22px;bottom:-18px;width:66px;transform:rotate(-8deg)') + im('alarm/stk3-star-y.png', 'right:44px;bottom:-14px;width:30px', 'sw') + im('alarm/stk3-sparks-gold.png', 'left:-14px;bottom:30px;width:34px');
+    else if (sk.season === 'halloween' && !sk.draw) h = im('alarm/stk3-bat.png', 'right:-30px;top:30px;width:64px', 'flap') + im('alarm/stk3-bat.png', 'left:-34px;top:112px;width:44px;animation-delay:-.25s', 'flap') + im('alarm/stk3-ghost.png', 'right:-26px;bottom:-24px;width:70px', 'sw') + im('alarm/stk3-moon.png', 'left:-20px;bottom:-18px;width:48px');
+    else if (sk.season === 'xmas' && !sk.draw) { h = im('alarm/stk3-tree.png', 'right:-24px;bottom:-22px;width:62px') + im('alarm/stk3-gift.png', 'left:-24px;bottom:-18px;width:52px;transform:rotate(-8deg)'); for (let i = 0; i < 7; i++) h += '<span class="fall" style="left:' + (8 + i * 13) + '%;top:-6px;animation-delay:-' + (i * 0.6) + 's;animation-duration:' + (3.4 + (i % 3) * .7) + 's">' + FLAKE(8 + (i * 5) % 7, 'rgba(255,255,255,.85)') + '</span>'; }
+    else if (sk.season === 'halloween') h = '<span class="flap" style="right:-20px;top:38px">' + BAT + '</span><span class="flap" style="left:-24px;top:118px;animation-delay:-.25s;scale:.75">' + BAT + '</span><span class="sw" style="right:-14px;bottom:-22px">' + GHOST + '</span>' + im('alarm/stkd-moon.png', 'left:-18px;bottom:-16px;width:42px;background:#FFF7EC;border-radius:50%;padding:3px');
+    else if (sk.season === 'xmas') { h = '<span style="right:-16px;bottom:-14px">' + TREE + '</span><span style="left:-10px;bottom:-10px;scale:.7">' + TREE + '</span>'; for (let i = 0; i < 7; i++) h += '<span class="fall" style="left:' + (8 + i * 13) + '%;top:-6px;animation-delay:-' + (i * 0.6) + 's;animation-duration:' + (3.4 + (i % 3) * .7) + 's">' + FLAKE(8 + (i * 5) % 7, sk.draw ? '#1C2B22' : 'rgba(255,255,255,.85)') + '</span>'; }
+    $('deco').innerHTML = h;
+  }
+
   // 파티 폭죽: 말랑이가 있는 위쪽(왼쪽 위 ~ 가운데 위)은 비우고 퍼짐
   function party(on) {
     if (!on) { $('party').innerHTML = ''; return; }
@@ -49,6 +77,7 @@
     const sk = skin();
     document.documentElement.style.setProperty('--fl', sk.draw ? 'rgba(22,22,22,.55)' : (sk.glow || 'rgba(110,100,230,.5)').replace(/[\d.]+\)$/, '.85)'));
     art();
+    deco();
     party(a.fx === 'party');
     document.body.className = 'fx-' + (a.fx || 'boing');
     const w = $('wrap');
@@ -88,6 +117,6 @@
     if (c.type === 'alarm') show(c.alarm);
     if (c.type === 'leave') { stopSound(); $('wrap').classList.add('out'); party(false); document.body.className = ''; }
   });
-  api.onState((s) => { S = s; if (cur) { style(); } });
+  api.onState((s) => { const was = S && S.settings; S = s; if (cur) { style(); if (was && (was.alarmScale !== s.settings.alarmScale || was.alarmPos !== s.settings.alarmPos)) setTimeout(sendRect, 80); } });
   api.init().then(async (s) => { S = s; style(); show(await api.alarmGet()); });
 })();

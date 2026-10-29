@@ -278,8 +278,8 @@
     honey: ['stk3-sun', 'stk3-star-y', 'stk3-sparks-gold', 'stk3-shine-y', 'stk3-star-y', 'stk3-heart-p', 'stk3-sun', 'stk3-spark-iris'],
     sky: ['stk3-cloud-s', 'stk3-bubbles', 'stk3-bubble-iris', 'stk3-drop', 'stk3-star-iris', 'stk3-spark-iris', 'stk3-cloud', 'stk3-star-y'],
     aurora: ['stk3-star-iris', 'stk3-heart-iris', 'stk3-moon', 'stk3-spark-iris', 'stk3-bubble-iris', 'stk3-sparks-mix', 'stk3-star-iris', 'stk3-heart-lav'],
-    gxmas: ['stk3-star-y', 'stk3-sparks-gold', 'stk3-heart-p', 'stk3-star-y', 'stk3-spark-iris', 'stk3-note-p', 'stk3-sparks-gold', 'stk3-star-p'],
-    ghalloween: ['stk3-moon', 'stk3-star-y', 'stk3-sparks-gold', 'stk3-moon-cloud', 'stk3-star-iris', 'stk3-spark-iris', 'stk3-star-y', 'stk3-sparks-mix'],
+    gxmas: ['stk3-tree', 'stk3-gift', 'stk3-star-y', 'stk3-sparks-gold', 'stk3-heart-p', 'stk3-tree', 'stk3-gift', 'stk3-spark-iris'],
+    ghalloween: ['stk3-ghost', 'stk3-bat', 'stk3-moon', 'stk3-star-y', 'stk3-sparks-gold', 'stk3-ghost', 'stk3-bat', 'stk3-star-iris'],
     draw: ['stkd-star', 'stkd-heart', 'stkd-spark', 'stkd-sparks', 'stkd-hearts', 'stkd-note', 'stkd-flower', 'stkd-star']
   };
   // 화살표 그림이 원래 가리키는 방향(도) — 날아가는 쪽으로 돌려 줌

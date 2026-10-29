@@ -696,6 +696,7 @@
   function renderAlarms() {
     $('alBox').hidden = !S.alarmOn;
     if (!S.alarmOn) return;
+    if (!$('alSet').hidden) renderAlSet();
     const ico = alDraw() ? 'alarm/stkd-clock.png' : 'alarm/stk3-clock.png', icoEl = $('alBox').querySelector('.alIco');
     if (icoEl.getAttribute('src') !== ico) icoEl.setAttribute('src', ico);
     const list =(S.alarms || []).slice().sort((a, b) => a.h * 60 + a.m - (b.h * 60 + b.m));
@@ -732,6 +733,24 @@
   const setH12 = (h12, ap) => { h12 = ((h12 - 1 + 120) % 12) + 1; ae.h = (h12 % 12) + (ap ? 12 : 0); };
   $('alAdd').innerHTML = ICONS.plus.replace('width="15" height="15"', 'width="12" height="12"') + '<span>추가</span>';
   $('alAdd').addEventListener('click', () => openAlarm(null));
+  // 알람 창 크기·자리 (모든 알람 공통)
+  $('alSetBtn').innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>';
+  const AL_POS = [['tl', '왼쪽 위'], ['tc', '위 가운데'], ['tr', '오른쪽 위'], ['ml', '왼쪽 가운데'], ['mc', '한가운데'], ['mr', '오른쪽 가운데'], ['bl', '왼쪽 아래'], ['bc', '아래 가운데'], ['br', '오른쪽 아래']];
+  function renderAlSet() {
+    const st = S.settings, sc = st.alarmScale || 80;
+    if (document.activeElement !== $('alScale')) $('alScale').value = sc;
+    $('alScaleV').textContent = sc + '%';
+    $('alPos').innerHTML = AL_POS.map((p) => '<button type="button" data-p="' + p[0] + '" class="' + ((st.alarmPos || 'tc') === p[0] ? 'on' : '') + '" title="' + p[1] + '" aria-label="' + p[1] + '"></button>').join('');
+  }
+  $('alSetBtn').addEventListener('click', () => {
+    const open = $('alSet').hidden;
+    $('alSet').hidden = !open; $('alSetBtn').setAttribute('aria-expanded', String(open));
+    if (open) renderAlSet();
+  });
+  const alSetPreview = () => { api.alarmTest({ memo: '알람 창 크기·자리 미리보기', fx: 'boing', snd: 'none' }); };
+  $('alScale').addEventListener('input', () => { $('alScaleV').textContent = $('alScale').value + '%'; api.setSettings({ alarmScale: Number($('alScale').value) }); });
+  $('alPos').addEventListener('click', (e) => { const b = e.target.closest('[data-p]'); if (!b) return; api.setSettings({ alarmPos: b.dataset.p }); if (!S.alarmTesting) alSetPreview(); });
+  $('alSetTest').addEventListener('click', alSetPreview);
   $('alList').addEventListener('click', (e) => {
     const row = e.target.closest('.al'); if (!row) return;
     const a = (S.alarms || []).find((x) => x.id === row.dataset.id); if (!a) return;

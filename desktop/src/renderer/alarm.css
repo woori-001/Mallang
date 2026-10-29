@@ -1,7 +1,14 @@
 /* 말랑 알람: 화면 전체를 덮는 투명 창 · 카드는 위쪽 가운데 */
 html, body { background: transparent; margin: 0; width: 100%; height: 100%; overflow: hidden; }
 body { font-family: 'IBM Plex Sans KR', sans-serif; }
-.wrap { position: absolute; left: 50%; top: 150px; width: 400px; margin-left: -200px; opacity: 0; transform: translateY(-30px) scale(.85); }
+/* 자리(9곳)와 크기는 설정에서 · 크기는 통째로 줄이고 키움 */
+.pos { position: absolute; --t: ; transform: var(--t) scale(var(--sc, .8)); }
+.pos.p-tl, .pos.p-tc, .pos.p-tr { top: 16px; } .pos.p-bl, .pos.p-bc, .pos.p-br { bottom: 16px; } .pos.p-ml, .pos.p-mc, .pos.p-mr { top: 50%; }
+.pos.p-tl, .pos.p-ml, .pos.p-bl { left: 16px; } .pos.p-tr, .pos.p-mr, .pos.p-br { right: 16px; } .pos.p-tc, .pos.p-mc, .pos.p-bc { left: 50%; }
+.pos.p-tl { transform-origin: 0 0; } .pos.p-tc { --t: translateX(-50%); transform-origin: 50% 0; } .pos.p-tr { transform-origin: 100% 0; }
+.pos.p-ml { --t: translateY(-50%); transform-origin: 0 50%; } .pos.p-mc { --t: translate(-50%, -50%); transform-origin: 50% 50%; } .pos.p-mr { --t: translateY(-50%); transform-origin: 100% 50%; }
+.pos.p-bl { transform-origin: 0 100%; } .pos.p-bc { --t: translateX(-50%); transform-origin: 50% 100%; } .pos.p-br { transform-origin: 100% 100%; }
+.wrap { position: relative; width: 400px; margin: 92px 30px 26px 48px; opacity: 0; transform: translateY(-30px) scale(.85); }
 .wrap.in { animation: cardIn .65s cubic-bezier(.34, 1.56, .64, 1) forwards; }
 .wrap.out { animation: cardOut .4s ease forwards; }
 @keyframes cardIn { to { opacity: 1; transform: none; } }
@@ -94,3 +101,43 @@ html.draw .ok { background: #161616; color: #FBFAF5; box-shadow: 3px 3px 0 rgba(
 html.draw .wave { border-color: #161616; }
 html.draw .pt { filter: drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1px #fff); }
 @media (prefers-reduced-motion: reduce) { .art img, .pt, .wave, body .card, body .art { animation-duration: 3s !important; } }
+
+/* ───────── 스킨 꾸밈: 목록바와 같은 배경지·그림 ───────── */
+.deco { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+.deco > * { position: absolute; display: block; }
+.card > :not(.deco) { position: relative; z-index: 1; }
+/* 포레스트 그린: 화이트 우드 + 숲빛 + 나뭇잎 가지 */
+html.g-forest .card { background: linear-gradient(180deg, rgba(47, 120, 88, .16), rgba(47, 120, 88, .04) 40%, rgba(47, 120, 88, .12)), url(wood-white.svg) 0 0 / 168px auto, #F1EEE6; }
+html.g-forest .memo, html.g-forest .sb { background: rgba(255, 255, 255, .78); }
+/* 피치 블라썸: 복숭아빛 + 꽃잎 */
+html.g-peach .card { background: url(sakura-petals.svg) 0 0 / 170px auto, linear-gradient(180deg, #FFF1EE, #FFE3E0 55%, #F3F7EA); }
+html.g-peach .memo, html.g-peach .sb { background: rgba(255, 255, 255, .8); }
+/* 선샤인 레몬: 레몬빛 + 탄산 방울 */
+html.g-lemon .card { background: url(soda-bubbles.svg) 0 0 / 160px auto, linear-gradient(180deg, #FFF8D6, #FFF3C2 55%, #F2F8DC); }
+html.g-lemon .memo, html.g-lemon .sb { background: rgba(255, 255, 255, .82); }
+html.g-lemon .tm { color: #D39A08; }
+/* 스카이 블루: 하늘빛 + 아래쪽 물결 */
+html.g-sky .card { background: url(sky-wave.svg) 0 calc(100% - 6px) / 80px 16px repeat-x, url(sky-wave.svg) 22px calc(100% + 6px) / 80px 16px repeat-x, linear-gradient(180deg, #EAF5FF, #DDEFFF 60%, #C9E5FB); padding-bottom: 24px; }
+html.g-sky .memo, html.g-sky .sb { background: rgba(255, 255, 255, .8); }
+/* 오로라 글래스: 오로라 띠 */
+html.g-aurora .card { background: url(aurora-bands.svg) 0 0 / 100% 100%, linear-gradient(180deg, #ECEEFD, #CFD3F6 60%, #AEB5EC); }
+html.g-aurora .memo, html.g-aurora .sb { background: rgba(255, 255, 255, .72); }
+/* 미드나잇: 밤하늘 별 */
+html.dark .card { background: url(aurora-stars.svg) 0 0 / 100% 100%, linear-gradient(170deg, #353C5C, #232842); }
+/* 말랑 할로윈 · 말랑 크리스마스: 밤하늘 네이비 / 소나무 초록 + 모눈 */
+html.g-halloween .card, html.g-xmas .card { color: #fff; box-shadow: 0 22px 50px rgba(10, 8, 30, .4); }
+html.g-halloween .card { background: linear-gradient(rgba(255, 255, 255, .07) 1px, transparent 1px) 0 0 / 22px 22px, linear-gradient(90deg, rgba(255, 255, 255, .07) 1px, transparent 1px) 0 0 / 22px 22px, linear-gradient(170deg, #3A2F4C, #2A2238); }
+html.g-xmas .card { background: linear-gradient(rgba(255, 255, 255, .07) 1px, transparent 1px) 0 0 / 22px 22px, linear-gradient(90deg, rgba(255, 255, 255, .07) 1px, transparent 1px) 0 0 / 22px 22px, linear-gradient(170deg, #2A5A42, #1D4632); }
+html.g-halloween .lab, html.g-halloween .tm small, html.g-xmas .lab, html.g-xmas .tm small { color: rgba(255, 255, 255, .78); }
+html.g-halloween .tm { color: #F29A4A; } html.g-xmas .tm { color: #F6D27A; }
+html.g-halloween .memo, html.g-xmas .memo { background: rgba(255, 255, 255, .1); color: #fff; }
+html.g-halloween .sb, html.g-xmas .sb { background: rgba(255, 255, 255, .12); color: #fff; }
+/* 드로잉 할로윈·크리스마스: 종이 카드 + 펜 그림 */
+html.halloween .card { background: #FFF7EC; } html.xmas .card { background: #FFFDF6; }
+.deco svg { overflow: visible; }
+@keyframes sway { 0%, 100% { rotate: -4deg; } 50% { rotate: 4deg; } }
+@keyframes flap { 0%, 100% { transform: translateY(0) scaleY(1); } 50% { transform: translateY(-4px) scaleY(.75); } }
+@keyframes fall { from { transform: translateY(-10px) rotate(0); opacity: 0; } 15% { opacity: 1; } to { transform: translateY(150px) rotate(200deg); opacity: 0; } }
+.deco .sw { animation: sway 3s ease-in-out infinite; transform-origin: 50% 0; }
+.deco .flap { animation: flap .5s ease-in-out infinite; }
+.deco .fall { animation: fall 4s linear infinite; }
