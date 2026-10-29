@@ -88,6 +88,10 @@
 
     <!-- 캘린더 -->
     <section id="vCal" class="view" hidden>
+      <div id="alBox" class="alBox" hidden>
+        <div class="alHead"><img src="alarm/stk3-clock.png" alt="" class="alIco"><b>알람</b><span class="alBeta">관리자 미리보기</span><button id="alAdd" class="smallprimary soft" type="button"></button></div>
+        <div id="alList" class="alList"></div>
+      </div>
       <div class="calcard">
         <div class="calhead">
           <div class="calttl"><span id="calNum" class="calnum"></span><span id="calEn" class="calen"></span></div>
@@ -300,6 +304,27 @@
 
       </div>
     </section>
+    <div id="sAlarm" class="sconfirm salarm" hidden role="dialog" aria-modal="true" aria-labelledby="aeTitle">
+      <div class="scbox aebox">
+        <div class="aeTop"><b id="aeTitle">새 알람</b><button id="aeX" class="ib" type="button" aria-label="닫기"></button></div>
+        <div class="aeTime">
+          <div class="aeAp" role="radiogroup" aria-label="오전 오후"><button type="button" data-ap="0">오전</button><button type="button" data-ap="1">오후</button></div>
+          <div class="aeNum"><button type="button" class="aeUp" data-k="h" aria-label="시 올리기"></button><input id="aeH" inputmode="numeric" maxlength="2" aria-label="시"><button type="button" class="aeDn" data-k="h" aria-label="시 내리기"></button></div>
+          <span class="aeColon">:</span>
+          <div class="aeNum"><button type="button" class="aeUp" data-k="m" aria-label="분 올리기"></button><input id="aeM" inputmode="numeric" maxlength="2" aria-label="분"><button type="button" class="aeDn" data-k="m" aria-label="분 내리기"></button></div>
+        </div>
+        <div class="aeLab">반복</div>
+        <div id="aeDays" class="aeDays"></div>
+        <div class="aeQuick"><button type="button" data-q="once">한 번만</button><button type="button" data-q="all">매일</button><button type="button" data-q="week">평일</button></div>
+        <div class="aeLab">알람 메모</div>
+        <input id="aeMemo" class="aeMemo" type="text" maxlength="200" placeholder="무슨 알람인지 적어 두세요" spellcheck="false">
+        <div class="aeLab">울릴 때 효과</div>
+        <div id="aeFx" class="aeFx"></div>
+        <div class="aeLab">소리</div>
+        <div id="aeSnd" class="aeSnd"></div>
+        <div class="aeBtns"><button id="aeDel" class="scno aeDel" type="button">삭제</button><button id="aeTest" class="scno" type="button">미리보기</button><button id="aeSave" class="scyes" type="button">저장</button></div>
+      </div>
+    </div>
     <div id="sConfirm" class="sconfirm" hidden role="alertdialog" aria-modal="true" aria-labelledby="scTitle" aria-describedby="scDesc">
       <div class="scbox">
         <div id="scTitle" class="sctitle"></div>

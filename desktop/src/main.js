@@ -38,6 +38,7 @@ if (!app.requestSingleInstanceLock()) {
 }
 app.setAppUserModelId('com.mallang.memo');
 if (process.platform === 'linux') app.commandLine.appendSwitch('enable-transparent-visuals');
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');   // 알람 소리는 누르지 않아도 울려야 함
 
 // ───────────────────────── 저장소 ─────────────────────────
 let dataDir, dataFile, store, saveTimer, quitting = false;
@@ -87,6 +88,8 @@ function load() {
     slot: 0, w: 260, h: 220, type: 'text', title: '', text: '', items: [], layer: 'normal', hidden: false, folded: false, ...m, deleting: false
   }));
   store.trash = Array.isArray(store.trash) ? store.trash.filter((t) => t && typeof t.id === 'number') : [];
+  store.alarms = Array.isArray(store.alarms) ? store.alarms.map(cleanAlarm).filter(Boolean) : [];
+  store.alarmSnooze = Array.isArray(store.alarmSnooze) ? store.alarmSnooze.filter((z) => z && typeof z.at === 'number') : [];
   // 주간 플래너 동기화 표시: 처음엔 이 PC에 있던 주를 서버 것과 합친 뒤 올림
   if (!store.planner.meta || typeof store.planner.meta !== 'object') {
     store.planner.meta = {};
@@ -212,6 +215,8 @@ function snapshot() {
     displays: displayList(),
     sideDisplay: sideDisplay().id,   // 관리자가 모두에게 공개한 계절 스킨
     isAdmin: !!(store.cloud && store.cloud.admin),                         // 회사 공통 연락망
+    alarmOn: alarmAllowed(),
+    alarms: alarmAllowed() ? store.alarms : [],
     canEditContacts: !store.shared.contacts || !!store.cloud.admin,   // 공통 연락망은 관리자만 고침
     groups: store.groups,
     openGroups: store.openGroups,
@@ -395,6 +400,9 @@ function createHost() {
     if (kind === 'clock') {
       return { action: 'allow', overrideBrowserWindowOptions: { ...baseWinOpts, ...clockBounds(), alwaysOnTop: true, focusable: false } };
     }
+    if (kind === 'alarm') {
+      return { action: 'allow', overrideBrowserWindowOptions: { ...baseWinOpts, ...alarmBounds(), alwaysOnTop: true } };
+    }
     if (kind === 'search') {
       const wa = workArea();
       return { action: 'allow', overrideBrowserWindowOptions: {
@@ -418,6 +426,7 @@ function createHost() {
     if (kind === 'people') setupPeople(win);
     if (kind === 'search') setupSearch(win);
     if (kind === 'clock') setupClock(win, u.searchParams.get('mode'));
+    if (kind === 'alarm') setupAlarm(win);
     if (kind === 'notice') setupNotice(win, u.searchParams.get('view') === '1');
   });
   host.on('close', (e) => { if (!quitting) e.preventDefault(); });
@@ -1023,6 +1032,136 @@ function tickClock() {
   showClock('show');
 }
 
+
+// ───────────────────────── 알람 (내가 맞춘 시간에 요란하게) ─────────────────────────
+// 지금은 관리자만 (확인되면 공용으로)
+function alarmAllowed() { return !!(store.cloud && store.cloud.admin); }
+const ALARM_FX = ['boing', 'shake', 'flash', 'party'], ALARM_SND = ['ding', 'pop', 'ring', 'none'];
+function cleanAlarm(a) {
+  if (!a || typeof a !== 'object') return null;
+  const h = Math.floor(Number(a.h)), m = Math.floor(Number(a.m));
+  if (!(h >= 0 && h < 24 && m >= 0 && m < 60)) return null;
+  const days = Array.isArray(a.days) ? [...new Set(a.days.map(Number).filter((d) => d >= 0 && d <= 6))].sort() : [];
+  return {
+    id: typeof a.id === 'string' && a.id ? a.id.slice(0, 40) : 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    h, m, days,
+    once: days.length ? null : (/^\d{4}-\d{2}-\d{2}$/.test(a.once || '') ? a.once : null),
+    memo: String(a.memo || '').slice(0, 200),
+    fx: ALARM_FX.includes(a.fx) ? a.fx : 'boing',
+    snd: ALARM_SND.includes(a.snd) ? a.snd : 'ding',
+    on: a.on !== false,
+    created: Number(a.created) || Date.now()
+  };
+}
+const ymd = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+// 한 번만 울릴 알람: 오늘 그 시각이 지났으면 내일
+function nextOnce(h, m) {
+  const d = new Date(), t = new Date(d.getFullYear(), d.getMonth(), d.getDate(), h, m);
+  if (t.getTime() <= d.getTime() + 5000) t.setDate(t.getDate() + 1);
+  return ymd(t);
+}
+ipcMain.handle('alarm:save', (e, a) => {
+  if (!alarmAllowed()) return null;
+  const c = cleanAlarm(a);
+  if (!c) return null;
+  if (!c.days.length && (!c.once || a.reschedule !== false)) c.once = nextOnce(c.h, c.m);
+  if (a.on === undefined) c.on = true;
+  const i = store.alarms.findIndex((x) => x.id === c.id);
+  if (i >= 0) store.alarms[i] = c; else store.alarms.push(c);
+  store.alarmSnooze = store.alarmSnooze.filter((z) => z.id !== c.id);
+  save(); broadcast();
+  return c;
+});
+ipcMain.on('alarm:toggle', (e, id, on) => {
+  const a = store.alarms.find((x) => x.id === id);
+  if (!a || !alarmAllowed()) return;
+  a.on = !!on;
+  if (a.on && !a.days.length) a.once = nextOnce(a.h, a.m);
+  if (!a.on) store.alarmSnooze = store.alarmSnooze.filter((z) => z.id !== id);
+  save(); broadcast();
+});
+ipcMain.on('alarm:delete', (e, id) => {
+  store.alarms = store.alarms.filter((x) => x.id !== id);
+  store.alarmSnooze = store.alarmSnooze.filter((z) => z.id !== id);
+  save(); broadcast();
+});
+// 미리보기: 지금 바로 울려 보기 (저장 안 해도)
+ipcMain.on('alarm:test', (e, a) => {
+  if (!alarmAllowed()) return;
+  const c = cleanAlarm({ h: new Date().getHours(), m: new Date().getMinutes(), ...a });
+  if (c) ringAlarm({ ...c, test: true });
+});
+
+let alarmWin = null, alarmCur = null;
+const alarmQueue = [];
+let alarmLastCheck = Date.now();
+function alarmBounds() {
+  const wa = sideDisplay().workArea;
+  return { x: wa.x, y: wa.y, width: wa.width, height: wa.height };
+}
+function ringAlarm(a) {
+  const item = { ...a, at: Date.now() };
+  if (alarmCur) { alarmQueue.push(item); return; }
+  alarmCur = item;
+  if (alarmWin && !alarmWin.isDestroyed()) { alarmWin.setBounds(alarmBounds()); alarmWin.webContents.send('cmd', { type: 'alarm', alarm: item }); return; }
+  hostOpen('alarm.html?kind=alarm', 'alarm-' + Date.now());
+}
+function setupAlarm(win) {
+  alarmWin = win;
+  win.setAlwaysOnTop(true, 'screen-saver');
+  win.setVisibleOnAllWorkspaces && win.setVisibleOnAllWorkspaces(true);
+  win.setIgnoreMouseEvents(true, { forward: true });   // 카드 밖은 아래 창으로 클릭이 그대로
+  win.once('ready-to-show', () => { if (!win.isDestroyed()) win.showInactive(); });
+  win.on('closed', () => { if (alarmWin === win) alarmWin = null; });
+}
+ipcMain.handle('alarm:get', () => alarmCur);
+ipcMain.on('alarm:mouse', (e, on) => { if (alarmWin && !alarmWin.isDestroyed()) alarmWin.setIgnoreMouseEvents(!on, { forward: true }); });
+ipcMain.on('alarm:act', (e, act) => {
+  const a = alarmCur;
+  alarmCur = null;
+  if (a && !a.test && (act === 'snooze5' || act === 'snooze10')) {
+    store.alarmSnooze.push({ id: a.id, at: Date.now() + (act === 'snooze5' ? 5 : 10) * 60000, mins: act === 'snooze5' ? 5 : 10 });
+    save();
+  }
+  const next = alarmQueue.shift();
+  if (next) { setTimeout(() => ringAlarm(next), 400); return; }
+  const w = alarmWin;
+  if (w && !w.isDestroyed()) { w.webContents.send('cmd', { type: 'leave' }); setTimeout(() => { if (!w.isDestroyed()) w.close(); }, 420); }
+});
+// 5초마다: 지난 확인 이후 지나간 분들 중 맞는 알람 울리기 (잠자기에서 깨어나도 30분 안의 것은 울림)
+function tickAlarms() {
+  const now = Date.now();
+  if (!alarmAllowed()) { alarmLastCheck = now; return; }
+  const from = Math.max(alarmLastCheck, now - 30 * 60000);
+  alarmLastCheck = now;
+  let changed = false;
+  // 다시 알림
+  const due = store.alarmSnooze.filter((z) => z.at <= now);
+  if (due.length) {
+    store.alarmSnooze = store.alarmSnooze.filter((z) => z.at > now);
+    changed = true;
+    for (const z of due) { const a = store.alarms.find((x) => x.id === z.id); if (a) ringAlarm({ ...a, snoozed: z.mins }); }
+  }
+  // 이번에 지나간 '분'마다 확인
+  const start = new Date(from); start.setSeconds(0, 0);
+  for (let t = start.getTime(); t <= now; t += 60000) {
+    if (t <= from - 60000) continue;
+    const d = new Date(t);
+    const minuteStart = t, minuteKey = ymd(d) + ' ' + d.getHours() + ':' + d.getMinutes();
+    if (minuteStart > now) break;
+    for (const a of store.alarms) {
+      if (!a.on || a.h !== d.getHours() || a.m !== d.getMinutes()) continue;
+      if (a.lastKey === minuteKey) continue;
+      if (a.days.length ? !a.days.includes(d.getDay()) : a.once !== ymd(d)) continue;
+      a.lastKey = minuteKey;
+      if (!a.days.length) a.on = false;   // 한 번만: 울리고 나면 꺼짐
+      changed = true;
+      ringAlarm(a);
+    }
+  }
+  if (changed) { save(); broadcast(); }
+}
+
 // ───────────────────────── 빠른 검색 (Ctrl+Alt+F) ─────────────────────────
 const SEARCH_W = 560;
 function toggleSearch() {
@@ -1590,7 +1729,8 @@ ipcMain.handle('backup:export', async (e, password) => {
       memos: store.memos.filter((m) => !m.deleting).map(({ deleting, dirty, ...m }) => m),
       events: store.events, settings: store.settings,
       contacts: store.contacts ? store.contacts.rows : null,
-      planner: store.planner
+      planner: store.planner,
+      alarms: store.alarms
     };
     fs.writeFileSync(r.filePath, encryptBackup(payload, password));
     return { ok: true, file: path.basename(r.filePath), count: payload.memos.length };
@@ -1750,6 +1890,10 @@ ipcMain.handle('backup:import', async (e, password) => {
     added++;
   }
   let evAdded = 0;
+  if (Array.isArray(data.alarms)) {   // 알람: 없는 것만 채움
+    const have = new Set(store.alarms.map((a) => a.id));
+    for (const a of data.alarms) { const c = cleanAlarm(a); if (c && !have.has(c.id)) store.alarms.push(c); }
+  }
   if (data.planner && data.planner.weeks && typeof data.planner.weeks === 'object') {   // 주간 플래너: 없는 주만 채움
     for (const [k, w] of Object.entries(data.planner.weeks)) if (/^\d{4}-\d{2}-\d{2}$/.test(k) && !store.planner.weeks[k]) { store.planner.weeks[k] = cleanWeek(w); plannerTouch(k); }
   }
@@ -2480,6 +2624,8 @@ app.whenReady().then(() => {
   powerMonitor.on('resume', () => scheduleSync(2000));
   setInterval(() => scheduleSync(0), 5 * 60 * 1000);   // 5분마다 다른 기기·공통 연락망 맞추기
   clockTimer = setInterval(tickClock, 10 * 1000);         // 정각·30분 말랑이 시계
+  setInterval(tickAlarms, 5 * 1000);                      // 내가 맞춘 알람
+  powerMonitor.on('resume', () => setTimeout(tickAlarms, 1500));
   powerMonitor.on('unlock-screen', () => scheduleSync(1000));
   createHost();
   createSide();

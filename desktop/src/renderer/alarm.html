@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:">
+<title>말랑 알람</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="alarm.css">
+</head>
+<body>
+<div id="edge" class="edge" aria-hidden="true"></div>
+<div id="wrap" class="wrap">
+  <div id="party" class="party" aria-hidden="true"></div>
+  <div id="art" class="art" aria-hidden="true"></div>
+  <div id="card" class="card" role="alertdialog" aria-labelledby="tm" aria-describedby="memo">
+    <div id="lab" class="lab"></div>
+    <div id="tm" class="tm"></div>
+    <div id="memo" class="memo"></div>
+    <div class="btns">
+      <button id="s5" class="sb" type="button">5분 뒤<small>다시 알림</small></button>
+      <button id="s10" class="sb" type="button">10분 뒤<small>다시 알림</small></button>
+      <button id="ok" class="ok" type="button">확인</button>
+    </div>
+  </div>
+</div>
+<script src="common.js"></script>
+<script src="alarm.js"></script>
+</body>
+</html>

@@ -544,6 +544,7 @@
 
   // ───────── 캘린더 ─────────
   function renderCal() {
+    renderAlarms();
     $('calNum').textContent = String(calM + 1);
     $('calEn').textContent = MONTH_EN[calM] + ' ' + calY;
     const todayK = dateKey(new Date());
@@ -675,6 +676,108 @@
   $('evList').addEventListener('focusout', () => { if (evSaveT) saveEvents(true); });
   $('todayToggle').addEventListener('click', () => api.setSettings({ showToday: !S.settings.showToday }));
   $('calToggle').addEventListener('click', () => api.setSettings({ showCal: !S.settings.showCal }));
+
+
+  // ───────── 알람 (관리자 미리보기) ─────────
+  const DAYN = ['일', '월', '화', '수', '목', '금', '토'];
+  const AL_FX = [['boing', '뾰잉 점프', 'alarm/alm3-bunny.png'], ['shake', '흔들흔들', 'alarm/stk3-excl2.png'], ['flash', '반짝 테두리', 'alarm/stk3-spark-iris.png'], ['party', '파티 폭죽', 'alarm/stk3-sparks-mix.png']];
+  const alPad = (n) => (n < 10 ? '0' : '') + n;
+  const apH = (h) => ({ ap: h < 12 ? 0 : 1, h12: (h % 12) || 12 });
+  function alWhen(a) {
+    if (a.days.length === 7) return '매일';
+    if (a.days.length === 5 && [1, 2, 3, 4, 5].every((d) => a.days.includes(d))) return '평일';
+    if (a.days.length) return a.days.map((d) => DAYN[d]).join(' ');
+    if (!a.on) return '한 번 (울림)';
+    const t = new Date(), k = t.getFullYear() + '-' + alPad(t.getMonth() + 1) + '-' + alPad(t.getDate());
+    return a.once === k ? '오늘 한 번' : '내일 한 번';
+  }
+  function renderAlarms() {
+    $('alBox').hidden = !S.alarmOn;
+    if (!S.alarmOn) return;
+    const list = (S.alarms || []).slice().sort((a, b) => a.h * 60 + a.m - (b.h * 60 + b.m));
+    $('alList').innerHTML = list.length ? list.map((a) => {
+      const t = apH(a.h), fx = AL_FX.find((f) => f[0] === a.fx) || AL_FX[0];
+      return '<div class="al' + (a.on ? '' : ' off') + '" data-id="' + esc(a.id) + '" title="눌러서 고치기">' +
+        '<div class="am"><div class="at"><small>' + (t.ap ? '오후' : '오전') + '</small>' + t.h12 + ':' + alPad(a.m) + '</div>' +
+        '<div class="ameta"><b>' + alWhen(a) + '</b> · ' + (a.memo ? esc(a.memo) : fx[1]) + '</div></div>' +
+        '<button class="toggle" type="button" data-act="on" aria-pressed="' + !!a.on + '" aria-label="알람 켜기/끄기"><span class="track"><span class="knob"></span></span></button></div>';
+    }).join('') : '<div class="empty">아직 알람이 없어요</div>';
+  }
+  let ae = null;
+  function openAlarm(a) {
+    const n = new Date(Date.now() + 60 * 60000);
+    ae = a ? JSON.parse(JSON.stringify(a)) : { h: n.getHours(), m: 0, days: [], memo: '', fx: 'boing', snd: 'ding', on: true };
+    $('aeTitle').textContent = a ? '알람 고치기' : '새 알람';
+    $('aeDel').hidden = !a;
+    $('aeMemo').value = ae.memo || '';
+    renderAe();
+    $('sAlarm').hidden = false;
+    api.sideFocus();
+  }
+  function renderAe() {
+    const t = apH(ae.h);
+    document.querySelectorAll('.aeAp button').forEach((b) => b.classList.toggle('on', Number(b.dataset.ap) === t.ap));
+    if (document.activeElement !== $('aeH')) $('aeH').value = t.h12;
+    if (document.activeElement !== $('aeM')) $('aeM').value = alPad(ae.m);
+    $('aeDays').innerHTML = DAYN.map((d, i) => '<button type="button" data-d="' + i + '" class="' + (i === 0 ? 'sun' : '') + (ae.days.includes(i) ? ' on' : '') + '">' + d + '</button>').join('');
+    const q = !ae.days.length ? 'once' : ae.days.length === 7 ? 'all' : (ae.days.length === 5 && [1, 2, 3, 4, 5].every((d) => ae.days.includes(d))) ? 'week' : '';
+    document.querySelectorAll('.aeQuick button').forEach((b) => b.classList.toggle('on', b.dataset.q === q));
+    $('aeFx').innerHTML = AL_FX.map((f) => '<button type="button" data-fx="' + f[0] + '" class="' + (ae.fx === f[0] ? 'on' : '') + '"><img src="' + f[2] + '" alt="">' + f[1] + '</button>').join('');
+    $('aeSnd').innerHTML = window.M.ALARM_SOUNDS.map((x) => '<button type="button" data-snd="' + x[0] + '" class="' + (ae.snd === x[0] ? 'on' : '') + '">' + x[1] + '</button>').join('');
+  }
+  const setH12 = (h12, ap) => { h12 = ((h12 - 1 + 120) % 12) + 1; ae.h = (h12 % 12) + (ap ? 12 : 0); };
+  $('alAdd').innerHTML = ICONS.plus.replace('width="15" height="15"', 'width="12" height="12"') + '<span>추가</span>';
+  $('alAdd').addEventListener('click', () => openAlarm(null));
+  $('alList').addEventListener('click', (e) => {
+    const row = e.target.closest('.al'); if (!row) return;
+    const a = (S.alarms || []).find((x) => x.id === row.dataset.id); if (!a) return;
+    if (e.target.closest('[data-act="on"]')) { api.alarmToggle(a.id, !a.on); return; }
+    openAlarm(a);
+  });
+  const UP = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>';
+  document.querySelectorAll('.aeUp').forEach((b) => { b.innerHTML = UP; });
+  document.querySelectorAll('.aeDn').forEach((b) => { b.innerHTML = UP.replace('M6 15l6-6 6 6', 'M6 9l6 6 6-6'); });
+  $('aeX').innerHTML = ICONS.x;
+  $('sAlarm').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b || !ae) return;
+    const t = apH(ae.h);
+    if (b.dataset.ap != null) setH12(t.h12, Number(b.dataset.ap));
+    else if (b.classList.contains('aeUp') || b.classList.contains('aeDn')) {
+      const d = b.classList.contains('aeUp') ? 1 : -1;
+      if (b.dataset.k === 'h') ae.h = (ae.h + d + 24) % 24; else ae.m = d > 0 ? (Math.floor(ae.m / 5) * 5 + 5) % 60 : (Math.ceil(ae.m / 5) * 5 - 5 + 60) % 60;
+    } else if (b.dataset.d != null) { const i = Number(b.dataset.d); ae.days = ae.days.includes(i) ? ae.days.filter((x) => x !== i) : ae.days.concat(i).sort(); }
+    else if (b.dataset.q) ae.days = b.dataset.q === 'once' ? [] : b.dataset.q === 'all' ? [0, 1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 5];
+    else if (b.dataset.fx) ae.fx = b.dataset.fx;
+    else if (b.dataset.snd) { ae.snd = b.dataset.snd; const stop = window.M.alarmSound(ae.snd, { once: true }); setTimeout(stop, 2500); }
+    else return;
+    renderAe();
+  });
+  // 마우스 휠로 시·분 돌리기
+  ['aeH', 'aeM'].forEach((id) => $(id).addEventListener('wheel', (e) => {
+    e.preventDefault(); if (!ae) return;
+    const d = e.deltaY < 0 ? 1 : -1;
+    if (id === 'aeH') ae.h = (ae.h + d + 24) % 24; else ae.m = (ae.m + d + 60) % 60;
+    renderAe();
+  }, { passive: false }));
+  $('aeH').addEventListener('change', () => { const v = parseInt($('aeH').value, 10); if (v >= 1 && v <= 12) setH12(v, apH(ae.h).ap); else if (v === 0 || (v >= 13 && v <= 23)) ae.h = v; renderAe(); });
+  $('aeM').addEventListener('change', () => { const v = parseInt($('aeM').value, 10); if (v >= 0 && v <= 59) ae.m = v; renderAe(); });
+  ['aeH', 'aeM'].forEach((id) => $(id).addEventListener('blur', () => { $(id).dispatchEvent(new Event('change')); }));
+  const closeAe = () => { $('sAlarm').hidden = true; ae = null; };
+  $('aeX').addEventListener('click', closeAe);
+  $('sAlarm').addEventListener('pointerdown', (e) => { if (e.target === $('sAlarm')) closeAe(); });
+  $('sAlarm').addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); closeAe(); } });
+  const aeData = () => ({ ...ae, memo: $('aeMemo').value.trim() });
+  $('aeSave').addEventListener('click', async () => {
+    if (!ae) return;
+    const r = await api.alarmSave({ ...aeData(), on: true });
+    if (r) closeAe();
+  });
+  $('aeTest').addEventListener('click', () => { if (ae) api.alarmTest(aeData()); });
+  $('aeDel').addEventListener('click', () => {
+    if (!ae || !ae.id) return;
+    const id = ae.id;
+    askConfirm('알람을 지울까요?', (ae.memo ? '"' + ae.memo + '" ' : '') + '알람이 지워져요.', '지우기').then((ok) => { if (ok) { api.alarmDelete(id); closeAe(); } });
+  });
 
   // ───────── 꾸미기 ─────────
   // 계절 스킨: 목록바 배경에 눈 내리기 / 박쥐 날기
