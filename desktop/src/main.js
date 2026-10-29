@@ -1101,7 +1101,9 @@ function alarmBounds() {
 }
 function ringAlarm(a) {
   const item = { ...a, at: Date.now() };
-  if (alarmCur) { alarmQueue.push(item); return; }
+  // 미리보기가 떠 있으면: 새 미리보기·진짜 알람으로 바로 바꿈
+  if (alarmCur && alarmCur.test && alarmWin && !alarmWin.isDestroyed()) { alarmCur = item; alarmWin.webContents.send('cmd', { type: 'alarm', alarm: item }); return; }
+  if (alarmCur) { if (!item.test) alarmQueue.push(item); return; }
   alarmCur = item;
   if (alarmWin && !alarmWin.isDestroyed()) { alarmWin.setBounds(alarmBounds()); alarmWin.webContents.send('cmd', { type: 'alarm', alarm: item }); return; }
   hostOpen('alarm.html?kind=alarm', 'alarm-' + Date.now());
