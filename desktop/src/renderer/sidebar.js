@@ -680,7 +680,9 @@
 
   // ───────── 알람 (관리자 미리보기) ─────────
   const DAYN = ['일', '월', '화', '수', '목', '금', '토'];
-  const AL_FX = [['boing', '뾰잉 점프', 'alarm/alm3-bunny.png'], ['shake', '흔들흔들', 'alarm/stk3-excl2.png'], ['flash', '반짝 테두리', 'alarm/stk3-spark-iris.png'], ['party', '파티 폭죽', 'alarm/stk3-sparks-mix.png']];
+  const AL_FX = [['boing', '뾰잉 점프', 'alarm/alm3-bunny-ico.png', 'alarm/almd-bunny-ico.png'], ['shake', '흔들흔들', 'alarm/stk3-excl2.png', 'alarm/stkd-excl2.png'], ['flash', '반짝 테두리', 'alarm/stk3-spark-iris.png', 'alarm/stkd-spark.png'], ['party', '파티 폭죽', 'alarm/stk3-sparks-mix.png', 'alarm/stkd-sparks.png']];
+  // 말랑 드로잉·종이 스킨은 손그림 그림으로
+  const alDraw = () => { const k = window.M.SKINS[S.settings.skin] || {}; return !!(k.draw || k.paper); };
   const alPad = (n) => (n < 10 ? '0' : '') + n;
   const apH = (h) => ({ ap: h < 12 ? 0 : 1, h12: (h % 12) || 12 });
   function alWhen(a) {
@@ -694,7 +696,9 @@
   function renderAlarms() {
     $('alBox').hidden = !S.alarmOn;
     if (!S.alarmOn) return;
-    const list = (S.alarms || []).slice().sort((a, b) => a.h * 60 + a.m - (b.h * 60 + b.m));
+    const ico = alDraw() ? 'alarm/stkd-clock.png' : 'alarm/stk3-clock.png', icoEl = $('alBox').querySelector('.alIco');
+    if (icoEl.getAttribute('src') !== ico) icoEl.setAttribute('src', ico);
+    const list =(S.alarms || []).slice().sort((a, b) => a.h * 60 + a.m - (b.h * 60 + b.m));
     $('alList').innerHTML = list.length ? list.map((a) => {
       const t = apH(a.h), fx = AL_FX.find((f) => f[0] === a.fx) || AL_FX[0];
       return '<div class="al' + (a.on ? '' : ' off') + '" data-id="' + esc(a.id) + '" title="눌러서 고치기">' +
@@ -722,7 +726,7 @@
     $('aeDays').innerHTML = DAYN.map((d, i) => '<button type="button" data-d="' + i + '" class="' + (i === 0 ? 'sun' : '') + (ae.days.includes(i) ? ' on' : '') + '">' + d + '</button>').join('');
     const q = !ae.days.length ? 'once' : ae.days.length === 7 ? 'all' : (ae.days.length === 5 && [1, 2, 3, 4, 5].every((d) => ae.days.includes(d))) ? 'week' : '';
     document.querySelectorAll('.aeQuick button').forEach((b) => b.classList.toggle('on', b.dataset.q === q));
-    $('aeFx').innerHTML = AL_FX.map((f) => '<button type="button" data-fx="' + f[0] + '" class="' + (ae.fx === f[0] ? 'on' : '') + '"><img src="' + f[2] + '" alt="">' + f[1] + '</button>').join('');
+    $('aeFx').innerHTML = AL_FX.map((f) => '<button type="button" data-fx="' + f[0] + '" class="' + (ae.fx === f[0] ? 'on' : '') + '"><img src="' + f[alDraw() ? 3 : 2] + '" alt="">' + f[1] + '</button>').join('');
     $('aeSnd').innerHTML = window.M.ALARM_SOUNDS.map((x) => '<button type="button" data-snd="' + x[0] + '" class="' + (ae.snd === x[0] ? 'on' : '') + '">' + x[1] + '</button>').join('');
   }
   const setH12 = (h12, ap) => { h12 = ((h12 - 1 + 120) % 12) + 1; ae.h = (h12 % 12) + (ap ? 12 : 0); };
