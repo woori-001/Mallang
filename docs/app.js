@@ -786,11 +786,11 @@
   const plGet = () => st.planner.weeks[plKey()] || plWeek(null);
   const toM = (t) => (isT(t) ? +t.slice(0, 2) * 60 + +t.slice(3) : null);
   const fmtM = (m) => Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0');
-  function plOt(d, i) {
+  function plOt(d, i, hol) {   // 주말·공휴일은 휴일 근무로 따로
     const a = toM(d.in); let b = toM(d.out);
     const r = { e: 0, l: 0, w: 0 };
     const u30 = (m) => Math.floor(Math.max(0, m) / 30) * 30;   // 연장근무는 30분 단위
-    if (i >= 5) { if (a != null && b != null) { if (b < a) b += 1440; r.w = u30(b - a); } return r; }
+    if (i >= 5 || hol) { if (a != null && b != null) { if (b < a) b += 1440; r.w = u30(b - a); } return r; }
     if (a != null) r.e = u30(toM(st.planner.std.in) - a);
     if (b != null) { if (a != null && b < a) b += 1440; r.l = u30(b - toM(st.planner.std.out)); }
     return r;
@@ -823,7 +823,7 @@
     renderPlSum();
     const todayK = dateKey(new Date());
     $('plDays').innerHTML = plW.days.map((d, i) => {
-      const dt = plDay(i), today = dateKey(dt) === todayK, o = plOt(d, i);
+      const dt = plDay(i), today = dateKey(dt) === todayK, o = plOt(d, i, !!window.M.holiday(dateKey(dt)));
       const tapes = plW.tapes.filter((t) => t && t.a <= i && i <= t.b);
       const tl = (f, label, chip) => '<div class="pdT"><span class="pk">' + label + '</span><input type="time" data-i="' + i + '" data-f="' + f + '" value="' + esc(d[f]) + '">' +
         (!d[f] && today ? '<button class="pNow" type="button" data-i="' + i + '" data-f="' + f + '">지금</button>' : '') + chip + '</div>';
@@ -834,7 +834,7 @@
         '<div class="pdH"><b>' + dt.getDate() + '</b><span>' + PL_EN[i] + '요일</span>' + (today ? '<em class="pTodayTag">오늘</em>' : '') + (hol ? '<em class="pHol">' + esc(hol) + '</em>' : '') +
         tapes.map((t) => '<span class="pTape ' + (PL_COLORS.includes(t.c) ? t.c : 'peach') + '">' + esc(t.text || ' ') + '</span>').join('') + '</div>' +
         '<div class="pdTimes">' + tl('in', '출근', o.e ? '<span class="pOt e">조출 ' + fmtM(o.e) + '</span>' : '') +
-        tl('out', '퇴근', o.l ? '<span class="pOt l">야근 ' + fmtM(o.l) + '</span>' : o.w ? '<span class="pOt w">근무 ' + fmtM(o.w) + '</span>' : '') + '</div>' +
+        tl('out', '퇴근', o.l ? '<span class="pOt l">야근 ' + fmtM(o.l) + '</span>' : o.w ? '<span class="pOt w">' + (i >= 5 ? '주말 ' : '휴일 ') + fmtM(o.w) + '</span>' : '') + '</div>' +
         '<div class="pItems">' + items + '<div class="pIt add"><span class="pCb"></span><input class="pTx" type="text" maxlength="300" data-i="' + i + '" data-add="1" placeholder="+ 할 일"></div></div>' +
       '</div>';
     }).join('');
@@ -843,15 +843,16 @@
   }
   function renderPlSum() {
     const wk = { e: 0, l: 0, w: 0 };
-    plW.days.forEach((d, i) => { const o = plOt(d, i); wk.e += o.e; wk.l += o.l; wk.w += o.w; });
+    plW.days.forEach((d, i) => { const o = plOt(d, i, !!window.M.holiday(dateKey(plDay(i)))); wk.e += o.e; wk.l += o.l; wk.w += o.w; });
     const th = plDay(3), m = th.getMonth(), y = th.getFullYear();
     const mo = { e: 0, l: 0, w: 0 };
     for (let d = plMonday(new Date(y, m, 1)); d <= new Date(y, m + 1, 0); d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 7)) {
       const k = dateKey(d), w = k === plKey() ? plW : st.planner.weeks[k];
       if (!w) continue;
-      w.days.forEach((dd, i) => { const dt = new Date(d.getFullYear(), d.getMonth(), d.getDate() + i); if (dt.getMonth() !== m) return; const o = plOt(dd, i); mo.e += o.e; mo.l += o.l; mo.w += o.w; });
+      w.days.forEach((dd, i) => { const dt = new Date(d.getFullYear(), d.getMonth(), d.getDate() + i); if (dt.getMonth() !== m) return; const o = plOt(dd, i, !!window.M.holiday(dateKey(dt))); mo.e += o.e; mo.l += o.l; mo.w += o.w; });
     }
-    $('plSum').innerHTML = '<span>주간 합계 <b>' + fmtM(wk.e + wk.l + wk.w) + '</b></span><span>월간 합계 <b>' + fmtM(mo.e + mo.l + mo.w) + '</b></span>';
+    const ww = (t) => t.w ? ' <small class="plW">· 휴일 ' + fmtM(t.w) + '</small>' : '';
+    $('plSum').innerHTML = '<span>주간 합계 <b>' + fmtM(wk.e + wk.l) + '</b>' + ww(wk) + '</span><span>월간 합계 <b>' + fmtM(mo.e + mo.l) + '</b>' + ww(mo) + '</span>';
   }
   const plNowT = () => { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
   $('plPrev').innerHTML = I.left; $('plNext').innerHTML = I.right;

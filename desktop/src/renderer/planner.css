@@ -242,3 +242,5 @@ html.g-aurora .bun img { filter: drop-shadow(0 0 6px rgba(150, 220, 255, .6)); }
 /* 공휴일 이름 (요일 옆 작게) */
 .dh .hol { margin-left: auto; font-size: 10.5px; font-weight: 700; color: var(--sun); background: color-mix(in srgb, var(--sun) 12%, transparent); border-radius: 6px; padding: 1px 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; max-width: 60%; }
 html.draw .dh .hol { background: transparent; box-shadow: inset 0 0 0 1.4px currentColor; }
+
+.sum .sl.slw { line-height: 1.6; font-size: 11.5px; color: var(--sub); } .sum .sl.slw span { font-weight: 600; } .sum .sl.slw b { font-size: 12.5px; color: var(--sat); }

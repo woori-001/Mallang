@@ -40,14 +40,15 @@
   function nowT() { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
 
   // 조출·야근 계산 (주말은 근무 시간 전체)
-  function overtime(i) { return otDay(W.days[i], i); }
-  function otDay(d, i) {
+  function overtime(i) { return otDay(W.days[i], i, !!window.M.holiday(dateKey(dayAt(i)))); }
+  // 주말·공휴일은 '휴일 근무'로 따로 셈 (출근~퇴근 전체)
+  function otDay(d, i, hol) {
     const a = toMin(d.in);
     let b = toMin(d.out);
     const r = { e: 0, l: 0, w: 0 };
     // 연장근무는 30분 단위로만 인정 (예: 18:30 퇴근 기준, 20:01 퇴근 → 1:30)
     const u30 = (m) => Math.floor(Math.max(0, m) / 30) * 30;
-    if (i >= 5) { if (a != null && b != null) { if (b < a) b += 1440; r.w = u30(b - a); } return r; }
+    if (i >= 5 || hol) { if (a != null && b != null) { if (b < a) b += 1440; r.w = u30(b - a); } return r; }
     if (a != null) r.e = u30(toMin(std.in) - a);
     if (b != null) { if (a != null && b < a) b += 1440; r.l = u30(b - toMin(std.out)); }
     return r;
@@ -97,8 +98,10 @@
   }
   // 한 줄: "주간 합계 1:00" (마우스를 올리면 조출·야근 나눠서)
   function sumLine(t) {
-    const tip = '조출 ' + fmt(t.e) + ' · 야근 ' + fmt(t.l) + (t.w ? ' · 주말 ' + fmt(t.w) : '') + ' · ' + t.days + '일 기록';
-    return '<div class="sl" title="' + tip + '"><span>' + t.label + '</span><b>' + fmt(t.e + t.l + t.w) + '</b></div>';
+    const tip = '조출 ' + fmt(t.e) + ' · 야근 ' + fmt(t.l) + ' · ' + t.days + '일 기록';
+    // 조출+야근 합계와 주말·휴일 근무는 따로
+    return '<div class="sl" title="' + tip + '"><span>' + t.label + '</span><b>' + fmt(t.e + t.l) + '</b></div>' +
+      (t.w ? '<div class="sl slw" title="주말·공휴일에 출근해서 일한 시간"><span>└ 주말·휴일 근무</span><b>' + fmt(t.w) + '</b></div>' : '');
   }
   function weekTotal() {
     const t = { e: 0, l: 0, w: 0, days: 0, label: '주간 합계' };
@@ -121,7 +124,7 @@
       for (let i = 0; i < 7; i++) {
         const dt = new Date(p[0], p[1] - 1, p[2] + i);
         if (dt.getMonth() !== m || !wk.days[i]) continue;
-        const o = otDay(wk.days[i], i); t.e += o.e; t.l += o.l; t.w += o.w; if (wk.days[i].in || wk.days[i].out) t.days++;
+        const o = otDay(wk.days[i], i, !!window.M.holiday(dateKey(dt))); t.e += o.e; t.l += o.l; t.w += o.w; if (wk.days[i].in || wk.days[i].out) t.days++;
       }
     }
     return t;
@@ -158,7 +161,7 @@
   function otChip(i, f) {
     const o = overtime(i);
     if (f === 'in') return o.e ? '<span class="e">조출 ' + fmt(o.e) + '</span>' : '';
-    return o.l ? '<span class="l">야근 ' + fmt(o.l) + '</span>' : (o.w ? '<span class="w">근무 ' + fmt(o.w) + '</span>' : '');
+    return o.l ? '<span class="l">야근 ' + fmt(o.l) + '</span>' : (o.w ? '<span class="w">' + (i >= 5 ? '주말 ' : '휴일 ') + fmt(o.w) + '</span>' : '');
   }
   // 줄 수 = 기본 8줄, 마지막으로 쓴 줄 아래에 늘 빈 줄 하나
   function rowCount(i) {
