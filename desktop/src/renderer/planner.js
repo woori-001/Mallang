@@ -139,9 +139,9 @@
   function renderDays() {
     let ch = '', hh = '', th = '', lh = '';
     for (let i = 0; i < 7; i++) {
-      const d = dayAt(i), cls = (isToday(i) ? ' today' : '') + (i === 5 ? ' sat' : '') + (i === 6 ? ' sun' : ''), gc = 'grid-column:' + (i + 2);
+      const d = dayAt(i), hol = window.M.holiday(dateKey(d)), cls = (isToday(i) ? ' today' : '') + (i === 5 && !hol ? ' sat' : '') + (i === 6 || hol ? ' sun' : ''), gc = 'grid-column:' + (i + 2);
       ch += '<div class="col' + cls + '" style="' + gc + '"></div>';
-      hh += '<div class="dh' + cls + '" style="' + gc + '"><span class="n">' + d.getDate() + '</span><span class="e">' + EN[i] + '</span></div>';
+      hh += '<div class="dh' + cls + '" style="' + gc + '"><span class="n">' + d.getDate() + '</span><span class="e">' + EN[i] + '</span>' + (hol ? '<span class="hol" title="' + esc(hol) + '">' + esc(hol) + '</span>' : '') + '</div>';
       th += '<div class="tm" style="' + gc + '" data-i="' + i + '">' + timeLine(i, 'in', '출근') + timeLine(i, 'out', '퇴근') + '</div>';
       lh += '<div class="ls" style="' + gc + '" data-i="' + i + '">' + itemsHTML(i) + '</div>';
     }

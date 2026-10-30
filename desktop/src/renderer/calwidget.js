@@ -31,14 +31,16 @@
       if (dt.getMonth() !== m) { h += '<div class="cell"></div>'; continue; }
       const k = dateKey(dt), wd = dt.getDay();
       const evs = window.M.eventsOn(S.events, k, rec).map((x) => x.ev);
-      const color = wd === 0 ? 'var(--sun)' : (wd === 6 ? 'var(--sat)' : 'var(--ink)');
-      h += '<div class="cell"><button type="button" class="day' + (k === todayK ? ' today' : '') + (k === sel ? ' sel' : '') + '" data-k="' + k + '" style="color:' + color + '">' +
+      const hol = window.M.holiday(k);
+      const color = wd === 0 || hol ? 'var(--sun)' : (wd === 6 ? 'var(--sat)' : 'var(--ink)');
+      h += '<div class="cell"><button type="button"' + (hol ? ' title="' + esc(hol) + '"' : '') + ' class="day' + (k === todayK ? ' today' : '') + (k === sel ? ' sel' : '') + '" data-k="' + k + '" style="color:' + color + '">' +
         '<span>' + dt.getDate() + '</span><span class="dots">' + evs.slice(0, 3).map((e) => '<i style="background:' + EVENT_COLORS[e.c] + '"></i>').join('') + '</span></button></div>';
     }
     $('grid').innerHTML = h;
     const p = sel.split('-').map(Number), sd = new Date(p[0], p[1] - 1, p[2]);
     const list = window.M.eventsOn(S.events, sel);
-    $('evh').textContent = (sd.getMonth() + 1) + '월 ' + sd.getDate() + '일 ' + WD[sd.getDay()] + '요일 · 일정 ' + list.length + '개';
+    const selHol = window.M.holiday(sel);
+    $('evh').textContent = (sd.getMonth() + 1) + '월 ' + sd.getDate() + '일 ' + WD[sd.getDay()] + '요일' + (selHol ? ' · ' + selHol : '') + ' · 일정 ' + list.length + '개';
     $('list').innerHTML = list.length
       ? list.map((x) => '<div class="ev"><span class="dot" style="background:' + EVENT_COLORS[x.ev.c] + '"></span><span class="t">' + esc(/^\d{2}:\d{2}$/.test(x.ev.t) ? x.ev.t : '종일') + '</span><span class="n">' + esc(x.ev.title || '(이름 없음)') + '</span>' + (x.ev.r ? '<span class="rep">↻ ' + window.M.REPEAT_NAME[x.ev.r] + '</span>' : '') + '</div>').join('')
       : '<div class="none">일정이 없어요</div>';

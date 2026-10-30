@@ -559,14 +559,16 @@
       const k = dateKey(dt);
       const evs = window.M.eventsOn(S.events, k, rec).map((x) => x.ev);
       const wd = dt.getDay();
-      const color = wd === 0 ? 'var(--sun)' : (wd === 6 ? 'var(--sat)' : 'var(--ink)');
-      html += '<div class="cell"><button class="day' + (wd === 0 ? ' sun' : '') + (k === todayK ? ' today' : '') + (k === sel ? ' sel' : '') + '" type="button" data-k="' + k + '" style="color:' + color + '" aria-pressed="' + (k === sel) + '" aria-label="' + (dt.getMonth() + 1) + '월 ' + dt.getDate() + '일' + (evs.length ? ', 일정 ' + evs.length + '개' : '') + '">' +
+      const hol = window.M.holiday(k);
+      const color = wd === 0 || hol ? 'var(--sun)' : (wd === 6 ? 'var(--sat)' : 'var(--ink)');
+      html += '<div class="cell"><button' + (hol ? ' title="' + esc(hol) + '"' : '') + ' class="day' + (wd === 0 || hol ? ' sun' : '') + (hol ? ' hol' : '') + (k === todayK ? ' today' : '') + (k === sel ? ' sel' : '') + '" type="button" data-k="' + k + '" style="color:' + color + '" aria-pressed="' + (k === sel) + '" aria-label="' + (dt.getMonth() + 1) + '월 ' + dt.getDate() + '일' + (evs.length ? ', 일정 ' + evs.length + '개' : '') + '">' +
         '<span>' + dt.getDate() + '</span><span class="dots">' + evs.slice(0, 3).map((ev) => '<i style="background:' + EVENT_COLORS[ev.c] + '"></i>').join('') + '</span></button></div>';
     }
     $('grid').innerHTML = html;
     const sp = sel.split('-').map(Number);
     const sd = new Date(sp[0], sp[1] - 1, sp[2]);
-    $('selLabel').textContent = (sd.getMonth() + 1) + '월 ' + sd.getDate() + '일 ' + WD[sd.getDay()] + '요일';
+    const selHol = window.M.holiday(sel);
+    $('selLabel').innerHTML = (sd.getMonth() + 1) + '월 ' + sd.getDate() + '일 ' + WD[sd.getDay()] + '요일' + (selHol ? '<span class="holtag">' + esc(selHol) + '</span>' : '');
     $('calToggle').setAttribute('aria-pressed', String(!!S.settings.showCal));
     const tt = $('todayToggle');
     tt.setAttribute('aria-pressed', String(!!S.settings.showToday));

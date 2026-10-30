@@ -235,6 +235,31 @@
   }
 
 
+
+  // ───────── 공휴일 (대체공휴일·선거일 포함) ─────────
+  // 출처: 한국천문연구원 월력요항 / 공휴일 안내 (해마다 새로 나오면 여기에 더함)
+  const HOLIDAYS = {
+    '2025-01-01': '신정', '2025-01-27': '임시공휴일', '2025-01-28': '설날 연휴', '2025-01-29': '설날', '2025-01-30': '설날 연휴',
+    '2025-03-01': '삼일절', '2025-03-03': '대체공휴일', '2025-05-05': '어린이날 · 부처님오신날', '2025-05-06': '대체공휴일',
+    '2025-06-03': '대통령 선거', '2025-06-06': '현충일', '2025-08-15': '광복절', '2025-10-03': '개천절',
+    '2025-10-05': '추석 연휴', '2025-10-06': '추석', '2025-10-07': '추석 연휴', '2025-10-08': '대체공휴일', '2025-10-09': '한글날', '2025-12-25': '크리스마스',
+    '2026-01-01': '신정', '2026-02-16': '설날 연휴', '2026-02-17': '설날', '2026-02-18': '설날 연휴',
+    '2026-03-01': '삼일절', '2026-03-02': '대체공휴일', '2026-05-01': '노동절', '2026-05-05': '어린이날',
+    '2026-05-24': '부처님오신날', '2026-05-25': '대체공휴일', '2026-06-03': '지방선거', '2026-06-06': '현충일', '2026-07-17': '제헌절',
+    '2026-08-15': '광복절', '2026-08-17': '대체공휴일', '2026-09-24': '추석 연휴', '2026-09-25': '추석', '2026-09-26': '추석 연휴',
+    '2026-10-03': '개천절', '2026-10-05': '대체공휴일', '2026-10-09': '한글날', '2026-12-25': '크리스마스',
+    '2027-01-01': '신정', '2027-02-06': '설날 연휴', '2027-02-07': '설날', '2027-02-08': '설날 연휴', '2027-02-09': '대체공휴일',
+    '2027-03-01': '삼일절', '2027-05-01': '노동절', '2027-05-03': '대체공휴일', '2027-05-05': '어린이날', '2027-05-13': '부처님오신날',
+    '2027-06-06': '현충일', '2027-07-17': '제헌절', '2027-07-19': '대체공휴일', '2027-08-15': '광복절', '2027-08-16': '대체공휴일',
+    '2027-09-14': '추석 연휴', '2027-09-15': '추석', '2027-09-16': '추석 연휴', '2027-10-03': '개천절', '2027-10-04': '대체공휴일',
+    '2027-10-09': '한글날', '2027-10-11': '대체공휴일', '2027-12-25': '크리스마스', '2027-12-27': '대체공휴일',
+    '2028-01-01': '신정', '2028-01-26': '설날 연휴', '2028-01-27': '설날', '2028-01-28': '설날 연휴', '2028-03-01': '삼일절',
+    '2028-04-12': '국회의원 선거', '2028-05-01': '노동절', '2028-05-02': '부처님오신날', '2028-05-05': '어린이날', '2028-06-06': '현충일',
+    '2028-07-17': '제헌절', '2028-08-15': '광복절', '2028-10-02': '추석 연휴', '2028-10-03': '추석 · 개천절', '2028-10-04': '추석 연휴',
+    '2028-10-05': '대체공휴일', '2028-10-09': '한글날', '2028-12-25': '크리스마스'
+  };
+  const holiday = (k) => HOLIDAYS[k] || null;
+
   // ───────── 알람 소리 (파일 없이 직접 만든 소리) ─────────
   // kind: ding(딩동댕) · pop(뿅뿅) · ring(따르릉) · none / 반환값: 멈추는 함수
   const ALARM_SOUNDS = [['ding', '딩동댕'], ['pop', '뿅뿅'], ['ring', '따르릉'], ['none', '무음']];
@@ -865,5 +890,5 @@
     burst(1200);
   }
   const SEASONS_ON = false;   // 계절 스킨 꺼내기: true 로 바꾸면 스킨 목록에 나타남
-  window.M = { alarmSound, ALARM_SOUNDS, ALARM_PARTY, ALARM_ARROW, SEASONS_ON, fitShape, REPEATS, REPEAT_NAME, repeatsOn, recurring, eventsOn, GROUP_COLORS, syncRanges, TBL, CONTACT_HEAD, fixContactRows, contactView, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
+  window.M = { holiday, HOLIDAYS, alarmSound, ALARM_SOUNDS, ALARM_PARTY, ALARM_ARROW, SEASONS_ON, fitShape, REPEATS, REPEAT_NAME, repeatsOn, recurring, eventsOn, GROUP_COLORS, syncRanges, TBL, CONTACT_HEAD, fixContactRows, contactView, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
 })();

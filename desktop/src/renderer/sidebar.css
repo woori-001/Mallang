@@ -852,3 +852,5 @@ html.g-halloween .calDeco .s3bat, html.g-halloween .calDeco .s3ghost, html.g-xma
 @keyframes s3flap { 0%, 100% { transform: translateY(0) scaleY(1); } 50% { transform: translateY(-3px) scaleY(.8); } }
 @keyframes s3float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 @media (prefers-reduced-motion: reduce) { .calDeco .s3 { animation: none; } }
+/* 공휴일 */
+.sellabel .holtag { margin-left: 6px; font-size: 11px; font-weight: 700; color: var(--sun); background: color-mix(in srgb, var(--sun) 12%, transparent); border-radius: 6px; padding: 1px 6px; vertical-align: 1px; }

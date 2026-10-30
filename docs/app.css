@@ -530,3 +530,7 @@ html.g-forest .pDay, html.g-peach .pDay, html.g-lemon .pDay, html.g-sky .pDay, h
 html.g-forest .card, html.g-peach .card, html.g-lemon .card, html.g-sky .card, html.g-aurora .card { background: rgba(255, 255, 255, .72); }
 html.g-lemon .plTtl b, html.g-lemon .calTtl { color: #B8860B; }
 
+
+/* 공휴일 */
+.selLabel .holtag, .pHol { margin-left: 6px; font-style: normal; font-size: 12px; font-weight: 700; color: var(--sun); background: color-mix(in srgb, var(--sun) 12%, transparent); border-radius: 8px; padding: 1px 7px; vertical-align: 2px; }
+.pHol { margin-left: 0; align-self: center; }

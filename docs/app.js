@@ -638,14 +638,16 @@
       const k = dateKey(d);
       const evs = window.M.eventsOn(st.events, k, rec).map((x) => x.ev);
       const wd = d.getDay();
-      const color = wd === 0 ? 'var(--sun)' : wd === 6 ? 'var(--sat)' : 'var(--ink)';
+      const hol = window.M.holiday(k);
+      const color = wd === 0 || hol ? 'var(--sun)' : wd === 6 ? 'var(--sat)' : 'var(--ink)';
       h += '<div class="cell"><button class="day' + (k === todayK ? ' today' : '') + (k === sel ? ' sel' : '') + '" type="button" data-k="' + k + '" style="color:' + color + '" aria-pressed="' + (k === sel) + '" aria-label="' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일' + (evs.length ? ', 일정 ' + evs.length + '개' : '') + '">' +
         '<span>' + d.getDate() + '</span><span class="dots">' + evs.slice(0, 3).map((e) => '<i style="background:' + EVENT_COLORS[e.c] + '"></i>').join('') + '</span></button></div>';
     }
     $('grid').innerHTML = h;
     const p = sel.split('-').map(Number);
     const sd = new Date(p[0], p[1] - 1, p[2]);
-    $('selLabel').textContent = (sd.getMonth() + 1) + '월 ' + sd.getDate() + '일 ' + WD[sd.getDay()] + '요일';
+    const selHol = window.M.holiday(sel);
+    $('selLabel').innerHTML = (sd.getMonth() + 1) + '월 ' + sd.getDate() + '일 ' + WD[sd.getDay()] + '요일' + (selHol ? '<span class="holtag">' + esc(selHol) + '</span>' : '');
     if (!$('evList').contains(document.activeElement)) renderEvents();
   }
   function renderEvents(focusIdx) {
@@ -827,8 +829,9 @@
         (!d[f] && today ? '<button class="pNow" type="button" data-i="' + i + '" data-f="' + f + '">지금</button>' : '') + chip + '</div>';
       const items = d.items.map((it, j) => '<div class="pIt' + (it.d ? ' done' : '') + '"><button class="pCb" type="button" data-i="' + i + '" data-j="' + j + '" aria-label="완료">' + (it.d ? I.check : '') + '</button>' +
         '<input class="pTx" type="text" maxlength="300" data-i="' + i + '" data-j="' + j + '" value="' + esc(it.t) + '"></div>').join('');
-      return '<div class="pDay' + (today ? ' today' : '') + (i >= 5 ? ' wk' + i : '') + '">' +
-        '<div class="pdH"><b>' + dt.getDate() + '</b><span>' + PL_EN[i] + '요일</span>' + (today ? '<em class="pTodayTag">오늘</em>' : '') +
+      const hol = window.M.holiday(dateKey(dt));
+      return '<div class="pDay' + (today ? ' today' : '') + (hol ? ' wk6' : i >= 5 ? ' wk' + i : '') + '">' +
+        '<div class="pdH"><b>' + dt.getDate() + '</b><span>' + PL_EN[i] + '요일</span>' + (today ? '<em class="pTodayTag">오늘</em>' : '') + (hol ? '<em class="pHol">' + esc(hol) + '</em>' : '') +
         tapes.map((t) => '<span class="pTape ' + (PL_COLORS.includes(t.c) ? t.c : 'peach') + '">' + esc(t.text || ' ') + '</span>').join('') + '</div>' +
         '<div class="pdTimes">' + tl('in', '출근', o.e ? '<span class="pOt e">조출 ' + fmtM(o.e) + '</span>' : '') +
         tl('out', '퇴근', o.l ? '<span class="pOt l">야근 ' + fmtM(o.l) + '</span>' : o.w ? '<span class="pOt w">근무 ' + fmtM(o.w) + '</span>' : '') + '</div>' +
