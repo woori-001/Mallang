@@ -297,7 +297,7 @@ function animateTo(win, target, ms = 340) {
 // 맨 뒤 배치 (Windows API 사용)
 // HWND_BOTTOM 으로만 보내면 가끔 바탕화면 창(Progman/WorkerW)보다 아래로 내려가서
 // 메모가 '사라졌다가' 다른 창이 움직일 때 다시 나타나요 → 바탕화면 바로 위에 두도록 고침
-let SetWindowPos = null, GetWindow = null, FindWindowExW = null, IsWindowVisible = null;
+let SetWindowPos = null, GetWindow = null, FindWindowExW = null, IsWindowVisible = null, GetWindowLong = null;
 if (isWin) {
   try {
     const koffi = require('koffi');
@@ -307,6 +307,7 @@ if (isWin) {
       GetWindow = user32.func('__stdcall', 'GetWindow', 'intptr', ['intptr', 'uint']);
       FindWindowExW = user32.func('__stdcall', 'FindWindowExW', 'intptr', ['intptr', 'intptr', 'str16', 'str16']);
       IsWindowVisible = user32.func('__stdcall', 'IsWindowVisible', 'bool', ['intptr']);
+      try { GetWindowLong = user32.func('__stdcall', process.arch === 'ia32' ? 'GetWindowLongW' : 'GetWindowLongPtrW', 'intptr', ['intptr', 'int']); } catch (e) { GetWindowLong = null; }
     } catch (e) { GetWindow = FindWindowExW = IsWindowVisible = null; }
   } catch (e) {
     console.error('맨 뒤 배치 기능을 불러오지 못했어요', e);
@@ -464,6 +465,7 @@ function setupMemoWin(win, id) {
   win.on('blur', () => {
     const m = getMemo(id);
     if (m && m.layer === 'bottom') sendToBottom(win);
+    if (m && m.layer === 'top') setTimeout(() => keepTop(win), 150);
   });
   win.on('closed', () => {
     if (memoWins.get(id) === win) memoWins.delete(id);
@@ -484,6 +486,23 @@ function closeMemoWin(id, delay = 330) {
   setTimeout(() => { if (!win.isDestroyed()) win.close(); }, delay);
 }
 
+// '항상 위' 메모가 다른 프로그램 때문에 슬쩍 아래로 내려가는 경우가 있어서
+// 몇 초마다 확인해서 '항상 위' 표시가 풀렸으면 바로 다시 위로 (깜빡임 없이 Windows API로)
+function keepTop(win) {
+  if (!win || win.isDestroyed()) return;
+  if (!SetWindowPos) { win.setAlwaysOnTop(true, 'floating'); return; }
+  try {
+    const h = hwndOf(win);
+    if (GetWindowLong) { const ex = Number(GetWindowLong(h, -20)); if (ex & 0x8) return; }   // GWL_EXSTYLE · WS_EX_TOPMOST 그대로면 둠
+    SetWindowPos(h, -1, 0, 0, 0, 0, 0x0013);   // HWND_TOPMOST · 크기·위치·포커스 그대로
+  } catch (e) { console.error(e); }
+}
+function keepTopAll() {
+  for (const m of store.memos) {
+    if (m.layer !== 'top' || m.hidden || m.deleting) continue;
+    keepTop(memoWins.get(m.id));
+  }
+}
 function applyLayer(id) {
   const m = getMemo(id);
   const win = memoWins.get(id);
@@ -2649,6 +2668,7 @@ app.whenReady().then(() => {
   setInterval(() => scheduleSync(0), 5 * 60 * 1000);   // 5분마다 다른 기기·공통 연락망 맞추기
   clockTimer = setInterval(tickClock, 10 * 1000);         // 정각·30분 말랑이 시계
   setInterval(tickAlarms, 5 * 1000);                      // 내가 맞춘 알람
+  setInterval(keepTopAll, 2000);                          // '항상 위' 메모가 내려가 있으면 다시 위로
   powerMonitor.on('resume', () => setTimeout(tickAlarms, 1500));
   powerMonitor.on('unlock-screen', () => scheduleSync(1000));
   createHost();
