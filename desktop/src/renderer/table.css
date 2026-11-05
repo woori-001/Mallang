@@ -134,3 +134,10 @@ html.draw .gvSec:not(.closed):not(.solo) .gvHead { box-shadow: none; border-bott
 .gv .gvItem.dropBefore { box-shadow: inset 3px 0 0 var(--a1) !important; }
 .gv .dropAfter { box-shadow: 0 3px 0 var(--a1) !important; }
 .gv .gvItem.dropAfter { box-shadow: inset -3px 0 0 var(--a1) !important; }
+/* 부서 이름이 잘리지 않게: 이름은 다 보이고, 자리가 모자라면 대표번호가 아랫줄로 */
+.gvHead { flex-wrap: wrap; row-gap: 0; }
+.gvTog { flex: 1 0 auto; max-width: 100%; }
+.gvHead > .gvMain { margin-left: auto; }
+.gvHead > .gvOrdBox, .gvHead > .gvDetach { flex: none; }
+.gvHead { position: relative; }
+.gvHead > .gvDetach { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); background: rgb(var(--glass)); box-shadow: 0 2px 8px rgba(40, 40, 90, .18); z-index: 1; }
