@@ -484,6 +484,13 @@
     if (r.error) { bkMsg(r.error, 'err'); return; }
     bkMsg('메모잇에서 메모 ' + r.added + '개' + (r.events ? ', 달력 일정 ' + r.events + '개' : '') + '를 가져왔어요' + (r.skipped ? ' (이미 있거나 빈 메모 ' + r.skipped + '개는 건너뜀)' : ''), 'ok');
   });
+  $('smemoBtn').addEventListener('click', async () => {
+    bkMsg('S메모 폴더를 압축한 zip이나 syncmemo_data 폴더의 syncmemo_data.smy 파일을 골라 주세요…');
+    const r = await api.importSmemo();
+    if (r.canceled) { bkMsg(''); return; }
+    if (r.error) { bkMsg(r.error, 'err'); return; }
+    bkMsg('S메모에서 메모 ' + r.added + '개를 가져왔어요' + (r.shown ? ' (' + r.shown + '개는 원래 자리에 띄움, 나머지는 목록에 숨김)' : ' (목록바에서 눈 버튼으로 띄울 수 있어요)') + (r.skipped ? ' · 이미 있거나 빈 메모 ' + r.skipped + '개는 건너뜀' : ''), 'ok');
+  });
   $('bkCancel').addEventListener('click', () => { closeBk(); bkMsg(''); });
   $('bkForm').addEventListener('submit', async (e) => {
     e.preventDefault();

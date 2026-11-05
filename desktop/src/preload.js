@@ -94,6 +94,7 @@ contextBridge.exposeInMainWorld('api', {
   exportBackup: (pw) => ipcRenderer.invoke('backup:export', pw),
   importBackup: (pw) => ipcRenderer.invoke('backup:import', pw),
   importMemoit: () => ipcRenderer.invoke('import:memoit'),
+  importSmemo: () => ipcRenderer.invoke('import:smemo'),
 
   cloudSignIn: (mode, username, password) => ipcRenderer.invoke('cloud:signin', mode, username, password),
   cloudLogout: (force) => ipcRenderer.invoke('cloud:logout', !!force),

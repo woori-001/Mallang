@@ -1891,6 +1891,135 @@ function slotFromColorref(c) {
   if (h >= 255 && h < 320) return 4;              // 보라
   return 2;                                       // 빨강·분홍
 }
+// ───────── S메모(SMYSoft) 가져오기 ─────────
+// syncmemo_data 폴더: 메모마다 .stf (UTF-16 글) + 목록 파일 syncmemo_data.smy (자리·크기·색·고친 날짜)
+// 고를 수 있는 것: S메모 폴더를 압축한 .zip, 또는 syncmemo_data 폴더 안의 syncmemo_data.smy
+function readZipEntries(buf, want) {
+  const zlib = require('zlib');
+  const out = new Map();
+  let eocd = -1;
+  for (let i = buf.length - 22; i >= Math.max(0, buf.length - 70000); i--) if (buf.readUInt32LE(i) === 0x06054b50) { eocd = i; break; }
+  if (eocd < 0) throw new Error('zip');
+  const n = buf.readUInt16LE(eocd + 10);
+  let p = buf.readUInt32LE(eocd + 16);
+  for (let k = 0; k < n; k++) {
+    if (buf.readUInt32LE(p) !== 0x02014b50) break;
+    const method = buf.readUInt16LE(p + 10), csize = buf.readUInt32LE(p + 20), nlen = buf.readUInt16LE(p + 28), xlen = buf.readUInt16LE(p + 30), clen = buf.readUInt16LE(p + 32), loff = buf.readUInt32LE(p + 42);
+    const name = buf.slice(p + 46, p + 46 + nlen).toString('latin1').replace(/\\/g, '/');
+    p += 46 + nlen + xlen + clen;
+    if (!want(name)) continue;
+    const lh = loff, dataAt = lh + 30 + buf.readUInt16LE(lh + 26) + buf.readUInt16LE(lh + 28);
+    const raw = buf.slice(dataAt, dataAt + csize);
+    out.set(name, method === 0 ? raw : method === 8 ? zlib.inflateRawSync(raw) : null);
+  }
+  return out;
+}
+function smemoText(b) {
+  if (!b || !b.length) return '';
+  if (b[0] === 0xff && b[1] === 0xfe) return b.slice(2).toString('utf16le');
+  if (b[0] === 0xef && b[1] === 0xbb && b[2] === 0xbf) return b.slice(3).toString('utf8');
+  // BOM 없이 UTF-16 (짝수 자리에 0이 많음)
+  let z = 0; for (let i = 1; i < Math.min(b.length, 200); i += 2) if (b[i] === 0) z++;
+  if (z > 20) return b.toString('utf16le');
+  const u = b.toString('utf8');
+  if (!u.includes('\uFFFD')) return u;
+  try { return new TextDecoder('euc-kr').decode(b); } catch (e) { return u; }
+}
+function parseSmemoIndex(d) {
+  // .stf 파일 이름 앞 52바이트: [?, ?, 왼, 위, 오른, 아래, ?, 바탕색, 제목색, 보임, 너비, 높이, ?] (4바이트 정수)
+  const recs = [];
+  if (!d || d.length < 60) return recs;
+  const pat = Buffer.from('.stf', 'utf16le');
+  let i = 0;
+  while (true) {
+    const j = d.indexOf(pat, i); if (j < 0) break;
+    const m = d.lastIndexOf(Buffer.from([0xff, 0xfe, 0xff]), j);
+    i = j + pat.length;
+    if (m < 52) continue;
+    const n = d[m + 3], name = d.slice(m + 4, m + 4 + 2 * n).toString('utf16le');
+    if (!/^[\w.-]+\.stf$/.test(name)) continue;
+    const I = (k) => d.readInt32LE(m - 52 + 4 * k);
+    let k2 = m + 4 + 2 * n, date = null;
+    // 이름 뒤 첫 날짜 문자열 (YYYY-MM-DD HH:MM)
+    const tail = d.slice(k2, k2 + 80).toString('utf16le');
+    const dm = tail.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
+    if (dm) date = new Date(+dm[1], +dm[2] - 1, +dm[3], +dm[4], +dm[5]).getTime();
+    recs.push({ name, L: I(2), T: I(3), R: I(4), B: I(5), color: I(7) >>> 0, shown: I(9) !== 0, date });
+  }
+  return recs;
+}
+ipcMain.handle('import:smemo', async (e) => {
+  const parent = BrowserWindow.fromWebContents(e.sender);
+  const r = await dialog.showOpenDialog(parent, {
+    title: 'S메모 백업 고르기 (S메모 폴더를 압축한 zip 또는 syncmemo_data.smy)',
+    defaultPath: fs.existsSync('C:\\SMYSoft\\SMemo\\syncmemo_data') ? 'C:\\SMYSoft\\SMemo\\syncmemo_data' : app.getPath('documents'),
+    properties: ['openFile'],
+    filters: [{ name: 'S메모 백업 (zip, smy)', extensions: ['zip', 'smy'] }, { name: '모든 파일', extensions: ['*'] }]
+  });
+  if (r.canceled || !r.filePaths || !r.filePaths[0]) return { canceled: true };
+  const file = r.filePaths[0];
+  let files = new Map(), smy = null;
+  try {
+    if (/\.zip$/i.test(file)) {
+      const ents = readZipEntries(fs.readFileSync(file), (n) => /(^|\/)syncmemo_data\/[^/]+\.(stf|smy)$/i.test(n));
+      for (const [n, b] of ents) { if (!b) continue; const base = n.split('/').pop(); if (/\.smy$/i.test(base)) smy = b; else files.set(base, b); }
+    } else {
+      const dir = fs.statSync(file).isDirectory() ? file : path.dirname(file);
+      for (const f of fs.readdirSync(dir)) {
+        if (/\.stf$/i.test(f)) files.set(f, fs.readFileSync(path.join(dir, f)));
+        else if (/\.smy$/i.test(f)) smy = fs.readFileSync(path.join(dir, f));
+      }
+    }
+  } catch (err) {
+    return { error: 'S메모 파일을 읽지 못했어요. S메모 폴더를 압축한 zip이나 syncmemo_data.smy 파일을 골라 주세요' };
+  }
+  if (!files.size) return { error: 'S메모 메모(.stf)를 찾지 못했어요. S메모 폴더(또는 syncmemo_data 폴더)를 압축한 zip을 골라 주세요' };
+  // 목록 파일에 있는 메모만 (지운 메모 되살리지 않게), 목록 파일을 못 읽으면 모두
+  let recs = parseSmemoIndex(smy).filter((x) => files.has(x.name));
+  if (!recs.length) recs = [...files.keys()].sort().map((name) => ({ name, shown: true }));
+  const shownN = recs.filter((x) => x.shown).length;
+  const ask = await dialog.showMessageBox(parent, {
+    type: 'question', title: 'S메모 가져오기',
+    message: 'S메모 메모 ' + recs.length + '개를 찾았어요',
+    detail: 'S메모에서 바탕화면에 떠 있던 메모는 ' + shownN + '개예요.\n‘원래 자리에 띄우기’는 그 메모들을 S메모 때 자리·크기 그대로 띄우고, 나머지는 숨김으로 넣어요.\n‘목록에만 넣기’는 모두 숨김으로 넣어서 목록바에서 골라 볼 수 있어요.',
+    buttons: ['원래 자리에 띄우기', '목록에만 넣기 (숨김)', '취소'], defaultId: 0, cancelId: 2, noLink: true
+  });
+  if (ask.response === 2) return { canceled: true };
+  const showThem = ask.response === 0;
+  const sig = (m) => (m.title || '') + '\u0001' + (m.text || '');
+  const have = new Set(store.memos.map(sig));
+  const ords = store.memos.map((x) => x.ord).filter((v) => typeof v === 'number');
+  let ord = ords.length ? Math.min(...ords) : null;
+  let added = 0, skipped = 0;
+  for (const rec of recs) {
+    const text = smemoText(files.get(rec.name)).replace(/\r\n?/g, '\n').replace(/\u0000/g, '').replace(/\n+$/, '').slice(0, 200000);
+    if (!text.trim()) { skipped++; continue; }
+    const f = text.split('\n').map((l) => l.trim()).find(Boolean) || '';
+    const title = (f.length > 30 ? f.slice(0, 30) + '…' : f).slice(0, 200);
+    if (have.has(title + '\u0001' + text)) { skipped++; continue; }
+    const fm = rec.name.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/);
+    const created = fm ? new Date(+fm[1], +fm[2] - 1, +fm[3], +fm[4], +fm[5], +fm[6]).getTime() : Date.now();
+    const okRect = [rec.L, rec.T, rec.R, rec.B].every(Number.isFinite) && rec.R - rec.L > 40 && rec.B - rec.T > 30;
+    const visible = showThem && rec.shown;
+    const m = {
+      id: store.nextId++, slot: rec.color != null ? slotFromColorref(rec.color) : 0, type: 'text', title, text, items: [],
+      x: okRect ? rec.L : null, y: okRect ? rec.T : null,
+      w: okRect ? Math.min(MAX_W, Math.max(MIN_W, rec.R - rec.L)) : 260, h: okRect ? Math.min(MAX_H, Math.max(MIN_H, rec.B - rec.T)) : 220,
+      layer: 'normal', hidden: !visible, folded: false,
+      mark: null, markColor: '#E8456B', created, updated: rec.date || created,
+      uid: Cloud.uid(), mt: Date.now(), dirty: true, lt: Date.now()
+    };
+    if (ord != null) m.ord = --ord;
+    store.memos.push(m);
+    have.add(sig(m));
+    ensurePos(m);
+    if (!m.hidden) openMemoWin(m);
+    added++;
+  }
+  markLayout(); save(); broadcast(); scheduleSync();
+  return { ok: true, added, skipped, shown: showThem ? Math.min(shownN, added) : 0 };
+});
+
 ipcMain.handle('import:memoit', async (e) => {
   const parent = BrowserWindow.fromWebContents(e.sender);
   const r = await dialog.showOpenDialog(parent, {
