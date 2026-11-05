@@ -67,7 +67,7 @@ html.sk-retro .w, html.sk-retro .pl { border-radius: 0 !important; box-shadow: 0
 html.sk-retro .clock { border-radius: 0; background: transparent !important; box-shadow: none; padding: 0; display: block; position: relative; }
 html.sk-retro .clock .bun { width: calc(250px * var(--s, 1)); height: auto; aspect-ratio: 360 / 403; background: url(skin/rt-clock.png) 0 0 / 100% 100% no-repeat; image-rendering: pixelated; filter: drop-shadow(0 4px 0 rgba(46, 34, 56, .16)); transform-origin: 50% 100%; }
 html.sk-retro .clock .bun img { visibility: hidden; }
-html.sk-retro .clock .time { position: absolute; z-index: 1; left: calc(125px * var(--s, 1)); top: calc(201px * var(--s, 1)); transform: translate(-50%, -50%);
+html.sk-retro .clock .time { position: absolute; z-index: 1; left: calc(127.5px * var(--s, 1)); top: calc(202.5px * var(--s, 1)); transform: translate(-50%, -50%); margin-right: -1px;
   font: 700 calc(36px * var(--s, 1))/1 'Galmuri11', monospace; color: var(--rt-blue); letter-spacing: 1px; text-shadow: 2px 2px 0 #fff; }
 html.sk-retro .clock.dark .bun { filter: brightness(.82) saturate(.9); }
 html.sk-retro .clock.show .bun, html.sk-retro .clock.stay .bun { animation: none; }
