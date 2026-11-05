@@ -751,7 +751,17 @@
 
   /* 연락망 보기 (부서별로 묶어서 이름·내선을 촘촘하게)
      el 안에 그려요. opts.onPick(값, 줄, 요소) 누를 때 · opts.store 접어 둔 부서 기억용 키 */
-  const deptIcon = () => '<img src="' + (document.documentElement.classList.contains('draw') ? 'bunny-draw.svg' : 'bunny.png') + '" alt="" width="18" height="18" draggable="false">';
+  // 부서 프사: 스킨에 아이콘 묶음이 있으면 부서 이름마다 하나씩 (늘 같은 부서엔 같은 그림)
+  const DEPT_ICONS = {
+    'sk-ninja': ['toad', 'slug', 'gourd', 'mask', 'ramen', 'scroll', 'shuriken', 'tails', 'sakura', 'leafg', 'bomb', 'kunai'].map((n) => 'skin/nj-' + n + '.png'),
+    'sk-retro': ['pc', 'folder', 'floppy', 'mail', 'heart', 'star', 'note', 'bell', 'sun', 'moon'].map((n) => 'skin/rt-' + n + '.png')
+  };
+  const hashStr = (t) => { let h = 0; for (const ch of String(t)) h = (h * 31 + ch.codePointAt(0)) >>> 0; return h; };
+  const deptIcon = (name) => {
+    const cl = document.documentElement.classList;
+    for (const k of Object.keys(DEPT_ICONS)) if (cl.contains(k)) { const L = DEPT_ICONS[k]; return '<img src="' + L[hashStr(name) % L.length] + '" alt="" width="18" height="18" draggable="false">'; }
+    return '<img src="' + (cl.contains('draw') ? 'bunny-draw.svg' : 'bunny.png') + '" alt="" width="18" height="18" draggable="false">';
+  };
   function contactView(el, opts) {
     opts = opts || {};
     let rows = null, query = '';
@@ -762,7 +772,7 @@
     const findCol = (head, re, dflt) => { const i = head.findIndex((h) => re.test(h)); return i >= 0 ? i : dflt; };
     const isMain = (name) => /^(대표|대표번호|팀\s*대표)$/.test(String(name).trim());
     // 내가 정한 순서 (부서 · 부서 안 사람) — 연락망 내용은 그대로, 보이는 순서만
-    let ordering = false, curGroups = [];
+    let ordering = false, curGroups = [], lastSkc = '';
     const pKey = (r, N, X) => String(r[N] || '').trim() + '|' + String(r[X] || '').trim();
     const ord = () => (opts.order && opts.order()) || { groups: [], people: {} };
     const rank = (list, key) => { const i = list.indexOf(key); return i < 0 ? 1e6 : i; };
@@ -809,7 +819,7 @@
         const ob = (cls, d, dis, extra) => '<button type="button" class="gvOrd ' + cls + '"' + extra + (dis ? ' disabled' : '') + ' title="' + (d < 0 ? '위로' : '아래로') + '">' + ARW(d) + '</button>';
         html += '<section class="gvSec' + (isClosed ? ' closed' : '') + (people.length ? '' : ' solo') + '" data-gi="' + gi + '">' +
           '<div class="gvHead">' + (ordering && !opts.only ? '<span class="gvOrdBox">' + ob('gUp', -1, gi === 0, ' data-gi="' + gi + '"') + ob('gDn', 1, gi === groups.length - 1, ' data-gi="' + gi + '"') + '</span>' : '') + '<button type="button" class="gvTog" data-g="' + esc(g.name) + '" aria-expanded="' + !isClosed + '"' + (people.length ? '' : ' tabindex="-1"') + '>' +
-            '<span class="gvIco" aria-hidden="true">' + deptIcon() + '</span>' +
+            '<span class="gvIco" aria-hidden="true">' + deptIcon(g.name) + '</span>' +
             (people.length ? '<span class="gvChev" aria-hidden="true">' + ICONS.chev + '</span>' : '') +
             '<b>' + (q ? hl(g.name, q) : esc(g.name)) + '</b>' +
             (g.people.length ? '<span class="gvCnt">' + g.people.length + '명</span>' : '') + '</button>' +
@@ -933,7 +943,7 @@
       if (opts.onPick) opts.onPick(b.dataset.v.trim(), rows[Number(b.dataset.k)], b);
     });
     return {
-      setRows(r) { const j = JSON.stringify(r); if (j === JSON.stringify(rows)) return; rows = r ? r.map((x) => x.slice()) : null; render(); },
+      setRows(r) { const j = JSON.stringify(r), skc = document.documentElement.className; if (j === JSON.stringify(rows) && skc === lastSkc) return; lastSkc = skc; rows = r ? r.map((x) => x.slice()) : null; render(); },
       filter(q) { query = String(q || '').trim(); render(); },
       setOrdering(on) { ordering = !!on; render(); },
       resetOrder() { if (opts.onOrder) opts.onOrder({ groups: [], people: {} }); setTimeout(render, 0); },

@@ -295,16 +295,16 @@ html.sk-ninja {
 }
 .nj-num, html.sk-ninja .clock .time, html.sk-ninja .wrap .tm { font-family: 'Do Hyeon', sans-serif; }
 /* 목록바: 먹색 */
-html.sk-ninja .tab { background: linear-gradient(180deg, var(--nj-or2), var(--nj-or)); color: var(--nj-ink); border: 2.5px solid #000; border-right: none; }
-html.sk-ninja .panel { --ink: #EEE6DA; --sub: #A89E92; color: var(--ink); background: var(--nj-char) !important; border: 2.5px solid #000; border-right: none; box-shadow: -6px 0 24px rgba(0, 0, 0, .3); }
-html.sk-ninja .phead { background: linear-gradient(180deg, #1A181E, var(--nj-char)); margin: -20px -20px 0; padding: 12px 20px 8px; border-top-left-radius: 21.5px; }
+html.sk-ninja .tab { background: var(--nj-or); color: var(--nj-ink); border: 2.5px solid #000; border-right: none; }
+html.sk-ninja .panel { background: rgba(37, 34, 43, calc(.3 + .7 * var(--side-a, 1))) !important; border: 2.5px solid #000; border-right: none; box-shadow: -6px 0 24px rgba(0, 0, 0, .3); }
+html.sk-ninja .phead { background: transparent; margin: -20px -20px 0; padding: 12px 20px 8px; border-top-left-radius: 21.5px; }
 html.sk-ninja .applogo { height: auto; width: 230px; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .45)); }
 html.sk-ninja .todaytxt { color: #A89E92; }
 html.sk-ninja .pinbtn { background: var(--nj-char2); color: #EEE6DA; border-radius: 10px; }
 html.sk-ninja .seg { background: transparent; box-shadow: inset 0 -2px 0 #3E3946; border-radius: 0; padding: 0; }
 html.sk-ninja .segb { font: 400 15px 'Do Hyeon', sans-serif; letter-spacing: .4px; color: #9D93A8; border-radius: 0; background: transparent; box-shadow: none; }
 html.sk-ninja .segb.on { color: var(--nj-or2); background: transparent; box-shadow: inset 0 -3px 0 var(--nj-or); }
-html.sk-ninja .panel .primary, html.sk-ninja .panel .smallprimary { background: linear-gradient(180deg, var(--nj-or2), var(--nj-or)); color: var(--nj-ink); border: 2px solid #000; box-shadow: 0 3px 0 #000; font-family: 'Do Hyeon', sans-serif; font-weight: 400; font-size: 15px; border-radius: 10px; }
+html.sk-ninja .panel .primary, html.sk-ninja .panel .smallprimary { background: var(--nj-or); color: var(--nj-ink); border: 2px solid #000; box-shadow: 0 3px 0 #000; font-family: 'Do Hyeon', sans-serif; font-weight: 400; font-size: 15px; border-radius: 10px; }
 html.sk-ninja .panel .search { background: #1B1920; box-shadow: inset 0 0 0 1.5px #3E3946; border-radius: 10px; }
 html.sk-ninja .panel .search input { color: #EEE6DA; }
 html.sk-ninja .panel .tbar .tg { background: var(--nj-char2); box-shadow: none; border-radius: 10px; }
@@ -322,7 +322,7 @@ html.sk-ninja .panel .calcard, html.sk-ninja .panel .box, html.sk-ninja .panel .
   --ink: #2B2420; --sub: #8E8274; color: var(--ink); background: var(--nj-cream); border-radius: 12px; box-shadow: 0 0 0 2px #000; }
 html.sk-ninja .panel .wdays { background: var(--nj-char); color: #fff; border-radius: 6px; padding: 4px 0; margin-bottom: 4px; border: none; }
 html.sk-ninja .panel .day.today { box-shadow: inset 0 0 0 2px var(--nj-or); }
-html.sk-ninja .panel .day.sel { background: linear-gradient(180deg, var(--nj-or2), var(--nj-or)); color: var(--nj-ink) !important; box-shadow: 0 0 0 2px #000; }
+html.sk-ninja .panel .day.sel { background: var(--nj-or); color: var(--nj-ink) !important; box-shadow: 0 0 0 2px #000; }
 html.sk-ninja .panel .calhead b, html.sk-ninja .panel .calnum { color: var(--nj-or); }
 /* 메모지: 두루마리 */
 html.sk-ninja #card { border-radius: 6px !important; border: 2.5px solid #000; box-shadow: 0 6px 14px rgba(0, 0, 0, .28); }
@@ -341,7 +341,7 @@ html.sk-ninja .w .grid > *, html.sk-ninja .w .d { border-radius: 8px; }
 html.sk-ninja .pl .sheet { box-shadow: 0 0 0 2px #000; background: var(--nj-wash); }
 html.sk-ninja .pl .dh { background: var(--nj-char); border-bottom: 2px solid #000; }
 html.sk-ninja .pl .dh .n { color: #F3EBDD; font-family: 'Do Hyeon'; font-weight: 400; } html.sk-ninja .pl .dh .e { color: #A89E92; }
-html.sk-ninja .pl .dh.today .n { background: linear-gradient(180deg, var(--nj-or2), var(--nj-or)); color: var(--nj-ink); }
+html.sk-ninja .pl .dh.today .n { background: var(--nj-or); color: var(--nj-ink); }
 html.sk-ninja .pl .it.done .cb { background: var(--nj-or); }
 html.sk-ninja .pl .pb.on { background: var(--nj-or); color: var(--nj-ink); }
 /* 연락망 */
@@ -370,6 +370,21 @@ html.sk-ninja .wrap .tm { font-weight: 400; font-size: 70px; color: var(--nj-or)
 html.sk-ninja .wrap .tm small { font-family: 'Do Hyeon'; font-weight: 400; -webkit-text-stroke: 0; text-shadow: none; color: #8E8274; }
 html.sk-ninja .wrap .memo { border-radius: 8px; background: var(--nj-wash); box-shadow: inset 0 0 0 1.5px #000; }
 html.sk-ninja .wrap .btns button { border-radius: 10px; border: 2px solid #000; background: #fff; color: var(--nj-ink); box-shadow: 0 3px 0 #000; font-family: 'Do Hyeon', sans-serif; font-weight: 400; }
-html.sk-ninja .wrap .btns .ok { background: linear-gradient(180deg, var(--nj-or2), var(--nj-or)); color: var(--nj-ink); }
+html.sk-ninja .wrap .btns .ok { background: var(--nj-or); color: var(--nj-ink); }
 html.sk-ninja .art.gx { left: auto; right: -16px; top: -100px; width: 128px; height: 118px; }
 html.sk-ninja .wrap .deco { z-index: 2; }
+
+/* 닌자 목록바: 먹색 바탕 위에 바로 놓인 글씨만 밝게 (팝업·카드 안 글씨는 원래 진한 색) */
+html.sk-ninja .panel .todaytxt, html.sk-ninja .panel .sellabel, html.sk-ninja .panel .selrow, html.sk-ninja .panel .foot, html.sk-ninja .panel .footrow, html.sk-ninja .panel .trashHead,
+html.sk-ninja .panel .list > .empty, html.sk-ninja .panel .gempty, html.sk-ninja .panel .gcnt, html.sk-ninja .panel .pShared, html.sk-ninja .panel .sect, html.sk-ninja .panel .slabel,
+html.sk-ninja .panel .evlist > :not(.ev), html.sk-ninja .panel .trashBtn, html.sk-ninja .panel .pfoot { color: #DCD3C6; }
+html.sk-ninja .panel .tbar .ib, html.sk-ninja .panel .ghead .ib, html.sk-ninja .panel .pinbtn, html.sk-ninja .panel .search, html.sk-ninja .panel .search input { color: #EEE6DA; }
+html.sk-ninja .panel .search input::placeholder { color: #7E7488; }
+html.sk-ninja .panel .view { --ink: #EEE6DA; --sub: #A89E92; color: var(--ink); }
+html.sk-ninja .panel .scbox, html.sk-ninja .panel .acCard, html.sk-ninja .panel .tblScroll, html.sk-ninja .panel .bkField, html.sk-ninja .panel .ntList > *, html.sk-ninja .panel .cseg { --ink: #2B2420; --sub: #8E8274; color: var(--ink); }
+html.sk-ninja .panel .tbar .ib { color: #EEE6DA !important; }
+html.sk-ninja .panel .tbar .ib svg { opacity: 1; }
+html.sk-ninja .panel .pill { --ink: #2B2420; color: #2B2420; }
+/* 연락망 부서 프사: 스킨 소품 */
+html.sk-ninja .gvIco, html.sk-retro .gvIco { background: transparent; width: 28px; height: 28px; }
+html.sk-ninja .gvIco img, html.sk-retro .gvIco img { width: 26px; height: 26px; filter: none; }
