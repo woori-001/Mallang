@@ -46,7 +46,7 @@ let dataDir, dataFile, store, saveTimer, quitting = false;
 function defaults() {
   return {
     version: 1,
-    settings: { skin: 'lav', font: 'gowun', fontScale: 100, titleScale: 100, titleBold: true, calFont: 'same', calScale: 100, peopleFont: 'same', peopleScale: 100, bodyBg: false, alpha: 60, sideAlpha: 55, showToday: true, showCal: false, showPeople: false, clockMode: 30, clockAlpha: 75, clockScale: 100, clockDark: false, alarmScale: 80, alarmPos: 'tc', foldScale: 100, memoRound: 100, noticeOn: true, pinned: false, autoStart: false },
+    settings: { skin: 'lav', font: 'gowun', fontScale: 100, titleScale: 100, titleBold: true, calFont: 'same', calScale: 100, peopleFont: 'same', peopleScale: 100, bodyBg: false, alpha: 60, sideAlpha: 55, showToday: true, showCal: false, showPeople: false, clockMode: 30, clockAlpha: 75, clockScale: 100, clockDark: false, alarmScale: 80, alarmPos: 'tc', foldScale: 100, memoRound: 100, noticeOn: true, pinned: false, autoStart: false, foldDesk: false, foldDeskWhich: 'peek' },
     nextId: 2,
     memos: [{
       id: 1, slot: 0, x: null, y: null, w: 290, h: 240, type: 'text', title: '말랑메모 시작하기',
@@ -301,7 +301,7 @@ function animateTo(win, target, ms = 340) {
 // 맨 뒤 배치 (Windows API 사용)
 // HWND_BOTTOM 으로만 보내면 가끔 바탕화면 창(Progman/WorkerW)보다 아래로 내려가서
 // 메모가 '사라졌다가' 다른 창이 움직일 때 다시 나타나요 → 바탕화면 바로 위에 두도록 고침
-let SetWindowPos = null, GetWindow = null, FindWindowExW = null, IsWindowVisible = null, GetWindowLong = null;
+let SetWindowPos = null, GetWindow = null, FindWindowExW = null, IsWindowVisible = null, GetWindowLong = null, GetForegroundWindow = null;
 if (isWin) {
   try {
     const koffi = require('koffi');
@@ -311,6 +311,7 @@ if (isWin) {
       GetWindow = user32.func('__stdcall', 'GetWindow', 'intptr', ['intptr', 'uint']);
       FindWindowExW = user32.func('__stdcall', 'FindWindowExW', 'intptr', ['intptr', 'intptr', 'str16', 'str16']);
       IsWindowVisible = user32.func('__stdcall', 'IsWindowVisible', 'bool', ['intptr']);
+      try { GetForegroundWindow = user32.func('__stdcall', 'GetForegroundWindow', 'intptr', []); } catch (e) { GetForegroundWindow = null; }
       try { GetWindowLong = user32.func('__stdcall', process.arch === 'ia32' ? 'GetWindowLongW' : 'GetWindowLongPtrW', 'intptr', ['intptr', 'int']); } catch (e) { GetWindowLong = null; }
     } catch (e) { GetWindow = FindWindowExW = IsWindowVisible = null; }
   } catch (e) {
@@ -331,6 +332,31 @@ function desktopHwnds() {
     if (!IsWindowVisible || IsWindowVisible(w)) set.add(w);
   }
   return set;
+}
+// ───── 바탕화면을 누르면 메모 접기 (설정에서 켜고 끔) ─────
+const peekIds = new Set();   // 접혀 있다가 펼쳐 본 메모 (이번 실행 동안)
+let lastFg = 0;
+function allDesktopHwnds() {
+  const set = new Set();
+  if (!FindWindowExW) return set;
+  const pm = Number(FindWindowExW(0, 0, 'Progman', null)) || 0;
+  if (pm) set.add(pm);
+  let w = 0;
+  for (let i = 0; i < 50; i++) { w = Number(FindWindowExW(0, w, 'WorkerW', null)) || 0; if (!w) break; set.add(w); }
+  return set;
+}
+function foldDeskTick() {
+  if (!GetForegroundWindow || !store.settings.foldDesk) { lastFg = 0; return; }
+  let fg = 0;
+  try { fg = Number(GetForegroundWindow()) || 0; } catch (e) { return; }
+  if (fg === lastFg) return;
+  lastFg = fg;
+  if (!fg || !allDesktopHwnds().has(fg)) return;
+  // 바탕화면이 앞으로 왔어요 → 메모 접기
+  const all = store.settings.foldDeskWhich === 'all';
+  const list = store.memos.filter((m) => !m.folded && !m.hidden && !m.deleting && (all || peekIds.has(m.id)));
+  for (const m of list) updateMemo(m.id, { folded: true });
+  peekIds.clear();
 }
 function sendToBottom(win) {
   if (!win || win.isDestroyed() || !SetWindowPos) return;
@@ -550,6 +576,7 @@ function updateMemo(id, patch) {
     m.x = m.ox; m.y = m.oy; delete m.ox; delete m.oy; restored = true;
   }
   // 화면 오른쪽에 있는 메모는 오른쪽 끝을 그대로 두고 왼쪽으로 펼쳐요 (옆 모니터로 넘어가지 않게)
+  if ('folded' in patch && !!m.folded !== !!prev.folded) { if (m.folded) peekIds.delete(id); else peekIds.add(id); }
   if (!!m.folded !== !!prev.folded && !restored && m.x != null && !applyingLayout) {
     foldMove(m, !!m.folded);
   }
@@ -1382,7 +1409,7 @@ function updateSettings(patch) {
   if ('bodyBg' in patch) patch.bodyBg = !!patch.bodyBg;
   if ('titleBold' in patch) patch.titleBold = !!patch.titleBold;
   if ('titleScale' in patch) patch.titleScale = Math.min(170, Math.max(70, Number(patch.titleScale) || 100));
-  const keys = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'showCal', 'showPeople', 'clockMode', 'clockAlpha', 'clockScale', 'clockDark', 'alarmScale', 'alarmPos', 'foldScale', 'memoRound', 'sideDisplay', 'noticeOn', 'pinned', 'autoStart'];
+  const keys = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'showCal', 'showPeople', 'clockMode', 'clockAlpha', 'clockScale', 'clockDark', 'alarmScale', 'alarmPos', 'foldScale', 'memoRound', 'sideDisplay', 'noticeOn', 'pinned', 'autoStart', 'foldDesk', 'foldDeskWhich'];
   if ('noticeOn' in patch) patch.noticeOn = !!patch.noticeOn;
   if ('sideDisplay' in patch) patch.sideDisplay = typeof patch.sideDisplay === 'number' && isFinite(patch.sideDisplay) ? patch.sideDisplay : null;
   if ('foldScale' in patch) patch.foldScale = clampFs(patch.foldScale);
@@ -1393,6 +1420,8 @@ function updateSettings(patch) {
   if ('clockDark' in patch) patch.clockDark = !!patch.clockDark;
   if ('alarmScale' in patch) patch.alarmScale = Math.min(120, Math.max(50, Number(patch.alarmScale) || 80));
   if ('alarmPos' in patch) patch.alarmPos = ['tl', 'tc', 'tr', 'ml', 'mc', 'mr', 'bl', 'bc', 'br'].includes(patch.alarmPos) ? patch.alarmPos : 'tc';
+  if ('foldDesk' in patch) patch.foldDesk = !!patch.foldDesk;
+  if ('foldDeskWhich' in patch) patch.foldDeskWhich = patch.foldDeskWhich === 'all' ? 'all' : 'peek';
   if ('fontScale' in patch) patch.fontScale = Math.min(170, Math.max(70, Number(patch.fontScale) || 100));
   const oldFold = new Map(store.memos.filter((m) => m.folded && m.fs == null && m.x != null && !m.hidden && !m.deleting).map((m) => [m, [foldW(m), foldH(m)]]));
   for (const k of keys) if (k in patch) store.settings[k] = patch[k];
@@ -2728,7 +2757,8 @@ app.whenReady().then(() => {
   powerMonitor.on('resume', () => scheduleSync(2000));
   setInterval(() => scheduleSync(0), 5 * 60 * 1000);   // 5분마다 다른 기기·공통 연락망 맞추기
   clockTimer = setInterval(tickClock, 10 * 1000);         // 정각·30분 말랑이 시계
-  setInterval(tickAlarms, 5 * 1000);                      // 내가 맞춘 알람
+  setInterval(tickAlarms, 5 * 1000);
+  setInterval(foldDeskTick, 250);                        // 바탕화면 누르면 메모 접기                      // 내가 맞춘 알람
   setInterval(keepTopAll, 2000);                          // '항상 위' 메모가 내려가 있으면 다시 위로
   powerMonitor.on('resume', () => setTimeout(tickAlarms, 1500));
   powerMonitor.on('unlock-screen', () => scheduleSync(1000));

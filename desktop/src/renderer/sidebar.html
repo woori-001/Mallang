@@ -208,6 +208,16 @@
         </div>
 
         <div class="box">
+          <div class="bhead">메모 접기</div>
+          <button id="foldDesk" class="toggle mini" type="button" aria-pressed="false"><span>바탕화면을 누르면 메모 접기</span><span class="track"><span class="knob"></span></span></button>
+          <div id="foldDeskWhich" class="cseg" role="group" aria-label="접을 메모">
+            <button type="button" data-fdw="peek" aria-pressed="true">펼쳐 본 메모만</button>
+            <button type="button" data-fdw="all" aria-pressed="false">펼쳐진 메모 모두</button>
+          </div>
+          <div class="bkInfo" id="foldDeskInfo">켜 두면, 접힌 메모를 펼쳐 보다가 바탕화면을 누를 때 다시 접혀요.</div>
+        </div>
+
+        <div class="box">
           <div class="bhead">시작 · 백업</div>
           <button id="autoStart" class="toggle mini" type="button" aria-pressed="false"><span>윈도우 시작 시 자동 실행</span><span class="track"><span class="knob"></span></span></button>
           <button id="noticeOn" class="toggle mini" type="button" aria-pressed="true"><span>업데이트 공지 받기</span><span class="track"><span class="knob"></span></span></button>

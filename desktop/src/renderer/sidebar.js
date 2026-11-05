@@ -897,6 +897,7 @@
     $('alphaV').textContent = s.alpha + '%';
     $('sideAlphaV').textContent = s.sideAlpha + '%';
     $('autoStart').setAttribute('aria-pressed', String(!!s.autoStart));
+    renderSysToggles();
     const mons = S.displays || [];
     $('sideMonBox').hidden = mons.length < 2;
     $('sideMon').innerHTML = mons.map((d) => '<button type="button" data-mon="' + d.id + '" aria-pressed="' + (d.id === S.sideDisplay) + '">모니터 ' + d.n + (d.primary ? ' (주)' : '') + '</button>').join('');
@@ -943,6 +944,8 @@
   });
   $('bodyBg').addEventListener('click', () => api.setSettings({ bodyBg: !S.settings.bodyBg }));
   $('autoStart').addEventListener('click', () => api.setSettings({ autoStart: !S.settings.autoStart }));
+  $('foldDesk').addEventListener('click', () => api.setSettings({ foldDesk: !S.settings.foldDesk }));
+  $('foldDeskWhich').addEventListener('click', (e) => { const b = e.target.closest('[data-fdw]'); if (b) api.setSettings({ foldDeskWhich: b.dataset.fdw }); });
   $('sideMon').addEventListener('click', (e) => { const b = e.target.closest('[data-mon]'); if (b) api.setSettings({ sideDisplay: Number(b.dataset.mon) }); });
   $('openData').addEventListener('click', () => api.openData());
 
@@ -1010,7 +1013,18 @@
     if (r && r.ok) { $('ntTitle').value = ''; $('ntBody').value = ''; $('ntMsg').textContent = '보냈어요 · 다른 사용자에게 5분 안에 떠요'; $('ntMsg').className = 'bkMsg ok'; }
     else { $('ntMsg').textContent = (r && r.error) || '보내지 못했어요'; $('ntMsg').className = 'bkMsg err'; }
   });
+  // 계정 탭의 켜고 끄기 (꾸미기·계정 어느 탭에서든 바로 반영)
+  function renderSysToggles() {
+    const s = S.settings;
+    $('autoStart').setAttribute('aria-pressed', String(!!s.autoStart));
+    $('noticeOn').setAttribute('aria-pressed', String(s.noticeOn !== false));
+    $('foldDesk').setAttribute('aria-pressed', String(!!s.foldDesk));
+    $('foldDeskWhich').hidden = !s.foldDesk;
+    $('foldDeskWhich').querySelectorAll('[data-fdw]').forEach((b) => b.setAttribute('aria-pressed', String((s.foldDeskWhich || 'peek') === b.dataset.fdw)));
+    $('foldDeskInfo').textContent = !s.foldDesk ? '켜 두면 바탕화면을 누를 때 펼쳐 둔 메모가 접혀요.' : (s.foldDeskWhich || 'peek') === 'all' ? '바탕화면을 누르면 펼쳐진 메모가 모두 접혀요 (숨긴 메모는 그대로).' : '접힌 메모를 펼쳐 보다가 바탕화면을 누르면 그 메모만 다시 접혀요. 원래 펼쳐 둔 메모는 그대로예요.';
+  }
   function renderAcct() {
+    renderSysToggles();
     const c = S.cloud || {};
     renderNotices();
     $('acOut').hidden = !!c.signedIn;
