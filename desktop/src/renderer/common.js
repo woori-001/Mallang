@@ -104,7 +104,7 @@
     },
     // 베타 스킨 (관리자만): 픽셀 레트로 · 말랑 엑셀 — 종이 스킨 바탕 + 스킨 전용 모양(skins.css)
     retro: {
-      name: '픽셀 레트로', paper: true, beta: true, look: 'retro', bunny: 'skin/rt-win.png', logo: 'skin/rt-logo.png', paperBg: '#FBF9FD',
+      name: '픽셀 레트로', paper: true, beta: true, look: 'retro', bunny: 'skin/rt-bun.png', win: 'skin/rt-win.png', logo: 'skin/rt-logo.png', paperBg: '#FBF9FD',
       base: '#E6E2EE', b: ['#DCD8E6', '#ECE9F2', '#D3CEE0', '#F2F0F7'],
       a1: '#1A33C9', a2: '#3D5BE0', ink: '#2E2238', sub: '#6E6684', sun: '#D23B5A', sat: '#1A33C9', glow: 'rgba(26,51,201,0.20)', on: '#FFFFFF',
       pal: [[[251, 249, 253], [251, 249, 253]], [[255, 242, 246], [255, 242, 246]], [[255, 249, 222], [255, 249, 222]], [[236, 248, 238], [236, 248, 238]], [[238, 244, 255], [238, 244, 255]]]
@@ -321,6 +321,8 @@
     aurora: ['stk3-star-iris', 'stk3-heart-iris', 'stk3-moon', 'stk3-spark-iris', 'stk3-bubble-iris', 'stk3-sparks-mix', 'stk3-star-iris', 'stk3-heart-lav'],
     gxmas: ['stk3-tree', 'stk3-gift', 'stk3-star-y', 'stk3-sparks-gold', 'stk3-heart-p', 'stk3-tree', 'stk3-gift', 'stk3-spark-iris'],
     ghalloween: ['stk3-ghost', 'stk3-bat', 'stk3-moon', 'stk3-star-y', 'stk3-sparks-gold', 'stk3-ghost', 'stk3-bat', 'stk3-star-iris'],
+    retro: ['../skin/rt-star', '../skin/rt-heart', '../skin/rt-sparkle', '../skin/rt-note', '../skin/rt-star2', '../skin/rt-heart2', '../skin/rt-bell', '../skin/rt-sun', '../skin/rt-cloud', '../skin/rt-moon'],
+    excel: ['../skin/xl-bar', '../skin/xl-fx', '../skin/xl-pie', '../skin/xl-sum', '../skin/xl-line', '../skin/xl-az', '../skin/xl-cell', '../skin/xl-filter', '../skin/xl-grid'],
     draw: ['stkd-star', 'stkd-heart', 'stkd-spark', 'stkd-sparks', 'stkd-hearts', 'stkd-note', 'stkd-flower', 'stkd-star']
   };
   // 화살표 그림이 원래 가리키는 방향(도) — 날아가는 쪽으로 돌려 줌

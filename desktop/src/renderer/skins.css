@@ -66,13 +66,14 @@ html.sk-retro .w, html.sk-retro .pl { border-radius: 0 !important; box-shadow: 0
 /* 말랑이 시계: 보내준 픽셀 창 그림 + 제목줄에 시간 */
 html.sk-retro .clock { border-radius: 0; background: transparent !important; box-shadow: none; padding: 0; display: block; position: relative; }
 html.sk-retro .clock .bun { width: calc(250px * var(--s, 1)); height: auto; filter: drop-shadow(0 4px 0 rgba(46, 34, 56, .18)); transform-origin: 50% 100%; }
-html.sk-retro .clock .bun img { height: auto; image-rendering: pixelated; }
+html.sk-retro .clock .bun { aspect-ratio: 360 / 246; background: url(skin/rt-win.png) 0 0 / 100% 100% no-repeat; image-rendering: pixelated; }
+html.sk-retro .clock .bun img { visibility: hidden; }
 html.sk-retro .clock .time { position: absolute; z-index: 1; left: calc(16px * var(--s, 1)); top: calc(7px * var(--s, 1)); height: calc(21px * var(--s, 1)); align-items: center;
   font: 700 calc(17px * var(--s, 1))/1 'Galmuri11', monospace; color: #fff; letter-spacing: 1px; text-shadow: 2px 2px 0 #0F2296; }
 html.sk-retro .clock.dark .bun img { filter: brightness(.82) saturate(.9); }
 html.sk-retro .clock.show .bun { animation: rtHop 1s steps(6) .15s 2; }
 @keyframes rtHop { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-6px); } 70% { transform: translateY(1px); } }
-html.sk-retro .done { border-radius: 0; background: var(--rt-blue); border: 2px solid var(--rt-ink); box-shadow: none; }
+html.sk-retro #done { border-radius: 0; background: var(--rt-blue); border: 2px solid var(--rt-ink); box-shadow: none; }
 
 /* ===== 말랑 엑셀: 크림 종이 + 연두 초록 + 말랑이 갈색 선, 엑셀 칸 ===== */
 html.sk-excel {
@@ -101,31 +102,44 @@ html.sk-excel .panel .day.sel { background: var(--xl-gl); color: var(--xl-g) !im
 html.sk-excel .panel .day.sel .dots i { background: var(--xl-g) !important; }
 html.sk-excel .panel .wdays { background: var(--xl-hd); }
 
-/* 메모지: 둥근 창 + 갈색 테두리 + 엑셀 칸 */
-html.sk-excel #card { box-shadow: inset 0 0 0 2.5px var(--xl-ink), 0 3px 8px rgba(80, 110, 70, .12); }
+/* 메모지: 엑셀 창 — 초록 제목줄 + 이름 상자·fx 수식줄 + 열 머리 + 줄 번호 + 선택 칸 */
+html.sk-excel #card { border-radius: 12px; box-shadow: inset 0 0 0 2.5px var(--xl-ink), 0 3px 8px rgba(80, 110, 70, .12); }
 html.sk-excel #card:hover { box-shadow: inset 0 0 0 2.5px var(--xl-ink), 0 3px 10px rgba(80, 110, 70, .18); }
-html.sk-excel #card .head { background: var(--xl-gl) !important; border-bottom: 2px solid var(--xl-ink); }
-html.sk-excel #card.folded .head { border-bottom: none; }
-html.sk-excel #card .body { margin: 0 2.5px 2.5px; overflow: hidden; }
-html.sk-excel #card .text { padding-left: 40px;
-  background-image: linear-gradient(to bottom, transparent calc(1.7em - 1px), var(--xl-line) 0), linear-gradient(to right, var(--xl-hd) 28px, var(--xl-line) 28px 29px, transparent 29px);
-  background-size: 100% 1.7em, 100% 100%; background-position: 0 8px, 0 0; }
+html.sk-excel #card .head { background: var(--xl-g) !important; border-bottom: 2px solid var(--xl-ink); border-radius: 10px 10px 0 0 !important; margin: 2.5px 2.5px 0; height: 36px; }
+html.sk-excel #card .head .title, html.sk-excel #card .head .ib, html.sk-excel #card .head .grpDot { color: #fff; }
+html.sk-excel #card .head .more { opacity: .85; }
+html.sk-excel #card .title:not([readonly]) { background: rgba(255, 255, 255, .95); color: var(--xl-ink); }
+html.sk-excel #card.folded .head { border-bottom: none; border-radius: 9px !important; margin: 2.5px; height: 27px; }
+html.sk-excel #card .body { margin: 0 2.5px 2.5px; overflow: hidden; border-radius: 0 0 10px 10px; background: #fff !important; }
+html.sk-excel #card .xlfx { flex: none; display: flex; align-items: center; gap: 8px; height: 26px; padding: 0 8px; border-bottom: 1px solid var(--xl-line); background: #fff; font-size: 11.5px; color: #4A4A40; }
+html.sk-excel #card .xlfx .nm { flex: none; min-width: 34px; padding: 1px 6px; border: 1px solid var(--xl-line); border-radius: 4px; font: 600 10.5px 'IBM Plex Sans KR', sans-serif; color: #8A7C78; text-align: center; }
+html.sk-excel #card .xlfx i { flex: none; font: italic 700 12px serif; color: var(--xl-g); padding-right: 7px; border-right: 1px solid var(--xl-line); }
+html.sk-excel #card .xlfx .fv { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--memo-font); }
+html.sk-excel #card .xlcol { flex: none; display: grid; grid-template-columns: 29px repeat(8, 80px); height: 20px; background: var(--xl-hd); border-bottom: 1px solid var(--xl-line); overflow: hidden; }
+html.sk-excel #card .xlcol i, html.sk-excel #card .xlcol b { border-right: 1px solid var(--xl-line); font: 600 10.5px/20px 'IBM Plex Sans KR', sans-serif; color: #9A8C88; text-align: center; }
+html.sk-excel #card .text { padding-left: 37px;
+  background-image: linear-gradient(to bottom, transparent calc(1.7em - 1px), var(--xl-line) 0), linear-gradient(to right, transparent 108px, var(--xl-line) 108px 109px, transparent 109px), linear-gradient(to right, var(--xl-hd) 28px, var(--xl-line) 28px 29px, transparent 29px);
+  background-size: 100% 1.7em, 80px 100%, 100% 100%; background-position: 0 8px, 29px 0, 0 0; background-repeat: repeat, repeat-x, no-repeat; }
 html.sk-excel #card .xlg { position: absolute; left: 0; top: 0; width: 28px; pointer-events: none; color: #A99C98; font: 600 10.5px 'IBM Plex Sans KR', sans-serif; text-align: center; z-index: 1; }
 html.sk-excel #card .xlg i { display: block; font-style: normal; }
+html.sk-excel #card .xlg i.on { background: var(--xl-gl); color: var(--xl-g); }
+html.sk-excel #card .xlsel { position: absolute; left: 29px; right: 0; pointer-events: none; z-index: 1; box-shadow: inset 0 0 0 2px var(--xl-g); }
+html.sk-excel #card .xlsel::after { content: ''; position: absolute; right: 3px; bottom: -3px; width: 6px; height: 6px; background: var(--xl-g); box-shadow: 0 0 0 1.5px #fff; }
 html.sk-excel #card .tools { border-radius: 10px; box-shadow: 0 0 0 1.5px var(--xl-ink), 0 6px 14px rgba(80, 110, 70, .14); }
+html.sk-excel #card .checks .item, html.sk-excel #card .checks > * { border-bottom: 1px solid var(--xl-line); }
 
 html.sk-excel .w, html.sk-excel .pl { box-shadow: inset 0 0 0 2.5px var(--xl-ink), 0 3px 8px rgba(80, 110, 70, .12) !important; background: var(--xl-paper) !important; }
 
 /* 말랑이 시계: 엑셀 창 모양 상태창 + 엑셀 말랑이 */
 html.sk-excel .clock { border-radius: 14px; background: var(--xl-paper) !important; box-shadow: inset 0 0 0 2.5px var(--xl-ink), 0 4px 10px rgba(80, 110, 70, .18);
   padding: calc(30px * var(--s, 1)) calc(14px * var(--s, 1)) calc(8px * var(--s, 1)) calc(18px * var(--s, 1)); position: relative; overflow: hidden; }
-html.sk-excel .clock::before { content: 'fx'; position: absolute; left: 0; right: 0; top: 0; height: calc(22px * var(--s, 1)); background: var(--xl-gl); border-bottom: 2px solid var(--xl-ink);
-  font: italic 700 calc(11px * var(--s, 1))/calc(22px * var(--s, 1)) 'IBM Plex Sans KR', serif; color: var(--xl-g); padding-left: calc(12px * var(--s, 1)); }
-html.sk-excel .clock::after { content: ''; position: absolute; right: calc(10px * var(--s, 1)); top: calc(7px * var(--s, 1)); width: calc(9px * var(--s, 1)); height: calc(9px * var(--s, 1)); border-radius: 50%; background: var(--xl-g2); box-shadow: 0 0 0 2px var(--xl-ink), calc(-15px * var(--s, 1)) 0 0 0 #fff, calc(-15px * var(--s, 1)) 0 0 2px var(--xl-ink); }
+html.sk-excel .clock::before { content: 'fx'; position: absolute; left: 2.5px; right: 2.5px; top: 2.5px; height: calc(21px * var(--s, 1)); background: var(--xl-g); border-bottom: 2px solid var(--xl-ink); border-radius: 11.5px 11.5px 0 0;
+  font: italic 700 calc(11px * var(--s, 1))/calc(21px * var(--s, 1)) serif; color: #fff; padding-left: calc(12px * var(--s, 1)); }
+html.sk-excel .clock::after { content: ''; position: absolute; right: calc(11px * var(--s, 1)); top: calc(9px * var(--s, 1)); width: calc(8px * var(--s, 1)); height: calc(8px * var(--s, 1)); border-radius: 50%; background: #fff; box-shadow: 0 0 0 1.5px var(--xl-ink), calc(-14px * var(--s, 1)) 0 0 0 #fff, calc(-14px * var(--s, 1)) 0 0 1.5px var(--xl-ink); }
 html.sk-excel .clock .time { color: var(--xl-g); }
 html.sk-excel .clock .bun { width: calc(66px * var(--s, 1)); height: calc(56px * var(--s, 1)); filter: none; }
 html.sk-excel .clock.dark { background: #2F3A2E !important; }
-html.sk-excel .done { background: var(--xl-g); }
+html.sk-excel #done { background: var(--xl-g); }
 
 /* 알람 창 */
 .art.gx { left: auto; right: -30px; top: -112px; width: 150px; height: 104px; }
@@ -135,18 +149,19 @@ html.sk-excel .art.gx { width: 150px; right: -30px; top: -104px; }
 html.sk-retro .art.gx .xb { animation-timing-function: steps(5); image-rendering: pixelated; }
 html.sk-retro .wrap .card { border-radius: 0; background: var(--rt-face); box-shadow: inset 0 0 0 3px var(--rt-ink), inset 6px 6px 0 var(--rt-hi), inset -6px -6px 0 var(--rt-sh), 6px 6px 0 rgba(46, 34, 56, .25); padding-top: 44px; }
 html.sk-retro .wrap .card::before { content: ''; position: absolute; left: 6px; right: 6px; top: 6px; height: 26px; background: var(--rt-blue); box-shadow: inset 0 -2px 0 #0F2296; }
-html.sk-retro .lab { position: absolute; left: 16px; top: 11px; color: #fff; font-family: 'Galmuri11'; text-align: left; }
-html.sk-retro .tm { font-family: 'Galmuri11', monospace; color: var(--rt-blue); position: relative; z-index: 1; margin-top: 36px; }
-html.sk-retro .tm small { font-family: 'Galmuri11'; }
+html.sk-retro .wrap .lab { position: absolute; left: 16px; top: 11px; color: #fff; font-family: 'Galmuri11'; text-align: left; }
+html.sk-retro .wrap .tm { font-family: 'Galmuri11', monospace; color: var(--rt-blue); position: relative; z-index: 1; margin-top: 36px; }
+html.sk-retro .wrap .tm small { font-family: 'Galmuri11'; }
 html.sk-retro .wrap .memo { border-radius: 0; background: var(--rt-paper); box-shadow: inset 0 0 0 2px var(--rt-ink), inset 3px 3px 0 var(--rt-sh); }
-html.sk-retro .btns button { border-radius: 0; font-family: 'Galmuri11'; border: 2px solid var(--rt-ink); box-shadow: inset 2px 2px 0 var(--rt-hi), inset -2px -2px 0 var(--rt-sh); background: var(--rt-face); color: var(--rt-ink); }
-html.sk-retro .btns .ok { background: var(--rt-blue); color: #fff; box-shadow: inset 2px 2px 0 #6F86F0, inset -2px -2px 0 #0F2296; }
-html.sk-excel .wrap .card { background: var(--xl-paper); box-shadow: inset 0 0 0 2.5px var(--xl-ink), 0 18px 40px rgba(60, 90, 50, .22); padding-top: 46px; overflow: hidden; }
-html.sk-excel .wrap .card::before { content: 'fx'; position: absolute; left: 0; right: 0; top: 0; height: 30px; background: var(--xl-gl); border-bottom: 2px solid var(--xl-ink); text-align: left; padding-left: 18px; font: italic 700 13px/30px serif; color: var(--xl-g); }
-html.sk-excel .lab { position: absolute; left: 44px; top: 7px; z-index: 1; color: var(--xl-ink); }
+html.sk-retro .wrap .btns button { border-radius: 0; font-family: 'Galmuri11'; border: 2px solid var(--rt-ink); box-shadow: inset 2px 2px 0 var(--rt-hi), inset -2px -2px 0 var(--rt-sh); background: var(--rt-face); color: var(--rt-ink); }
+html.sk-retro .wrap .btns .ok { background: var(--rt-blue); color: #fff; box-shadow: inset 2px 2px 0 #6F86F0, inset -2px -2px 0 #0F2296; }
+html.sk-excel .wrap .card { background: #fff; box-shadow: inset 0 0 0 2.5px var(--xl-ink), 0 18px 40px rgba(60, 90, 50, .22); padding-top: 52px; border-radius: 18px; }
+html.sk-excel .wrap .card::before { content: ''; position: absolute; left: 2.5px; right: 2.5px; top: 2.5px; height: 34px; background: var(--xl-g); border-bottom: 2px solid var(--xl-ink); border-radius: 15.5px 15.5px 0 0; }
+html.sk-excel .wrap .lab { position: absolute; left: 18px; top: 2.5px; height: 34px; display: flex; align-items: center; gap: 8px; z-index: 1; color: #fff; text-align: left; }
+html.sk-excel .wrap .lab::before { content: 'fx'; font: italic 700 13px serif; padding-right: 8px; border-right: 1.5px solid rgba(255, 255, 255, .5); }
 html.sk-excel .wrap .memo { border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 2px var(--xl-g2); border: none; }
-html.sk-excel .btns button { border-radius: 10px; }
-html.sk-excel .btns .sb { background: #fff; box-shadow: inset 0 0 0 2px var(--xl-line); color: var(--xl-ink); }
+html.sk-excel .wrap .btns button { border-radius: 10px; }
+html.sk-excel .wrap .btns .sb { background: #fff; box-shadow: inset 0 0 0 2px var(--xl-line); color: var(--xl-ink); }
 html.sk-retro .panel .alBox { border-radius: 0; background: var(--rt-paper); box-shadow: 0 0 0 2px var(--rt-ink), var(--rt-sunk); }
 html.sk-excel .panel .alBox { border-radius: 12px; background: #fff; box-shadow: 0 0 0 1.5px var(--xl-line); }
 
@@ -156,3 +171,69 @@ html.sk-retro .w .today, html.sk-retro .pl .pb { border-radius: 0 !important; ba
 html.sk-retro .pl .pb.on, html.sk-retro .pl .pb.cur { background: var(--rt-blue) !important; color: #fff; }
 html.sk-retro .w .grid > *, html.sk-retro .w .d { border-radius: 0 !important; }
 html.sk-excel .w .grid > * { border-radius: 0 !important; }
+
+html.sk-retro .pt { image-rendering: pixelated; }
+/* 주간 플래너 말랑이 */
+html.sk-retro .pl .bun { width: 52px; height: 40px; }
+html.sk-retro .pl .bun img { image-rendering: pixelated; filter: none; }
+html.sk-excel .pl .bun { width: 50px; height: 42px; }
+
+/* ===== 주간 플래너 ===== */
+html.sk-retro .pl .sheet { border-radius: 0; box-shadow: 0 0 0 2px var(--rt-ink), inset 2px 2px 0 var(--rt-sh); background: var(--rt-paper); }
+html.sk-retro .pl .dh { background: var(--rt-face); border-bottom: 2px solid var(--rt-ink); }
+html.sk-retro .pl .dh.today .n { border-radius: 0; background: var(--rt-blue); }
+html.sk-retro .pl .tl input { border-radius: 0; background: #fff; box-shadow: inset 0 0 0 1.5px var(--rt-sh); font-family: 'Galmuri11'; }
+html.sk-retro .pl .tl .now { border-radius: 0; background: var(--rt-blue); box-shadow: inset 1.5px 1.5px 0 #6F86F0, inset -1.5px -1.5px 0 #0F2296; }
+html.sk-retro .pl .it .cb { border-radius: 0; border: 2px solid var(--rt-ink); background: #fff; }
+html.sk-retro .pl .it.done .cb { background: var(--rt-blue); border-color: var(--rt-ink); color: #fff; }
+html.sk-retro .pl .ot span { border-radius: 0; }
+html.sk-retro .pl .ch { border-bottom: 2px solid var(--rt-ink); color: var(--rt-ink); }
+
+html.sk-excel .pl .sheet { border-radius: 6px; background: #fff; box-shadow: 0 0 0 1.5px var(--xl-line); --cline: var(--xl-line); --cline2: var(--xl-line); }
+html.sk-excel .pl .col { border-left: 1px solid var(--xl-line); }
+html.sk-excel .pl .dh { background: var(--xl-hd); border-bottom: 1px solid var(--xl-line); padding-top: 7px; padding-bottom: 6px; }
+html.sk-excel .pl .dh.today { background: var(--xl-gl); box-shadow: inset 0 -2px 0 var(--xl-g); }
+html.sk-excel .pl .dh.today .n { background: none; color: var(--xl-g); padding: 0; margin: 0; }
+html.sk-excel .pl .col.today { background: rgba(234, 245, 227, .35); }
+html.sk-excel .pl .tm { padding: 4px 6px; }
+html.sk-excel .pl .tl input { border-radius: 0; background: #fff; box-shadow: inset 0 0 0 1px var(--xl-line); }
+html.sk-excel .pl .tl input:focus { box-shadow: inset 0 0 0 2px var(--xl-g); }
+html.sk-excel .pl .tl .now { border-radius: 0; background: var(--xl-g); }
+html.sk-excel .pl .ls { padding: 0; counter-reset: xlit; }
+html.sk-excel .pl .it { counter-increment: xlit; gap: 6px; padding-right: 8px; border-bottom: 1px solid var(--xl-line); }
+html.sk-excel .pl .it::before { content: counter(xlit); flex: none; width: 22px; align-self: stretch; display: grid; place-items: center; background: var(--xl-hd); border-right: 1px solid var(--xl-line); color: #A99C98; font: 600 10px 'IBM Plex Sans KR', sans-serif; }
+html.sk-excel .pl .it:focus-within { box-shadow: inset 0 0 0 2px var(--xl-g); }
+html.sk-excel .pl .it .cb { border-radius: 3px; border-color: var(--xl-g2); }
+html.sk-excel .pl .it.done .cb { background: var(--xl-g); border-color: var(--xl-g); }
+html.sk-excel .pl .side { background: #fff; }
+html.sk-excel .pl .ch { background: var(--xl-hd); margin: 0 -12px 4px; padding: 5px 12px; border-bottom: 1px solid var(--xl-line); color: #8A7C78; }
+html.sk-excel .pl .sum b { color: var(--xl-g); }
+html.sk-excel .pl .pb { border-radius: 8px; }
+html.sk-excel .pl .pb.on { background: var(--xl-g); }
+
+/* ===== 연락망 ===== */
+html.sk-retro .gvSec { border-radius: 0; background: var(--rt-paper); box-shadow: 0 0 0 2px var(--rt-ink), inset 2px 2px 0 var(--rt-sh); }
+html.sk-retro .gvSec:not(.closed):not(.solo) .gvHead { border-bottom: 2px solid var(--rt-ink); }
+html.sk-retro .gvHead { background: var(--rt-face); }
+html.sk-retro .gvItem { border-radius: 0; background: #fff; box-shadow: inset 0 0 0 1.5px var(--rt-sh); }
+html.sk-retro .gvItem:hover, html.sk-retro .gvItem.picked { background: var(--rt-blue); color: #fff; }
+html.sk-retro .gvItem:hover .gvName i, html.sk-retro .gvItem.picked .gvName i { color: #E0E4FF; }
+html.sk-retro .gvItem.picked .gvExt { color: #fff; }
+html.sk-retro .gvMain { border-radius: 0; }
+
+html.sk-excel .gvSec { border-radius: 4px; background: #fff; box-shadow: 0 0 0 1px var(--xl-line); overflow: hidden; }
+html.sk-excel .gvHead { background: var(--xl-hd); box-shadow: inset 3px 0 0 var(--xl-g); }
+html.sk-excel .gvSec:not(.closed):not(.solo) .gvHead { border-bottom: 1px solid var(--xl-line); box-shadow: inset 3px 0 0 var(--xl-g); }
+html.sk-excel .gvGrid { gap: 0; padding: 0; }
+html.sk-excel .gvItem { border-radius: 0; background: #fff; box-shadow: inset -1px -1px 0 var(--xl-line); padding: 7px 10px; }
+html.sk-excel .gvItem:hover { background: #F7FBF4; box-shadow: inset 0 0 0 2px var(--xl-g); }
+html.sk-excel .gvItem.picked { background: var(--xl-gl); box-shadow: inset 0 0 0 2px var(--xl-g); }
+html.sk-excel .gvItem.picked .gvExt, html.sk-excel .gvMain.picked b, html.sk-excel .gvMain span { color: var(--xl-g); }
+html.sk-excel .gvItem.vacant { box-shadow: inset -1px -1px 0 var(--xl-line); }
+html.sk-excel .gvMain { border-radius: 6px; }
+html.sk-excel .mtbl th { background: var(--xl-hd); color: #6E625E; border-right: 1px solid var(--xl-line); border-bottom: 1px solid var(--xl-line); }
+html.sk-excel .mtbl th, html.sk-excel .mtbl td { border-right: 1px solid var(--xl-line); border-bottom: 1px solid var(--xl-line); }
+html.sk-excel .mtbl .cur, html.sk-excel .mtbl [data-c]:focus { border-radius: 0; background: #fff !important; box-shadow: inset 0 0 0 2px var(--xl-g); }
+html.sk-excel .tblScroll { border-radius: 4px; background: #fff; box-shadow: inset 0 0 0 1px var(--xl-line); }
+html.sk-retro .mtbl .cur, html.sk-retro .mtbl [data-c]:focus { border-radius: 0; box-shadow: inset 0 0 0 2px var(--rt-blue); }
+html.sk-retro .tblScroll { border-radius: 0; box-shadow: inset 0 0 0 2px var(--rt-ink); background: #fff; }

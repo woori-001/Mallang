@@ -224,20 +224,53 @@
   // ───────── 본문 ─────────
   const saveText = debounce(() => api.update(id, { text: memo.text }), 250);
   const ed = window.M.lineEditor(text, () => { memo.text = ed.getText(); saveText(); });
-  // 말랑 엑셀 스킨: 왼쪽 줄 번호 (글과 같이 스크롤)
-  const xlg = document.createElement('div'); xlg.className = 'xlg'; xlg.hidden = true; text.parentNode.insertBefore(xlg, text);
+  // 말랑 엑셀 스킨: 이름 상자·fx 수식줄 + 열 머리(A B C…) + 왼쪽 줄 번호 + 지금 줄 선택 칸 (모양만, 글은 그대로)
+  const xlfx = document.createElement('div'); xlfx.className = 'xlfx'; xlfx.hidden = true; xlfx.innerHTML = '<b class="nm">A1</b><i>fx</i><span class="fv"></span>';
+  const xlcol = document.createElement('div'); xlcol.className = 'xlcol'; xlcol.hidden = true; xlcol.innerHTML = '<i></i>' + 'ABCDEFGH'.split('').map((c) => '<b>' + c + '</b>').join('');
+  const xlg = document.createElement('div'); xlg.className = 'xlg'; xlg.hidden = true;
+  const xlsel = document.createElement('div'); xlsel.className = 'xlsel'; xlsel.hidden = true;
+  text.parentNode.insertBefore(xlfx, text); text.parentNode.insertBefore(xlcol, text); text.parentNode.insertBefore(xlg, text); text.parentNode.insertBefore(xlsel, text);
+  let xlRow = 0;
+  function xlOn() { return document.documentElement.classList.contains('sk-excel') && !text.hidden && getComputedStyle(text).display !== 'none'; }
   function xlGutter() {
-    const on = document.documentElement.classList.contains('sk-excel') && !text.hidden && getComputedStyle(text).display !== 'none';
-    xlg.hidden = !on; if (!on) return;
+    const on = xlOn();
+    xlg.hidden = xlfx.hidden = xlcol.hidden = !on; if (!on) { xlsel.hidden = true; return; }
     const lh = parseFloat(getComputedStyle(text).lineHeight) || 24;
     const n = Math.ceil((text.scrollHeight + 8) / lh) + 1;
     if (xlg.childElementCount !== n) xlg.innerHTML = Array.from({ length: n }, (_, i) => '<i style="height:' + lh + 'px;line-height:' + lh + 'px">' + (i + 1) + '</i>').join('');
-    xlg.style.top = (text.offsetTop + 8 - text.scrollTop) + 'px';
+    const top = text.offsetTop + 8 - text.scrollTop;
+    xlg.style.top = top + 'px';
     xlg.style.clipPath = 'inset(' + Math.max(0, text.scrollTop - 8) + 'px 0 0 0)';
+    [...xlg.children].forEach((el, i) => el.classList.toggle('on', i === xlRow && document.activeElement === text));
+    // 지금 줄 = 엑셀의 선택 칸
+    const show = document.activeElement === text;
+    xlsel.hidden = !show;
+    if (show) {
+      const y = top + xlRow * lh;
+      xlsel.style.top = y + 'px'; xlsel.style.height = lh + 1 + 'px';
+      const vis = y + lh > text.offsetTop && y < text.offsetTop + text.clientHeight;
+      xlsel.style.visibility = vis ? '' : 'hidden';
+    }
   }
-  text.addEventListener('scroll', xlGutter); text.addEventListener('input', xlGutter);
+  function xlCaret() {
+    if (!xlOn()) return;
+    const sel = window.getSelection();
+    if (!sel.rangeCount || !text.contains(sel.anchorNode)) { xlGutter(); return; }
+    const r = sel.getRangeAt(0).cloneRange(); r.collapse(true);
+    let rect = r.getClientRects()[0];
+    let node = sel.anchorNode; while (node && node.parentNode !== text) node = node.parentNode;
+    if (!rect && node && node.getBoundingClientRect) rect = node.getBoundingClientRect();
+    const lh = parseFloat(getComputedStyle(text).lineHeight) || 24;
+    if (rect) xlRow = Math.max(0, Math.floor((rect.top + rect.height / 2 - text.getBoundingClientRect().top + text.scrollTop - 8) / lh));
+    xlfx.querySelector('.nm').textContent = 'A' + (xlRow + 1);
+    xlfx.querySelector('.fv').textContent = node && node.nodeType === 1 ? node.textContent : (node ? node.textContent : text.textContent.split('\n')[0]);
+    xlGutter();
+  }
+  text.addEventListener('scroll', xlGutter); text.addEventListener('input', xlCaret);
+  text.addEventListener('focus', xlCaret); text.addEventListener('blur', xlGutter);
+  document.addEventListener('selectionchange', xlCaret);
   new ResizeObserver(xlGutter).observe(text);
-  new MutationObserver(xlGutter).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  new MutationObserver(() => { xlGutter(); xlCaret(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
   text.addEventListener('blur', () => saveText.flush());
   $('bDiv').innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 12h18"/><path d="M8 6h8M8 18h8" opacity=".45"/></svg>';
   $('bDiv').addEventListener('click', () => {

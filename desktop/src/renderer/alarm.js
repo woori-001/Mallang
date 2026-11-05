@@ -17,7 +17,7 @@
 
   function art() {
     const sk = skin(), draw = !!(sk.draw || sk.paper);
-    if (sk.look) { $('art').className = 'art gx'; $('art').innerHTML = '<img class="xb" src="' + sk.bunny + '" alt="" draggable="false">'; return; }   // 베타 스킨: 스킨 말랑이 그림 하나
+    if (sk.look) { $('art').className = 'art gx'; $('art').innerHTML = '<img class="xb" src="' + (sk.win || sk.bunny) + '" alt="" draggable="false">'; return; }   // 베타 스킨: 스킨 말랑이 그림 하나
     $('art').className = 'art ' + (draw ? 'gd' : 'g3');
     $('art').innerHTML = draw
       ? ['ring', 'clock', 'excl', 'bunny', 'lines'].map((n) => '<img class="' + n + '" src="alarm/almd-' + n + '.png" alt="" draggable="false">').join('')
