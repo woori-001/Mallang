@@ -84,9 +84,9 @@ html.sk-excel .tab { background: var(--xl-g); border: 2.5px solid var(--xl-ink);
 /* 목록바 = 엑셀 시트: 옅은 칸 무늬 바탕 */
 html.sk-excel .panel { border: 2.5px solid var(--xl-ink); border-right: none; box-shadow: none;
   background: linear-gradient(var(--xl-line) 1px, transparent 1px) 0 0 / 100% 26px, linear-gradient(90deg, var(--xl-line) 1px, transparent 1px) 0 0 / 82px 100%, #FFFFFF !important; }
-html.sk-excel .phead { background: #fff; margin: -20px -20px 0; padding: 16px 20px 10px; border-bottom: 1.5px solid var(--xl-line); }
+html.sk-excel .phead { background: #F3F3F3; margin: -20px -20px 0; padding: 16px 20px 10px; border-bottom: none; }
 html.sk-excel .applogo { height: 42px; filter: none; }
-html.sk-excel .seg { background: #fff; margin: -14px -20px 0; padding: 0 12px; border-radius: 0; border-bottom: 2px solid var(--xl-ink); box-shadow: none; }
+html.sk-excel .seg { background: #F3F3F3; margin: -14px -20px 0; padding: 0 12px; border-radius: 0; border-bottom: 1px solid #D4D4D4; box-shadow: none; }
 html.sk-excel .segb { border-radius: 0; height: 36px; }
 html.sk-excel .segb.on { background: transparent; box-shadow: inset 0 -3px 0 var(--xl-g); color: var(--xl-g); }
 /* 리본 */
