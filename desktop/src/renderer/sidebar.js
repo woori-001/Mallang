@@ -220,7 +220,7 @@
           '<button class="ib" type="button" data-act="fold" aria-label="' + (m.folded ? '펼치기' : '접기') + '" aria-expanded="' + !m.folded + '" title="' + (m.folded ? '펼치기' : '접기') + '">' +
             ICONS.chev.replace('class="chev"', 'class="chev" style="transform:rotate(' + (m.folded ? 0 : 180) + 'deg)"') + '</button>' +
           '<button class="rmain" type="button" data-act="focus" title="메모 보기">' +
-            '<span class="rtitle">' + (m.mark ? markSvg(m.mark, m.markColor || '#E8456B', 16) : '') + '<span>' + esc(m.title || '제목 없음') + '</span></span>' +
+            '<span class="rtitle">' + (sk.rowIcons ? '<img class="rico" src="' + sk.rowIcons[(((m.slot || 0) % sk.rowIcons.length) + sk.rowIcons.length) % sk.rowIcons.length] + '" alt="" draggable="false">' : '') + (m.mark ? markSvg(m.mark, m.markColor || '#E8456B', 16) : '') + '<span>' + esc(m.title || '제목 없음') + '</span></span>' +
           '</button>' +
           '<button class="ib" type="button" data-act="hide" aria-label="' + (m.hidden ? '다시 보이기' : '숨기기') + '" title="' + (m.hidden ? '다시 보이기' : '숨기기') + '">' + (m.hidden ? ICONS.eyeOff : ICONS.eye) + '</button>' +
           '<button class="ib del" type="button" data-act="del" aria-label="삭제" title="삭제">' + ICONS.trash + '</button>' +
@@ -238,7 +238,7 @@
         const closed = !openGroups[g.id] && !q;   // 기본은 닫힘, 열어 둔 폴더만 열림
         html += '<div class="grp' + (closed ? ' closed' : '') + (allHidden ? ' ghidden' : '') + '" data-g="' + esc(g.id) + '">' +
           '<div class="ghead">' +
-            '<button class="ib gtog" type="button" data-gact="toggle" aria-expanded="' + !closed + '" title="' + (closed ? '폴더 열기' : '폴더 닫기') + '">' + (closed ? ICONS.folder : ICONS.folderOpen).replace('width="15" height="15"', 'width="17" height="17"') + '</button>' +
+            '<button class="ib gtog" type="button" data-gact="toggle" aria-expanded="' + !closed + '" title="' + (closed ? '폴더 열기' : '폴더 닫기') + '">' + (sk.groupIcon ? '<img class="gico" src="' + sk.groupIcon + '" alt="" draggable="false">' : (closed ? ICONS.folder : ICONS.folderOpen).replace('width="15" height="15"', 'width="17" height="17"')) + '</button>' +
             (renamingGroup === g.id
               ? '<input class="gname-in" data-gact="rename-in" value="' + esc(g.name) + '" maxlength="40" spellcheck="false">'
               : '<span class="gname" data-gact="rename" title="더블클릭해서 이름 바꾸기">' + esc(g.name) + '</span>') +

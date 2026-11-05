@@ -636,3 +636,4 @@ html.sk-excel .peopleGv { gap: 0 !important; }
 html.sk-excel .peopleGv .gvSec { border-radius: 0 !important; box-shadow: 0 0 0 1px var(--xl-line) !important; }
 html.sk-excel .peopleGv .gvHead { box-shadow: none !important; border-bottom: 1px solid var(--xl-line); }
 html.sk-excel .peopleGv .gvIco { display: none; }
+.mIco { width: 22px; height: 22px; object-fit: contain; flex: none; }

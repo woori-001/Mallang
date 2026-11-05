@@ -429,7 +429,7 @@
       // 접기·펴기 (기본은 접힘 = 제목만, 찾는 중에는 펼쳐서)
       const open = !!q || !!(prefs.mOpen && prefs.mOpen[m.uid]);
       return '<button class="memo' + (open ? '' : ' mFolded') + '" type="button" data-uid="' + esc(m.uid) + '" style="background:' + grad(sk, m.slot || 0, 0.82) + ';animation-delay:' + Math.min(i * 30, 300) + 'ms">' +
-        '<span class="mTitle">' + (m.mark ? markSvg(m.mark, m.markColor || '#E8456B', 18) : '') + '<span>' + esc(m.title || '제목 없음') + '</span>' +
+        '<span class="mTitle">' + (sk.rowIcons ? '<img class="mIco" src="' + sk.rowIcons[(((m.slot || 0) % sk.rowIcons.length) + sk.rowIcons.length) % sk.rowIcons.length] + '" alt="">' : '') + (m.mark ? markSvg(m.mark, m.markColor || '#E8456B', 18) : '') + '<span>' + esc(m.title || '제목 없음') + '</span>' +
           (q ? '' : '<span class="mFold" role="button" aria-label="' + (open ? '접기' : '펴기') + '" data-fold="' + esc(m.uid) + '"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>') + '</span>' +
         (preview(m) ? '<span class="mBody">' + (m.type === 'check' ? esc(preview(m)) : window.M.previewHTML(preview(m))) + '</span>' : '') +
         (done ? '<span class="mMeta">' + done + '</span>' : '') +

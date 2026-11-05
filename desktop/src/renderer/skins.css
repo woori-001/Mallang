@@ -282,3 +282,8 @@ html.sk-excel .panel .gbody .row { padding-left: 50px !important; }
 /* 레트로 알람: 말랑이가 알림창 위에 걸터앉기 */
 html.sk-retro .art.gx { left: 176px; right: auto; top: -88px; width: 176px; height: 116px; }
 html.sk-retro .wrap .deco, html.sk-excel .wrap .deco { z-index: 2; }
+
+/* 스킨 아이콘: 메모 줄 앞 · 그룹 폴더 */
+.panel .rico { width: 20px; height: 20px; object-fit: contain; flex: none; margin-right: 7px; vertical-align: middle; }
+.panel .rtitle { display: flex; align-items: center; }
+.panel .gico { width: 21px; height: 21px; object-fit: contain; }
