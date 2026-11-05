@@ -70,7 +70,7 @@ body { padding: 14px; }
 .text:empty::before { content: attr(data-placeholder); color: var(--sub); opacity: .6; pointer-events: none; }
 /* 구분선: 스킨 포인트색으로 얇게 */
 .text .dv {
-  height: 1px; margin: .55em 0; border-radius: 1px; user-select: none; cursor: default;
+  height: 1px; margin: calc(.85em - .5px) 0; border-radius: 1px; user-select: none; cursor: default;   /* 딱 한 줄(1.7em) 높이 → 배경 줄과 글자 칸이 어긋나지 않게 */
   background: var(--a1); opacity: .45;
 }
 .text .dv:hover { opacity: .7; }
@@ -323,7 +323,7 @@ html.draw .head .ib svg { width: 13px; height: 13px; }
 /* 공책 줄: 글자 줄마다 아래에 연하게 (배경 무늬가 아니라 줄 자체에 그어서 글자와 겹치지 않음) */
 html.draw .text { background: none; padding-top: 8px; }
 html.draw .text > div:not(.dv) { border-bottom: 1px solid rgba(22, 22, 22, .16); }
-html.draw .text .dv { height: 0; background: none; opacity: 1; border-top: 1.6px dashed rgba(22, 22, 22, .55); }
+html.draw .text .dv { height: 0; margin: calc(.85em - .8px) 0; background: none; opacity: 1; border-top: 1.6px dashed rgba(22, 22, 22, .55); }
 html.draw .item { border-radius: 0; border-bottom: 1px solid rgba(22, 22, 22, .16); }
 html.draw .item:hover { background: rgba(22, 22, 22, .04); }
 html.draw .chk { width: 18px; height: 16px; border: 2px solid var(--ink); background: transparent; border-radius: 48% 52% 45% 55% / 55% 45% 55% 45%; }

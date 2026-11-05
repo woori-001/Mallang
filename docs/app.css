@@ -309,6 +309,7 @@ html.bodybg .edText, html.bodybg .edChecks { background: rgba(var(--glass), .9);
 .edText:empty::before { content: attr(data-placeholder); color: var(--sub); opacity: .6; pointer-events: none; }
 /* 구분선: 스킨 포인트색으로 얇게 */
 .edText .dv, .dvp { display: block; height: 1px; margin: .55em 0; background: var(--a1); opacity: .45; }
+.edText .dv { margin: calc(.875em - .5px) 0; }   /* 딱 한 줄 높이 (배경 줄과 맞게) */
 .dvp { margin: .35em 0; }
 
 /* 표 메모 · 연락망 */
