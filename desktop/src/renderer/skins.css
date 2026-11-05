@@ -281,3 +281,4 @@ html.sk-excel .panel .gbody .row { padding-left: 50px !important; }
 
 /* 레트로 알람: 말랑이가 알림창 위에 걸터앉기 */
 html.sk-retro .art.gx { left: 176px; right: auto; top: -88px; width: 176px; height: 116px; }
+html.sk-retro .wrap .deco, html.sk-excel .wrap .deco { z-index: 2; }
