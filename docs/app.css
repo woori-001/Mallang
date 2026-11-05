@@ -590,7 +590,7 @@ html.sk-excel .tab.on { background: var(--xl-gl); box-shadow: none; }
 html.sk-excel .editor .edTop { background: var(--xl-gl); border-bottom: 2px solid var(--xl-ink); }
 html.sk-excel .edText { padding-left: 40px; background: linear-gradient(to bottom, transparent calc(1.75em - 1px), var(--xl-line) 0) 0 4px / 100% 1.75em local, linear-gradient(to right, var(--xl-hd) 28px, var(--xl-line) 28px 29px, transparent 29px); }
 /* 베타 스킨: 메모 목록 · 플래너 · 연락망 더 엑셀/레트로답게 */
-html.sk-excel .memo .mTitle { background: var(--xl-g); color: #fff; }
+html.sk-excel .memo .mTitle { background: var(--xl-gl); color: var(--xl-ink); }
 html.sk-excel .memo .mTitle .mark { filter: drop-shadow(0 0 1px #fff); }
 html.sk-excel .pDay { border-radius: 6px; background: #fff; padding: 0 0 6px; overflow: hidden; }
 html.sk-excel .pDay .pdH { background: var(--xl-hd); padding: 8px 12px; border-bottom: 1px solid var(--xl-line); }
@@ -620,3 +620,18 @@ html.sk-retro .peopleGv .gvHead { background: var(--rt-face); border-bottom: 2px
 html.sk-retro .peopleGv .gvItem { border-radius: 0; background: #fff; box-shadow: inset 0 0 0 1.5px var(--rt-sh); }
 html.sk-retro .peopleGv .gvItem.picked { background: var(--rt-blue); color: #fff; }
 .peopleTop .textBtn { white-space: nowrap; flex: none; }
+/* 메모 접기·펴기 (기본 접힘: 제목만) */
+.mTitle > span:not(.mFold) { flex: 1; min-width: 0; }
+.mFold { flex: none; width: 32px; height: 28px; margin: -6px -8px -6px 0; display: grid; place-items: center; border-radius: 10px; color: var(--sub); transition: transform .25s var(--ease), background .2s ease; }
+.mFold:active { background: rgba(var(--glass), .7); }
+.memo:not(.mFolded) .mFold { transform: rotate(180deg); }
+.memo.mFolded { padding-top: 13px; padding-bottom: 13px; }
+.memo.mFolded .mBody, .memo.mFolded .mMeta { display: none; }
+html.sk-excel .memo.mFolded, html.sk-retro .memo.mFolded { padding-top: 0; padding-bottom: 0; }
+html.sk-retro .memo.mFolded { padding-bottom: 5px; }
+html.sk-excel .memo.mFolded .mTitle { border-bottom: none; }
+html.sk-excel .memo .mFold, html.sk-retro .memo .mFold { color: inherit; }
+html.sk-excel .peopleGv { gap: 0 !important; }
+html.sk-excel .peopleGv .gvSec { border-radius: 0 !important; box-shadow: 0 0 0 1px var(--xl-line) !important; }
+html.sk-excel .peopleGv .gvHead { box-shadow: none !important; border-bottom: 1px solid var(--xl-line); }
+html.sk-excel .peopleGv .gvIco { display: none; }

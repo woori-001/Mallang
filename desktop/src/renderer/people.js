@@ -50,7 +50,8 @@
     get only() { return DEPT ? (winSt().g || '\u0000') : null; },
     order: () => myOrder,
     onOrder: (o) => { myOrder = o; orderJ = JSON.stringify(o); api.peopleOrder(o); },
-    onDetach: DEPT ? null : (g) => { api.peopleDetach(g); toast('‘' + g + '’ 부서를 바탕화면에 띄웠어요'); },
+    drag: true,
+    onDetach: DEPT ? null : (g, x, y) => { api.peopleDetach(g, x, y); toast('‘' + g + '’ 부서를 바탕화면에 띄웠어요'); },
     onPick: (v, row, el) => {
       api.copyText(v);
       el.classList.add('picked');

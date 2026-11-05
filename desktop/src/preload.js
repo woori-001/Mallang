@@ -38,7 +38,7 @@ contextBridge.exposeInMainWorld('api', {
   peopleResize: (w, h, done) => ipcRenderer.send('people:resize', w, h, !!done),
   peopleTop: (on) => ipcRenderer.send('people:top', !!on),
   peopleFold: (on) => ipcRenderer.send('people:fold', !!on),
-  peopleDetach: (g) => ipcRenderer.send('people:detach', String(g || '')),
+  peopleDetach: (g, x, y) => ipcRenderer.send('people:detach', String(g || ''), x, y),
   peopleCloseDept: () => ipcRenderer.send('people:closeDept'),
   peopleOrder: (o) => ipcRenderer.send('people:order', o),
   noticeExpand: (h) => ipcRenderer.send('notice:expand', h),

@@ -1306,15 +1306,21 @@ function closePeople() {
   setTimeout(() => { if (!w.isDestroyed()) w.close(); }, 330);
 }
 // 부서 떼어 띄우기 · 닫기
-ipcMain.on('people:detach', (e, g) => {
+ipcMain.on('people:detach', (e, g, sx, sy) => {
   g = String(g || '').trim().slice(0, 80);
   if (!g) return;
+  sx = num(sx); sy = num(sy);
+  const at = sx != null && sy != null ? { x: Math.round(sx - 60), y: Math.round(sy - 18) } : null;   // 끌어 놓은 자리에
   let id = Object.keys(store.deptWins).find((k) => store.deptWins[k].g === g);
   if (!id) {
     id = 'd' + Date.now().toString(36);
     const n = Object.keys(store.deptWins).length, wa = workArea();
-    store.deptWins[id] = { g, x: wa.x + wa.width - 300 - 460 - n * 24, y: wa.y + 120 + n * 24, w: 300, h: 260, top: false, folded: false };
+    store.deptWins[id] = { g, x: at ? at.x : wa.x + wa.width - 300 - 460 - n * 24, y: at ? at.y : wa.y + 120 + n * 24, w: 300, h: 260, top: false, folded: false };
     save(); broadcast();
+  } else if (at) {
+    store.deptWins[id].x = at.x; store.deptWins[id].y = at.y; save();
+    const w = deptWinMap.get(id);
+    if (w && !w.isDestroyed()) setB(w, peopleBounds(id));
   }
   openDept(id);
 });

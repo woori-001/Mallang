@@ -127,3 +127,10 @@ html.draw .gvSec:not(.closed):not(.solo) .gvHead { box-shadow: none; border-bott
 .gvHead:hover .gvDetach, .gvDetach:focus-visible { opacity: .9; }
 .gvDetach:hover { background: color-mix(in srgb, var(--a1) 14%, transparent); color: var(--a1); }
 .gv.ordering .gvDetach { display: none; }
+.gvGhost { position: fixed; z-index: 99; pointer-events: none; transform: translate(-30%, -60%) rotate(-2deg); padding: 7px 12px; border-radius: 10px; background: rgb(var(--glass)); color: var(--ink); font-size: 13px; font-weight: 700; box-shadow: 0 10px 24px rgba(40, 40, 90, .25), 0 0 0 1.5px var(--a1); white-space: nowrap; }
+.gvGhost.out::after { content: ' · 놓으면 바탕화면에'; font-weight: 500; color: var(--a1); }
+.gv.dragOn { cursor: grabbing; user-select: none; }
+.gv .dropBefore { box-shadow: 0 -3px 0 var(--a1) !important; }
+.gv .gvItem.dropBefore { box-shadow: inset 3px 0 0 var(--a1) !important; }
+.gv .dropAfter { box-shadow: 0 3px 0 var(--a1) !important; }
+.gv .gvItem.dropAfter { box-shadow: inset -3px 0 0 var(--a1) !important; }

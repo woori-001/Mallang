@@ -229,12 +229,13 @@
   const xlcol = document.createElement('div'); xlcol.className = 'xlcol'; xlcol.hidden = true; xlcol.innerHTML = '<i></i>' + 'ABCDEFGH'.split('').map((c) => '<b>' + c + '</b>').join('');
   const xlg = document.createElement('div'); xlg.className = 'xlg'; xlg.hidden = true;
   const xlsel = document.createElement('div'); xlsel.className = 'xlsel'; xlsel.hidden = true;
+  const xltab = document.createElement('div'); xltab.className = 'xltab'; xltab.hidden = true; xltab.innerHTML = '<b>Sheet1</b><i>+</i>'; text.parentNode.appendChild(xltab);
   text.parentNode.insertBefore(xlfx, text); text.parentNode.insertBefore(xlcol, text); text.parentNode.insertBefore(xlg, text); text.parentNode.insertBefore(xlsel, text);
   let xlRow = 0;
   function xlOn() { return document.documentElement.classList.contains('sk-excel') && !text.hidden && getComputedStyle(text).display !== 'none'; }
   function xlGutter() {
     const on = xlOn();
-    xlg.hidden = xlfx.hidden = xlcol.hidden = !on; if (!on) { xlsel.hidden = true; return; }
+    xlg.hidden = xlfx.hidden = xlcol.hidden = xltab.hidden = !on; if (!on) { xlsel.hidden = true; return; }
     const lh = parseFloat(getComputedStyle(text).lineHeight) || 24;
     const n = Math.ceil((text.scrollHeight + 8) / lh) + 1;
     if (xlg.childElementCount !== n) xlg.innerHTML = Array.from({ length: n }, (_, i) => '<i style="height:' + lh + 'px;line-height:' + lh + 'px">' + (i + 1) + '</i>').join('');

@@ -81,36 +81,52 @@ html.sk-excel {
   --paper-line: rgba(107, 81, 77, .2); --paper-dot: rgba(79, 154, 92, .4);
 }
 html.sk-excel .tab { background: var(--xl-g); border: 2.5px solid var(--xl-ink); border-right: none; }
-html.sk-excel .panel { background: var(--xl-paper); border: 2.5px solid var(--xl-ink); border-right: none; box-shadow: none; }
-html.sk-excel .applogo { height: 40px; filter: none; }
-html.sk-excel .seg { border-bottom: 2px solid var(--xl-ink); box-shadow: none; }
-html.sk-excel .segb.on { box-shadow: inset 0 -3px 0 var(--xl-g); color: var(--xl-g); }
-html.sk-excel .panel .search { border-radius: 8px; box-shadow: 0 0 0 1.5px var(--xl-line); background: #fff; }
-html.sk-excel .panel .tbar .tg { border-radius: 8px; background: #F5FAF1; box-shadow: 0 0 0 1.5px var(--xl-line); }
-/* 메모 목록: 엑셀 칸 + 줄 번호 */
-html.sk-excel .panel .list, html.sk-excel .panel #list { counter-reset: xlrow; }
-html.sk-excel .panel .row { counter-increment: xlrow; border-radius: 0; background: #fff; box-shadow: inset 0 -1px 0 var(--xl-line), inset 1px 0 0 var(--xl-line); padding-left: 38px !important; position: relative; }
-html.sk-excel .panel .row::before { content: counter(xlrow); position: absolute; left: 0; top: 0; bottom: 0; width: 28px; display: grid; place-items: center; background: var(--xl-hd); color: #9A8C88; font: 600 11px 'IBM Plex Sans KR', sans-serif; box-shadow: inset -1px 0 0 var(--xl-line); }
-html.sk-excel .panel .row:hover { transform: none; background: #F7FBF4; }
-html.sk-excel .panel .row.sel, html.sk-excel .panel .row.on, html.sk-excel .panel .row.active { box-shadow: inset 0 0 0 2px var(--xl-g); }
-html.sk-excel .panel .row.sel::before, html.sk-excel .panel .row.on::before, html.sk-excel .panel .row.active::before { background: var(--xl-gl); color: var(--xl-g); }
-html.sk-excel .panel .ghead { border-radius: 0; background: var(--xl-hd); box-shadow: inset 0 -1px 0 var(--xl-line); }
-html.sk-excel .panel .calcard, html.sk-excel .panel .box { border-radius: 12px; box-shadow: 0 0 0 1.5px var(--xl-line); }
+/* 목록바 = 엑셀 시트: 옅은 칸 무늬 바탕 */
+html.sk-excel .panel { border: 2.5px solid var(--xl-ink); border-right: none; box-shadow: none;
+  background: linear-gradient(var(--xl-line) 1px, transparent 1px) 0 0 / 100% 26px, linear-gradient(90deg, var(--xl-line) 1px, transparent 1px) 0 0 / 82px 100%, #FAFCF7 !important; }
+html.sk-excel .phead { background: #fff; margin: -20px -20px 0; padding: 16px 20px 10px; border-bottom: 1.5px solid var(--xl-line); }
+html.sk-excel .applogo { height: 42px; filter: none; }
+html.sk-excel .seg { background: #fff; margin: -14px -20px 0; padding: 0 12px; border-radius: 0; border-bottom: 2px solid var(--xl-ink); box-shadow: none; }
+html.sk-excel .segb { border-radius: 0; height: 36px; }
+html.sk-excel .segb.on { background: transparent; box-shadow: inset 0 -3px 0 var(--xl-g); color: var(--xl-g); }
+/* 리본 */
+html.sk-excel .panel .tbar { background: #F2F8EE; margin: 0 -20px; padding: 5px 14px; border-top: 1.5px solid var(--xl-line); border-bottom: 1.5px solid var(--xl-line); gap: 2px; }
+html.sk-excel .panel .tbar .tg { background: transparent; box-shadow: none; border-radius: 0; border-right: 1.5px solid var(--xl-line); padding-right: 4px; }
+html.sk-excel .panel .tbar .tg:last-child { border-right: none; }
+html.sk-excel .panel .tbar .ib { color: var(--xl-g); border-radius: 6px; }
+html.sk-excel .panel .tbar .ib:hover { background: var(--xl-gl); }
+html.sk-excel .panel .primary, html.sk-excel .panel .smallprimary { background: var(--xl-g); border-radius: 9px; box-shadow: none; }
+/* 찾기 = fx 수식줄 */
+html.sk-excel .panel .search { border-radius: 4px; box-shadow: 0 0 0 1.5px var(--xl-line); background: #fff; }
+html.sk-excel .panel .search::after { content: 'fx'; order: -1; font: italic 700 13px serif; color: var(--xl-g); padding-right: 8px; margin-right: 2px; border-right: 1.5px solid var(--xl-line); }
+/* 메모 목록: 열 머리 A + 줄 번호 + 선택 칸 */
+html.sk-excel .panel .list, html.sk-excel .panel #list { counter-reset: xlrow; gap: 0 !important; background: #fff; box-shadow: 0 0 0 1px var(--xl-line); }
+html.sk-excel .panel #list::before { content: 'A'; display: block; height: 22px; padding-left: 28px; background: linear-gradient(90deg, var(--xl-hd) 28px, var(--xl-line) 28px 29px, var(--xl-hd) 29px); border-bottom: 1px solid var(--xl-line); font: 600 11px/22px 'IBM Plex Sans KR', sans-serif; color: #9A8C88; text-align: center; }
+html.sk-excel .panel .row { counter-increment: xlrow; border-radius: 0 !important; background: #fff !important; box-shadow: inset 0 -1px 0 var(--xl-line) !important; padding-left: 38px !important; position: relative; margin: 0 !important; }
+html.sk-excel .panel .row::before { content: counter(xlrow); position: absolute; left: 0; top: 0; bottom: 0; width: 28px; display: grid; place-items: center; background: var(--xl-hd); color: #9A8C88; font: 600 11px 'IBM Plex Sans KR', sans-serif; box-shadow: inset -1px 0 0 var(--xl-line), inset 0 -1px 0 var(--xl-line); }
+html.sk-excel .panel .row:hover { transform: none; background: #F7FBF4 !important; }
+html.sk-excel .panel .row:hover::after { content: ''; position: absolute; inset: 0 0 0 28px; box-shadow: inset 0 0 0 2px var(--xl-g); pointer-events: none; }
+html.sk-excel .panel .row:hover::before { background: var(--xl-gl); color: var(--xl-g); }
+html.sk-excel .panel .ghead { border-radius: 0 !important; background: var(--xl-hd) !important; box-shadow: inset 0 -1px 0 var(--xl-line), inset 3px 0 0 var(--xl-g) !important; margin: 0 !important; }
+html.sk-excel .panel .footrow { background: var(--xl-hd); margin: 0 -20px -14px; padding: 0 14px 0 0; border-top: 1.5px solid var(--xl-line); height: 34px; }
+html.sk-excel .panel .footrow::before { content: 'Sheet1'; align-self: stretch; display: flex; align-items: center; padding: 0 14px; background: #fff; color: var(--xl-g); font: 700 12px 'IBM Plex Sans KR', sans-serif; border-bottom: 3px solid var(--xl-g); border-right: 1.5px solid var(--xl-line); }
+html.sk-excel .panel .calcard, html.sk-excel .panel .box, html.sk-excel .panel .alBox { border-radius: 4px; background: #fff; box-shadow: 0 0 0 1.5px var(--xl-line); }
 html.sk-excel .panel .day { border-radius: 0; box-shadow: inset -1px -1px 0 var(--xl-line); }
 html.sk-excel .panel .day.today { box-shadow: inset 0 0 0 2px var(--xl-g2); }
 html.sk-excel .panel .day.sel { background: var(--xl-gl); color: var(--xl-g) !important; box-shadow: inset 0 0 0 2.5px var(--xl-g); }
 html.sk-excel .panel .day.sel .dots i { background: var(--xl-g) !important; }
 html.sk-excel .panel .wdays { background: var(--xl-hd); }
+html.sk-excel .panel .pinbtn, html.sk-excel .panel .navb { border-radius: 8px; background: #fff; box-shadow: 0 0 0 1.5px var(--xl-line); }
 
 /* 메모지: 엑셀 창 — 초록 제목줄 + 이름 상자·fx 수식줄 + 열 머리 + 줄 번호 + 선택 칸 */
-html.sk-excel #card { border-radius: 12px; box-shadow: inset 0 0 0 2.5px var(--xl-ink), 0 3px 8px rgba(80, 110, 70, .12); }
-html.sk-excel #card:hover { box-shadow: inset 0 0 0 2.5px var(--xl-ink), 0 3px 10px rgba(80, 110, 70, .18); }
-html.sk-excel #card .head { background: var(--xl-g) !important; border-bottom: 2px solid var(--xl-ink); border-radius: 10px 10px 0 0 !important; margin: 2.5px 2.5px 0; height: 36px; }
-html.sk-excel #card .head .title, html.sk-excel #card .head .ib, html.sk-excel #card .head .grpDot { color: #fff; }
+html.sk-excel #card { border-radius: 12px; border: 2.5px solid var(--xl-ink); box-shadow: 0 3px 8px rgba(80, 110, 70, .12); background: #fff !important; }
+html.sk-excel #card:hover { box-shadow: 0 3px 10px rgba(80, 110, 70, .18); }
+html.sk-excel #card .head { background: var(--xl-gl) !important; border-bottom: 2px solid var(--xl-ink); border-radius: 0 !important; margin: 0; height: 36px; }
+html.sk-excel #card .head .title, html.sk-excel #card .head .ib, html.sk-excel #card .head .grpDot { color: var(--xl-ink); }
 html.sk-excel #card .head .more { opacity: .85; }
 html.sk-excel #card .title:not([readonly]) { background: rgba(255, 255, 255, .95); color: var(--xl-ink); }
-html.sk-excel #card.folded .head { border-bottom: none; border-radius: 9px !important; margin: 2.5px; height: 27px; }
-html.sk-excel #card .body { margin: 0 2.5px 2.5px; overflow: hidden; border-radius: 0 0 10px 10px; background: #fff !important; }
+html.sk-excel #card.folded .head { border-bottom: none; height: 100%; }
+html.sk-excel #card .body { margin: 0; overflow: hidden; border-radius: 0; background: #fff !important; }
 html.sk-excel #card .xlfx { flex: none; display: flex; align-items: center; gap: 8px; height: 26px; padding: 0 8px; border-bottom: 1px solid var(--xl-line); background: #fff; font-size: 11.5px; color: #4A4A40; }
 html.sk-excel #card .xlfx .nm { flex: none; min-width: 34px; padding: 1px 6px; border: 1px solid var(--xl-line); border-radius: 4px; font: 600 10.5px 'IBM Plex Sans KR', sans-serif; color: #8A7C78; text-align: center; }
 html.sk-excel #card .xlfx i { flex: none; font: italic 700 12px serif; color: var(--xl-g); padding-right: 7px; border-right: 1px solid var(--xl-line); }
@@ -237,3 +253,17 @@ html.sk-excel .mtbl .cur, html.sk-excel .mtbl [data-c]:focus { border-radius: 0;
 html.sk-excel .tblScroll { border-radius: 4px; background: #fff; box-shadow: inset 0 0 0 1px var(--xl-line); }
 html.sk-retro .mtbl .cur, html.sk-retro .mtbl [data-c]:focus { border-radius: 0; box-shadow: inset 0 0 0 2px var(--rt-blue); }
 html.sk-retro .tblScroll { border-radius: 0; box-shadow: inset 0 0 0 2px var(--rt-ink); background: #fff; }
+
+html.sk-excel #card .xltab { flex: none; display: flex; align-items: stretch; height: 22px; background: var(--xl-hd); border-top: 1px solid var(--xl-line); font: 600 11px 'IBM Plex Sans KR', sans-serif; }
+html.sk-excel #card .xltab b { padding: 0 12px; display: flex; align-items: center; background: #fff; color: var(--xl-g); border-right: 1px solid var(--xl-line); box-shadow: inset 0 -2.5px 0 var(--xl-g); }
+html.sk-excel #card .xltab i { padding: 0 10px; display: flex; align-items: center; color: #A99C98; font-style: normal; }
+/* 연락망: 부서마다 떨어진 카드 대신 한 장의 시트처럼 */
+html.sk-excel .gv { gap: 0 !important; }
+html.sk-excel .gvSec { border-radius: 0 !important; margin: 0 !important; box-shadow: 0 0 0 1px var(--xl-line) !important; }
+html.sk-excel .gvSec + .gvSec { margin-top: 0 !important; }
+html.sk-excel .gvHead, html.sk-excel .gvSec:not(.closed):not(.solo) .gvHead { box-shadow: none; background: var(--xl-hd); border-bottom: 1px solid var(--xl-line); }
+html.sk-excel .gvSec.closed .gvHead, html.sk-excel .gvSec.solo .gvHead { border-bottom: none; }
+html.sk-excel .gvIco { display: none; }
+html.sk-excel .gvTog b { color: var(--xl-ink); }
+html.sk-excel #card .xlfx[hidden], html.sk-excel #card .xlcol[hidden], html.sk-excel #card .xltab[hidden] { display: none; }
+html.sk-excel #card .xltab { position: relative; z-index: 2; }

@@ -798,7 +798,7 @@
         const isClosed = !q && !ordering && closed[g.name] && !opts.only;
         // 부서 줄: [접기 · 부서 이름 · 인원] [대표번호]
         const ob = (cls, d, dis, extra) => '<button type="button" class="gvOrd ' + cls + '"' + extra + (dis ? ' disabled' : '') + ' title="' + (d < 0 ? '위로' : '아래로') + '">' + ARW(d) + '</button>';
-        html += '<section class="gvSec' + (isClosed ? ' closed' : '') + (people.length ? '' : ' solo') + '" data-gi="' + gi + '"' + (ordering && !opts.only ? ' draggable="true"' : '') + '>' +
+        html += '<section class="gvSec' + (isClosed ? ' closed' : '') + (people.length ? '' : ' solo') + '" data-gi="' + gi + '">' +
           '<div class="gvHead">' + (ordering && !opts.only ? '<span class="gvOrdBox">' + ob('gUp', -1, gi === 0, ' data-gi="' + gi + '"') + ob('gDn', 1, gi === groups.length - 1, ' data-gi="' + gi + '"') + '</span>' : '') + '<button type="button" class="gvTog" data-g="' + esc(g.name) + '" aria-expanded="' + !isClosed + '"' + (people.length ? '' : ' tabindex="-1"') + '>' +
             '<span class="gvIco" aria-hidden="true">' + deptIcon() + '</span>' +
             (people.length ? '<span class="gvChev" aria-hidden="true">' + ICONS.chev + '</span>' : '') +
@@ -810,7 +810,7 @@
           (people.length ? '<div class="gvGrid">' + people.map((it, pi) => {
             const ex = extra.map((i) => String(it.r[i] || '').trim()).filter(Boolean).join(' · ');
             const vacant = /^(공석|빈자리|-)$/.test(String(it.r[N] || '').trim());
-            if (ordering) return '<div class="gvItem ordItem" draggable="true" data-gi="' + gi + '" data-pi="' + pi + '"><span class="gvName">' + esc(it.r[N] || '') + '</span>' +
+            if (ordering) return '<div class="gvItem ordItem" data-gi="' + gi + '" data-pi="' + pi + '"><span class="gvName">' + esc(it.r[N] || '') + '</span>' +
               '<span class="gvOrdBox">' + ob('pUp', -1, pi === 0, ' data-gi="' + gi + '" data-pi="' + pi + '"') + ob('pDn', 1, pi === people.length - 1, ' data-gi="' + gi + '" data-pi="' + pi + '"') + '</span></div>';
             return '<button type="button" class="gvItem' + (vacant ? ' vacant' : '') + '" data-v="' + esc(it.r[X] || '') + '" data-k="' + it.k + '" title="눌러서 복사">' +
               '<span class="gvName">' + hl(it.r[N] || '', q) + (ex ? '<i>' + hl(ex, q) + '</i>' : '') + '</span>' +
@@ -837,31 +837,66 @@
     }
     // 순서 바꾸기: ▲▼ 버튼 (휴대폰) + 끌어서 놓기 (PC)
     function move(arr, from, to) { if (to < 0 || to >= arr.length || from === to) return false; const [x] = arr.splice(from, 1); arr.splice(to, 0, x); return true; }
-    let dragSrc = null;
-    el.addEventListener('dragstart', (e) => {
-      if (!ordering) return;
-      const it = e.target.closest('.ordItem'), sec = e.target.closest('.gvSec[draggable]');
-      dragSrc = it ? { gi: +it.dataset.gi, pi: +it.dataset.pi } : sec ? { gi: +sec.dataset.gi } : null;
-      if (dragSrc) { e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', 'x'); } catch (er) { /* 무시 */ } (it || sec).classList.add('dragging'); }
-      e.stopPropagation();
+    // PC: 부서 줄·사람 칸을 잡고 끌면 순서 바꾸기, 부서를 창 밖으로 끌어 놓으면 떼어서 바탕화면에
+    let pd = null, eatClick = false;
+    el.addEventListener('pointerdown', (e) => {
+      if (!opts.drag || e.button !== 0 || ordering || query) return;
+      if (e.target.closest('.gvMain, .gvDetach, .gvOrd')) return;
+      const head = e.target.closest('.gvHead'), item = e.target.closest('.gvItem');
+      const sec = e.target.closest('.gvSec'); if (!sec || (!head && !item)) return;
+      pd = { x: e.clientX, y: e.clientY, id: e.pointerId, gi: +sec.dataset.gi, pi: item ? [...sec.querySelectorAll('.gvItem')].indexOf(item) : null, src: item || sec, on: false, ghost: null, to: null };
     });
-    el.addEventListener('dragover', (e) => { if (dragSrc) e.preventDefault(); });
-    el.addEventListener('dragend', () => { dragSrc = null; el.querySelectorAll('.dragging').forEach((x) => x.classList.remove('dragging')); });
-    el.addEventListener('drop', (e) => {
-      if (!dragSrc) return;
-      e.preventDefault();
-      const src = dragSrc; dragSrc = null;
-      if (src.pi != null) {
-        const it = e.target.closest('.ordItem');
-        if (!it || +it.dataset.gi !== src.gi) return render();
-        if (move(curGroups[src.gi].people, src.pi, +it.dataset.pi)) saveOrder(curGroups);
-      } else {
-        const sec = e.target.closest('.gvSec');
-        if (!sec) return render();
-        if (move(curGroups, src.gi, +sec.dataset.gi)) saveOrder(curGroups);
+    el.addEventListener('pointermove', (e) => {
+      if (!pd || e.pointerId !== pd.id) return;
+      if (!pd.on) {
+        if (Math.hypot(e.clientX - pd.x, e.clientY - pd.y) < 6) return;
+        pd.on = true;
+        try { el.setPointerCapture(e.pointerId); } catch (er) { /* 무시 */ }
+        const g = curGroups[pd.gi];
+        pd.ghost = document.createElement('div'); pd.ghost.className = 'gvGhost';
+        pd.ghost.textContent = pd.pi != null ? String((g.people[pd.pi] && g.people[pd.pi].r[1]) || '') : g.name;
+        if (pd.pi != null) { const n = pd.src.querySelector('.gvName'); if (n) pd.ghost.textContent = n.textContent; }
+        document.body.appendChild(pd.ghost);
+        pd.src.classList.add('dragging'); el.classList.add('dragOn');
       }
-      render();
+      pd.ghost.style.left = e.clientX + 'px'; pd.ghost.style.top = e.clientY + 'px';
+      const out = e.clientX < 0 || e.clientY < 0 || e.clientX > window.innerWidth || e.clientY > window.innerHeight;
+      pd.ghost.classList.toggle('out', out && pd.pi == null && !!opts.onDetach);
+      el.querySelectorAll('.dropBefore, .dropAfter').forEach((x) => x.classList.remove('dropBefore', 'dropAfter'));
+      pd.to = null;
+      if (out) return;
+      if (pd.pi == null) {
+        const secs = [...el.querySelectorAll('.gvSec')];
+        let k = secs.findIndex((x) => { const r = x.getBoundingClientRect(); return e.clientY < r.top + r.height / 2; });
+        if (k < 0) k = secs.length;
+        pd.to = k;
+        if (k < secs.length) secs[k].classList.add('dropBefore'); else if (secs.length) secs[secs.length - 1].classList.add('dropAfter');
+      } else {
+        const sec = el.querySelector('.gvSec[data-gi="' + pd.gi + '"]'), its = sec ? [...sec.querySelectorAll('.gvItem')] : [];
+        let best = -1, bd = 1e9;
+        its.forEach((x, k) => { const r = x.getBoundingClientRect(); const d = Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2)); if (d < bd) { bd = d; best = k; } });
+        if (best >= 0) { pd.to = best; if (best !== pd.pi) its[best].classList.add(best < pd.pi ? 'dropBefore' : 'dropAfter'); }
+      }
     });
+    function endDrag(e, cancel) {
+      if (!pd) return;
+      const d = pd; pd = null;
+      if (!d.on) return;
+      eatClick = true; setTimeout(() => { eatClick = false; }, 50);
+      d.ghost.remove(); el.classList.remove('dragOn');
+      el.querySelectorAll('.dragging, .dropBefore, .dropAfter').forEach((x) => x.classList.remove('dragging', 'dropBefore', 'dropAfter'));
+      if (cancel) return;
+      const out = e.clientX < 0 || e.clientY < 0 || e.clientX > window.innerWidth || e.clientY > window.innerHeight;
+      if (out && d.pi == null) { if (opts.onDetach) opts.onDetach(curGroups[d.gi].name, e.screenX, e.screenY); return; }
+      if (d.to == null) return;
+      let ok = false;
+      if (d.pi == null) { const to = d.to > d.gi ? d.to - 1 : d.to; ok = move(curGroups, d.gi, to); }
+      else ok = move(curGroups[d.gi].people, d.pi, d.to);
+      if (ok) { saveOrder(curGroups); render(); }
+    }
+    el.addEventListener('pointerup', (e) => endDrag(e, false));
+    el.addEventListener('pointercancel', (e) => endDrag(e, true));
+    el.addEventListener('click', (e) => { if (eatClick) { e.stopImmediatePropagation(); e.preventDefault(); eatClick = false; } }, true);
     el.addEventListener('click', (e) => {
       const o = e.target.closest('.gvOrd');
       if (o) {
