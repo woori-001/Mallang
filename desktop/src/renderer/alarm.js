@@ -33,7 +33,7 @@
   function deco() {
     const sk = skin(), id = S.settings.skin;
     let h = '';
-    if (sk.look === 'retro') h = im('skin/rt-sparkle.png', 'left:-22px;top:46px;width:30px;image-rendering:pixelated', 'sw') + im('skin/rt-star.png', 'right:-18px;bottom:-18px;width:32px;image-rendering:pixelated') + im('skin/rt-heart.png', 'right:20px;bottom:-16px;width:22px;image-rendering:pixelated');
+    if (sk.look === 'retro') h = im('skin/rt-sparkle.png', 'left:-22px;top:46px;width:30px', 'sw') + im('skin/rt-star.png', 'right:-18px;bottom:-18px;width:32px') + im('skin/rt-heart.png', 'right:20px;bottom:-16px;width:22px');
     else if (sk.look === 'excel') h = im('skin/xl-bar.png', 'left:-16px;bottom:-14px;width:38px;transform:rotate(-8deg)', 'sw') + im('skin/xl-line.png', 'right:-10px;bottom:-12px;width:38px;transform:rotate(6deg)');
     else if (sk.deco === 'forest') h = im('leaf-top.svg', 'right:-44px;bottom:-40px;width:120px;transform:scaleY(-1)', 'sw') + im('leaf-bot.svg', 'left:-58px;bottom:-48px;width:118px');
     else if (sk.deco === 'peach') h = im('peach-fruit.png', 'left:112px;top:-34px;width:58px;transform:rotate(-8deg)', 'sw') + im('blossom-pink.png', 'left:168px;top:-12px;width:24px') + im('blossom-white.png', 'right:-12px;bottom:-12px;width:28px', 'sw') + im('blossom-pink.png', 'left:-12px;bottom:26px;width:24px');

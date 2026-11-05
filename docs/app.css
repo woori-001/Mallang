@@ -548,7 +548,7 @@ html.sk-retro {
 }
 html.sk-retro body, html.sk-retro button, html.sk-retro input, html.sk-retro textarea, html.sk-retro select { font-family: 'Galmuri11', 'Gowun Dodum', sans-serif; }
 html.sk-retro body { background: var(--rt-face); }
-html.sk-retro img[src^="skin/rt"] { image-rendering: pixelated; }
+html.sk-retro img[src^="skin/rt"] { image-rendering: auto; }
 html.sk-retro .brand img { height: 54px; filter: none; }
 html.sk-retro .search, html.sk-retro .calCard, html.sk-retro .card, html.sk-retro .evList > *, html.sk-retro .toggleRow, html.sk-retro .install, html.sk-retro .pDay {
   border-radius: 0 !important; background: var(--rt-paper); box-shadow: 0 0 0 2px var(--rt-ink), inset 2px 2px 0 var(--rt-sh) !important; border: none; }
