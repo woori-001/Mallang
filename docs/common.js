@@ -116,7 +116,7 @@
       pal: [[[255, 255, 255], [255, 255, 255]], [[255, 244, 247], [255, 244, 247]], [[255, 250, 230], [255, 250, 230]], [[240, 248, 236], [240, 248, 236]], [[240, 245, 255], [240, 245, 255]]]
     },
     ninja: {
-      name: '닌자 말랑', paper: true, beta: true, look: 'ninja', bunny: 'skin/nj-bun.png', logo: 'skin/nj-logo.png', paperBg: '#F2E7D0',
+      name: '닌자 말랑', paper: true, beta: true, look: 'ninja', bunny: 'skin/nj-bun1.png', logo: 'skin/nj-logo.png', paperBg: '#F2E7D0',
       rowIcons: ['skin/nj-scroll.png', 'skin/nj-shuriken.png', 'skin/nj-kunai.png', 'skin/nj-bomb.png', 'skin/nj-ramen.png'], groupIcon: 'skin/nj-curtain.png',
       base: '#F2E7D0', b: ['#F7C99A', '#F2E7D0', '#E8B98C', '#FBF4E4'],
       a1: '#F57C1F', a2: '#FF9D3C', ink: '#2B2420', sub: '#8E8274', sun: '#D23C4A', sat: '#3F6CC4', glow: 'rgba(245,124,31,0.30)', on: '#1C1A20',
