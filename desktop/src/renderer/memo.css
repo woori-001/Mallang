@@ -108,7 +108,7 @@ body { padding: 14px; }
   background: rgba(var(--glass), .72); border-radius: 10px; padding: 3px 9px; pointer-events: none;
 }
 .grip {
-  position: absolute; right: 2px; bottom: 2px; width: 18px; height: 18px; cursor: nwse-resize;
+  position: absolute; right: 2px; bottom: 2px; width: 18px; height: 18px; cursor: nwse-resize; z-index: 5;   /* 엑셀 시트 탭 등 위로 */
   border-radius: 0 0 18px 0;
 }
 .grip::after {
