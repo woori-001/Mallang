@@ -640,7 +640,7 @@ html.sk-excel .peopleGv .gvIco { display: none; }
 
 /* ───────── 베타 스킨: 닌자 말랑 (먹색 + 주황, 두루마리 종이) ───────── */
 html.sk-ninja { --nj-ink: #1C1A20; --nj-char: #25222B; --nj-char2: #302C37; --nj-or: #F57C1F; --nj-or2: #FF9D3C; --nj-wash: #F2E7D0; --nj-cream: #FBF4E4; --nj-wood: #7A4B2A; }
-html.sk-ninja body { background: repeating-linear-gradient(-14deg, transparent 0 46px, rgba(255, 255, 255, .05) 46px 48px, transparent 48px 120px), radial-gradient(ellipse at 80% 8%, rgba(255, 170, 70, .5) 0, transparent 45%), linear-gradient(170deg, #3A2B30 0%, #5B3528 50%, #B8541E 100%) fixed; }
+html.sk-ninja body { background: var(--nj-char); }   /* 그라데이션 없이 먹색 한 가지 */
 html.sk-ninja .brand img { height: 64px; filter: drop-shadow(0 3px 5px rgba(0, 0, 0, .45)); }
 html.sk-ninja .top .sync, html.sk-ninja .top .sync * { color: #EEE6DA; }
 html.sk-ninja .search, html.sk-ninja .calCard, html.sk-ninja .card, html.sk-ninja .evList > *, html.sk-ninja .toggleRow, html.sk-ninja .install, html.sk-ninja .pDay { background: var(--nj-cream) !important; box-shadow: 0 0 0 2px #000 !important; border-radius: 12px; }
@@ -674,3 +674,4 @@ html.sk-ninja .empty, html.sk-ninja .small.center, html.sk-ninja .selLabel { col
 html.sk-ninja .card .empty, html.sk-ninja .evList .empty, html.sk-ninja .calCard .empty { color: #8E8274; }
 html.sk-ninja .skin .sn, html.sk-ninja .set h3, html.sk-ninja .secH, html.sk-ninja .plHead, html.sk-ninja .plRange { color: #EEE6DA; }
 html.sk-ninja .textBtn { color: var(--nj-or2); }
+html.sk-ninja .skins .skin .sn, html.sk-ninja .skins .skin.on .sn { color: #EEE6DA; } html.sk-ninja .skins .skin.on .sn { color: var(--nj-or2); } html.sk-ninja .view h2 { color: #EEE6DA; }
