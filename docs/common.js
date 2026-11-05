@@ -115,6 +115,13 @@
       a1: '#217346', a2: '#6FB58A', ink: '#3A3533', sub: '#6E6A68', sun: '#D9546E', sat: '#3B6FC4', glow: 'rgba(33,115,70,0.20)', on: '#FFFFFF',
       pal: [[[255, 255, 255], [255, 255, 255]], [[255, 244, 247], [255, 244, 247]], [[255, 250, 230], [255, 250, 230]], [[240, 248, 236], [240, 248, 236]], [[240, 245, 255], [240, 245, 255]]]
     },
+    ninja: {
+      name: '닌자 말랑', paper: true, beta: true, look: 'ninja', bunny: 'skin/nj-bun.png', logo: 'skin/nj-logo.png', paperBg: '#F2E7D0',
+      rowIcons: ['skin/nj-scroll.png', 'skin/nj-shuriken.png', 'skin/nj-kunai.png', 'skin/nj-bomb.png', 'skin/nj-ramen.png'], groupIcon: 'skin/nj-curtain.png',
+      base: '#F2E7D0', b: ['#F7C99A', '#F2E7D0', '#E8B98C', '#FBF4E4'],
+      a1: '#F57C1F', a2: '#FF9D3C', ink: '#2B2420', sub: '#8E8274', sun: '#D23C4A', sat: '#3F6CC4', glow: 'rgba(245,124,31,0.30)', on: '#1C1A20',
+      pal: [[[242, 231, 208], [242, 231, 208]], [[255, 228, 200], [255, 228, 200]], [[246, 226, 222], [246, 226, 222]], [[232, 236, 216], [232, 236, 216]], [[228, 228, 238], [228, 228, 238]]]
+    },
     midnight: {
       name: '미드나잇', dark: true, base: '#16181D', b: ['#2A3A64', '#1E3442', '#3A2C52', '#1C3448'],
       a1: '#4C8DFF', a2: '#6FB3FF', ink: '#E9ECF1', sub: '#AEB6C4', sun: '#FF8FA8', sat: '#7FBDFF', glow: 'rgba(76,141,255,0.30)', on: '#FFFFFF',
@@ -219,6 +226,7 @@
     document.documentElement.classList.toggle('g-xmas', !!sk.glassSeason && sk.season === 'xmas');
     document.documentElement.classList.toggle('sk-retro', sk.look === 'retro');
     document.documentElement.classList.toggle('sk-excel', sk.look === 'excel');
+    document.documentElement.classList.toggle('sk-ninja', sk.look === 'ninja');
     for (const d of ['forest', 'peach', 'lemon', 'sky', 'aurora']) document.documentElement.classList.toggle('g-' + d, sk.deco === d);   // 디자인 스킨 장식
     r.setProperty('--paper-bg', sk.paperBg || '#FBFAF5');
     // 드로잉 스킨에서는 말랑이도 손그림으로
@@ -323,6 +331,7 @@
     ghalloween: ['stk3-ghost', 'stk3-bat', 'stk3-moon', 'stk3-star-y', 'stk3-sparks-gold', 'stk3-ghost', 'stk3-bat', 'stk3-star-iris'],
     retro: ['../skin/rt-star', '../skin/rt-heart', '../skin/rt-sparkle', '../skin/rt-note', '../skin/rt-star2', '../skin/rt-heart2', '../skin/rt-bell', '../skin/rt-sun', '../skin/rt-cloud', '../skin/rt-moon'],
     excel: ['../skin/xl-bar', '../skin/xl-fx', '../skin/xl-pie', '../skin/xl-sum', '../skin/xl-line', '../skin/xl-az', '../skin/xl-cell', '../skin/xl-filter', '../skin/xl-grid'],
+    ninja: ['../skin/nj-shuriken', '../skin/nj-kunai', '../skin/nj-leafg', '../skin/nj-sakura', '../skin/nj-ramen', '../skin/nj-petal', '../skin/nj-redcloud', '../skin/nj-scroll', '../skin/nj-excl'],
     draw: ['stkd-star', 'stkd-heart', 'stkd-spark', 'stkd-sparks', 'stkd-hearts', 'stkd-note', 'stkd-flower', 'stkd-star']
   };
   // 화살표 그림이 원래 가리키는 방향(도) — 날아가는 쪽으로 돌려 줌

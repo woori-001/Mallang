@@ -942,7 +942,7 @@
     window.M.syncRanges();
     $('avatar').textContent = ((session && session.username) || '?').slice(0, 1).toUpperCase();
     const GROUPS = [['기본 스킨', ['lav']], ['컬러 스킨', ['pink', 'cotton', 'blue', 'midnight']], ['디자인 스킨', ['peach', 'forest', 'honey', 'sky', 'aurora']],
-      ['페이퍼 스킨', ['office', 'sage', 'berry']], ['말랑 스킨', ['draw']], ['시즌 스킨', ['halloween', 'xmas', 'ghalloween', 'gxmas']], ['베타 스킨', ['retro', 'excel']]];
+      ['페이퍼 스킨', ['office', 'sage', 'berry']], ['말랑 스킨', ['draw']], ['시즌 스킨', ['halloween', 'xmas', 'ghalloween', 'gxmas']], ['베타 스킨', ['retro', 'excel', 'ninja']]];
     const listed = new Set(GROUPS.flatMap((g) => g[1]));
     GROUPS[1][1] = GROUPS[1][1].concat(Object.keys(SKINS).filter((id) => !listed.has(id)));
     const openSk = (st.shared && st.shared.openSkins) || [];

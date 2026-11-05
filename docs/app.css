@@ -637,3 +637,40 @@ html.sk-excel .peopleGv .gvSec { border-radius: 0 !important; box-shadow: 0 0 0 
 html.sk-excel .peopleGv .gvHead { box-shadow: none !important; border-bottom: 1px solid var(--xl-line); }
 html.sk-excel .peopleGv .gvIco { display: none; }
 .mIco { width: 22px; height: 22px; object-fit: contain; flex: none; }
+
+/* ───────── 베타 스킨: 닌자 말랑 (먹색 + 주황, 두루마리 종이) ───────── */
+html.sk-ninja { --nj-ink: #1C1A20; --nj-char: #25222B; --nj-char2: #302C37; --nj-or: #F57C1F; --nj-or2: #FF9D3C; --nj-wash: #F2E7D0; --nj-cream: #FBF4E4; --nj-wood: #7A4B2A; }
+html.sk-ninja body { background: repeating-linear-gradient(-14deg, transparent 0 46px, rgba(255, 255, 255, .05) 46px 48px, transparent 48px 120px), radial-gradient(ellipse at 80% 8%, rgba(255, 170, 70, .5) 0, transparent 45%), linear-gradient(170deg, #3A2B30 0%, #5B3528 50%, #B8541E 100%) fixed; }
+html.sk-ninja .brand img { height: 64px; filter: drop-shadow(0 3px 5px rgba(0, 0, 0, .45)); }
+html.sk-ninja .top .sync, html.sk-ninja .top .sync * { color: #EEE6DA; }
+html.sk-ninja .search, html.sk-ninja .calCard, html.sk-ninja .card, html.sk-ninja .evList > *, html.sk-ninja .toggleRow, html.sk-ninja .install, html.sk-ninja .pDay { background: var(--nj-cream) !important; box-shadow: 0 0 0 2px #000 !important; border-radius: 12px; }
+html.sk-ninja .iconBtn { background: var(--nj-char2); color: var(--nj-or2); box-shadow: 0 0 0 2px #000; }
+html.sk-ninja .memo { border-radius: 8px; padding: 0 0 12px; overflow: hidden; border: 2px solid #000; box-shadow: 0 6px 14px rgba(0, 0, 0, .3); background: var(--nj-wash) !important; }
+html.sk-ninja .memo .mTitle { padding: 10px 14px; background: var(--nj-char); color: #F3EBDD; border-top: 5px solid var(--nj-wood); border-bottom: 2px solid #000; font-family: 'Do Hyeon', sans-serif; }
+html.sk-ninja .memo .mTitle span { font-family: 'Do Hyeon', var(--memo-font); font-weight: 400; }
+html.sk-ninja .memo.mFolded { padding: 0; }
+html.sk-ninja .memo.mFolded .mTitle { border-bottom: none; }
+html.sk-ninja .memo .mBody, html.sk-ninja .memo .mMeta { padding: 0 14px; }
+html.sk-ninja .memo .mBody { margin-top: 8px; }
+html.sk-ninja .memo .mFold { color: var(--nj-or2); }
+html.sk-ninja .fab, html.sk-ninja .primary, html.sk-ninja .smallPrimary { background: linear-gradient(180deg, var(--nj-or2), var(--nj-or)); color: var(--nj-ink); box-shadow: 0 0 0 2px #000, 0 4px 0 #000; }
+html.sk-ninja .tabs { background: var(--nj-char); box-shadow: 0 0 0 2.5px #000; }
+html.sk-ninja .tab { color: #9D93A8; font-family: 'Do Hyeon', sans-serif; font-weight: 400; }
+html.sk-ninja .tab.on { background: linear-gradient(180deg, var(--nj-or2), var(--nj-or)); color: var(--nj-ink); box-shadow: 0 0 0 2px #000; }
+html.sk-ninja .calTtl, html.sk-ninja .calNum { color: var(--nj-or); }
+html.sk-ninja .wdays { background: var(--nj-char); border-radius: 6px; padding: 4px 0; color: #fff; }
+html.sk-ninja .day.today { box-shadow: inset 0 0 0 2px var(--nj-or); }
+html.sk-ninja .day.sel { background: linear-gradient(180deg, var(--nj-or2), var(--nj-or)); color: var(--nj-ink) !important; box-shadow: 0 0 0 2px #000; }
+html.sk-ninja .pDay .pdH { margin: -12px -14px 8px; padding: 8px 14px; background: var(--nj-char); border-radius: 10px 10px 0 0; border-bottom: 2px solid #000; }
+html.sk-ninja .pDay .pdH b, html.sk-ninja .pDay .pdH > span { color: #F3EBDD; font-family: 'Do Hyeon', sans-serif; font-weight: 400; }
+html.sk-ninja .pIt.done .pCb { background: var(--nj-or); }
+html.sk-ninja .peopleGv .gvSec { background: var(--nj-cream); box-shadow: 0 0 0 2px #000 !important; border-radius: 10px; }
+html.sk-ninja .peopleGv .gvHead { background: var(--nj-char); border-radius: 10px 10px 0 0; }
+html.sk-ninja .peopleGv .gvSec.closed .gvHead, html.sk-ninja .peopleGv .gvSec.solo .gvHead { border-radius: 10px; }
+html.sk-ninja .peopleGv .gvTog, html.sk-ninja .peopleGv .gvTog b { color: #F3EBDD; font-family: 'Do Hyeon', sans-serif; font-weight: 400; }
+html.sk-ninja .peopleGv .gvItem { background: var(--nj-wash); }
+html.sk-ninja .mIco { width: 26px; height: 26px; }
+html.sk-ninja .empty, html.sk-ninja .small.center, html.sk-ninja .selLabel { color: #EEE6DA; }
+html.sk-ninja .card .empty, html.sk-ninja .evList .empty, html.sk-ninja .calCard .empty { color: #8E8274; }
+html.sk-ninja .skin .sn, html.sk-ninja .set h3, html.sk-ninja .secH, html.sk-ninja .plHead, html.sk-ninja .plRange { color: #EEE6DA; }
+html.sk-ninja .textBtn { color: var(--nj-or2); }

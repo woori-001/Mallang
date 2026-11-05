@@ -287,3 +287,87 @@ html.sk-retro .wrap .deco, html.sk-excel .wrap .deco { z-index: 2; }
 .panel .rico { width: 20px; height: 20px; object-fit: contain; flex: none; margin-right: 7px; vertical-align: middle; }
 .panel .rtitle { display: flex; align-items: center; }
 .panel .gico { width: 21px; height: 21px; object-fit: contain; }
+
+/* ===== 닌자 말랑 (html.sk-ninja): 먹색 + 주황, 두루마리 종이, 굵은 검정 선 ===== */
+html.sk-ninja {
+  --nj-ink: #1C1A20; --nj-char: #25222B; --nj-char2: #302C37; --nj-or: #F57C1F; --nj-or2: #FF9D3C; --nj-wash: #F2E7D0; --nj-cream: #FBF4E4; --nj-wood: #7A4B2A; --nj-line: rgba(80, 55, 30, .18);
+  --paper-line: rgba(28, 26, 32, .25); --paper-dot: rgba(245, 124, 31, .5);
+}
+.nj-num, html.sk-ninja .clock .time, html.sk-ninja .wrap .tm { font-family: 'Do Hyeon', sans-serif; }
+/* 목록바: 먹색 */
+html.sk-ninja .tab { background: linear-gradient(180deg, var(--nj-or2), var(--nj-or)); color: var(--nj-ink); border: 2.5px solid #000; border-right: none; }
+html.sk-ninja .panel { --ink: #EEE6DA; --sub: #A89E92; color: var(--ink); background: var(--nj-char) !important; border: 2.5px solid #000; border-right: none; box-shadow: -6px 0 24px rgba(0, 0, 0, .3); }
+html.sk-ninja .phead { background: linear-gradient(180deg, #1A181E, var(--nj-char)); margin: -20px -20px 0; padding: 12px 20px 8px; border-top-left-radius: 21.5px; }
+html.sk-ninja .applogo { height: auto; width: 230px; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .45)); }
+html.sk-ninja .todaytxt { color: #A89E92; }
+html.sk-ninja .pinbtn { background: var(--nj-char2); color: #EEE6DA; border-radius: 10px; }
+html.sk-ninja .seg { background: transparent; box-shadow: inset 0 -2px 0 #3E3946; border-radius: 0; padding: 0; }
+html.sk-ninja .segb { font: 400 15px 'Do Hyeon', sans-serif; letter-spacing: .4px; color: #9D93A8; border-radius: 0; background: transparent; box-shadow: none; }
+html.sk-ninja .segb.on { color: var(--nj-or2); background: transparent; box-shadow: inset 0 -3px 0 var(--nj-or); }
+html.sk-ninja .panel .primary, html.sk-ninja .panel .smallprimary { background: linear-gradient(180deg, var(--nj-or2), var(--nj-or)); color: var(--nj-ink); border: 2px solid #000; box-shadow: 0 3px 0 #000; font-family: 'Do Hyeon', sans-serif; font-weight: 400; font-size: 15px; border-radius: 10px; }
+html.sk-ninja .panel .search { background: #1B1920; box-shadow: inset 0 0 0 1.5px #3E3946; border-radius: 10px; }
+html.sk-ninja .panel .search input { color: #EEE6DA; }
+html.sk-ninja .panel .tbar .tg { background: var(--nj-char2); box-shadow: none; border-radius: 10px; }
+html.sk-ninja .panel .row { --ink: #2B2420; --sub: #8E8274; color: var(--ink); border-radius: 8px; border: 1.5px solid #000; box-shadow: none !important;
+  background: linear-gradient(90deg, rgba(120, 80, 40, .12), transparent 30%, transparent 70%, rgba(120, 80, 40, .12)), var(--nj-wash) !important; }
+html.sk-ninja .panel .row .ib { color: #6E5F52; }
+html.sk-ninja .panel .row:hover { transform: translateX(-3px); box-shadow: 0 0 0 2px var(--nj-or), 0 0 12px rgba(245, 124, 31, .4) !important; }
+html.sk-ninja .panel .ghead { background: transparent !important; box-shadow: none !important; }
+html.sk-ninja .panel .gname, html.sk-ninja .panel .nogrp { font-family: 'Do Hyeon', sans-serif; font-weight: 400; font-size: 14px; letter-spacing: .3px; color: #C9BFB2; }
+html.sk-ninja .panel .rico { width: 24px; height: 24px; }
+html.sk-ninja .panel .gico { width: 26px; height: 26px; }
+html.sk-ninja .panel .foot { color: #8A8094; }
+/* 목록바 안 밝은 카드 (달력·설정 칸 등) */
+html.sk-ninja .panel .calcard, html.sk-ninja .panel .box, html.sk-ninja .panel .alBox, html.sk-ninja .panel .ev, html.sk-ninja .panel .toggle:not(.mini), html.sk-ninja .panel .acHero, html.sk-ninja .panel .bkForm, html.sk-ninja .panel .gvSec, html.sk-ninja .panel .thInfo {
+  --ink: #2B2420; --sub: #8E8274; color: var(--ink); background: var(--nj-cream); border-radius: 12px; box-shadow: 0 0 0 2px #000; }
+html.sk-ninja .panel .wdays { background: var(--nj-char); color: #fff; border-radius: 6px; padding: 4px 0; margin-bottom: 4px; border: none; }
+html.sk-ninja .panel .day.today { box-shadow: inset 0 0 0 2px var(--nj-or); }
+html.sk-ninja .panel .day.sel { background: linear-gradient(180deg, var(--nj-or2), var(--nj-or)); color: var(--nj-ink) !important; box-shadow: 0 0 0 2px #000; }
+html.sk-ninja .panel .calhead b, html.sk-ninja .panel .calnum { color: var(--nj-or); }
+/* 메모지: 두루마리 */
+html.sk-ninja #card { border-radius: 6px !important; border: 2.5px solid #000; box-shadow: 0 6px 14px rgba(0, 0, 0, .28); }
+html.sk-ninja #card .head { background: var(--nj-char) !important; border-radius: 0 !important; border-top: 6px solid var(--nj-wood); border-bottom: 2px solid #000; color: #F3EBDD; }
+html.sk-ninja #card .head .title { font-family: 'Do Hyeon', var(--memo-font); font-weight: 400; letter-spacing: .3px; color: #F3EBDD; }
+html.sk-ninja #card .head .ib, html.sk-ninja #card .head .grpDot { color: var(--nj-or2); opacity: 1; }
+html.sk-ninja #card .title:not([readonly]) { background: rgba(255, 255, 255, .95); color: var(--nj-ink); }
+html.sk-ninja #card .body { border-bottom: 6px solid var(--nj-wood); }
+html.sk-ninja #card.folded .head { border-bottom: none; height: 100%; }
+html.sk-ninja #card .text { background-image: linear-gradient(to bottom, transparent calc(1.7em - 1px), var(--nj-line) 0); }
+html.sk-ninja #card .tools { border-radius: 10px; box-shadow: 0 0 0 2px #000, 0 6px 14px rgba(0, 0, 0, .2); background: var(--nj-cream); }
+html.sk-ninja #card .checks .cb, html.sk-ninja #card .item .ck { border-color: #000; }
+/* 달력·오늘 위젯, 플래너 */
+html.sk-ninja .w, html.sk-ninja .pl { background: var(--nj-cream) !important; box-shadow: inset 0 0 0 2.5px #000, 0 8px 18px rgba(0, 0, 0, .25) !important; }
+html.sk-ninja .w .grid > *, html.sk-ninja .w .d { border-radius: 8px; }
+html.sk-ninja .pl .sheet { box-shadow: 0 0 0 2px #000; background: var(--nj-wash); }
+html.sk-ninja .pl .dh { background: var(--nj-char); border-bottom: 2px solid #000; }
+html.sk-ninja .pl .dh .n { color: #F3EBDD; font-family: 'Do Hyeon'; font-weight: 400; } html.sk-ninja .pl .dh .e { color: #A89E92; }
+html.sk-ninja .pl .dh.today .n { background: linear-gradient(180deg, var(--nj-or2), var(--nj-or)); color: var(--nj-ink); }
+html.sk-ninja .pl .it.done .cb { background: var(--nj-or); }
+html.sk-ninja .pl .pb.on { background: var(--nj-or); color: var(--nj-ink); }
+/* 연락망 */
+html.sk-ninja .gvSec { background: var(--nj-cream); box-shadow: 0 0 0 2px #000; border-radius: 10px; }
+html.sk-ninja .gvSec .gvHead { border-radius: 10px 10px 0 0; } html.sk-ninja .gvSec.closed .gvHead, html.sk-ninja .gvSec.solo .gvHead { border-radius: 10px; }
+html.sk-ninja .gvHead { background: var(--nj-char); }
+html.sk-ninja .gvTog, html.sk-ninja .gvTog b { color: #F3EBDD; font-family: 'Do Hyeon', sans-serif; font-weight: 400; }
+html.sk-ninja .gvCnt { color: #A89E92; } html.sk-ninja .gvMain span, html.sk-ninja .gvMain b { color: var(--nj-or2); }
+html.sk-ninja .gvItem { background: var(--nj-wash); --ink: #2B2420; color: #2B2420; }
+html.sk-ninja .gvItem:hover, html.sk-ninja .gvItem.picked { background: #FFE0BF; box-shadow: inset 0 0 0 2px var(--nj-or); }
+/* 시계: 두루마리 + 굵은 숫자 */
+html.sk-ninja .clock { border-radius: 6px; background: var(--nj-wash) !important; box-shadow: inset 0 0 0 2.5px #000, 0 8px 18px rgba(0, 0, 0, .3); position: relative; overflow: visible; padding-right: calc(10px * var(--s, 1)); }
+html.sk-ninja .clock::before, html.sk-ninja .clock::after { content: ''; position: absolute; top: -7px; bottom: -7px; width: 12px; border-radius: 7px; background: linear-gradient(90deg, #8B5A33, #5C3820); box-shadow: 0 0 0 2px #000; }
+html.sk-ninja .clock::before { left: -7px; } html.sk-ninja .clock::after { right: -7px; }
+html.sk-ninja .clock .time { font-size: calc(42px * var(--s, 1)); font-weight: 400; color: var(--nj-or); -webkit-text-stroke: 1.5px #000; text-shadow: 3px 3px 0 #000; letter-spacing: 1px; }
+html.sk-ninja .clock .bun { width: calc(96px * var(--s, 1)); height: calc(64px * var(--s, 1)); filter: none; }
+html.sk-ninja .clock.dark { background: var(--nj-char) !important; }
+html.sk-ninja #done { background: var(--nj-or); color: var(--nj-ink); }
+/* 알람 */
+html.sk-ninja .wrap .card { background: var(--nj-cream); box-shadow: inset 0 0 0 2.5px #000, 0 18px 40px rgba(0, 0, 0, .35); padding-top: 52px; border-radius: 14px; }
+html.sk-ninja .wrap .card::before { content: ''; position: absolute; left: 2.5px; right: 2.5px; top: 2.5px; height: 34px; background: var(--nj-char); border-bottom: 2px solid #000; border-radius: 11.5px 11.5px 0 0; }
+html.sk-ninja .wrap .lab { position: absolute; left: 18px; top: 2.5px; height: 34px; display: flex; align-items: center; z-index: 1; color: #F3EBDD; font-family: 'Do Hyeon', sans-serif; font-weight: 400; font-size: 15px; }
+html.sk-ninja .wrap .tm { font-weight: 400; font-size: 70px; color: var(--nj-or); -webkit-text-stroke: 2px #000; text-shadow: 4px 4px 0 #000; }
+html.sk-ninja .wrap .tm small { font-family: 'Do Hyeon'; font-weight: 400; -webkit-text-stroke: 0; text-shadow: none; color: #8E8274; }
+html.sk-ninja .wrap .memo { border-radius: 8px; background: var(--nj-wash); box-shadow: inset 0 0 0 1.5px #000; }
+html.sk-ninja .wrap .btns button { border-radius: 10px; border: 2px solid #000; background: #fff; color: var(--nj-ink); box-shadow: 0 3px 0 #000; font-family: 'Do Hyeon', sans-serif; font-weight: 400; }
+html.sk-ninja .wrap .btns .ok { background: linear-gradient(180deg, var(--nj-or2), var(--nj-or)); color: var(--nj-ink); }
+html.sk-ninja .art.gx { left: auto; right: -40px; top: -132px; width: 220px; height: 150px; }
+html.sk-ninja .wrap .deco { z-index: 2; }

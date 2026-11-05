@@ -858,7 +858,7 @@
     const openSk = S.openSkins || [];
     // 스킨은 분류별로 묶어서 (계절 스킨은 공개됐거나 관리자이거나 지금 쓰는 중일 때만)
     const GROUPS = [['기본 스킨', ['lav']], ['컬러 스킨', ['pink', 'cotton', 'blue', 'midnight']], ['디자인 스킨', ['peach', 'forest', 'honey', 'sky', 'aurora']],
-      ['페이퍼 스킨', ['office', 'sage', 'berry']], ['말랑 스킨', ['draw']], ['시즌 스킨', ['halloween', 'xmas', 'ghalloween', 'gxmas']], ['베타 스킨', ['retro', 'excel']]];
+      ['페이퍼 스킨', ['office', 'sage', 'berry']], ['말랑 스킨', ['draw']], ['시즌 스킨', ['halloween', 'xmas', 'ghalloween', 'gxmas']], ['베타 스킨', ['retro', 'excel', 'ninja']]];
     const listed = new Set(GROUPS.flatMap((g) => g[1]));
     const rest = Object.keys(SKINS).filter((id) => !listed.has(id));
     if (rest.length) GROUPS[1][1] = GROUPS[1][1].concat(rest);   // 혹시 빠진 스킨은 컬러 스킨에
