@@ -102,6 +102,19 @@
       a1: '#B8434A', a2: '#5E8A6E', ink: '#2A302C', sub: '#6E7770', sun: '#B8434A', sat: '#5E8A6E', glow: 'rgba(184,67,74,0.24)', on: '#FFFFFF',
       pal: [[[246, 218, 216], [238, 204, 202]], [[218, 232, 220], [204, 222, 208]], [[246, 240, 226], [236, 228, 210]], [[240, 226, 214], [232, 212, 200]], [[224, 234, 236], [210, 226, 228]]]
     },
+    // 베타 스킨 (관리자만): 픽셀 레트로 · 말랑 엑셀 — 종이 스킨 바탕 + 스킨 전용 모양(skins.css)
+    retro: {
+      name: '픽셀 레트로', paper: true, beta: true, look: 'retro', bunny: 'skin/rt-win.png', logo: 'skin/rt-logo.png', paperBg: '#FBF9FD',
+      base: '#E6E2EE', b: ['#DCD8E6', '#ECE9F2', '#D3CEE0', '#F2F0F7'],
+      a1: '#1A33C9', a2: '#3D5BE0', ink: '#2E2238', sub: '#6E6684', sun: '#D23B5A', sat: '#1A33C9', glow: 'rgba(26,51,201,0.20)', on: '#FFFFFF',
+      pal: [[[251, 249, 253], [251, 249, 253]], [[255, 242, 246], [255, 242, 246]], [[255, 249, 222], [255, 249, 222]], [[236, 248, 238], [236, 248, 238]], [[238, 244, 255], [238, 244, 255]]]
+    },
+    excel: {
+      name: '말랑 엑셀', paper: true, beta: true, look: 'excel', bunny: 'skin/xl-bun.png', logo: 'skin/xl-logo.png', paperBg: '#FFFDF9',
+      base: '#F3F6EF', b: ['#E4EFDD', '#F1F6EC', '#DCEAD3', '#F7FAF3'],
+      a1: '#4F9A5C', a2: '#8CC48F', ink: '#4A3A37', sub: '#8A7C78', sun: '#D9546E', sat: '#4A78C9', glow: 'rgba(79,154,92,0.22)', on: '#FFFFFF',
+      pal: [[[255, 255, 255], [255, 255, 255]], [[255, 244, 247], [255, 244, 247]], [[255, 250, 230], [255, 250, 230]], [[240, 248, 236], [240, 248, 236]], [[240, 245, 255], [240, 245, 255]]]
+    },
     midnight: {
       name: '미드나잇', dark: true, base: '#16181D', b: ['#2A3A64', '#1E3442', '#3A2C52', '#1C3448'],
       a1: '#4C8DFF', a2: '#6FB3FF', ink: '#E9ECF1', sub: '#AEB6C4', sun: '#FF8FA8', sat: '#7FBDFF', glow: 'rgba(76,141,255,0.30)', on: '#FFFFFF',
@@ -127,6 +140,7 @@
     { id: 'himelody', name: '하이멜로디 · 손글씨', fam: "'Hi Melody', cursive", size: 17 },
     { id: 'poorstory', name: '푸어스토리 · 손글씨', fam: "'Poor Story', cursive", size: 16 },
     { id: 'pen', name: '나눔손글씨 펜', fam: "'Nanum Pen Script', cursive", size: 20 },
+    { id: 'galmuri', name: '갈무리 · 픽셀 글씨', fam: "'Galmuri11', 'Gowun Dodum', sans-serif", size: 13 },
     { id: 'poppins', name: 'Poppins · 영문·숫자 (한글은 고운돋움)', fam: "'Poppins', 'Gowun Dodum', sans-serif", size: 14 }
   ];
 
@@ -203,6 +217,8 @@
     document.documentElement.classList.toggle('gseason', !!sk.glassSeason);
     document.documentElement.classList.toggle('g-halloween', !!sk.glassSeason && sk.season === 'halloween');
     document.documentElement.classList.toggle('g-xmas', !!sk.glassSeason && sk.season === 'xmas');
+    document.documentElement.classList.toggle('sk-retro', sk.look === 'retro');
+    document.documentElement.classList.toggle('sk-excel', sk.look === 'excel');
     for (const d of ['forest', 'peach', 'lemon', 'sky', 'aurora']) document.documentElement.classList.toggle('g-' + d, sk.deco === d);   // 디자인 스킨 장식
     r.setProperty('--paper-bg', sk.paperBg || '#FBFAF5');
     // 드로잉 스킨에서는 말랑이도 손그림으로

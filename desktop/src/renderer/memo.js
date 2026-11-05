@@ -224,6 +224,20 @@
   // ───────── 본문 ─────────
   const saveText = debounce(() => api.update(id, { text: memo.text }), 250);
   const ed = window.M.lineEditor(text, () => { memo.text = ed.getText(); saveText(); });
+  // 말랑 엑셀 스킨: 왼쪽 줄 번호 (글과 같이 스크롤)
+  const xlg = document.createElement('div'); xlg.className = 'xlg'; xlg.hidden = true; text.parentNode.insertBefore(xlg, text);
+  function xlGutter() {
+    const on = document.documentElement.classList.contains('sk-excel') && !text.hidden && getComputedStyle(text).display !== 'none';
+    xlg.hidden = !on; if (!on) return;
+    const lh = parseFloat(getComputedStyle(text).lineHeight) || 24;
+    const n = Math.ceil((text.scrollHeight + 8) / lh) + 1;
+    if (xlg.childElementCount !== n) xlg.innerHTML = Array.from({ length: n }, (_, i) => '<i style="height:' + lh + 'px;line-height:' + lh + 'px">' + (i + 1) + '</i>').join('');
+    xlg.style.top = (text.offsetTop + 8 - text.scrollTop) + 'px';
+    xlg.style.clipPath = 'inset(' + Math.max(0, text.scrollTop - 8) + 'px 0 0 0)';
+  }
+  text.addEventListener('scroll', xlGutter); text.addEventListener('input', xlGutter);
+  new ResizeObserver(xlGutter).observe(text);
+  new MutationObserver(xlGutter).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
   text.addEventListener('blur', () => saveText.flush());
   $('bDiv').innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 12h18"/><path d="M8 6h8M8 18h8" opacity=".45"/></svg>';
   $('bDiv').addEventListener('click', () => {

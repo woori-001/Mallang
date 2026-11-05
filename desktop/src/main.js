@@ -976,6 +976,7 @@ const CLOCK_W = 250, CLOCK_H = 96;
 
 function clockBounds() {
   const s = (store.settings.clockScale || 100) / 100;
+  const CLOCK_H = store.settings.skin === 'retro' ? 186 : 96;   // 레트로: 픽셀 창 그림이라 키가 큼
   const w = Math.round(CLOCK_W * s) + 2 * P + 20, h = Math.round(CLOCK_H * s) + 2 * P + 40;
   const wa = workArea();
   const p = store.clockPos || { x: wa.x + wa.width / 2, y: wa.y + 110 };

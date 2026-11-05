@@ -274,6 +274,7 @@
       if (st.shared.admin && st.shared.dirty && st.shared.contacts) { await C.putShared(holder, 'contacts', { rows: st.shared.contacts }); st.shared.dirty = false; }
       // 자주 받아오지 않음 (1분에 한 번)
       if (st.shared.fetched && Date.now() - st.shared.fetched < 60000 && !st.shared.dirty) return;
+      try { const sk = await C.getShared(holder, 'skins'); st.shared.openSkins = sk && sk.data && Array.isArray(sk.data.open) ? sk.data.open.filter((x) => typeof x === 'string').slice(0, 20) : []; } catch (e) { /* 무시 */ }
       const sh = await C.getShared(holder, 'contacts');
       st.shared.fetched = Date.now();
       if (sh && sh.data && Array.isArray(sh.data.rows) && !st.shared.dirty) {
@@ -806,11 +807,20 @@
     scheduleSync();
   }
   let plW = null, plPending = false;
+  const plTyping = () => { const a = document.activeElement; return document.visibilityState === 'visible' && document.hasFocus() && a && $('vPlan').contains(a) && /INPUT|TEXTAREA/.test(a.tagName) && !$('plStd').contains(a); };
   function plRemote() {
-    // 쓰는 중이면 손 뗀 뒤에 다시 그림
-    if ($('vPlan').contains(document.activeElement) && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) { plPending = true; return; }
-    renderPlan();
+    // 쓰는 중이면 화면은 그대로 두고 데이터만 새것으로 (지금 쓰는 칸만 내 값) → 손 떼면 다시 그림
+    if (plTyping()) {
+      const a = document.activeElement, fresh = JSON.parse(JSON.stringify(plGet()));
+      if (a.id === 'plNotes') fresh.notes = a.value;
+      else if (a.type === 'time' && a.dataset.f) fresh.days[+a.dataset.i][a.dataset.f] = isT(a.value) ? a.value : '';
+      else if (a.classList.contains('pTx') && !a.dataset.add) { const it = fresh.days[+a.dataset.i].items; while (it.length <= +a.dataset.j) it.push({ t: '', d: false }); it[+a.dataset.j].t = a.value; }
+      plW = fresh; plPending = true; renderPlSum(); return;
+    }
+    plPending = false; renderPlan();
   }
+  $('vPlan').addEventListener('focusout', () => setTimeout(() => { if (plPending && !plTyping()) { plPending = false; renderPlan(); } }, 50));
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && plPending && view === 'plan') { plPending = false; renderPlan(); } });
   function renderPlan() {
     plW = JSON.parse(JSON.stringify(plGet()));
     const th = plDay(3), first = plMonday(new Date(th.getFullYear(), th.getMonth(), 1));
@@ -918,16 +928,17 @@
     window.M.syncRanges();
     $('avatar').textContent = ((session && session.username) || '?').slice(0, 1).toUpperCase();
     const GROUPS = [['기본 스킨', ['lav']], ['컬러 스킨', ['pink', 'cotton', 'blue', 'midnight']], ['디자인 스킨', ['peach', 'forest', 'honey', 'sky', 'aurora']],
-      ['페이퍼 스킨', ['office', 'sage', 'berry']], ['말랑 스킨', ['draw']], ['시즌 스킨', ['halloween', 'xmas', 'ghalloween', 'gxmas']]];
+      ['페이퍼 스킨', ['office', 'sage', 'berry']], ['말랑 스킨', ['draw']], ['시즌 스킨', ['halloween', 'xmas', 'ghalloween', 'gxmas']], ['베타 스킨', ['retro', 'excel']]];
     const listed = new Set(GROUPS.flatMap((g) => g[1]));
     GROUPS[1][1] = GROUPS[1][1].concat(Object.keys(SKINS).filter((id) => !listed.has(id)));
-    const visible = (id) => SKINS[id] && (!SKINS[id].season || window.M.SEASONS_ON || prefs.skin === id);
+    const openSk = (st.shared && st.shared.openSkins) || [];
+    const visible = (id) => SKINS[id] && (SKINS[id].beta ? (openSk.includes(id) || !!(st.shared && st.shared.admin) || prefs.skin === id) : (!SKINS[id].season || window.M.SEASONS_ON || prefs.skin === id));
     const btn = (id) => {
       const k = SKINS[id];
       return '<button class="skin' + (prefs.skin === id ? ' on' : '') + '" type="button" data-skin="' + id + '" aria-pressed="' + (prefs.skin === id) + '" style="--sc:' + k.a1 + '">' +
-        (k.bunny ? '<span class="sw swDraw' + (k.deco || k.glassSeason ? ' swDeco' : '') + '" style="background:' + (k.season || k.deco ? k.b[0] : '') + '"><img src="' + k.bunny + '" alt=""></span>'
+        (k.bunny ? '<span class="sw swDraw' + (k.deco || k.glassSeason ? ' swDeco' : '') + '" style="background:' + (k.season || k.deco || k.beta ? k.b[0] : '') + '"><img src="' + k.bunny + '" alt=""></span>'
           : '<span class="sw" style="background:linear-gradient(135deg,' + k.b[0] + ',' + k.b[2] + ')"><b style="background:linear-gradient(135deg,' + k.a1 + ',' + k.a2 + ')"></b></span>') +
-        '<span class="sn">' + k.name + '</span></button>';
+        '<span class="sn">' + k.name + (k.beta && !openSk.includes(id) ? ' <em class="sbeta">베타</em>' : '') + '</span></button>';
     };
     $('skins').innerHTML = '<div class="skg">' + GROUPS.flatMap((g) => g[1]).filter(visible).map(btn).join('') + '</div>';
     $('fonts').innerHTML = FONTS.map((f) =>

@@ -17,6 +17,7 @@
 
   function art() {
     const sk = skin(), draw = !!(sk.draw || sk.paper);
+    if (sk.look) { $('art').className = 'art gx'; $('art').innerHTML = '<img class="xb" src="' + sk.bunny + '" alt="" draggable="false">'; return; }   // 베타 스킨: 스킨 말랑이 그림 하나
     $('art').className = 'art ' + (draw ? 'gd' : 'g3');
     $('art').innerHTML = draw
       ? ['ring', 'clock', 'excl', 'bunny', 'lines'].map((n) => '<img class="' + n + '" src="alarm/almd-' + n + '.png" alt="" draggable="false">').join('')
@@ -32,7 +33,9 @@
   function deco() {
     const sk = skin(), id = S.settings.skin;
     let h = '';
-    if (sk.deco === 'forest') h = im('leaf-top.svg', 'right:-44px;bottom:-40px;width:120px;transform:scaleY(-1)', 'sw') + im('leaf-bot.svg', 'left:-58px;bottom:-48px;width:118px');
+    if (sk.look === 'retro') h = im('skin/rt-sparkle.png', 'left:-16px;bottom:30px;width:30px;image-rendering:pixelated', 'sw') + im('skin/rt-star.png', 'right:-10px;bottom:-14px;width:30px;image-rendering:pixelated') + im('skin/rt-heart.png', 'right:24px;bottom:-12px;width:22px;image-rendering:pixelated');
+    else if (sk.look === 'excel') h = im('skin/xl-bar.png', 'left:-16px;bottom:-14px;width:38px;transform:rotate(-8deg)', 'sw') + im('skin/xl-line.png', 'right:-10px;bottom:-12px;width:38px;transform:rotate(6deg)');
+    else if (sk.deco === 'forest') h = im('leaf-top.svg', 'right:-44px;bottom:-40px;width:120px;transform:scaleY(-1)', 'sw') + im('leaf-bot.svg', 'left:-58px;bottom:-48px;width:118px');
     else if (sk.deco === 'peach') h = im('peach-fruit.png', 'left:112px;top:-34px;width:58px;transform:rotate(-8deg)', 'sw') + im('blossom-pink.png', 'left:168px;top:-12px;width:24px') + im('blossom-white.png', 'right:-12px;bottom:-12px;width:28px', 'sw') + im('blossom-pink.png', 'left:-12px;bottom:26px;width:24px');
     else if (sk.deco === 'lemon') h = im('lemon-slice.png', 'left:112px;top:-34px;width:58px;transform:rotate(-12deg)', 'sw') + im('daisy-white.png', 'left:168px;top:-12px;width:26px') + im('daisy-white.png', 'left:-14px;bottom:24px;width:28px', 'sw') + im('lemon-slice.png', 'right:-10px;bottom:-12px;width:30px');
     else if (sk.deco === 'sky') h = im('sky-cloud.svg', 'left:104px;top:-26px;width:80px', 'sw') + im('sky-cloud.svg', 'left:-28px;top:120px;width:64px') + im('sky-cloud.svg', 'right:60px;bottom:-22px;width:58px');

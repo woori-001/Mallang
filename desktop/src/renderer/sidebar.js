@@ -833,17 +833,17 @@
     const openSk = S.openSkins || [];
     // 스킨은 분류별로 묶어서 (계절 스킨은 공개됐거나 관리자이거나 지금 쓰는 중일 때만)
     const GROUPS = [['기본 스킨', ['lav']], ['컬러 스킨', ['pink', 'cotton', 'blue', 'midnight']], ['디자인 스킨', ['peach', 'forest', 'honey', 'sky', 'aurora']],
-      ['페이퍼 스킨', ['office', 'sage', 'berry']], ['말랑 스킨', ['draw']], ['시즌 스킨', ['halloween', 'xmas', 'ghalloween', 'gxmas']]];
+      ['페이퍼 스킨', ['office', 'sage', 'berry']], ['말랑 스킨', ['draw']], ['시즌 스킨', ['halloween', 'xmas', 'ghalloween', 'gxmas']], ['베타 스킨', ['retro', 'excel']]];
     const listed = new Set(GROUPS.flatMap((g) => g[1]));
     const rest = Object.keys(SKINS).filter((id) => !listed.has(id));
     if (rest.length) GROUPS[1][1] = GROUPS[1][1].concat(rest);   // 혹시 빠진 스킨은 컬러 스킨에
-    const visible = (id) => SKINS[id] && (!SKINS[id].season || openSk.includes(id) || S.isAdmin || s.skin === id);
+    const visible = (id) => SKINS[id] && (!(SKINS[id].season || SKINS[id].beta) || openSk.includes(id) || S.isAdmin || s.skin === id);
     const btn = (id) => {
       const k = SKINS[id];
       return '<button class="skin' + (s.skin === id ? ' on' : '') + '" type="button" data-skin="' + id + '" aria-pressed="' + (s.skin === id) + '" title="' + esc(k.name) + '" style="--sc:' + k.a1 + '">' +
-        (k.bunny ? '<span class="sw swDraw' + (k.deco || k.glassSeason ? ' swDeco' : '') + '" style="background:' + (k.season || k.deco ? k.b[0] : '') + '"><img src="' + k.bunny + '" alt="" draggable="false"></span>'
+        (k.bunny ? '<span class="sw swDraw' + (k.deco || k.glassSeason ? ' swDeco' : '') + '" style="background:' + (k.season || k.deco || k.beta ? k.b[0] : '') + '"><img src="' + k.bunny + '" alt="" draggable="false"></span>'
           : '<span class="sw" style="background:linear-gradient(135deg,' + k.b[0] + ',' + k.b[2] + ')"><b style="background:linear-gradient(135deg,' + k.a1 + ',' + k.a2 + ')"></b></span>') +
-        '<span class="sn">' + esc(k.name) + (k.season && !openSk.includes(id) ? '<em class="sbeta">베타</em>' : '') + '</span></button>';
+        '<span class="sn">' + esc(k.name) + ((k.season || k.beta) && !openSk.includes(id) ? '<em class="sbeta">베타</em>' : '') + '</span></button>';
     };
     // 분류 순서대로 아이콘만 이어서 (분류 제목 없이 짧게)
     $('skins').innerHTML = '<div class="skg">' + GROUPS.flatMap((g) => g[1]).filter(visible).map(btn).join('') + '</div>';
@@ -956,7 +956,7 @@
     $('skAdmin').hidden = !S.isAdmin;
     if (!S.isAdmin) return;
     const openSk = S.openSkins || [];
-    const items = Object.keys(SKINS).filter((id) => SKINS[id].season).map((id) => [id, SKINS[id].name]);
+    const items = Object.keys(SKINS).filter((id) => SKINS[id].season || SKINS[id].beta).map((id) => [id, SKINS[id].name]);
     $('skList').innerHTML = items.map(([id, name]) => {
       const on = openSk.includes(id);
       return '<div class="skRow"><span class="skName">' + esc(name) + '</span><span class="skState' + (on ? ' on' : '') + '">' + (on ? '모두 공개 중' : '나만 보기 (베타)') + '</span>' +

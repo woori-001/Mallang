@@ -478,12 +478,34 @@
   });
   // 다른 PC에서 고친 내용이 들어오면 다시 그림 (지금 쓰는 중이면 손 뗀 뒤에)
   let reloadT = 0;
-  function remoteReload() {
+  // 다른 기기에서 바뀐 내용 받기
+  // 예전엔 칸에 커서가 남아 있으면(다른 창으로 넘어가도) 영영 안 바뀌고, 그 상태로 고치면 옛 내용으로 덮어썼음
+  const typingEl = () => { const a = document.activeElement; return document.hasFocus() && a && /INPUT|TEXTAREA/.test(a.tagName) && !pop.contains(a) ? a : null; };
+  async function remoteReload() {
     clearTimeout(reloadT);
-    const busy = saveT || placing || !pop.hidden || (document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName));
-    if (busy) { reloadT = setTimeout(remoteReload, 2000); return; }
-    const y = sheet.scrollTop; load().then(() => { sheet.scrollTop = y; });
+    if (placing || !pop.hidden) { reloadT = setTimeout(remoteReload, 2000); return; }
+    const a = typingEl();
+    if (!a) {
+      const old = document.activeElement;
+      if (old && /INPUT|TEXTAREA/.test(old.tagName)) old.blur();
+      if (saveT) flush();
+      const y = sheet.scrollTop; await load(); sheet.scrollTop = y;
+      return;
+    }
+    // 쓰는 중: 화면은 그대로, 데이터만 새것으로 바꾸고 지금 쓰는 칸만 내 값으로 → 손 떼면 다시 그림
+    const r = await api.plannerGet(keyOf());
+    if (!r) return;
+    std = { in: '09:00', out: '18:00', alpha: null, ...(r.std || {}) };
+    const f = r.week;
+    if (a.id === 'notes') f.notes = a.value;
+    else if (a.closest('#times') && a.dataset.f) { const tm = a.closest('.tm'); f.days[+tm.dataset.i][a.dataset.f] = normT(a.value) || (a.value.trim() ? f.days[+tm.dataset.i][a.dataset.f] : ''); }
+    else if (a.closest('.it')) { const row = a.closest('.it'), i = +row.closest('.ls').dataset.i, j = +row.dataset.j, it = f.days[i].items; while (it.length <= j) it.push({ t: '', d: false }); it[j].t = a.value; }
+    W = f;
+    document.querySelectorAll('#times .tm').forEach((tm) => tm.querySelectorAll('.ot').forEach((x) => { x.innerHTML = otChip(+tm.dataset.i, x.dataset.ot); }));
+    renderSum();
+    a.addEventListener('blur', () => setTimeout(() => { if (!typingEl()) remoteReload(); }, 60), { once: true });
   }
+  window.addEventListener('blur', () => { if (reloadT) remoteReload(); });
   api.onCmd((c) => { if (c.type === 'plReload') remoteReload(); });
   api.onCmd((c) => { if (c.type === 'leave') { if (saveT) flush(); closePop(); stopPlace(); api.plannerShape(false); slider.classList.remove('in'); } });
   slider.addEventListener('transitionend', (e) => { if (e.target === slider && slider.classList.contains('in')) api.plannerShape(true); });
