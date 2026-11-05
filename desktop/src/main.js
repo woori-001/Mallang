@@ -64,7 +64,7 @@ function defaults() {
     widget: { x: null, y: null },
     calWidget: { x: null, y: null },
     planner: { weeks: {}, std: { in: '09:00', out: '18:00' } },   // 주간 플래너 (관리자 베타)
-    peopleWin: { x: null, y: null, w: 430, h: 380, top: false },
+    peopleWin: { x: null, y: null, w: 520, h: 400, top: false },
     deptWins: {},                       // 떼어 띄운 부서 창 { id: { g, x, y, w, h, top, folded } }
     peopleOrder: { groups: [], people: {} }   // 연락망: 내가 정한 부서·사람 순서 (이 기기에만)
   };
@@ -90,6 +90,16 @@ function load() {
     slot: 0, w: 260, h: 220, type: 'text', title: '', text: '', items: [], layer: 'normal', hidden: false, folded: false, ...m, deleting: false
   }));
   store.trash = Array.isArray(store.trash) ? store.trash.filter((t) => t && typeof t.id === 'number') : [];
+  // 연락망 창 가로 넓히기 (3.5.5, 한 번만): 부서 이름·대표번호가 한 줄에 다 보이게
+  if (!store.peopleWinV || store.peopleWinV < 2) {
+    store.peopleWinV = 2;
+    if (!store.peopleWin.w || store.peopleWin.w < 520) {
+      const grow = 520 - (store.peopleWin.w || 430);
+      store.peopleWin.w = 520;
+      if (store.peopleWin.x != null && store.peopleWin.x - grow >= 0) store.peopleWin.x -= grow;   // 오른쪽 끝은 그대로, 왼쪽으로 늘림
+    }
+    for (const k of Object.keys(store.deptWins || {})) if ((store.deptWins[k].w || 300) < 340) store.deptWins[k].w = 340;
+  }
   store.alarms = Array.isArray(store.alarms) ? store.alarms.map(cleanAlarm).filter(Boolean) : [];
   store.alarmSnooze = Array.isArray(store.alarmSnooze) ? store.alarmSnooze.filter((z) => z && typeof z.at === 'number') : [];
   // 주간 플래너 동기화 표시: 처음엔 이 PC에 있던 주를 서버 것과 합친 뒤 올림
@@ -1298,7 +1308,7 @@ function cleanOrder(o) {
 }
 function peopleBounds(id) {
   const p = pwState(id) || store.peopleWin, wa = workArea(), dept = id && id !== 'main';
-  const dw = dept ? 300 : 430, dh = dept ? 260 : 380;
+  const dw = dept ? 340 : 520, dh = dept ? 260 : 400;
   const w = p.folded ? FOLD_W : Math.max(PEOPLE_MIN_W, p.w || dw), h = p.folded ? FOLD_H : Math.max(PEOPLE_MIN_H, p.h || dh);
   const x = p.x != null ? p.x : wa.x + wa.width - Math.max(PEOPLE_MIN_W, p.w || dw) - 430;
   const y = p.y != null ? p.y : wa.y + 90;
@@ -1342,7 +1352,7 @@ ipcMain.on('people:detach', (e, g, sx, sy) => {
   if (!id) {
     id = 'd' + Date.now().toString(36);
     const n = Object.keys(store.deptWins).length, wa = workArea();
-    store.deptWins[id] = { g, x: at ? at.x : wa.x + wa.width - 300 - 460 - n * 24, y: at ? at.y : wa.y + 120 + n * 24, w: 300, h: 260, top: false, folded: false };
+    store.deptWins[id] = { g, x: at ? at.x : wa.x + wa.width - 340 - 540 - n * 24, y: at ? at.y : wa.y + 120 + n * 24, w: 340, h: 260, top: false, folded: false };
     save(); broadcast();
   } else if (at) {
     store.deptWins[id].x = at.x; store.deptWins[id].y = at.y; save();
