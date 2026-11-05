@@ -111,8 +111,8 @@
     },
     excel: {
       name: '말랑 엑셀', paper: true, beta: true, look: 'excel', bunny: 'skin/xl-bun.png', logo: 'skin/xl-logo.png', paperBg: '#FFFDF9',
-      base: '#F3F6EF', b: ['#E4EFDD', '#F1F6EC', '#DCEAD3', '#F7FAF3'],
-      a1: '#4F9A5C', a2: '#8CC48F', ink: '#4A3A37', sub: '#8A7C78', sun: '#D9546E', sat: '#4A78C9', glow: 'rgba(79,154,92,0.22)', on: '#FFFFFF',
+      base: '#F5F6F5', b: ['#E3F1E8', '#F3F3F3', '#D9EFE1', '#FAFAFA'],
+      a1: '#217346', a2: '#6FB58A', ink: '#3A3533', sub: '#6E6A68', sun: '#D9546E', sat: '#3B6FC4', glow: 'rgba(33,115,70,0.20)', on: '#FFFFFF',
       pal: [[[255, 255, 255], [255, 255, 255]], [[255, 244, 247], [255, 244, 247]], [[255, 250, 230], [255, 250, 230]], [[240, 248, 236], [240, 248, 236]], [[240, 245, 255], [240, 245, 255]]]
     },
     midnight: {

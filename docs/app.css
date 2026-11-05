@@ -569,10 +569,10 @@ html.sk-retro .editor .edTop .edTitle { color: #fff; }
 html.sk-retro .editor .edTop .iconBtn { color: var(--rt-ink); }
 
 html.sk-excel {
-  --xl-ink: #6B514D; --xl-g: #4F9A5C; --xl-g2: #8CC48F; --xl-gl: #EAF5E3; --xl-line: #DCE9D5; --xl-hd: #EEF3EA; --xl-paper: #FFFDF9;
+  --xl-ink: #6B514D; --xl-g: #217346; --xl-g2: #6FB58A; --xl-gl: #D9EFE1; --xl-line: #E1E1E1; --xl-hd: #F3F3F3; --xl-paper: #FFFDF9;
   --paper-line: rgba(107, 81, 77, .2); --paper-dot: rgba(79, 154, 92, .4);
 }
-html.sk-excel body { background: linear-gradient(var(--xl-line) 1px, transparent 1px) 0 0 / 100% 26px, linear-gradient(90deg, var(--xl-line) 1px, transparent 1px) 0 0 / 96px 100%, #F8FBF4; }
+html.sk-excel body { background: linear-gradient(var(--xl-line) 1px, transparent 1px) 0 0 / 100% 26px, linear-gradient(90deg, var(--xl-line) 1px, transparent 1px) 0 0 / 96px 100%, #FFFFFF; }
 html.sk-excel .brand img { height: 40px; filter: none; }
 html.sk-excel .memo { border-radius: 14px; padding: 0 0 12px; overflow: hidden; border: 2.5px solid var(--xl-ink); box-shadow: 0 3px 8px rgba(80, 110, 70, .1); }
 html.sk-excel .memo .mTitle { padding: 10px 16px 9px; background: var(--xl-gl); border-bottom: 2px solid var(--xl-ink); }
@@ -599,7 +599,7 @@ html.sk-excel .pDay.today .pdH { background: var(--xl-gl); }
 html.sk-excel .pdTimes { padding: 6px 12px 8px; border-bottom: 1px solid var(--xl-line); }
 html.sk-excel .pItems { padding: 0; counter-reset: xlit; }
 html.sk-excel .pIt { counter-increment: xlit; border-bottom: 1px solid var(--xl-line); padding-right: 10px; min-height: 38px; }
-html.sk-excel .pIt::before { content: counter(xlit); flex: none; width: 26px; align-self: stretch; display: grid; place-items: center; background: var(--xl-hd); border-right: 1px solid var(--xl-line); color: #A99C98; font: 600 10.5px 'IBM Plex Sans KR', sans-serif; }
+html.sk-excel .pIt::before { content: counter(xlit); flex: none; width: 26px; align-self: stretch; display: grid; place-items: center; background: var(--xl-hd); border-right: 1px solid var(--xl-line); color: #5F5F5F; font: 600 10.5px 'IBM Plex Sans KR', sans-serif; }
 html.sk-excel .pIt:focus-within { box-shadow: inset 0 0 0 2px var(--xl-g); }
 html.sk-excel .pCb { border-radius: 4px; border-color: var(--xl-g2); }
 html.sk-excel .pIt.done .pCb { background: var(--xl-g); border-color: var(--xl-g); }
