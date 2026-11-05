@@ -257,10 +257,22 @@
       const gi = listEl.querySelector('.gname-in');
       if (gi && document.activeElement !== gi) { gi.focus(); gi.select(); }
     }
+    xlFill();
     const hidden = S.memos.filter((m) => m.hidden).length;
     const folded = S.memos.filter((m) => m.folded).length;
     $('mFoot').textContent = '전체 ' + S.memos.length + '개 · 접힘 ' + folded + '개 · 숨김 ' + hidden + '개';
   }
+  // 말랑 엑셀 스킨: 목록 아래 빈 곳도 엑셀 시트처럼 (열 머리 A B C + 빈 줄과 줄 번호로 끝까지 채움)
+  function xlFill() {
+    const el = $('list');
+    el.querySelectorAll(':scope > .xlf, :scope > .xlh').forEach((x) => x.remove());
+    if (!document.documentElement.classList.contains('sk-excel') || trashMode) return;
+    el.insertAdjacentHTML('afterbegin', '<div class="xlh" aria-hidden="true"><i></i><b>A</b><b>B</b><b>C</b></div>');
+    const last = el.lastElementChild, used = last ? last.getBoundingClientRect().bottom - el.getBoundingClientRect().top + el.scrollTop : 0;
+    const rh = 38, n = Math.max(1, Math.floor((el.clientHeight - used) / rh));
+    el.insertAdjacentHTML('beforeend', '<div class="xlf" aria-hidden="true"></div>'.repeat(n));
+  }
+  window.addEventListener('resize', () => { clearTimeout(xlFill.t); xlFill.t = setTimeout(xlFill, 120); });
   // ───────── 휴지통 ─────────
   let trashMode = false;
   const DAY = 24 * 60 * 60 * 1000;
