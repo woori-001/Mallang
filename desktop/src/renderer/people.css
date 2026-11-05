@@ -67,3 +67,4 @@ html.customR .card { border-radius: var(--memo-r) !important; }
 html.customR .card.folded { border-radius: var(--memo-rf) !important; }
 html.customR .card .head { border-top-left-radius: var(--memo-r) !important; border-top-right-radius: var(--memo-r) !important; }
 html.customR .card.folded .head { border-radius: var(--memo-rf) !important; }
+#head .search[hidden] { display: none; }

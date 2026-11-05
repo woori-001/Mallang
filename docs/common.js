@@ -752,6 +752,19 @@
     el.classList.add('gv');
     const findCol = (head, re, dflt) => { const i = head.findIndex((h) => re.test(h)); return i >= 0 ? i : dflt; };
     const isMain = (name) => /^(대표|대표번호|팀\s*대표)$/.test(String(name).trim());
+    // 내가 정한 순서 (부서 · 부서 안 사람) — 연락망 내용은 그대로, 보이는 순서만
+    let ordering = false, curGroups = [];
+    const pKey = (r, N, X) => String(r[N] || '').trim() + '|' + String(r[X] || '').trim();
+    const ord = () => (opts.order && opts.order()) || { groups: [], people: {} };
+    const rank = (list, key) => { const i = list.indexOf(key); return i < 0 ? 1e6 : i; };
+    function sortBy(arr, list, keyOf) { return arr.map((x, i) => [x, i]).sort((a, b) => (rank(list, keyOf(a[0])) - rank(list, keyOf(b[0]))) || (a[1] - b[1])).map((x) => x[0]); }
+    function saveOrder(groups) {
+      const o = { groups: groups.map((g) => g.name), people: { ...(ord().people || {}) } };
+      for (const g of groups) o.people[g.name] = g.people.map((it) => it.key);
+      if (opts.onOrder) opts.onOrder(o);
+    }
+    const ARW = (d) => '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="' + (d < 0 ? 'M6 15l6-6 6 6' : 'M6 9l6 6 6-6') + '"/></svg>';
+    const DETACH = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="13" height="13" rx="2.5"/><path d="M10 3h11v11M21 3l-9 9"/></svg>';
     function render() {
       if (!rows) return;
       const head = rows[0] || [];
@@ -763,37 +776,49 @@
       rows.slice(1).forEach((r, k) => {
         if (!r.some((c) => String(c).trim())) return;
         const g = String(r[D] || '').trim() || '기타';
+        if (opts.only && g !== opts.only) return;
         if (!byName.has(g)) { const o = { name: g, main: [], people: [] }; byName.set(g, o); groups.push(o); }
-        const item = { r, k: k + 1 };
+        const item = { r, k: k + 1, key: pKey(r, N, X) };
         (isMain(r[N]) ? byName.get(g).main : byName.get(g).people).push(item);
       });
+      const O = ord();
+      const sorted = sortBy(groups, O.groups || [], (g) => g.name);
+      for (const g of sorted) g.people = sortBy(g.people, (O.people && O.people[g.name]) || [], (it) => it.key);
+      groups.length = 0; groups.push(...sorted);
+      curGroups = groups;
+      el.classList.toggle('ordering', ordering);
       const q = query;
       let html = '', shown = 0;
-      for (const g of groups) {
+      groups.forEach((g, gi) => {
         const gHit = q && rowMatches([g.name], q);
         const people = q && !gHit ? g.people.filter((it) => rowMatches(it.r, q)) : g.people;
         const mains = q && !gHit ? g.main.filter((it) => rowMatches(it.r, q)) : g.main;
-        if (q && !people.length && !mains.length) continue;
+        if (q && !people.length && !mains.length) return;
         shown += people.length + mains.length;
-        const isClosed = !q && closed[g.name];
+        const isClosed = !q && !ordering && closed[g.name] && !opts.only;
         // 부서 줄: [접기 · 부서 이름 · 인원] [대표번호]
-        html += '<section class="gvSec' + (isClosed ? ' closed' : '') + (people.length ? '' : ' solo') + '">' +
-          '<div class="gvHead"><button type="button" class="gvTog" data-g="' + esc(g.name) + '" aria-expanded="' + !isClosed + '"' + (people.length ? '' : ' tabindex="-1"') + '>' +
+        const ob = (cls, d, dis, extra) => '<button type="button" class="gvOrd ' + cls + '"' + extra + (dis ? ' disabled' : '') + ' title="' + (d < 0 ? '위로' : '아래로') + '">' + ARW(d) + '</button>';
+        html += '<section class="gvSec' + (isClosed ? ' closed' : '') + (people.length ? '' : ' solo') + '" data-gi="' + gi + '"' + (ordering && !opts.only ? ' draggable="true"' : '') + '>' +
+          '<div class="gvHead">' + (ordering && !opts.only ? '<span class="gvOrdBox">' + ob('gUp', -1, gi === 0, ' data-gi="' + gi + '"') + ob('gDn', 1, gi === groups.length - 1, ' data-gi="' + gi + '"') + '</span>' : '') + '<button type="button" class="gvTog" data-g="' + esc(g.name) + '" aria-expanded="' + !isClosed + '"' + (people.length ? '' : ' tabindex="-1"') + '>' +
             '<span class="gvIco" aria-hidden="true">' + deptIcon() + '</span>' +
             (people.length ? '<span class="gvChev" aria-hidden="true">' + ICONS.chev + '</span>' : '') +
             '<b>' + (q ? hl(g.name, q) : esc(g.name)) + '</b>' +
             (g.people.length ? '<span class="gvCnt">' + g.people.length + '명</span>' : '') + '</button>' +
           mains.map((it) => '<button type="button" class="gvMain" data-v="' + esc(it.r[X] || '') + '" data-k="' + it.k + '" title="대표번호 · 눌러서 복사">' +
-            '<span>대표</span><b>' + hl(it.r[X] || '', q) + '</b></button>').join('') + '</div>' +
-          (people.length ? '<div class="gvGrid">' + people.map((it) => {
+            '<span>대표</span><b>' + hl(it.r[X] || '', q) + '</b></button>').join('') +
+          (opts.onDetach && !opts.only && !q ? '<button type="button" class="gvDetach" data-g="' + esc(g.name) + '" title="이 부서만 바탕화면에 띄우기">' + DETACH + '</button>' : '') + '</div>' +
+          (people.length ? '<div class="gvGrid">' + people.map((it, pi) => {
             const ex = extra.map((i) => String(it.r[i] || '').trim()).filter(Boolean).join(' · ');
             const vacant = /^(공석|빈자리|-)$/.test(String(it.r[N] || '').trim());
+            if (ordering) return '<div class="gvItem ordItem" draggable="true" data-gi="' + gi + '" data-pi="' + pi + '"><span class="gvName">' + esc(it.r[N] || '') + '</span>' +
+              '<span class="gvOrdBox">' + ob('pUp', -1, pi === 0, ' data-gi="' + gi + '" data-pi="' + pi + '"') + ob('pDn', 1, pi === people.length - 1, ' data-gi="' + gi + '" data-pi="' + pi + '"') + '</span></div>';
             return '<button type="button" class="gvItem' + (vacant ? ' vacant' : '') + '" data-v="' + esc(it.r[X] || '') + '" data-k="' + it.k + '" title="눌러서 복사">' +
               '<span class="gvName">' + hl(it.r[N] || '', q) + (ex ? '<i>' + hl(ex, q) + '</i>' : '') + '</span>' +
               '<span class="gvExt">' + hl(it.r[X] || '', q) + '</span></button>';
           }).join('') + '</div>' : '') + '</section>';
-      }
-      if (!groups.length) html = '<div class="gvEmpty">아직 연락망이 없어요.<br>편집을 눌러 넣거나, 엑셀에서 복사해 붙여넣어 보세요.</div>';
+      });
+      if (opts.only && !groups.length) html = '<div class="gvEmpty">‘' + esc(opts.only) + '’ 부서가 연락망에 없어요</div>';
+      else if (!groups.length) html = '<div class="gvEmpty">아직 연락망이 없어요.<br>편집을 눌러 넣거나, 엑셀에서 복사해 붙여넣어 보세요.</div>';
       else if (!shown && q) html = '<div class="gvEmpty">찾는 사람이 없어요</div>';
       el.innerHTML = html;
     }
@@ -810,7 +835,44 @@
       while (j >= 0) { out += esc(t.slice(i, j)) + '<mark>' + esc(t.slice(j, j + n.length)) + '</mark>'; i = j + n.length; j = lt.indexOf(n, i); }
       return out + esc(t.slice(i));
     }
+    // 순서 바꾸기: ▲▼ 버튼 (휴대폰) + 끌어서 놓기 (PC)
+    function move(arr, from, to) { if (to < 0 || to >= arr.length || from === to) return false; const [x] = arr.splice(from, 1); arr.splice(to, 0, x); return true; }
+    let dragSrc = null;
+    el.addEventListener('dragstart', (e) => {
+      if (!ordering) return;
+      const it = e.target.closest('.ordItem'), sec = e.target.closest('.gvSec[draggable]');
+      dragSrc = it ? { gi: +it.dataset.gi, pi: +it.dataset.pi } : sec ? { gi: +sec.dataset.gi } : null;
+      if (dragSrc) { e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', 'x'); } catch (er) { /* 무시 */ } (it || sec).classList.add('dragging'); }
+      e.stopPropagation();
+    });
+    el.addEventListener('dragover', (e) => { if (dragSrc) e.preventDefault(); });
+    el.addEventListener('dragend', () => { dragSrc = null; el.querySelectorAll('.dragging').forEach((x) => x.classList.remove('dragging')); });
+    el.addEventListener('drop', (e) => {
+      if (!dragSrc) return;
+      e.preventDefault();
+      const src = dragSrc; dragSrc = null;
+      if (src.pi != null) {
+        const it = e.target.closest('.ordItem');
+        if (!it || +it.dataset.gi !== src.gi) return render();
+        if (move(curGroups[src.gi].people, src.pi, +it.dataset.pi)) saveOrder(curGroups);
+      } else {
+        const sec = e.target.closest('.gvSec');
+        if (!sec) return render();
+        if (move(curGroups, src.gi, +sec.dataset.gi)) saveOrder(curGroups);
+      }
+      render();
+    });
     el.addEventListener('click', (e) => {
+      const o = e.target.closest('.gvOrd');
+      if (o) {
+        const gi = +o.dataset.gi, d = o.classList.contains('gUp') || o.classList.contains('pUp') ? -1 : 1;
+        const ok = o.dataset.pi != null ? move(curGroups[gi].people, +o.dataset.pi, +o.dataset.pi + d) : move(curGroups, gi, gi + d);
+        if (ok) { saveOrder(curGroups); render(); }
+        return;
+      }
+      const dt = e.target.closest('.gvDetach');
+      if (dt) { if (opts.onDetach) opts.onDetach(dt.dataset.g); return; }
+      if (ordering) return;
       const h = e.target.closest('.gvTog');
       if (h) {
         if (query || h.closest('.solo')) return;
@@ -829,6 +891,8 @@
     return {
       setRows(r) { const j = JSON.stringify(r); if (j === JSON.stringify(rows)) return; rows = r ? r.map((x) => x.slice()) : null; render(); },
       filter(q) { query = String(q || '').trim(); render(); },
+      setOrdering(on) { ordering = !!on; render(); },
+      resetOrder() { if (opts.onOrder) opts.onOrder({ groups: [], people: {} }); setTimeout(render, 0); },
       render
     };
   }

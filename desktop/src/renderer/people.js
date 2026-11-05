@@ -6,14 +6,17 @@
   const card = $('card'), head = $('head'), q = $('q');
   window.M.fitShape(card);
   const P = 14, MIN_W = 260, MIN_H = 180;
-  let S = null, editing = false, dirty = false, timer = null, sentAt = 0;
+  let S = null, editing = false, dirty = false, timer = null, sentAt = 0, ordering = false, myOrder = null, orderJ = '';
+  // 떼어 띄운 부서 창이면 그 부서만
+  const DEPT = new URLSearchParams(location.search).get('dept');
+  const winSt = () => (S ? (DEPT ? (S.deptWins && S.deptWins[DEPT]) : S.peopleWin) : null) || {};
 
   $('hIcon').innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5a5.5 5.5 0 0 1 11 0"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6M17.5 14.2a5 5 0 0 1 3 5.3"/></svg>';
   $('sIcon').innerHTML = ICONS.search.replace('width="16" height="16"', 'width="14" height="14"');
   $('top').innerHTML = ICONS.pin.replace('width="17" height="17"', 'width="15" height="15"');
   $('close').innerHTML = ICONS.x;
   $('fold').innerHTML = ICONS.chev;
-  const folded = () => !!(S && S.peopleWin && S.peopleWin.folded);
+  const folded = () => !!winSt().folded;
   function toggleFold() {
     if (!S) return;
     flush();
@@ -21,7 +24,7 @@
     try { getSelection().removeAllRanges(); } catch (e) { /* 무시 */ }
     if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
     const on = !folded();
-    S.peopleWin = { ...S.peopleWin, folded: on };
+    if (DEPT) S.deptWins[DEPT] = { ...winSt(), folded: on }; else S.peopleWin = { ...S.peopleWin, folded: on };
     render();
     api.peopleFold(on);
   }
@@ -44,6 +47,10 @@
   // 보기: 부서별로 묶어서
   const gv = window.M.contactView($('gv'), {
     store: 'mallang.people.closed',
+    get only() { return DEPT ? (winSt().g || '\u0000') : null; },
+    order: () => myOrder,
+    onOrder: (o) => { myOrder = o; orderJ = JSON.stringify(o); api.peopleOrder(o); },
+    onDetach: DEPT ? null : (g) => { api.peopleDetach(g); toast('‘' + g + '’ 부서를 바탕화면에 띄웠어요'); },
     onPick: (v, row, el) => {
       api.copyText(v);
       el.classList.add('picked');
@@ -68,8 +75,20 @@
     if (on) setTimeout(() => tbl.focusFirst(), 30);
   }
   $('edit').addEventListener('click', () => setEdit(!editing));
-  $('top').addEventListener('click', () => api.peopleTop(!(S && S.peopleWin && S.peopleWin.top)));
-  $('close').addEventListener('click', () => { flush(); api.setSettings({ showPeople: false }); });
+  $('top').addEventListener('click', () => api.peopleTop(!winSt().top));
+  $('close').addEventListener('click', () => { flush(); if (DEPT) api.peopleCloseDept(); else api.setSettings({ showPeople: false }); });
+  function setOrdering(on) {
+    ordering = on;
+    if (on && editing) setEdit(false);
+    if (on && q.value) { q.value = ''; doFilter(); }
+    $('ord').textContent = on ? '완료' : '순서';
+    $('ord').classList.toggle('on', on);
+    $('ord').setAttribute('aria-pressed', String(on));
+    card.classList.toggle('ordering', on);
+    gv.setOrdering(on);
+    if (on) toast(DEPT ? '▲▼ 또는 끌어서 사람 순서를 바꿔요' : '▲▼ 또는 끌어서 부서·사람 순서를 바꿔요 (나에게만)');
+  }
+  $('ord').addEventListener('click', () => setOrdering(!ordering));
   const doFilter = () => { tbl.filter(q.value); gv.filter(q.value); };
   q.addEventListener('input', doFilter);
   q.addEventListener('keydown', (e) => { if (e.key === 'Escape') { q.value = ''; doFilter(); } });
@@ -88,12 +107,20 @@
     $('fold').querySelector('.chev').style.transform = f ? 'rotate(0deg)' : 'rotate(180deg)';
     $('fold').setAttribute('aria-label', f ? '펼치기' : '접기');
     $('fold').setAttribute('aria-expanded', String(!f));
-    const on = !!(S.peopleWin && S.peopleWin.top);
+    const on = !!winSt().top;
+    if (DEPT) {
+      const g = winSt().g || '';
+      document.querySelector('.htitle').textContent = g || '연락망';
+      $('edit').hidden = true;
+      document.querySelector('#head .search').hidden = true;
+    }
+    const oj = JSON.stringify(S.peopleOrder || null);
+    if (oj !== orderJ) { orderJ = oj; myOrder = S.peopleOrder || null; gv.render(); }
     $('top').classList.toggle('on', on);
     $('top').setAttribute('aria-pressed', String(on));
     if (!dirty && Date.now() - sentAt > 800) { tbl.setRows(S.contacts || null); tbl.filter(q.value); }
     if (!editing) gv.setRows(S.contacts || [window.M.CONTACT_HEAD]);
-    $('edit').hidden = S.canEditContacts === false && !editing;
+    if (!DEPT) $('edit').hidden = S.canEditContacts === false && !editing;
   }
 
   // 제목줄 끌어서 옮기기

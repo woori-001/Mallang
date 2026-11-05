@@ -64,7 +64,9 @@ function defaults() {
     widget: { x: null, y: null },
     calWidget: { x: null, y: null },
     planner: { weeks: {}, std: { in: '09:00', out: '18:00' } },   // 주간 플래너 (관리자 베타)
-    peopleWin: { x: null, y: null, w: 430, h: 380, top: false }
+    peopleWin: { x: null, y: null, w: 430, h: 380, top: false },
+    deptWins: {},                       // 떼어 띄운 부서 창 { id: { g, x, y, w, h, top, folded } }
+    peopleOrder: { groups: [], people: {} }   // 연락망: 내가 정한 부서·사람 순서 (이 기기에만)
   };
 }
 
@@ -82,7 +84,7 @@ function load() {
   }
   const d = defaults();
   store = s
-    ? { ...d, ...s, settings: { ...d.settings, ...(s.settings || {}) }, widget: { ...d.widget, ...(s.widget || {}) }, calWidget: { ...d.calWidget, ...(s.calWidget || {}) }, planner: { weeks: {}, std: { in: '09:00', out: '18:00' }, ...(s.planner || {}) }, peopleWin: { ...d.peopleWin, ...(s.peopleWin || {}) }, events: s.events || {} }
+    ? { ...d, ...s, settings: { ...d.settings, ...(s.settings || {}) }, widget: { ...d.widget, ...(s.widget || {}) }, calWidget: { ...d.calWidget, ...(s.calWidget || {}) }, planner: { weeks: {}, std: { in: '09:00', out: '18:00' }, ...(s.planner || {}) }, peopleWin: { ...d.peopleWin, ...(s.peopleWin || {}) }, deptWins: (s.deptWins && typeof s.deptWins === 'object') ? s.deptWins : {}, peopleOrder: cleanOrder(s.peopleOrder), events: s.events || {} }
     : d;
   store.memos = store.memos.filter((m) => m && typeof m.id === 'number').map((m) => ({
     slot: 0, w: 260, h: 220, type: 'text', title: '', text: '', items: [], layer: 'normal', hidden: false, folded: false, ...m, deleting: false
@@ -222,6 +224,8 @@ function snapshot() {
     groups: store.groups,
     openGroups: store.openGroups,
     peopleWin: store.peopleWin,
+    deptWins: store.deptWins,
+    peopleOrder: store.peopleOrder,
     trash: store.trash.map((t) => ({
       id: t.id, title: t.title, slot: t.slot, mark: t.mark, markColor: t.markColor, type: t.type,
       preview: t.type === 'table' ? ((t.table && t.table.rows) || []).slice(1).map((r) => r.filter(Boolean).join(' ')).find((x) => x.trim()) || '표' : t.type === 'check' ? (t.items || []).map((x) => x.t).filter(Boolean).slice(0, 3).join(', ') : (t.text || '').split('\n').find((l) => l.trim() && l !== '\u2E3B') || '',
@@ -413,7 +417,9 @@ function createHost() {
       } };
     }
     if (kind === 'people') {
-      return { action: 'allow', overrideBrowserWindowOptions: { ...baseWinOpts, ...peopleBounds(), alwaysOnTop: !!store.peopleWin.top } };
+      const id = u.searchParams.get('dept') || 'main', st = pwState(id);
+      if (!st) return { action: 'deny' };
+      return { action: 'allow', overrideBrowserWindowOptions: { ...baseWinOpts, ...peopleBounds(id), alwaysOnTop: !!st.top } };
     }
     return { action: 'deny' };
   });
@@ -425,7 +431,7 @@ function createHost() {
     if (kind === 'widget') setupWidget(win);
     if (kind === 'calw') setupCalW(win);
     if (kind === 'planner') setupPlanner(win);
-    if (kind === 'people') setupPeople(win);
+    if (kind === 'people') setupPeople(win, u.searchParams.get('dept') || 'main');
     if (kind === 'search') setupSearch(win);
     if (kind === 'clock') setupClock(win, u.searchParams.get('mode'));
     if (kind === 'alarm') setupAlarm(win);
@@ -725,7 +731,8 @@ function keepEdges(m, fromW, fromH, toW, toH) {
 }
 // 모두 접기: 지금 자리 그대로 접기만 (배치는 바꾸지 않음)
 function foldAll() {
-  if (peopleWin && !peopleWin.isDestroyed()) setPeopleFolded(true);
+  if (peopleWin && !peopleWin.isDestroyed()) setPeopleFolded('main', true);
+  for (const id of deptWinMap.keys()) setPeopleFolded(id, true);
   const list = store.memos.filter((m) => !m.hidden && !m.deleting && !m.folded);
   if (!list.length) return;
   for (const m of list) { foldMove(m, true); m.folded = true; }
@@ -743,7 +750,8 @@ function foldAll() {
 }
 
 function unfoldAll() {
-  if (peopleWin && !peopleWin.isDestroyed()) setPeopleFolded(false);
+  if (peopleWin && !peopleWin.isDestroyed()) setPeopleFolded('main', false);
+  for (const id of deptWinMap.keys()) setPeopleFolded(id, false);
   const list = store.memos.filter((m) => m.folded && !m.hidden && !m.deleting);
   for (const m of list) {
     if (m.ox == null) foldMove(m, false);
@@ -1248,11 +1256,24 @@ ipcMain.on('search:open', (e, id, q) => {
 });
 
 // ───────────────────────── 연락망 띄우기 ─────────────────────────
-const PEOPLE_MIN_W = 260, PEOPLE_MIN_H = 180;
-function peopleBounds() {
-  const p = store.peopleWin, wa = workArea();
-  const w = p.folded ? FOLD_W : Math.max(PEOPLE_MIN_W, p.w || 430), h = p.folded ? FOLD_H : Math.max(PEOPLE_MIN_H, p.h || 380);
-  const x = p.x != null ? p.x : wa.x + wa.width - Math.max(PEOPLE_MIN_W, p.w || 430) - 430;
+const PEOPLE_MIN_W = 220, PEOPLE_MIN_H = 120;
+const deptWinMap = new Map();   // 떼어 띄운 부서 창
+function pwState(id) { return !id || id === 'main' ? store.peopleWin : store.deptWins[id]; }
+function pwWin(id) { return !id || id === 'main' ? peopleWin : deptWinMap.get(id); }
+function pwId(e) { const w = BrowserWindow.fromWebContents(e.sender); if (!w) return null; if (w === peopleWin) return 'main'; for (const [k, v] of deptWinMap) if (v === w) return k; return null; }
+function cleanOrder(o) {
+  const str = (v) => String(v == null ? '' : v).slice(0, 80);
+  const out = { groups: [], people: {} };
+  if (!o || typeof o !== 'object') return out;
+  if (Array.isArray(o.groups)) out.groups = o.groups.slice(0, 200).map(str);
+  if (o.people && typeof o.people === 'object') for (const [g, arr] of Object.entries(o.people).slice(0, 200)) if (Array.isArray(arr)) out.people[str(g)] = arr.slice(0, 300).map(str);
+  return out;
+}
+function peopleBounds(id) {
+  const p = pwState(id) || store.peopleWin, wa = workArea(), dept = id && id !== 'main';
+  const dw = dept ? 300 : 430, dh = dept ? 260 : 380;
+  const w = p.folded ? FOLD_W : Math.max(PEOPLE_MIN_W, p.w || dw), h = p.folded ? FOLD_H : Math.max(PEOPLE_MIN_H, p.h || dh);
+  const x = p.x != null ? p.x : wa.x + wa.width - Math.max(PEOPLE_MIN_W, p.w || dw) - 430;
   const y = p.y != null ? p.y : wa.y + 90;
   return { x: Math.round(x - P), y: Math.round(y - P), width: w + 2 * P, height: h + 2 * P };
 }
@@ -1260,10 +1281,16 @@ function openPeople() {
   if (peopleWin && !peopleWin.isDestroyed()) { peopleWin.show(); peopleWin.focus(); return; }
   hostOpen('people.html?kind=people', 'people-' + Date.now());
 }
-function setupPeople(win) {
-  peopleWin = win;
+function openDept(id) {
+  const w = deptWinMap.get(id);
+  if (w && !w.isDestroyed()) { w.show(); w.focus(); return; }
+  hostOpen('people.html?kind=people&dept=' + encodeURIComponent(id), 'dept-' + id + '-' + Date.now());
+}
+function setupPeople(win, id) {
+  if (id === 'main') peopleWin = win; else deptWinMap.set(id, win);
   win.once('ready-to-show', () => { if (!win.isDestroyed()) win.show(); });
   win.on('closed', () => {
+    if (id !== 'main') { if (deptWinMap.get(id) === win) deptWinMap.delete(id); return; }
     if (peopleWin === win) peopleWin = null;
     if (!win.__intentional && !quitting && store.settings.showPeople) {
       store.settings.showPeople = false; save(); broadcast(); buildTrayMenu();
@@ -1278,38 +1305,64 @@ function closePeople() {
   w.webContents.send('cmd', { type: 'leave' });
   setTimeout(() => { if (!w.isDestroyed()) w.close(); }, 330);
 }
+// 부서 떼어 띄우기 · 닫기
+ipcMain.on('people:detach', (e, g) => {
+  g = String(g || '').trim().slice(0, 80);
+  if (!g) return;
+  let id = Object.keys(store.deptWins).find((k) => store.deptWins[k].g === g);
+  if (!id) {
+    id = 'd' + Date.now().toString(36);
+    const n = Object.keys(store.deptWins).length, wa = workArea();
+    store.deptWins[id] = { g, x: wa.x + wa.width - 300 - 460 - n * 24, y: wa.y + 120 + n * 24, w: 300, h: 260, top: false, folded: false };
+    save(); broadcast();
+  }
+  openDept(id);
+});
+ipcMain.on('people:closeDept', (e) => {
+  const id = pwId(e);
+  if (!id || id === 'main') return;
+  delete store.deptWins[id]; save(); broadcast();
+  const w = deptWinMap.get(id); deptWinMap.delete(id);
+  if (w && !w.isDestroyed()) { w.webContents.send('cmd', { type: 'leave' }); setTimeout(() => { if (!w.isDestroyed()) w.close(); }, 330); }
+});
+ipcMain.on('people:order', (e, o) => { store.peopleOrder = cleanOrder(o); save(); broadcast(); });
 ipcMain.on('people:move', (e, x, y, done) => {
   x = num(x); y = num(y);
-  if (!peopleWin || peopleWin.isDestroyed() || x == null || y == null) return;
-  const b = peopleWin.getBounds();
-  peopleWin.setBounds({ x: Math.round(x), y: Math.round(y), width: b.width, height: b.height });
-  if (done) { store.peopleWin.x = Math.round(x) + P; store.peopleWin.y = Math.round(y) + P; save(); }
+  const id = pwId(e), win = pwWin(id), st = pwState(id);
+  if (!win || win.isDestroyed() || !st || x == null || y == null) return;
+  const b = win.getBounds();
+  win.setBounds({ x: Math.round(x), y: Math.round(y), width: b.width, height: b.height });
+  if (done) { st.x = Math.round(x) + P; st.y = Math.round(y) + P; save(); }
 });
 ipcMain.on('people:resize', (e, w, h, done) => {
   w = num(w); h = num(h);
-  if (!peopleWin || peopleWin.isDestroyed() || w == null || h == null || store.peopleWin.folded) return;
+  const id = pwId(e), win = pwWin(id), st = pwState(id);
+  if (!win || win.isDestroyed() || !st || w == null || h == null || st.folded) return;
   w = Math.round(Math.min(1400, Math.max(PEOPLE_MIN_W, w)));
   h = Math.round(Math.min(1200, Math.max(PEOPLE_MIN_H, h)));
-  const b = peopleWin.getBounds();
-  peopleWin.setBounds({ x: b.x, y: b.y, width: w + 2 * P, height: h + 2 * P });
-  if (done) { store.peopleWin.w = w; store.peopleWin.h = h; save(); broadcast(); }
+  const b = win.getBounds();
+  win.setBounds({ x: b.x, y: b.y, width: w + 2 * P, height: h + 2 * P });
+  if (done) { st.w = w; st.h = h; save(); broadcast(); }
 });
 // 연락망 창 접기/펴기 (메모처럼: 접을 땐 내용 먼저, 펼 땐 창 먼저)
-function setPeopleFolded(on) {
+function setPeopleFolded(id, on) {
   on = !!on;
-  if (!!store.peopleWin.folded === on) return;
-  store.peopleWin.folded = on;
+  const st = pwState(id);
+  if (!st || !!st.folded === on) return;
+  st.folded = on;
   save();
   broadcast();
-  const w = peopleWin;
+  const w = pwWin(id);
   if (!w || w.isDestroyed()) return;
-  if (on) setTimeout(() => { if (!w.isDestroyed() && store.peopleWin.folded) setB(w, peopleBounds()); }, 320);
-  else setB(w, peopleBounds());
+  if (on) setTimeout(() => { if (!w.isDestroyed() && st.folded) setB(w, peopleBounds(id)); }, 320);
+  else setB(w, peopleBounds(id));
 }
-ipcMain.on('people:fold', (e, on) => setPeopleFolded(on));
+ipcMain.on('people:fold', (e, on) => setPeopleFolded(pwId(e), on));
 ipcMain.on('people:top', (e, on) => {
-  store.peopleWin.top = !!on;
-  if (peopleWin && !peopleWin.isDestroyed()) peopleWin.setAlwaysOnTop(!!on, 'floating');
+  const id = pwId(e), st = pwState(id), w = pwWin(id);
+  if (!st) return;
+  st.top = !!on;
+  if (w && !w.isDestroyed()) w.setAlwaysOnTop(!!on, 'floating');
   save(); broadcast();
 });
 
@@ -1488,6 +1541,7 @@ ipcMain.on('host:ready', () => {
   if (store.settings.showToday) openWidget();
   if (store.settings.showCal) openCalW();
   if (store.settings.showPeople) openPeople();
+  for (const id of Object.keys(store.deptWins)) openDept(id);   // 떼어 띄운 부서 창도 다시
 });
 ipcMain.on('memo:update', (e, id, patch) => updateMemo(id, patch));
 ipcMain.handle('memo:create', (e, opts) => createMemo(opts || {}));

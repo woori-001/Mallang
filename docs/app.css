@@ -619,3 +619,4 @@ html.sk-retro .peopleGv .gvSec { border-radius: 0; background: var(--rt-paper); 
 html.sk-retro .peopleGv .gvHead { background: var(--rt-face); border-bottom: 2px solid var(--rt-ink); }
 html.sk-retro .peopleGv .gvItem { border-radius: 0; background: #fff; box-shadow: inset 0 0 0 1.5px var(--rt-sh); }
 html.sk-retro .peopleGv .gvItem.picked { background: var(--rt-blue); color: #fff; }
+.peopleTop .textBtn { white-space: nowrap; flex: none; }

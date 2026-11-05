@@ -1100,7 +1100,7 @@
   };
 
   // ───────── 연락망 ─────────
-  let peopleEditing = false;
+  let peopleEditing = false, peopleOrdering = false;
   const people = window.M.tableEditor($('people'), {
     head: window.M.CONTACT_HEAD, editable: false, copy: copyText,
     onChange: (rows) => {
@@ -1119,6 +1119,8 @@
   });
   const peopleGv = window.M.contactView($('peopleGv'), {
     store: 'mallang.people.closed',
+    order: () => prefs.peopleOrder || null,
+    onOrder: (o) => { prefs.peopleOrder = o; savePrefs(); },
     onPick: (v, row, el) => {
       el.classList.add('picked'); setTimeout(() => el.classList.remove('picked'), 600);
       (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject(new Error('x'))).then(() => toast('‘' + v + '’ 복사했어요'), () => toast(v));
@@ -1132,8 +1134,9 @@
     $('people').hidden = !peopleEditing;
     $('peopleGv').hidden = peopleEditing;
     $('pEdit').hidden = !canEditContacts();
+    $('pOrd').hidden = peopleEditing;
     if (!peopleEditing) { peopleGv.setRows(contactRows() || [window.M.CONTACT_HEAD]); peopleGv.filter($('pq').value); }
-    $('pHint').textContent = st.shared && st.shared.contacts && !peopleEditing ? '회사 공통 연락망 · 번호를 누르면 복사돼요' : peopleEditing ? '엑셀에서 복사해 붙여넣을 수 있어요. 첫 줄은 머리글(부서 · 이름 · 내선)이에요.' : '번호를 누르면 복사돼요 · 부서 이름을 누르면 접혀요';
+    $('pHint').textContent = peopleOrdering ? '▲▼로 부서·사람 순서를 바꿔요 · 이 폰에만 적용돼요' : st.shared && st.shared.contacts && !peopleEditing ? '회사 공통 연락망 · 번호를 누르면 복사돼요' : peopleEditing ? '엑셀에서 복사해 붙여넣을 수 있어요. 첫 줄은 머리글(부서 · 이름 · 내선)이에요.' : '번호를 누르면 복사돼요 · 부서 이름을 누르면 접혀요';
   }
   function setPeopleEdit(on) {
     peopleEditing = on;
@@ -1143,7 +1146,19 @@
     people.setEditable(on);
     if (view === 'people') renderPeople();
   }
-  $('pEdit').onclick = () => setPeopleEdit(!peopleEditing);
+  $('pEdit').onclick = () => { if (peopleOrdering) setPeopleOrd(false); setPeopleEdit(!peopleEditing); };
+  function setPeopleOrd(on) {
+    peopleOrdering = on;
+    if (on && peopleEditing) setPeopleEdit(false);
+    if (on && $('pq').value) { $('pq').value = ''; people.filter(''); peopleGv.filter(''); }
+    $('pOrd').textContent = on ? '완료' : '순서';
+    $('pOrd').classList.toggle('on', on);
+    $('pOrd').setAttribute('aria-pressed', String(on));
+    peopleGv.setOrdering(on);
+    $('pHint').textContent = on ? '▲▼로 부서·사람 순서를 바꿔요 · 이 폰에만 적용돼요' : '';
+    if (!on && view === 'people') renderPeople();
+  }
+  $('pOrd').onclick = () => setPeopleOrd(!peopleOrdering);
   $('pq').addEventListener('input', () => { people.filter($('pq').value); peopleGv.filter($('pq').value); });
   $('edDel').onclick = async () => {
     const m = ed(); if (!m) return;
