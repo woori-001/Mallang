@@ -63,15 +63,14 @@ html.sk-retro #card .chip { border-radius: 0; }
 /* 달력 위젯 · 플래너 · 연락망 창 */
 html.sk-retro .w, html.sk-retro .pl { border-radius: 0 !important; box-shadow: 0 0 0 3px var(--rt-ink) inset, inset 5px 5px 0 var(--rt-hi), inset -5px -5px 0 var(--rt-sh) !important; background: var(--rt-face2) !important; }
 
-/* 말랑이 시계: 보내준 픽셀 창 그림 + 제목줄에 시간 */
+/* 말랑이 시계: 픽셀 창 위에 앉은 말랑이 + 창 안에 시간 */
 html.sk-retro .clock { border-radius: 0; background: transparent !important; box-shadow: none; padding: 0; display: block; position: relative; }
-html.sk-retro .clock .bun { width: calc(250px * var(--s, 1)); height: auto; filter: drop-shadow(0 4px 0 rgba(46, 34, 56, .18)); transform-origin: 50% 100%; }
-html.sk-retro .clock .bun { aspect-ratio: 360 / 246; background: url(skin/rt-win.png) 0 0 / 100% 100% no-repeat; image-rendering: pixelated; }
+html.sk-retro .clock .bun { width: calc(250px * var(--s, 1)); height: auto; aspect-ratio: 360 / 403; background: url(skin/rt-clock.png) 0 0 / 100% 100% no-repeat; image-rendering: pixelated; filter: drop-shadow(0 4px 0 rgba(46, 34, 56, .16)); transform-origin: 50% 100%; }
 html.sk-retro .clock .bun img { visibility: hidden; }
-html.sk-retro .clock .time { position: absolute; z-index: 1; left: calc(16px * var(--s, 1)); top: calc(7px * var(--s, 1)); height: calc(21px * var(--s, 1)); align-items: center;
-  font: 700 calc(17px * var(--s, 1))/1 'Galmuri11', monospace; color: #fff; letter-spacing: 1px; text-shadow: 2px 2px 0 #0F2296; }
-html.sk-retro .clock.dark .bun img { filter: brightness(.82) saturate(.9); }
-html.sk-retro .clock.show .bun { animation: rtHop 1s steps(6) .15s 2; }
+html.sk-retro .clock .time { position: absolute; z-index: 1; left: calc(125px * var(--s, 1)); top: calc(201px * var(--s, 1)); transform: translate(-50%, -50%);
+  font: 700 calc(36px * var(--s, 1))/1 'Galmuri11', monospace; color: var(--rt-blue); letter-spacing: 1px; text-shadow: 2px 2px 0 #fff; }
+html.sk-retro .clock.dark .bun { filter: brightness(.82) saturate(.9); }
+html.sk-retro .clock.show .bun, html.sk-retro .clock.stay .bun { animation: none; }
 @keyframes rtHop { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-6px); } 70% { transform: translateY(1px); } }
 html.sk-retro #done { border-radius: 0; background: var(--rt-blue); border: 2px solid var(--rt-ink); box-shadow: none; }
 
@@ -279,3 +278,6 @@ html.sk-excel .panel .ghead, html.sk-excel .panel .nogrp { counter-increment: xl
 html.sk-excel .panel .ghead::before, html.sk-excel .panel .nogrp::before { content: counter(xlrow); position: absolute; left: 0; top: 0; bottom: 0; width: 28px; display: grid; place-items: center; background: var(--xl-hd); box-shadow: inset -1px 0 0 var(--xl-line); color: #5F5F5F; font: 600 11px 'IBM Plex Sans KR', sans-serif; }
 html.sk-excel .panel .nogrp { background: #fff; box-shadow: inset 0 -1px 0 var(--xl-line); padding-top: 0; color: #5F5F5F; }
 html.sk-excel .panel .gbody .row { padding-left: 50px !important; }
+
+/* 레트로 알람: 말랑이가 알림창 위에 걸터앉기 */
+html.sk-retro .art.gx { left: 176px; right: auto; top: -88px; width: 176px; height: 116px; }

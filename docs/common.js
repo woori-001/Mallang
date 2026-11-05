@@ -104,7 +104,7 @@
     },
     // 베타 스킨 (관리자만): 픽셀 레트로 · 말랑 엑셀 — 종이 스킨 바탕 + 스킨 전용 모양(skins.css)
     retro: {
-      name: '픽셀 레트로', paper: true, beta: true, look: 'retro', bunny: 'skin/rt-bun.png', win: 'skin/rt-win.png', logo: 'skin/rt-logo.png', paperBg: '#FBF9FD',
+      name: '픽셀 레트로', paper: true, beta: true, look: 'retro', bunny: 'skin/rt-bun.png', logo: 'skin/rt-logo.png', paperBg: '#FBF9FD',
       base: '#E6E2EE', b: ['#DCD8E6', '#ECE9F2', '#D3CEE0', '#F2F0F7'],
       a1: '#1A33C9', a2: '#3D5BE0', ink: '#2E2238', sub: '#6E6684', sun: '#D23B5A', sat: '#1A33C9', glow: 'rgba(26,51,201,0.20)', on: '#FFFFFF',
       pal: [[[251, 249, 253], [251, 249, 253]], [[255, 242, 246], [255, 242, 246]], [[255, 249, 222], [255, 249, 222]], [[236, 248, 238], [236, 248, 238]], [[238, 244, 255], [238, 244, 255]]]
