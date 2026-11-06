@@ -855,3 +855,6 @@ html.g-halloween .calDeco .s3bat, html.g-halloween .calDeco .s3ghost, html.g-xma
 /* 공휴일 */
 .sellabel .holtag { margin-left: 6px; font-size: 11px; font-weight: 700; color: var(--sun); background: color-mix(in srgb, var(--sun) 12%, transparent); border-radius: 6px; padding: 1px 6px; vertical-align: 1px; }
 .cseg[hidden] { display: none; }
+/* 끌어서 순서 바꾸기: 끼워 넣을 자리 줄 */
+.row.dropBefore { box-shadow: 0 -3px 0 var(--a1) !important; }
+.row.dropAfter { box-shadow: 0 3px 0 var(--a1) !important; }

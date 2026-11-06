@@ -216,7 +216,7 @@
     } else {
       const rowOf = (m) => {
         const a = m.hidden ? 0.4 : 0.92;
-        return '<div class="row' + (m.hidden ? ' hidden' : '') + '" draggable="true" data-id="' + m.id + '" title="' + esc(metaOf(m)) + ' — 끌어서 그룹 폴더에 넣거나 뺄 수 있어요" style="background:' + grad(sk, m.slot || 0, a) + '">' +
+        return '<div class="row' + (m.hidden ? ' hidden' : '') + '" draggable="true" data-id="' + m.id + '" title="' + esc(metaOf(m)) + ' — 끌어서 순서를 바꾸거나 그룹 폴더에 넣고 뺄 수 있어요" style="background:' + grad(sk, m.slot || 0, a) + '">' +
           '<button class="ib" type="button" data-act="fold" aria-label="' + (m.folded ? '펼치기' : '접기') + '" aria-expanded="' + !m.folded + '" title="' + (m.folded ? '펼치기' : '접기') + '">' +
             ICONS.chev.replace('class="chev"', 'class="chev" style="transform:rotate(' + (m.folded ? 0 : 180) + 'deg)"') + '</button>' +
           '<button class="rmain" type="button" data-act="focus" title="메모 보기">' +
@@ -332,7 +332,7 @@
 
   // ───────── 끌어서 그룹에 넣기·빼기 ─────────
   let dragId = null;
-  const zoneOf = (el) => el && el.closest('.grp, .ungrp');
+  const zoneOf = (el) => el && el.closest && (el.closest('.grp, .ungrp') || (!$('list').querySelector('.ungrp') && el.closest('#list')) || null);   // 그룹이 없으면 목록 전체가 한 칸
   $('list').addEventListener('dragstart', (e) => {
     const row = e.target.closest && e.target.closest('.row[data-id]');
     if (!row) return;
@@ -342,38 +342,66 @@
     requestAnimationFrame(() => row.classList.add('dragging'));
     document.body.classList.add('dnd');
   });
+  const clearDrop = () => $('list').querySelectorAll('.dropOn, .dropBefore, .dropAfter').forEach((x) => x.classList.remove('dropOn', 'dropBefore', 'dropAfter'));
   $('list').addEventListener('dragend', () => {
     dragId = null;
     document.body.classList.remove('dnd');
-    $('list').querySelectorAll('.dragging, .dropOn').forEach((x) => x.classList.remove('dragging', 'dropOn'));
+    $('list').querySelectorAll('.dragging').forEach((x) => x.classList.remove('dragging'));
+    clearDrop();
   });
+  // 메모 줄 위에서는 그 위/아래에 끼워 넣기(순서 바꾸기), 폴더·빈 곳 위에서는 그 그룹으로
+  function dropSpot(e) {
+    const z = zoneOf(e.target);
+    if (!z) return null;
+    const row = e.target.closest('.row[data-id]');
+    if (row && Number(row.dataset.id) !== dragId && zoneOf(row) === z) {
+      const r = row.getBoundingClientRect();
+      return { z, row, after: e.clientY > r.top + r.height / 2 };
+    }
+    return { z, row: null };
+  }
   $('list').addEventListener('dragover', (e) => {
     if (dragId == null) return;
-    const z = zoneOf(e.target);
-    if (!z) return;
+    const sp = dropSpot(e);
+    if (!sp) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    if (!z.classList.contains('dropOn')) {
-      $('list').querySelectorAll('.dropOn').forEach((x) => x.classList.remove('dropOn'));
-      z.classList.add('dropOn');
-    }
+    clearDrop();
+    if (sp.row) sp.row.classList.add(sp.after ? 'dropAfter' : 'dropBefore');
+    const m = S.memos.find((x) => x.id === dragId);
+    if (!sp.row || (m && (m.group || null) !== (sp.z.dataset.g || null))) sp.z.classList.add('dropOn');
   });
   $('list').addEventListener('dragleave', (e) => {
     const z = zoneOf(e.target);
-    if (z && !z.contains(e.relatedTarget)) z.classList.remove('dropOn');
+    if (z && !z.contains(e.relatedTarget)) clearDrop();
   });
   $('list').addEventListener('drop', (e) => {
     if (dragId == null) return;
-    const z = zoneOf(e.target);
-    if (!z) return;
+    const sp = dropSpot(e);
+    if (!sp) return;
     e.preventDefault();
-    const gid = z.dataset.g || null;
+    const gid = sp.z.dataset.g || null;
     const m = S.memos.find((x) => x.id === dragId);
-    if (m && (m.group || null) !== gid) {
-      api.update(dragId, { group: gid });
-      if (gid && !openGroups[gid]) api.groupOpen(gid, true);
+    if (!m) return clearDrop();
+    const patch = {};
+    if ((m.group || null) !== gid) patch.group = gid;
+    if (sp.row) {
+      // 이 칸(그룹 없음 또는 폴더)의 지금 보이는 순서대로 다시 번호 매기기 → 바뀐 메모만 저장
+      const ids = [...sp.z.querySelectorAll('.row[data-id]')].map((r) => Number(r.dataset.id)).filter((id) => id !== dragId);
+      let at = ids.indexOf(Number(sp.row.dataset.id)); if (sp.after) at++;
+      ids.splice(at, 0, dragId);
+      const nums = ids.map((id) => S.memos.find((x) => x.id === id)).filter(Boolean).map((x) => x.ord).filter((v) => typeof v === 'number');
+      const base = nums.length ? Math.min(...nums) : 0;
+      ids.forEach((id, k) => {
+        const x = S.memos.find((y) => y.id === id);
+        if (!x) return;
+        if (id === dragId) patch.ord = base + k;
+        else if (x.ord !== base + k) api.update(id, { ord: base + k });
+      });
     }
-    z.classList.remove('dropOn');
+    if (Object.keys(patch).length) api.update(dragId, patch);
+    if (gid && patch.group && !openGroups[gid]) api.groupOpen(gid, true);
+    clearDrop();
   });
 
   // ───────── 그룹 ─────────

@@ -574,7 +574,7 @@ function updateMemo(id, patch) {
   if ('group' in patch && (!patch.group || !store.groups.some((g) => g.id === patch.group))) delete m.group;
   if (m.group && m.group !== prev.group && !applyingLayout) stackIntoGroup(m);
   if (m.layer !== 'top' && m.layer !== 'bottom') m.layer = 'normal';
-  m.updated = Date.now();
+  if (!Object.keys(patch).every((k) => k === 'ord' || k === 'group')) m.updated = Date.now();   // 순서만 바꾼 건 '고친 날짜' 그대로
   if (CONTENT.some((k) => k in patch && JSON.stringify(prev[k]) !== JSON.stringify(m[k]))) touch(m);
   if (['layer', 'hidden', 'folded', 'group', 'x', 'y'].some((k) => prev[k] !== m[k])) layoutTouched(m);
 
