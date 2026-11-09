@@ -241,7 +241,7 @@
     document.documentElement.classList.toggle('sk-ninja', sk.look === 'ninja');
     document.documentElement.classList.toggle('sk-friends', sk.look === 'friends');
     // 말랑 친구들: 목록바 배경지 · 주간 플래너 친구들 고르기
-    { const h = document.documentElement.classList, cb = settings.ckBg || 'sky', cp = settings.ckPl || 'trio', cf = settings.ckFr || 'picnic', cc = settings.ckClock || 'bubble';
+    { const h = document.documentElement.classList, cb = settings.ckBg || 'sky', cp = settings.ckPl || 'trio', cf = settings.ckFr || 'picnic', cc = 'peek';
       h.toggle('ckbg-sky', cb === 'sky'); h.toggle('ckbg-meadow', cb === 'meadow'); h.toggle('ckpl-trio', cp === 'trio'); h.toggle('ckpl-duo', cp === 'duo'); h.toggle('ckfr-picnic', cf === 'picnic'); h.toggle('ckfr-trio', cf === 'trio'); for (const k of ['bubble', 'peek', 'sky', 'friends']) h.toggle('ckcl-' + k, cc === k); }
     for (const d of ['forest', 'peach', 'lemon', 'sky', 'aurora']) document.documentElement.classList.toggle('g-' + d, sk.deco === d);   // 디자인 스킨 장식
     r.setProperty('--paper-bg', sk.paperBg || '#FBFAF5');
