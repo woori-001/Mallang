@@ -2223,7 +2223,18 @@ function setupUpdater() {
       n.show();
     } catch (e) { /* 알림을 못 띄워도 괜찮음 */ }
   });
-  autoUpdater.on('error', (e) => { console.error('업데이트 확인 실패', e && e.message); setUpd({ state: 'error', message: '업데이트를 확인하지 못했어요' }); });
+  // GitHub 다운로드 서버가 잠깐씩 504를 내는 때가 있어서, 실패하면 2·5·10·20·30·60분 뒤에 알아서 다시 확인
+  const RETRY = [2, 5, 10, 20, 30, 60];
+  let retryN = 0, retryT = null;
+  autoUpdater.on('error', (e) => {
+    console.error('업데이트 확인 실패', e && e.message);
+    setUpd({ state: 'error', message: '업데이트를 확인하지 못했어요 · 잠시 뒤 다시 확인할게요' });
+    if (retryT) return;
+    const m = RETRY[Math.min(retryN++, RETRY.length - 1)];
+    retryT = setTimeout(() => { retryT = null; check(); }, m * 60 * 1000);
+  });
+  autoUpdater.on('update-not-available', () => { retryN = 0; });
+  autoUpdater.on('update-downloaded', () => { retryN = 0; });
   const check = () => { if (upd.state !== 'downloading' && upd.state !== 'ready') autoUpdater.checkForUpdates().catch(() => {}); };
   setTimeout(check, 15000);
   setInterval(check, 6 * 60 * 60 * 1000);
