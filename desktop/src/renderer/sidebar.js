@@ -934,6 +934,7 @@
     $('ckBgBox').hidden = s.skin !== 'friends';
     document.querySelectorAll('.ckbg').forEach((b) => b.setAttribute('aria-pressed', String((s.ckBg || 'sky') === b.dataset.ckbg)));
     document.querySelectorAll('.ckfr').forEach((b) => b.setAttribute('aria-pressed', String((s.ckFr || 'picnic') === b.dataset.ckfr)));
+    document.querySelectorAll('.ckcl').forEach((b) => b.setAttribute('aria-pressed', String((s.ckClock || 'bubble') === b.dataset.ckcl)));
     $('autoStart').setAttribute('aria-pressed', String(!!s.autoStart));
     renderSysToggles();
     const mons = S.displays || [];
@@ -975,7 +976,7 @@
   const setCs = (v) => { v = Math.min(150, Math.max(70, v)); $('calScale').value = v; $('calScaleV').textContent = v + '%'; api.setSettings({ calScale: v }); };
   $('calScale').addEventListener('input', (e) => setCs(Number(e.target.value)));
   $('alpha').addEventListener('input', (e) => { $('alphaV').textContent = e.target.value + '%'; api.setSettings({ alpha: Number(e.target.value) }); });
-  $('ckBgBox').addEventListener('click', (e) => { const b = e.target.closest('[data-ckbg]'); if (b) api.setSettings({ ckBg: b.dataset.ckbg }); const c = e.target.closest('[data-ckfr]'); if (c) api.setSettings({ ckFr: c.dataset.ckfr }); });
+  $('ckBgBox').addEventListener('click', (e) => { const b = e.target.closest('[data-ckbg]'); if (b) api.setSettings({ ckBg: b.dataset.ckbg }); const c = e.target.closest('[data-ckfr]'); if (c) api.setSettings({ ckFr: c.dataset.ckfr }); const k = e.target.closest('[data-ckcl]'); if (k) api.setSettings({ ckClock: k.dataset.ckcl }); });
   $('sideAlpha').addEventListener('input', (e) => {
     $('sideAlphaV').textContent = e.target.value + '%';
     if (!sk || !sk.paper) { const v = Number(e.target.value) / 100; panel.style.background = 'rgba(' + ((sk && sk.panelRGB) || 'var(--glass)') + ',' + (sk && sk.panelRGB ? Math.round((0.35 + 0.65 * v) * 100) / 100 : v) + ')'; }
