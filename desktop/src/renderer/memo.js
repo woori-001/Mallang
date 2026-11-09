@@ -48,11 +48,29 @@
     api.update(id, patch);
   }
 
+  // 공책 점선 자리: 글꼴마다 글자가 줄 칸 안에서 놓이는 높이가 달라서, 실제 글자 아랫선을 재서 점선을 바로 밑에 둠
+  function placeDots() {
+    const t = $('text'); if (!t) return;
+    const p = document.createElement('div');
+    p.className = 'text'; p.setAttribute('aria-hidden', 'true');
+    p.style.cssText = 'position:fixed;left:-9999px;top:0;width:auto;height:auto;padding:0;visibility:hidden;pointer-events:none;overflow:visible;flex:none';
+    p.innerHTML = '<div><span>가Ag</span></div>';
+    document.body.appendChild(p);
+    const line = p.firstChild.getBoundingClientRect(), g = p.firstChild.firstChild.getBoundingClientRect();
+    p.remove();
+    if (!line.height) return;
+    // 글자 칸(위·아래 여백 포함) 아래에서 살짝 위 = 받침 바로 밑
+    const y = Math.min(line.height - 1.5, Math.max(g.bottom - line.top - g.height * 0.08, line.height * 0.7));
+    document.documentElement.style.setProperty('--dot-y', y.toFixed(2) + 'px');
+  }
+  if (document.fonts) { document.fonts.ready.then(placeDots); document.fonts.addEventListener('loadingdone', placeDots); }
+
   // ───────── 그리기 ─────────
   const setOn = (el, on) => { el.classList.toggle('on', on); el.setAttribute('aria-pressed', String(on)); };
   function render(first) {
     if (!memo || !settings) return;
     sk = applyTheme(settings).sk;
+    placeDots();
     const a = (settings.alpha != null ? settings.alpha : 60) / 100;
     if (sk.paper) {
       // 종이 스킨: 흰 종이 + 메모 색 머리띠 (투명도 없음)
