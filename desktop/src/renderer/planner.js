@@ -8,12 +8,12 @@
   const COLORS = ['peach', 'mint', 'sky', 'lav', 'lemon', 'pink', 'stripe', 'dot'];
   const BASE_ROWS = 8;
   // 말랑 친구들 스킨: 직접 그린 친구들·소품 그림 스티커 ('ck:이름' 으로 저장)
-  const CK_CHARS = ['picnic', 'mal2', 'mallang', 'bear', 'cat', 'rabbit', 'momo', 'pink', 'trio', 'duo'];
-  const CK_ITEMS = ['pbear', 'pfish', 'pstar', 'onigiri', 'dango', 'taiyaki', 'strawb', 'mochi', 'rice', 'corndog', 'bun1', 'candy', 'drink', 'heart', 'flower', 'clover', 'spark', 'starface', 'music', 'balloon', 'gift1', 'gift2', 'medal', 'coin', 'ticket', 'note', 'pencil', 'eraser', 'camera', 'lantern', 'tent', 'pouch', 'talk', 'ex', 'q', 'exq', 'excl', 'drops', 'puff', 'swirl', 'zzz', 'starwand', 'wandp', 'wandb', 'stick', 'cloud'];
+  const CK_CHARS = ['mal2', 'bear', 'cat', 'rabbit', 'momo', 'pink', 'trio', 'duo'];
+  const CK_ITEMS = ['pbear', 'pfish', 'pstar', 'onigiri', 'dango', 'taiyaki', 'strawb', 'mochi', 'rice', 'corndog', 'bun1', 'candy', 'drink', 'heart', 'flower', 'clover', 'spark', 'starface', 'music', 'balloon', 'gift1', 'gift2', 'medal', 'coin', 'ticket', 'note', 'pencil', 'eraser', 'camera', 'lantern', 'tent', 'pouch', 'talk', 'ex', 'q', 'exq', 'excl', 'drops', 'puff', 'swirl', 'zzz', 'starwand', 'cloud'];
   const ckOn = () => document.documentElement.classList.contains('sk-friends');
   const isCk = (e) => /^ck:[a-z0-9]+$/.test(e);
   const ckImg = (e) => '<img src="skin/ck-' + e.slice(3) + '.png" alt="" draggable="false">';
-  const ckCls = (e) => (CK_CHARS.includes(e.slice(3)) ? (/^ck:(trio|duo|picnic)$/.test(e) ? ' ckSk ckWide' : ' ckSk ckBig') : ' ckSk');
+  const ckCls = (e) => (CK_CHARS.includes(e.slice(3)) || /^ck:(picnic|mallang)$/.test(e) ? (/^ck:(trio|duo|picnic)$/.test(e) ? ' ckSk ckWide' : ' ckSk ckBig' + (e === 'ck:mal2' ? ' ckMal' : '')) : ' ckSk');
   const EMOJI = {
     '표정': '😀 😊 🥰 😍 😎 🤓 🥳 😴 🤯 😭 😤 🤔 😇 🫠 😵‍💫 🙃 😋 🤗 😌 🥲 😱 🫡 🤩 😮‍💨',
     '하트': '❤️ 🧡 💛 💚 💙 💜 🩷 🤍 🖤 💖 💗 💝 ✨ ⭐ 🌟 💫 ⚡ 🔥 💯 🎵',

@@ -454,7 +454,7 @@ html.sk-friends .wrap .memo { border-radius: 16px; background: #FFF0F3; box-shad
 html.sk-friends .wrap .btns button { border-radius: 999px; border: 2px solid var(--ck-line); background: #fff; color: var(--ck-ink); box-shadow: none; }
 html.sk-friends .wrap .btns .ok { background: var(--ck-pink); border-color: var(--ck-ink); }
 /* 말랑이는 제목줄 뒤에서 빼꼼 (손·발은 창 뒤에 숨음) */
-html.sk-friends .art.gx { left: auto; right: 34px; top: -72px; width: 72px; height: 100px; z-index: 4; }
+html.sk-friends .art.gx { left: auto; right: 26px; top: -90px; width: 92px; height: 130px; z-index: 4; }
 html.sk-friends .wrap .deco { z-index: 2; }
 /* 말랑 친구들: 목록바 배경지 (직접 그린 그림) — 투명도 조절바를 따름 */
 html.sk-friends .panel { isolation: isolate; }
