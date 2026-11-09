@@ -493,3 +493,5 @@ html.sk-friends .ckTail::after { content: ''; position: absolute; right: 0; bott
 html.sk-friends .ckfr .ckf img { height: 50px; max-width: 100%; }
 /* 스킨 고르기 동그라미: 서 있는 말랑이처럼 키 큰 그림도 동그라미 안에 쏙 */
 .skin .swDraw img { max-height: 84%; object-fit: contain; }
+/* 말랑 친구들 전용 꾸미기 칸: 다른 스킨에서는 (상자 모양 규칙이 덮어써도) 항상 숨김 */
+#ckBgBox[hidden], html:not(.sk-friends) #ckBgBox { display: none !important; }
