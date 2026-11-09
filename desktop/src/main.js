@@ -895,7 +895,7 @@ function cleanWeek(w) {
     o.days.push({ in: time(d.in), out: time(d.out), items: (Array.isArray(d.items) ? d.items : []).slice(0, 40).map((it) => ({ t: str(it && it.t, 300), d: !!(it && it.d) })) });
   }
   o.tapes = (w && Array.isArray(w.tapes) ? w.tapes : []).slice(0, 20).map((t) => ({ a: Math.min(6, Math.max(0, t.a | 0)), b: Math.min(6, Math.max(0, t.b | 0)), text: str(t.text, 60), c: PL_COLORS.includes(t.c) ? t.c : 'peach' })).map((t) => (t.b < t.a ? { ...t, a: t.b, b: t.a } : t));
-  o.stickers = (w && Array.isArray(w.stickers) ? w.stickers : []).slice(0, 60).map((s) => ({ e: str(s.e, 8), x: Math.min(100, Math.max(0, Number(s.x) || 0)), y: Math.min(100, Math.max(0, Number(s.y) || 0)), r: Math.min(20, Math.max(-20, Number(s.r) || 0)) })).filter((s) => s.e);
+  o.stickers = (w && Array.isArray(w.stickers) ? w.stickers : []).slice(0, 60).map((s) => ({ e: str(s.e, 24), x: Math.min(100, Math.max(0, Number(s.x) || 0)), y: Math.min(100, Math.max(0, Number(s.y) || 0)), r: Math.min(20, Math.max(-20, Number(s.r) || 0)) })).filter((s) => s.e);
   o.habits = (w && Array.isArray(w.habits) ? w.habits : []).slice(0, 4).map((h) => ({ t: str(h && h.t, 30), d: Array.from({ length: 7 }, (_, i) => !!(h && Array.isArray(h.d) && h.d[i])) }));
   return o;
 }

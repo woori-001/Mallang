@@ -11,9 +11,18 @@
   const CK_CHARS = ['mal2', 'bear', 'cat', 'rabbit', 'momo', 'pink', 'trio', 'duo'];
   const CK_ITEMS = ['pbear', 'pfish', 'pstar', 'onigiri', 'dango', 'taiyaki', 'strawb', 'mochi', 'rice', 'corndog', 'bun1', 'candy', 'drink', 'heart', 'flower', 'clover', 'spark', 'starface', 'music', 'balloon', 'gift1', 'gift2', 'medal', 'coin', 'ticket', 'note', 'pencil', 'eraser', 'camera', 'lantern', 'tent', 'pouch', 'talk', 'ex', 'q', 'exq', 'excl', 'drops', 'puff', 'swirl', 'zzz', 'starwand', 'cloud'];
   const ckOn = () => document.documentElement.classList.contains('sk-friends');
+  // 예전 버전이 스티커 이름을 8자에서 잘라 저장했던 것 되살리기 (ck:onigi → ck:onigiri)
+  const CK_ALL = CK_CHARS.concat(CK_ITEMS, ['picnic', 'mallang', 'wandp', 'wandb', 'stick']);
+  const ckFix = (e) => {
+    if (!/^ck:[a-z0-9]+$/.test(e)) return e;
+    const n = e.slice(3);
+    if (CK_ALL.includes(n)) return e;
+    const m = CK_ALL.filter((k) => k.startsWith(n));
+    return m.length === 1 ? 'ck:' + m[0] : e;
+  };
   const isCk = (e) => /^ck:[a-z0-9]+$/.test(e);
   const ckImg = (e) => '<img src="skin/ck-' + e.slice(3) + '.png" alt="" draggable="false">';
-  const ckCls = (e) => (CK_CHARS.includes(e.slice(3)) || /^ck:(picnic|mallang)$/.test(e) ? (/^ck:(trio|duo|picnic)$/.test(e) ? ' ckSk ckWide' : ' ckSk ckBig' + (e === 'ck:mal2' ? ' ckMal' : '')) : ' ckSk');
+  const ckCls = (e) => (CK_CHARS.includes(e.slice(3)) || /^ck:(picnic|mallang)$/.test(e) ? (/^ck:(trio|duo|picnic)$/.test(e) ? ' ckSk ckWide' : ' ckSk ckBig' + (e === 'ck:mal2' ? ' ckMal' : e === 'ck:rabbit' ? ' ckRab' : '')) : ' ckSk');
   const EMOJI = {
     '표정': '😀 😊 🥰 😍 😎 🤓 🥳 😴 🤯 😭 😤 🤔 😇 🫠 😵‍💫 🙃 😋 🤗 😌 🥲 😱 🫡 🤩 😮‍💨',
     '하트': '❤️ 🧡 💛 💚 💙 💜 🩷 🤍 🖤 💖 💗 💝 ✨ ⭐ 🌟 💫 ⚡ 🔥 💯 🎵',
@@ -199,6 +208,9 @@
     fit();
   }
   function renderStickers() {
+    let fixed = false;
+    W.stickers.forEach((s) => { const f = ckFix(s.e); if (f !== s.e) { s.e = f; fixed = true; } });
+    if (fixed) save();
     stk.innerHTML = W.stickers.map((s, k) => '<span class="sk' + (isCk(s.e) ? ckCls(s.e) : '') + '" data-k="' + k + '" style="left:' + s.x + '%;top:' + s.y + '%;--r:' + s.r + 'deg" title="끌어서 옮기기 · 휠로 기울이기 · 더블클릭으로 떼기">' + (isCk(s.e) ? ckImg(s.e) : esc(s.e)) + '</span>').join('');
   }
 
