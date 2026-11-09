@@ -500,10 +500,10 @@ html.sk-friends .ckfr .ckf img { height: 50px; max-width: 100%; }
 #ckBgBox[hidden], html:not(.sk-friends) #ckBgBox { display: none !important; }
 /* 말랑 친구들 시계 알림 모양 (꾸미기에서 고르기): bubble 말풍선 · peek 빼꼼 팻말 · sky 하늘 창 · friends 친구들 */
 html.sk-friends:is(.ckcl-peek, .ckcl-sky, .ckcl-friends) .clock .time::after { display: none; }
-/* 빼꼼 팻말: 크림색 팻말 뒤에서 말랑이가 빼꼼 (입까지 보이게), 모서리엔 포쉐트 곰돌이·물고기·별 */
+/* 빼꼼 팻말: 크림색 팻말 뒤에서 말랑이가 빼꼼 (입까지 보이게), 팻말 위 왼쪽엔 포쉐트 곰돌이·물고기·별이 나란히 */
 html.sk-friends.ckcl-peek .clock::before { content: ''; position: absolute; z-index: 1; left: calc(4px * var(--s, 1)); top: calc(62px * var(--s, 1)); width: calc(240px * var(--s, 1)); height: calc(84px * var(--s, 1)); box-sizing: border-box; background: var(--ck-cream); border: 2.5px solid var(--ck-ink); border-radius: calc(24px * var(--s, 1)); }
-html.sk-friends.ckcl-peek .clock::after { content: ''; position: absolute; z-index: 3; left: 0; top: calc(40px * var(--s, 1)); width: calc(250px * var(--s, 1)); height: calc(110px * var(--s, 1)); pointer-events: none;
-  background: url(skin/ck-pfish.png) 0 0 / calc(36px * var(--s, 1)) auto no-repeat, url(skin/ck-pbear.png) 0 100% / calc(30px * var(--s, 1)) auto no-repeat, url(skin/ck-pstar.png) 100% 100% / calc(30px * var(--s, 1)) auto no-repeat; }
+html.sk-friends.ckcl-peek .clock::after { content: ''; position: absolute; z-index: 3; left: calc(22px * var(--s, 1)); top: calc(36px * var(--s, 1)); width: calc(100px * var(--s, 1)); height: calc(32px * var(--s, 1)); pointer-events: none;
+  background: url(skin/ck-pbear.png) 0 100% / calc(30px * var(--s, 1)) auto no-repeat, url(skin/ck-pfish.png) calc(32px * var(--s, 1)) 100% / calc(36px * var(--s, 1)) auto no-repeat, url(skin/ck-pstar.png) calc(70px * var(--s, 1)) 100% / calc(29px * var(--s, 1)) auto no-repeat; }
 html.sk-friends.ckcl-peek .clock .bun { z-index: 0; left: auto; right: calc(36px * var(--s, 1)); top: 0; width: calc(62px * var(--s, 1)); height: calc(88px * var(--s, 1)); }
 html.sk-friends.ckcl-peek .clock .time { z-index: 2; left: calc(4px * var(--s, 1)); top: calc(62px * var(--s, 1)); width: calc(240px * var(--s, 1)); height: calc(84px * var(--s, 1)); box-sizing: border-box; padding: 0; display: flex; align-items: center; justify-content: center; white-space: nowrap; background: transparent; border: none; font-size: calc(42px * var(--s, 1)); }
 html.sk-friends.ckcl-peek .clock.dark::before { background: #3B302C; }
