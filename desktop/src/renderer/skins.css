@@ -417,10 +417,10 @@ html.sk-friends .panel .day.sel { background: var(--ck-pink); color: var(--ck-in
 html.sk-friends.ckfr-trio .panel:has(#vMemo:not([hidden]))::after { content: ''; position: absolute; right: 12px; bottom: 42px; width: 196px; height: 92px; pointer-events: none; z-index: 4;
   background: url(skin/ck-bear.png) 0 100% / 66px auto no-repeat, url(skin/ck-cat.png) 62px 100% / 66px auto no-repeat, url(skin/ck-rabbit.png) 128px 100% / 62px auto no-repeat; filter: drop-shadow(0 2px 0 rgba(90, 58, 46, .12)); }
 /* 소풍: 직접 그린 친구들 소풍 그림 (하늘 언덕 배경이면 언덕 위에 돗자리) */
-html.sk-friends.ckfr-picnic .panel:has(#vMemo:not([hidden]))::after { content: ''; position: absolute; left: 50%; transform: translateX(-50%); bottom: 40px; width: 268px; height: 188px; pointer-events: none; z-index: 4;
+html.sk-friends.ckfr-picnic .panel:has(#vMemo:not([hidden]))::after { content: ''; position: absolute; left: 50%; transform: translateX(-50%); bottom: 40px; width: 236px; height: 166px; pointer-events: none; z-index: 4;
   background: url(skin/ck-picnic.png) center bottom / contain no-repeat; filter: drop-shadow(0 3px 0 rgba(90, 58, 46, .1)); }
 html.sk-friends.ckfr-trio .panel #list { padding-bottom: 104px; }
-html.sk-friends.ckfr-picnic .panel #list { padding-bottom: 200px; }
+html.sk-friends.ckfr-picnic .panel #list { padding-bottom: 180px; }
 /* 메모지: 둥근 창 + 메모 색 제목줄 + 점선 노트 */
 html.sk-friends #card { border-radius: 20px !important; border: 2.5px solid var(--ck-ink); box-shadow: 0 4px 10px rgba(90, 58, 46, .12); }
 html.sk-friends #card .head { border-radius: 0 !important; border-bottom: 2.5px solid var(--ck-ink); color: var(--ck-ink); }
@@ -477,26 +477,29 @@ html.sk-friends .ckbg .ckf img { width: auto; height: 46px; object-fit: contain;
 /* 달력(목록바 · 바탕화면): 위 줄엔 구름 + 오늘/화살표, 아래 줄엔 큰 달 + 구름 + 언덕 위 말랑이, 달 끝 빈 칸엔 친구들 */
 .ckRow { display: none; }
 html.sk-friends .calhead, html.sk-friends .w .hd { flex-wrap: wrap; position: relative; row-gap: 0; }
-html.sk-friends .calhead::before, html.sk-friends .w .hd::before { content: ''; order: 0; width: 36px; height: 26px; animation: ckFloat 3.8s ease-in-out infinite; margin-right: auto; background: url(skin/ck-cloud2.png) left center / contain no-repeat; pointer-events: none; }
+html.sk-friends .calhead::before, html.sk-friends .w .hd::before { content: ''; order: 0; width: 36px; height: 26px; animation: ckFloat 4.2s ease-in-out infinite; will-change: transform; margin-right: auto; background: url(skin/ck-cloud2.png) left center / contain no-repeat; pointer-events: none; }
 html.sk-friends .calnav { order: 1; }
 html.sk-friends .w .hd .today, html.sk-friends .w .hd .nav { order: 1; }
 html.sk-friends .calttl, html.sk-friends .w .ttl { order: 2; flex: 1 0 100%; min-height: 64px; align-items: flex-end; align-content: flex-end; flex-wrap: wrap; padding: 0 0 2px 2px; }
 html.sk-friends .calnum, html.sk-friends .w .num { font-size: calc(34px * var(--cs, 1)); }
 html.sk-friends .calen, html.sk-friends .w .en { font-size: calc(12px * var(--cs, 1)); padding-bottom: 3px; }
-html.sk-friends .calhead::after, html.sk-friends .w .hd::after { content: ''; position: absolute; right: 0; top: 34px; width: 62%; height: 44px; pointer-events: none;
-  background: url(skin/ck-cloud2.png) 0 6px / 26px auto no-repeat, url(skin/ck-cloud2.png) 100% 4px / 38px auto no-repeat; animation: ckDrift 6s ease-in-out infinite; }
+html.sk-friends .calhead::after, html.sk-friends .w .hd::after { content: ''; position: absolute; right: 2px; top: 38px; width: 38px; height: 28px; pointer-events: none;
+  background: url(skin/ck-cloud2.png) center / contain no-repeat; animation: ckDrift 7s ease-in-out infinite; will-change: transform; }
+html.sk-friends .calttl::after, html.sk-friends .w .ttl::after { content: ''; position: absolute; left: 44%; top: 36px; width: 26px; height: 19px; pointer-events: none;
+  background: url(skin/ck-cloud2.png) center / contain no-repeat; animation: ckDrift2 5.5s ease-in-out infinite; will-change: transform; }
 /* 구름 둥실둥실 */
 @keyframes ckFloat { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(3px, -3px); } }
-@keyframes ckDrift { 0%, 100% { background-position: 0 8px, 100% 4px; } 50% { background-position: 6px 3px, calc(100% - 7px) 9px; } }
-@media (prefers-reduced-motion: reduce) { html.sk-friends .calhead::before, html.sk-friends .w .hd::before, html.sk-friends .calhead::after, html.sk-friends .w .hd::after { animation: none; } }
+@keyframes ckDrift { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-7px, 4px); } }
+@keyframes ckDrift2 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(7px, -4px); } }
+@media (prefers-reduced-motion: reduce) { html.sk-friends .calhead::before, html.sk-friends .w .hd::before, html.sk-friends .calhead::after, html.sk-friends .w .hd::after, html.sk-friends .calttl::after, html.sk-friends .w .ttl::after { animation: none; } }
 html.sk-friends .ckTail { position: relative; display: block; }
 html.sk-friends .ckRow { display: block; height: 30px; }
 /* 오른쪽 아래 모서리: 언덕 위 소풍 (달 끝 빈칸이 모자라면 빈 줄을 하나 더 둬서 날짜를 안 가림) */
 html.sk-friends .panel .calcard, html.sk-friends .w { position: relative; overflow: hidden; }
-html.sk-friends .panel .calcard #grid, html.sk-friends .w #grid { position: relative; padding-bottom: 44px; }
-html.sk-friends .panel .calcard #grid::after, html.sk-friends .w #grid::after { content: ''; position: absolute; right: -12px; bottom: -10px; width: calc(66% + 12px); aspect-ratio: 400 / 195; pointer-events: none;
+html.sk-friends .panel .calcard #grid, html.sk-friends .w #grid { position: relative; padding-bottom: 52px; }
+html.sk-friends .panel .calcard #grid::after, html.sk-friends .w #grid::after { content: ''; position: absolute; right: -12px; bottom: -10px; width: calc(74% + 12px); aspect-ratio: 400 / 195; pointer-events: none;
   background: url(skin/ck-picnic-hill.png) right bottom / 100% auto no-repeat; }
-html.sk-friends .w #grid::after { bottom: 0; right: -9.5px; width: calc(66% + 9.5px); }
+html.sk-friends .w #grid::after { bottom: 0; right: -9.5px; width: calc(74% + 9.5px); }
 html.sk-friends .ckfr .ckf img { height: 50px; max-width: 100%; }
 /* 스킨 고르기 동그라미: 서 있는 말랑이처럼 키 큰 그림도 동그라미 안에 쏙 */
 .skin .swDraw img { max-height: 84%; object-fit: contain; }
