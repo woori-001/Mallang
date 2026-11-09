@@ -477,14 +477,18 @@ html.sk-friends .ckbg .ckf img { width: auto; height: 46px; object-fit: contain;
 /* 달력(목록바 · 바탕화면): 위 줄엔 구름 + 오늘/화살표, 아래 줄엔 큰 달 + 구름 + 언덕 위 말랑이, 달 끝 빈 칸엔 친구들 */
 .ckRow { display: none; }
 html.sk-friends .calhead, html.sk-friends .w .hd { flex-wrap: wrap; position: relative; row-gap: 0; }
-html.sk-friends .calhead::before, html.sk-friends .w .hd::before { content: ''; order: 0; width: 46px; height: 30px; margin-right: auto; background: url(skin/ck-cloud2.png) left center / contain no-repeat; pointer-events: none; }
+html.sk-friends .calhead::before, html.sk-friends .w .hd::before { content: ''; order: 0; width: 36px; height: 26px; animation: ckFloat 3.8s ease-in-out infinite; margin-right: auto; background: url(skin/ck-cloud2.png) left center / contain no-repeat; pointer-events: none; }
 html.sk-friends .calnav { order: 1; }
 html.sk-friends .w .hd .today, html.sk-friends .w .hd .nav { order: 1; }
 html.sk-friends .calttl, html.sk-friends .w .ttl { order: 2; flex: 1 0 100%; min-height: 64px; align-items: flex-end; align-content: flex-end; flex-wrap: wrap; padding: 0 0 2px 2px; }
 html.sk-friends .calnum, html.sk-friends .w .num { font-size: calc(34px * var(--cs, 1)); }
 html.sk-friends .calen, html.sk-friends .w .en { font-size: calc(12px * var(--cs, 1)); padding-bottom: 3px; }
 html.sk-friends .calhead::after, html.sk-friends .w .hd::after { content: ''; position: absolute; right: 0; top: 34px; width: 62%; height: 44px; pointer-events: none;
-  background: url(skin/ck-cloud2.png) 0 70% / 34px auto no-repeat, url(skin/ck-cloud2.png) 100% 0 / 50px auto no-repeat; }
+  background: url(skin/ck-cloud2.png) 0 6px / 26px auto no-repeat, url(skin/ck-cloud2.png) 100% 4px / 38px auto no-repeat; animation: ckDrift 6s ease-in-out infinite; }
+/* 구름 둥실둥실 */
+@keyframes ckFloat { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(3px, -3px); } }
+@keyframes ckDrift { 0%, 100% { background-position: 0 8px, 100% 4px; } 50% { background-position: 6px 3px, calc(100% - 7px) 9px; } }
+@media (prefers-reduced-motion: reduce) { html.sk-friends .calhead::before, html.sk-friends .w .hd::before, html.sk-friends .calhead::after, html.sk-friends .w .hd::after { animation: none; } }
 html.sk-friends .ckTail { position: relative; display: block; }
 html.sk-friends .ckRow { display: block; height: 30px; }
 /* 오른쪽 아래 모서리: 언덕 위 소풍 (달 끝 빈칸이 모자라면 빈 줄을 하나 더 둬서 날짜를 안 가림) */
