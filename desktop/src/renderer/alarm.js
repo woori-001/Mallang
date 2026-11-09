@@ -34,6 +34,7 @@
     const sk = skin(), id = S.settings.skin;
     let h = '';
     if (sk.look === 'retro') h = im('skin/rt-sparkle.png', 'left:-22px;top:46px;width:30px', 'sw') + im('skin/rt-star.png', 'right:-18px;bottom:-18px;width:32px') + im('skin/rt-heart.png', 'right:20px;bottom:-16px;width:22px');
+    else if (sk.look === 'friends') h = im('skin/ck-pfish.png', 'left:-28px;top:44px;width:40px;transform:rotate(-12deg)', 'sw') + im('skin/ck-pbear.png', 'left:-16px;bottom:-14px;width:36px;transform:rotate(-10deg)') + im('skin/ck-pstar.png', 'right:-16px;bottom:-16px;width:36px;transform:rotate(10deg)');
     else if (sk.look === 'ninja') h = im('skin/nj-shuriken.png', 'left:-20px;top:46px;width:34px;transform:rotate(18deg)', 'sw') + im('skin/nj-kunai.png', 'right:-16px;bottom:-14px;width:34px;transform:rotate(-30deg)') + im('skin/nj-leafg.png', 'left:-12px;bottom:-12px;width:26px;transform:rotate(-30deg)');
     else if (sk.look === 'excel') h = im('skin/xl-bar.png', 'left:-16px;bottom:-14px;width:38px;transform:rotate(-8deg)', 'sw') + im('skin/xl-line.png', 'right:-10px;bottom:-12px;width:38px;transform:rotate(6deg)');
     else if (sk.deco === 'forest') h = im('leaf-top.svg', 'right:-44px;bottom:-40px;width:120px;transform:scaleY(-1)', 'sw') + im('leaf-bot.svg', 'left:-58px;bottom:-48px;width:118px');

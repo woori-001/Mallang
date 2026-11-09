@@ -352,7 +352,7 @@
   let calY = now.getFullYear(), calM = now.getMonth(), sel = dateKey(now);
 
   function applyPrefs() {
-    const t = applyTheme(prefs);
+    const t = applyTheme(SKINS[prefs.skin] && SKINS[prefs.skin].pcOnly ? Object.assign({}, prefs, { skin: 'lav' }) : prefs);
     document.documentElement.classList.toggle('bodybg', !!prefs.bodyBg);
     const r = document.documentElement.style;
     const sk = t.sk;
@@ -364,7 +364,7 @@
     setTimeout(() => window.M.syncRanges(), 0);
     return t;
   }
-  const skin = () => SKINS[prefs.skin] || SKINS.lav;
+  const skin = () => (SKINS[prefs.skin] && !SKINS[prefs.skin].pcOnly && SKINS[prefs.skin]) || SKINS.lav;
 
   function showApp() {
     $('auth').hidden = true;
@@ -946,7 +946,7 @@
     const listed = new Set(GROUPS.flatMap((g) => g[1]));
     GROUPS[1][1] = GROUPS[1][1].concat(Object.keys(SKINS).filter((id) => !listed.has(id)));
     const openSk = (st.shared && st.shared.openSkins) || [];
-    const visible = (id) => SKINS[id] && (SKINS[id].beta ? (openSk.includes(id) || !!(st.shared && st.shared.admin) || prefs.skin === id) : (!SKINS[id].season || window.M.SEASONS_ON || prefs.skin === id));
+    const visible = (id) => SKINS[id] && !SKINS[id].pcOnly && (SKINS[id].beta ? (openSk.includes(id) || !!(st.shared && st.shared.admin) || prefs.skin === id) : (!SKINS[id].season || window.M.SEASONS_ON || prefs.skin === id));
     const btn = (id) => {
       const k = SKINS[id];
       return '<button class="skin' + (prefs.skin === id ? ' on' : '') + '" type="button" data-skin="' + id + '" aria-pressed="' + (prefs.skin === id) + '" style="--sc:' + k.a1 + '">' +

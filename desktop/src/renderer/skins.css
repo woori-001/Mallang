@@ -388,3 +388,106 @@ html.sk-ninja .panel .pill { --ink: #2B2420; color: #2B2420; }
 /* 연락망 부서 프사: 스킨 소품 */
 html.sk-ninja .gvIco, html.sk-retro .gvIco { background: transparent; width: 28px; height: 28px; }
 html.sk-ninja .gvIco img, html.sk-retro .gvIco img { width: 26px; height: 26px; filter: none; }
+
+/* ===== 말랑 친구들 (html.sk-friends, PC 전용): 크림 + 분홍 점무늬, 둥근 갈색 선 ===== */
+html.sk-friends { --ck-ink: #5A3A2E; --ck-cream: #FFFDF9; --ck-pink: #F7C6D0; --ck-pink2: #E8899E; --ck-blue: #C9DAEE; --ck-yel: #F8E8AE; --ck-line: #F1E3DC; --ck-sub: #A08578;
+  --paper-line: rgba(90, 58, 46, .16); --paper-dot: rgba(232, 137, 158, .55); }
+html.sk-friends .tab { background: var(--ck-pink); border: 2.5px solid var(--ck-ink); border-right: none; color: var(--ck-ink); }
+html.sk-friends .panel { background: radial-gradient(circle, rgba(242, 165, 182, .22) 2.2px, transparent 2.6px) 0 0 / 34px 34px, rgba(255, 249, 247, var(--side-a, 1)) !important; border: 2.5px solid var(--ck-ink); border-right: none; box-shadow: none; }
+html.sk-friends .phead { padding-top: 6px; }
+html.sk-friends .appname { position: relative; }
+html.sk-friends .applogo { height: auto; width: 188px; filter: none; margin: -6px 0 -4px -4px; }
+html.sk-friends .seg { background: transparent; box-shadow: none; gap: 4px; }
+html.sk-friends .segb { border-radius: 999px; border: 2px solid transparent; color: var(--ck-sub); font-weight: 700; }
+html.sk-friends .segb.on { background: var(--ck-pink); color: var(--ck-ink); border-color: var(--ck-ink); box-shadow: none; }
+html.sk-friends .panel .primary, html.sk-friends .panel .smallprimary { background: var(--ck-pink); color: var(--ck-ink); border: 2px solid var(--ck-ink); border-radius: 999px; box-shadow: none; font-weight: 700; }
+html.sk-friends .panel .search { border-radius: 999px; background: #fff; box-shadow: 0 0 0 2px var(--ck-line); }
+html.sk-friends .panel .tbar .tg { border-radius: 999px; background: #fff; box-shadow: 0 0 0 2px var(--ck-line); }
+html.sk-friends .panel .tbar .ib { color: var(--ck-ink); }
+html.sk-friends .panel .row { border-radius: 16px; background: #fff !important; box-shadow: 0 0 0 2px var(--ck-line) !important; color: var(--ck-ink); }
+html.sk-friends .panel .row:hover { box-shadow: 0 0 0 2px var(--ck-ink) !important; background: #FFF0F3 !important; transform: translateY(-1px); }
+html.sk-friends .panel .rico { width: 26px; height: 26px; }
+html.sk-friends .panel .gico { width: 28px; height: 28px; }
+html.sk-friends .panel .ghead { background: transparent !important; box-shadow: none !important; }
+html.sk-friends .panel .gname, html.sk-friends .panel .nogrp { font-weight: 700; color: var(--ck-sub); }
+html.sk-friends .panel .calcard, html.sk-friends .panel .box, html.sk-friends .panel .alBox, html.sk-friends .panel .ev, html.sk-friends .panel .acHero, html.sk-friends .panel .bkForm, html.sk-friends .panel .gvSec { background: #fff; border-radius: 18px; box-shadow: 0 0 0 2px var(--ck-line); }
+html.sk-friends .panel .day.today { box-shadow: inset 0 0 0 2px var(--ck-pink2); border-radius: 50%; }
+html.sk-friends .panel .day.sel { background: var(--ck-pink); color: var(--ck-ink) !important; box-shadow: 0 0 0 2px var(--ck-ink); border-radius: 50%; }
+/* 목록바 맨 아래 친구들 셋 (목록은 그 위까지 스크롤) */
+html.sk-friends.ckfr-trio .panel:has(#vMemo:not([hidden]))::after { content: ''; position: absolute; right: 12px; bottom: 42px; width: 196px; height: 92px; pointer-events: none; z-index: 4;
+  background: url(skin/ck-bear.png) 0 100% / 66px auto no-repeat, url(skin/ck-cat.png) 62px 100% / 66px auto no-repeat, url(skin/ck-rabbit.png) 128px 100% / 62px auto no-repeat; filter: drop-shadow(0 2px 0 rgba(90, 58, 46, .12)); }
+/* 소풍: 직접 그린 친구들 소풍 그림 (하늘 언덕 배경이면 언덕 위에 돗자리) */
+html.sk-friends.ckfr-picnic .panel:has(#vMemo:not([hidden]))::after { content: ''; position: absolute; left: 50%; transform: translateX(-50%); bottom: 40px; width: 268px; height: 188px; pointer-events: none; z-index: 4;
+  background: url(skin/ck-picnic.png) center bottom / contain no-repeat; filter: drop-shadow(0 3px 0 rgba(90, 58, 46, .1)); }
+html.sk-friends.ckfr-trio .panel #list { padding-bottom: 104px; }
+html.sk-friends.ckfr-picnic .panel #list { padding-bottom: 200px; }
+/* 메모지: 둥근 창 + 메모 색 제목줄 + 점선 노트 */
+html.sk-friends #card { border-radius: 20px !important; border: 2.5px solid var(--ck-ink); box-shadow: 0 4px 10px rgba(90, 58, 46, .12); }
+html.sk-friends #card .head { border-radius: 0 !important; border-bottom: 2.5px solid var(--ck-ink); color: var(--ck-ink); }
+html.sk-friends #card .head .title { font-weight: 700; color: var(--ck-ink); }
+html.sk-friends #card .head .ib, html.sk-friends #card .head .grpDot { color: var(--ck-ink); }
+html.sk-friends #card.folded .head { border-bottom: none; height: 100%; }
+html.sk-friends #card .body { background: var(--ck-cream) !important; }
+html.sk-friends #card .text { background-image: radial-gradient(circle, rgba(90, 58, 46, .2) 1px, transparent 1.4px); background-size: 8px 1.7em; background-position: 0 calc(1.7em + 6px); }
+html.sk-friends #card .tools { border-radius: 18px; box-shadow: 0 0 0 2px var(--ck-ink), 0 6px 14px rgba(90, 58, 46, .15); background: var(--ck-cream); }
+/* 달력·오늘 위젯, 플래너, 연락망 */
+html.sk-friends .w, html.sk-friends .pl { background: var(--ck-cream) !important; box-shadow: inset 0 0 0 2.5px var(--ck-ink), 0 6px 14px rgba(90, 58, 46, .14) !important; }
+html.sk-friends .pl .sheet { box-shadow: 0 0 0 2px var(--ck-line); background: #fff; border-radius: 16px; }
+html.sk-friends .pl .dh.today .n { background: var(--ck-pink); color: var(--ck-ink); box-shadow: 0 0 0 2px var(--ck-ink); }
+html.sk-friends .pl .it.done .cb { background: var(--ck-yel); border-color: var(--ck-ink); color: var(--ck-ink); }
+html.sk-friends .gvSec { border-radius: 16px; background: #fff; box-shadow: 0 0 0 2px var(--ck-line); }
+html.sk-friends .gvIco { background: transparent; width: 30px; height: 30px; }
+html.sk-friends .gvIco img { width: 28px; height: 28px; filter: none; }
+/* 시계: 말풍선 안 시간 + 누운 말랑이 */
+html.sk-friends .clock { background: transparent !important; box-shadow: none; padding: 0; display: block; position: relative; width: calc(250px * var(--s, 1)); height: calc(150px * var(--s, 1)); }
+html.sk-friends .clock .time { position: absolute; left: 0; top: 0; padding: calc(8px * var(--s, 1)) calc(20px * var(--s, 1)); background: #fff; border: 2.5px solid var(--ck-ink); border-radius: calc(24px * var(--s, 1)); color: var(--ck-ink); font-size: calc(38px * var(--s, 1)); }
+html.sk-friends .clock .time::after { content: ''; position: absolute; left: 66%; bottom: -11px; width: 18px; height: 18px; background: #fff; border-right: 2.5px solid var(--ck-ink); border-bottom: 2.5px solid var(--ck-ink); transform: rotate(45deg); }
+html.sk-friends .clock .bun { position: absolute; left: calc(78px * var(--s, 1)); top: calc(62px * var(--s, 1)); width: calc(64px * var(--s, 1)); height: calc(88px * var(--s, 1)); filter: drop-shadow(0 2px 0 rgba(90, 58, 46, .15)); }
+html.sk-friends .clock.dark .time { background: #3B302C; color: #FFF0F3; }
+html.sk-friends #done { background: var(--ck-pink); color: var(--ck-ink); border: 2px solid var(--ck-ink); }
+/* 알람 */
+html.sk-friends .wrap .card { background: var(--ck-cream); box-shadow: inset 0 0 0 2.5px var(--ck-ink), 0 16px 34px rgba(90, 58, 46, .22); padding-top: 54px; border-radius: 24px; }
+html.sk-friends .wrap .card::before { content: ''; position: absolute; left: 2.5px; right: 2.5px; top: 2.5px; height: 36px; background: var(--ck-yel); border-bottom: 2.5px solid var(--ck-ink); border-radius: 21.5px 21.5px 0 0; }
+html.sk-friends .wrap .lab { position: absolute; left: 20px; top: 2.5px; height: 36px; display: flex; align-items: center; z-index: 1; color: var(--ck-ink); font-weight: 700; }
+html.sk-friends .wrap .tm { color: var(--ck-ink); }
+html.sk-friends .wrap .memo { border-radius: 16px; background: #FFF0F3; box-shadow: none; border: none; }
+html.sk-friends .wrap .btns button { border-radius: 999px; border: 2px solid var(--ck-line); background: #fff; color: var(--ck-ink); box-shadow: none; }
+html.sk-friends .wrap .btns .ok { background: var(--ck-pink); border-color: var(--ck-ink); }
+/* 말랑이는 제목줄 뒤에서 빼꼼 (손·발은 창 뒤에 숨음) */
+html.sk-friends .art.gx { left: auto; right: 34px; top: -72px; width: 72px; height: 100px; z-index: 4; }
+html.sk-friends .wrap .deco { z-index: 2; }
+/* 말랑 친구들: 목록바 배경지 (직접 그린 그림) — 투명도 조절바를 따름 */
+html.sk-friends .panel { isolation: isolate; }
+html.sk-friends.ckbg-sky .panel::before, html.sk-friends.ckbg-meadow .panel::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; background: url(skin/ck-bg-sky.png) center bottom / 100% auto no-repeat; }
+html.sk-friends.ckbg-meadow .panel::before { background-image: url(skin/ck-bg-meadow.png); }
+html.sk-friends.ckbg-sky .panel { background: rgba(219, 241, 254, calc(.3 + .7 * var(--side-a, 1))) !important; }
+html.sk-friends.ckbg-meadow .panel { background: rgba(218, 234, 198, calc(.3 + .7 * var(--side-a, 1))) !important; }
+html.sk-friends .ckbgs { display: flex; gap: 8px; }
+html.sk-friends .ckbg { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px; border: none; border-radius: 14px; background: #fff; box-shadow: 0 0 0 2px var(--ck-line); color: var(--ck-ink); font: inherit; font-size: 12px; cursor: pointer; }
+html.sk-friends .ckbg img, html.sk-friends .ckbg i { width: 100%; height: 64px; object-fit: cover; object-position: center bottom; border-radius: 10px; display: block; background: var(--ck-cream); }
+html.sk-friends .ckbg[aria-pressed="true"] { box-shadow: 0 0 0 2.5px var(--ck-ink); background: var(--ck-pink); }
+html.sk-friends.ckbg-sky .panel .footrow, html.sk-friends.ckbg-meadow .panel .footrow { position: relative; z-index: 3; background: rgba(255, 253, 249, .92); border-radius: 999px; padding: 4px 12px; box-shadow: 0 0 0 2px var(--ck-line); }
+html.sk-friends.ckbg-sky .panel .foot, html.sk-friends.ckbg-meadow .panel .foot { color: var(--ck-ink); }
+/* 주간 플래너: 새로 그린 말랑이 크게 (친구들은 스티커로 붙이기) */
+html.sk-friends .pl .hd .bun { margin-right: auto !important; width: 46px; height: 54px; margin: -2px 0 -10px 4px; }
+html.sk-friends .pl .hd .bun img { content: url(skin/ck-mal2.png); }
+html.sk-friends .ckh2 { margin-top: 12px; }
+html.sk-friends .ckf { width: 100%; height: 64px; display: flex; align-items: flex-end; justify-content: center; gap: 0; border-radius: 10px; background: var(--ck-cream); padding-bottom: 4px; }
+html.sk-friends .ckbg .ckf img { width: auto; height: 46px; object-fit: contain; border-radius: 0; background: none; margin: 0 -3px; }
+/* 달력(목록바 · 바탕화면): 위 줄엔 구름 + 오늘/화살표, 아래 줄엔 큰 달 + 구름 + 언덕 위 말랑이, 달 끝 빈 칸엔 친구들 */
+.ckRow { display: none; }
+html.sk-friends .calhead, html.sk-friends .w .hd { flex-wrap: wrap; position: relative; row-gap: 0; }
+html.sk-friends .calhead::before, html.sk-friends .w .hd::before { content: ''; order: 0; width: 46px; height: 30px; margin-right: auto; background: url(skin/ck-cloud2.png) left center / contain no-repeat; pointer-events: none; }
+html.sk-friends .calnav { order: 1; }
+html.sk-friends .w .hd .today, html.sk-friends .w .hd .nav { order: 1; }
+html.sk-friends .calttl, html.sk-friends .w .ttl { order: 2; flex: 1 0 100%; min-height: 80px; align-items: flex-end; align-content: flex-end; flex-wrap: wrap; padding: 0 0 2px 2px; }
+html.sk-friends .calnum, html.sk-friends .w .num { font-size: calc(34px * var(--cs, 1)); }
+html.sk-friends .calen, html.sk-friends .w .en { font-size: calc(12px * var(--cs, 1)); padding-bottom: 3px; }
+html.sk-friends .calhead::after, html.sk-friends .w .hd::after { content: ''; position: absolute; right: -12px; bottom: 0; width: 150px; height: 80px; pointer-events: none;
+  background: url(skin/ck-cloud2.png) 6px 16px / 30px auto no-repeat, url(skin/ck-hillmal.png) right bottom / auto 80px no-repeat; }
+html.sk-friends .w .hd::after { right: -9px; width: 136px; height: 76px; background-size: 26px auto, auto 76px; }
+html.sk-friends .ckTail { position: relative; display: block; }
+html.sk-friends .ckRow { display: block; height: 44px; }
+html.sk-friends .ckTail::after { content: ''; position: absolute; right: 0; bottom: -4px; width: 100%; height: calc(100% + 14px); max-height: 58px; pointer-events: none;
+  background: url(skin/ck-trio.png) right bottom / contain no-repeat; filter: drop-shadow(0 2px 0 rgba(90, 58, 46, .1)); }
+html.sk-friends .ckfr .ckf img { height: 50px; max-width: 100%; }

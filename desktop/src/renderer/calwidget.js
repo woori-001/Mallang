@@ -36,7 +36,7 @@
       h += '<div class="cell"><button type="button"' + (hol ? ' title="' + esc(hol) + '"' : '') + ' class="day' + (k === todayK ? ' today' : '') + (k === sel ? ' sel' : '') + '" data-k="' + k + '" style="color:' + color + '">' +
         '<span>' + dt.getDate() + '</span><span class="dots">' + evs.slice(0, 3).map((e) => '<i style="background:' + EVENT_COLORS[e.c] + '"></i>').join('') + '</span></button></div>';
     }
-    $('grid').innerHTML = h;
+    $('grid').innerHTML = window.M.calTail(h, count, start + new Date(y, m + 1, 0).getDate());
     const p = sel.split('-').map(Number), sd = new Date(p[0], p[1] - 1, p[2]);
     const list = window.M.eventsOn(S.events, sel);
     const selHol = window.M.holiday(sel);

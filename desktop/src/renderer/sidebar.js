@@ -617,7 +617,7 @@
       html += '<div class="cell"><button' + (hol ? ' title="' + esc(hol) + '"' : '') + ' class="day' + (wd === 0 || hol ? ' sun' : '') + (hol ? ' hol' : '') + (k === todayK ? ' today' : '') + (k === sel ? ' sel' : '') + '" type="button" data-k="' + k + '" style="color:' + color + '" aria-pressed="' + (k === sel) + '" aria-label="' + (dt.getMonth() + 1) + '월 ' + dt.getDate() + '일' + (evs.length ? ', 일정 ' + evs.length + '개' : '') + '">' +
         '<span>' + dt.getDate() + '</span><span class="dots">' + evs.slice(0, 3).map((ev) => '<i style="background:' + EVENT_COLORS[ev.c] + '"></i>').join('') + '</span></button></div>';
     }
-    $('grid').innerHTML = html;
+    $('grid').innerHTML = window.M.calTail(html, count, start + daysIn);
     const sp = sel.split('-').map(Number);
     const sd = new Date(sp[0], sp[1] - 1, sp[2]);
     const selHol = window.M.holiday(sel);
@@ -886,7 +886,7 @@
     const openSk = S.openSkins || [];
     // 스킨은 분류별로 묶어서 (계절 스킨은 공개됐거나 관리자이거나 지금 쓰는 중일 때만)
     const GROUPS = [['기본 스킨', ['lav']], ['컬러 스킨', ['pink', 'cotton', 'blue', 'midnight']], ['디자인 스킨', ['peach', 'forest', 'honey', 'sky', 'aurora']],
-      ['페이퍼 스킨', ['office', 'sage', 'berry']], ['말랑 스킨', ['draw']], ['시즌 스킨', ['halloween', 'xmas', 'ghalloween', 'gxmas']], ['베타 스킨', ['retro', 'excel', 'ninja']]];
+      ['페이퍼 스킨', ['office', 'sage', 'berry']], ['말랑 스킨', ['draw']], ['시즌 스킨', ['halloween', 'xmas', 'ghalloween', 'gxmas']], ['베타 스킨', ['retro', 'excel', 'ninja', 'friends']]];
     const listed = new Set(GROUPS.flatMap((g) => g[1]));
     const rest = Object.keys(SKINS).filter((id) => !listed.has(id));
     if (rest.length) GROUPS[1][1] = GROUPS[1][1].concat(rest);   // 혹시 빠진 스킨은 컬러 스킨에
@@ -931,6 +931,9 @@
     $('calScaleV').textContent = csv + '%';
     $('alphaV').textContent = s.alpha + '%';
     $('sideAlphaV').textContent = s.sideAlpha + '%';
+    $('ckBgBox').hidden = s.skin !== 'friends';
+    document.querySelectorAll('.ckbg').forEach((b) => b.setAttribute('aria-pressed', String((s.ckBg || 'sky') === b.dataset.ckbg)));
+    document.querySelectorAll('.ckfr').forEach((b) => b.setAttribute('aria-pressed', String((s.ckFr || 'picnic') === b.dataset.ckfr)));
     $('autoStart').setAttribute('aria-pressed', String(!!s.autoStart));
     renderSysToggles();
     const mons = S.displays || [];
@@ -972,6 +975,7 @@
   const setCs = (v) => { v = Math.min(150, Math.max(70, v)); $('calScale').value = v; $('calScaleV').textContent = v + '%'; api.setSettings({ calScale: v }); };
   $('calScale').addEventListener('input', (e) => setCs(Number(e.target.value)));
   $('alpha').addEventListener('input', (e) => { $('alphaV').textContent = e.target.value + '%'; api.setSettings({ alpha: Number(e.target.value) }); });
+  $('ckBgBox').addEventListener('click', (e) => { const b = e.target.closest('[data-ckbg]'); if (b) api.setSettings({ ckBg: b.dataset.ckbg }); const c = e.target.closest('[data-ckfr]'); if (c) api.setSettings({ ckFr: c.dataset.ckfr }); });
   $('sideAlpha').addEventListener('input', (e) => {
     $('sideAlphaV').textContent = e.target.value + '%';
     if (!sk || !sk.paper) { const v = Number(e.target.value) / 100; panel.style.background = 'rgba(' + ((sk && sk.panelRGB) || 'var(--glass)') + ',' + (sk && sk.panelRGB ? Math.round((0.35 + 0.65 * v) * 100) / 100 : v) + ')'; }

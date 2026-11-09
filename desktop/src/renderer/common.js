@@ -115,6 +115,13 @@
       a1: '#217346', a2: '#6FB58A', ink: '#3A3533', sub: '#6E6A68', sun: '#D9546E', sat: '#3B6FC4', glow: 'rgba(33,115,70,0.20)', on: '#FFFFFF',
       pal: [[[255, 255, 255], [255, 255, 255]], [[255, 244, 247], [255, 244, 247]], [[255, 250, 230], [255, 250, 230]], [[240, 248, 236], [240, 248, 236]], [[240, 245, 255], [240, 245, 255]]]
     },
+    friends: {
+      name: '말랑 친구들', paper: true, beta: true, pcOnly: true, solidAccent: true, look: 'friends', bunny: 'skin/ck-mal2.png', logo: 'skin/ck-logo.png', paperBg: '#FFFDF9',
+      rowIcons: ['skin/ck-pbear.png', 'skin/ck-pfish.png', 'skin/ck-pstar.png', 'skin/ck-clover.png', 'skin/ck-flower.png'], groupIcon: 'skin/ck-pouch.png',
+      base: '#FFF6F3', b: ['#F7C6D0', '#FFF6F3', '#C9DAEE', '#FFFDF9'],
+      a1: '#E8899E', a2: '#F7C6D0', ink: '#5A3A2E', sub: '#A08578', sun: '#E0708A', sat: '#6E95C8', glow: 'rgba(232,137,158,0.25)', on: '#5A3A2E',
+      pal: [[[247, 198, 208], [247, 198, 208]], [[201, 218, 238], [201, 218, 238]], [[248, 232, 174], [248, 232, 174]], [[215, 235, 200], [215, 235, 200]], [[227, 218, 242], [227, 218, 242]]]
+    },
     ninja: {
       name: '닌자 말랑', paper: true, beta: true, look: 'ninja', bunny: 'skin/nj-bun1.png', logo: 'skin/nj-logo.png', paperBg: '#F2E7D0',
       rowIcons: ['skin/nj-scroll.png', 'skin/nj-shuriken.png', 'skin/nj-kunai.png', 'skin/nj-bomb.png', 'skin/nj-ramen.png'], groupIcon: 'skin/nj-curtain.png',
@@ -193,6 +200,12 @@
   const dateKey = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
 
   // 스킨·글꼴을 CSS 변수로 적용
+  // 말랑 친구들 달력: 달 끝의 빈 칸에 친구들이 서 있을 자리 (빈 칸이 모자라면 아래 한 줄 더)
+  function calTail(html, count, filled) {
+    const tail = count - filled;
+    if (tail >= 3) return html.replace(new RegExp('(<div class="cell"></div>){' + tail + '}$'), '<div class="cell ckTail" style="grid-column: span ' + tail + '" data-n="' + tail + '"></div>');
+    return html + '<div class="ckTail ckRow" style="grid-column: 1 / -1"></div>';
+  }
   function applyTheme(settings) {
     const sk = SKINS[settings.skin] || SKINS.lav;
     const f = FONTS.find((x) => x.id === settings.font) || FONTS[0];
@@ -227,6 +240,10 @@
     document.documentElement.classList.toggle('sk-retro', sk.look === 'retro');
     document.documentElement.classList.toggle('sk-excel', sk.look === 'excel');
     document.documentElement.classList.toggle('sk-ninja', sk.look === 'ninja');
+    document.documentElement.classList.toggle('sk-friends', sk.look === 'friends');
+    // 말랑 친구들: 목록바 배경지 · 주간 플래너 친구들 고르기
+    { const h = document.documentElement.classList, cb = settings.ckBg || 'sky', cp = settings.ckPl || 'trio', cf = settings.ckFr || 'picnic';
+      h.toggle('ckbg-sky', cb === 'sky'); h.toggle('ckbg-meadow', cb === 'meadow'); h.toggle('ckpl-trio', cp === 'trio'); h.toggle('ckpl-duo', cp === 'duo'); h.toggle('ckfr-picnic', cf === 'picnic'); h.toggle('ckfr-trio', cf === 'trio'); }
     for (const d of ['forest', 'peach', 'lemon', 'sky', 'aurora']) document.documentElement.classList.toggle('g-' + d, sk.deco === d);   // 디자인 스킨 장식
     r.setProperty('--paper-bg', sk.paperBg || '#FBFAF5');
     // 드로잉 스킨에서는 말랑이도 손그림으로
@@ -332,6 +349,7 @@
     retro: ['../skin/rt-star', '../skin/rt-heart', '../skin/rt-sparkle', '../skin/rt-note', '../skin/rt-star2', '../skin/rt-heart2', '../skin/rt-bell', '../skin/rt-sun', '../skin/rt-cloud', '../skin/rt-moon'],
     excel: ['../skin/xl-bar', '../skin/xl-fx', '../skin/xl-pie', '../skin/xl-sum', '../skin/xl-line', '../skin/xl-az', '../skin/xl-cell', '../skin/xl-filter', '../skin/xl-grid'],
     ninja: ['../skin/nj-shuriken', '../skin/nj-kunai', '../skin/nj-leafg', '../skin/nj-sakura', '../skin/nj-ramen', '../skin/nj-petal', '../skin/nj-redcloud', '../skin/nj-scroll', '../skin/nj-excl'],
+    friends: ['../skin/ck-pbear', '../skin/ck-pfish', '../skin/ck-pstar', '../skin/ck-music', '../skin/ck-spark', '../skin/ck-heart', '../skin/ck-flower', '../skin/ck-starface', '../skin/ck-candy', '../skin/ck-clover', '../skin/ck-excl', '../skin/ck-strawb'],
     draw: ['stkd-star', 'stkd-heart', 'stkd-spark', 'stkd-sparks', 'stkd-hearts', 'stkd-note', 'stkd-flower', 'stkd-star']
   };
   // 화살표 그림이 원래 가리키는 방향(도) — 날아가는 쪽으로 돌려 줌
@@ -754,6 +772,7 @@
   // 부서 프사: 스킨에 아이콘 묶음이 있으면 부서 이름마다 하나씩 (늘 같은 부서엔 같은 그림)
   const DEPT_ICONS = {
     'sk-ninja': ['toad', 'slug', 'gourd', 'mask', 'ramen', 'scroll', 'shuriken', 'tails', 'sakura', 'leafg', 'bomb', 'kunai'].map((n) => 'skin/nj-' + n + '.png'),
+    'sk-friends': ['pbear', 'pfish', 'pstar', 'onigiri', 'dango', 'taiyaki', 'strawb', 'mochi', 'candy', 'drink', 'rice', 'corndog', 'bun1', 'starface', 'clover'].map((n) => 'skin/ck-' + n + '.png'),
     'sk-retro': ['pc', 'folder', 'floppy', 'mail', 'heart', 'star', 'note', 'bell', 'sun', 'moon'].map((n) => 'skin/rt-' + n + '.png')
   };
   const hashStr = (t) => { let h = 0; for (const ch of String(t)) h = (h * 31 + ch.codePointAt(0)) >>> 0; return h; };
@@ -1026,5 +1045,5 @@
     burst(1200);
   }
   const SEASONS_ON = false;   // 계절 스킨 꺼내기: true 로 바꾸면 스킨 목록에 나타남
-  window.M = { holiday, HOLIDAYS, alarmSound, ALARM_SOUNDS, ALARM_PARTY, ALARM_ARROW, SEASONS_ON, fitShape, REPEATS, REPEAT_NAME, repeatsOn, recurring, eventsOn, GROUP_COLORS, syncRanges, TBL, CONTACT_HEAD, fixContactRows, contactView, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, markSvg };
+  window.M = { holiday, HOLIDAYS, alarmSound, ALARM_SOUNDS, ALARM_PARTY, ALARM_ARROW, SEASONS_ON, fitShape, REPEATS, REPEAT_NAME, repeatsOn, recurring, eventsOn, GROUP_COLORS, syncRanges, TBL, CONTACT_HEAD, fixContactRows, contactView, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, calTail, markSvg };
 })();

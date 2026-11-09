@@ -7,6 +7,13 @@
   const KO = ['월', '화', '수', '목', '금', '토', '일'];
   const COLORS = ['peach', 'mint', 'sky', 'lav', 'lemon', 'pink', 'stripe', 'dot'];
   const BASE_ROWS = 8;
+  // 말랑 친구들 스킨: 직접 그린 친구들·소품 그림 스티커 ('ck:이름' 으로 저장)
+  const CK_CHARS = ['picnic', 'mal2', 'mallang', 'bear', 'cat', 'rabbit', 'momo', 'pink', 'trio', 'duo'];
+  const CK_ITEMS = ['pbear', 'pfish', 'pstar', 'onigiri', 'dango', 'taiyaki', 'strawb', 'mochi', 'rice', 'corndog', 'bun1', 'candy', 'drink', 'heart', 'flower', 'clover', 'spark', 'starface', 'music', 'balloon', 'gift1', 'gift2', 'medal', 'coin', 'ticket', 'note', 'pencil', 'eraser', 'camera', 'lantern', 'tent', 'pouch', 'talk', 'ex', 'q', 'exq', 'excl', 'drops', 'puff', 'swirl', 'zzz', 'starwand', 'wandp', 'wandb', 'stick', 'cloud'];
+  const ckOn = () => document.documentElement.classList.contains('sk-friends');
+  const isCk = (e) => /^ck:[a-z0-9]+$/.test(e);
+  const ckImg = (e) => '<img src="skin/ck-' + e.slice(3) + '.png" alt="" draggable="false">';
+  const ckCls = (e) => (CK_CHARS.includes(e.slice(3)) ? (/^ck:(trio|duo|picnic)$/.test(e) ? ' ckSk ckWide' : ' ckSk ckBig') : ' ckSk');
   const EMOJI = {
     '표정': '😀 😊 🥰 😍 😎 🤓 🥳 😴 🤯 😭 😤 🤔 😇 🫠 😵‍💫 🙃 😋 🤗 😌 🥲 😱 🫡 🤩 😮‍💨',
     '하트': '❤️ 🧡 💛 💚 💙 💜 🩷 🤍 🖤 💖 💗 💝 ✨ ⭐ 🌟 💫 ⚡ 🔥 💯 🎵',
@@ -192,7 +199,7 @@
     fit();
   }
   function renderStickers() {
-    stk.innerHTML = W.stickers.map((s, k) => '<span class="sk" data-k="' + k + '" style="left:' + s.x + '%;top:' + s.y + '%;--r:' + s.r + 'deg" title="끌어서 옮기기 · 휠로 기울이기 · 더블클릭으로 떼기">' + esc(s.e) + '</span>').join('');
+    stk.innerHTML = W.stickers.map((s, k) => '<span class="sk' + (isCk(s.e) ? ckCls(s.e) : '') + '" data-k="' + k + '" style="left:' + s.x + '%;top:' + s.y + '%;--r:' + s.r + 'deg" title="끌어서 옮기기 · 휠로 기울이기 · 더블클릭으로 떼기">' + (isCk(s.e) ? ckImg(s.e) : esc(s.e)) + '</span>').join('');
   }
 
   // ───────── 출퇴근
@@ -331,12 +338,17 @@
   }
 
   // ───────── 스티커
-  let cat = '표정';
+  let cat = '표정', ckSeen = false;
   $('tSticker').addEventListener('click', (e) => stickerPop(e.currentTarget));
   function stickerPop(anchor) {
+    const CK = ckOn() ? { '말랑 친구들': CK_CHARS, '친구들 소품': CK_ITEMS } : {};
+    if (!CK[cat] && !EMOJI[cat]) cat = '표정';
+    if (ckOn() && !ckSeen) { cat = '말랑 친구들'; ckSeen = true; }
     const draw = () => {
-      pop.innerHTML = '<h4>🌷 스티커 고르기</h4><div class="cats">' + Object.keys(EMOJI).map((c) => '<button type="button" data-c="' + c + '" class="' + (c === cat ? 'on' : '') + '">' + c + '</button>').join('') + '</div>' +
-        '<div class="emos">' + EMOJI[cat].split(' ').map((em) => '<button type="button" data-e="' + em + '">' + em + '</button>').join('') + '</div>' +
+      const cats = Object.keys(CK).concat(Object.keys(EMOJI));
+      const list = CK[cat] ? CK[cat].map((n) => 'ck:' + n) : EMOJI[cat].split(' ');
+      pop.innerHTML = '<h4>🌷 스티커 고르기</h4><div class="cats">' + cats.map((c) => '<button type="button" data-c="' + c + '" class="' + (c === cat ? 'on' : '') + (CK[c] ? ' ckCat' : '') + '">' + c + '</button>').join('') + '</div>' +
+        '<div class="emos' + (CK[cat] ? ' ckEmos' + (cat === '말랑 친구들' ? ' ckBigs' : '') : '') + '">' + list.map((em) => '<button type="button" data-e="' + em + '">' + (isCk(em) ? ckImg(em) : em) + '</button>').join('') + '</div>' +
         '<div class="tip">고른 뒤 플래너 아무 곳이나 누르면 붙어요<br>끌어서 옮기기 · 휠로 기울이기 · 더블클릭으로 떼기</div>';
     };
     openPop(anchor, ''); pop.classList.add('emo'); draw(); placePop(anchor);
@@ -347,7 +359,7 @@
   }
   function startPlace(em) {
     placing = em; stk.classList.add('placing');
-    $('hint').hidden = false; $('hint').textContent = em + ' 붙일 곳을 눌러 주세요 (Esc 취소)';
+    $('hint').hidden = false; $('hint').textContent = (isCk(em) ? '스티커' : em) + ' 붙일 곳을 눌러 주세요 (Esc 취소)';
   }
   function stopPlace() { placing = null; stk.classList.remove('placing'); $('hint').hidden = true; }
   function pct(e) { const r = stk.getBoundingClientRect(); return { x: Math.min(99, Math.max(1, (e.clientX - r.left) / r.width * 100)), y: Math.min(99, Math.max(1, (e.clientY - r.top) / r.height * 100)) }; }

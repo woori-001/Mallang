@@ -244,3 +244,15 @@ html.g-aurora .bun img { filter: drop-shadow(0 0 6px rgba(150, 220, 255, .6)); }
 html.draw .dh .hol { background: transparent; box-shadow: inset 0 0 0 1.4px currentColor; }
 
 .sum .sl.slw { line-height: 1.6; font-size: 11.5px; color: var(--sub); } .sum .sl.slw span { font-weight: 600; } .sum .sl.slw b { font-size: 12.5px; color: var(--sat); }
+/* 말랑 친구들 그림 스티커 */
+.sk.ckSk { font-size: 0; filter: drop-shadow(0 2px 2px rgba(90, 58, 46, .16)); }
+.sk.ckSk img { display: block; height: 32px; width: auto; pointer-events: none; }
+.sk.ckBig img { height: 60px; }
+.sk.ckWide img { height: 58px; }
+.pop .emos.ckEmos { grid-template-columns: repeat(7, 1fr); gap: 4px; max-height: 220px; }
+.pop .emos.ckEmos button { height: 40px; display: grid; place-items: center; }
+.pop .emos.ckEmos button img { max-height: 32px; max-width: 40px; }
+.pop .emos.ckBigs { grid-template-columns: repeat(5, 1fr); }
+.pop .emos.ckBigs button { height: 60px; }
+.pop .emos.ckBigs button img { max-height: 54px; max-width: 58px; }
+.pop .cats .ckCat { font-weight: 700; }
