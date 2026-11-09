@@ -491,3 +491,5 @@ html.sk-friends .ckRow { display: block; height: 44px; }
 html.sk-friends .ckTail::after { content: ''; position: absolute; right: 0; bottom: -4px; width: 100%; height: calc(100% + 14px); max-height: 58px; pointer-events: none;
   background: url(skin/ck-trio.png) right bottom / contain no-repeat; filter: drop-shadow(0 2px 0 rgba(90, 58, 46, .1)); }
 html.sk-friends .ckfr .ckf img { height: 50px; max-width: 100%; }
+/* 스킨 고르기 동그라미: 서 있는 말랑이처럼 키 큰 그림도 동그라미 안에 쏙 */
+.skin .swDraw img { max-height: 84%; object-fit: contain; }
