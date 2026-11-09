@@ -396,7 +396,7 @@ html.sk-friends .tab { background: var(--ck-pink); border: 2.5px solid var(--ck-
 html.sk-friends .panel { background: radial-gradient(circle, rgba(242, 165, 182, .22) 2.2px, transparent 2.6px) 0 0 / 34px 34px, rgba(255, 249, 247, var(--side-a, 1)) !important; border: 2.5px solid var(--ck-ink); border-right: none; box-shadow: none; }
 html.sk-friends .phead { padding-top: 6px; }
 html.sk-friends .appname { position: relative; }
-html.sk-friends .applogo { height: auto; width: 188px; filter: none; margin: -6px 0 -4px -4px; }
+html.sk-friends .applogo { height: auto; width: 168px; filter: none; margin: 4px 0 2px; }
 html.sk-friends .seg { background: transparent; box-shadow: none; gap: 4px; }
 html.sk-friends .segb { border-radius: 999px; border: 2px solid transparent; color: var(--ck-sub); font-weight: 700; }
 html.sk-friends .segb.on { background: var(--ck-pink); color: var(--ck-ink); border-color: var(--ck-ink); box-shadow: none; }
