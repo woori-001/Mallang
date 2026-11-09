@@ -499,7 +499,8 @@ html.sk-friends .panel .calcard, html.sk-friends .w { position: relative; overfl
 html.sk-friends .panel .calcard #grid, html.sk-friends .w #grid { position: relative; padding-bottom: 52px; }
 html.sk-friends .panel .calcard #grid::after, html.sk-friends .w #grid::after { content: ''; position: absolute; right: -12px; bottom: -10px; width: calc(74% + 12px); aspect-ratio: 400 / 195; pointer-events: none;
   background: url(skin/ck-picnic-hill.png) right bottom / 100% auto no-repeat; }
-html.sk-friends .w #grid::after { bottom: -8px; right: 0; width: 72%; aspect-ratio: auto; height: 52%; max-height: 120px; background: url(skin/ck-picnic-mound.png) right bottom / contain no-repeat; }
+html.sk-friends .w #grid { padding-bottom: 64px; }
+html.sk-friends .w #grid::after { bottom: -8px; right: -2px; width: 86%; aspect-ratio: 460 / 211; background: url(skin/ck-picnic-mound.png) right bottom / 100% auto no-repeat; }
 html.sk-friends .ckfr .ckf img { height: 50px; max-width: 100%; }
 /* 스킨 고르기 동그라미: 서 있는 말랑이처럼 키 큰 그림도 동그라미 안에 쏙 */
 .skin .swDraw img { max-height: 84%; object-fit: contain; }
