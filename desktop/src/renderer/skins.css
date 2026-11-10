@@ -48,7 +48,7 @@ html.sk-retro .panel .foot { color: var(--rt-ink); }
 html.sk-retro #card { border-radius: 0 !important; box-shadow: 0 0 0 3px var(--rt-ink) inset, inset 5px 5px 0 var(--rt-hi), inset -5px -5px 0 var(--rt-sh); padding: 5px; }
 html.sk-retro #card:hover { box-shadow: 0 0 0 3px var(--rt-ink) inset, inset 5px 5px 0 var(--rt-hi), inset -5px -5px 0 var(--rt-sh); }
 html.sk-retro #card .head { background: var(--rt-blue) !important; border-radius: 0 !important; border-bottom: none; color: #fff; height: 32px; box-shadow: inset 0 -2px 0 #0F2296; }
-html.sk-retro #card.folded .head { height: 28px; }
+html.sk-retro #card.folded .head { height: calc(var(--fold-h, 32px) - 4px); }
 html.sk-retro #card .head .ib, html.sk-retro #card .head .title, html.sk-retro #card .head .grpDot { color: #fff; opacity: 1; }
 html.sk-retro #card .head .title { font-family: 'Galmuri11', var(--memo-font); }
 html.sk-retro #card .head .more, html.sk-retro #card .head .hnew, html.sk-retro #card .head .fold { width: 22px; height: 20px; background: var(--rt-face); color: var(--rt-ink); border: 2px solid var(--rt-ink); box-shadow: inset 1.5px 1.5px 0 var(--rt-hi), inset -1.5px -1.5px 0 var(--rt-sh); margin-left: 3px; }

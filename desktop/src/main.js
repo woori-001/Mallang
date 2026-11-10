@@ -21,7 +21,9 @@ const FOLD_W = 180, FOLD_H = 32;
 const clampFs = (v) => Math.min(250, Math.max(50, Math.round(Number(v) || 100)));   // 접은 메모 가로 길이 %
 const foldScale = (m) => clampFs((m && m.fs) || (store && store.settings && store.settings.foldScale) || 100);
 const foldW = (m) => Math.round(FOLD_W * foldScale(m) / 100);
-const foldH = () => FOLD_H;   // 높이는 그대로, 가로만 조절
+// 접은 메모 세로 높이 (%) : 전체 설정(foldHScale) — 가로와 따로
+const clampFh = (v) => Math.min(150, Math.max(70, Math.round(Number(v) || 100)));
+const foldH = () => Math.round(FOLD_H * clampFh(store && store.settings && store.settings.foldHScale) / 100);
 const SIDE_W = 370;            // 목록 패널 340 + 탭 30
 const WIDGET_W = 284;
 const CALW_W = 300;   // 달력 위젯
@@ -46,7 +48,7 @@ let dataDir, dataFile, store, saveTimer, quitting = false;
 function defaults() {
   return {
     version: 1,
-    settings: { skin: 'lav', font: 'gowun', fontScale: 100, titleScale: 100, titleBold: true, calFont: 'same', calScale: 100, peopleFont: 'same', peopleScale: 100, bodyBg: false, alpha: 60, sideAlpha: 55, showToday: true, showCal: false, showPeople: false, clockMode: 30, clockAlpha: 75, clockScale: 100, clockDark: false, alarmScale: 80, alarmPos: 'tc', foldScale: 100, memoRound: 100, noticeOn: true, pinned: false, autoStart: false, foldDesk: false, foldDeskWhich: 'peek', ckBg: 'sky', ckPl: 'trio', ckFr: 'picnic', ckClock: 'bubble' },
+    settings: { skin: 'lav', font: 'gowun', fontScale: 100, titleScale: 100, titleBold: true, calFont: 'same', calScale: 100, peopleFont: 'same', peopleScale: 100, bodyBg: false, alpha: 60, sideAlpha: 55, showToday: true, showCal: false, showPeople: false, clockMode: 30, clockAlpha: 75, clockScale: 100, clockDark: false, alarmScale: 80, alarmPos: 'tc', foldScale: 100, foldHScale: 100, memoRound: 100, noticeOn: true, pinned: false, autoStart: false, foldDesk: false, foldDeskWhich: 'peek', ckBg: 'sky', ckPl: 'trio', ckFr: 'picnic', ckClock: 'bubble' },
     nextId: 2,
     memos: [{
       id: 1, slot: 0, x: null, y: null, w: 290, h: 240, type: 'text', title: '말랑메모 시작하기',
@@ -1417,10 +1419,11 @@ function updateSettings(patch) {
   if ('bodyBg' in patch) patch.bodyBg = !!patch.bodyBg;
   if ('titleBold' in patch) patch.titleBold = !!patch.titleBold;
   if ('titleScale' in patch) patch.titleScale = Math.min(170, Math.max(70, Number(patch.titleScale) || 100));
-  const keys = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'showCal', 'showPeople', 'clockMode', 'clockAlpha', 'clockScale', 'clockDark', 'alarmScale', 'alarmPos', 'foldScale', 'memoRound', 'sideDisplay', 'noticeOn', 'pinned', 'autoStart', 'foldDesk', 'foldDeskWhich', 'ckBg', 'ckPl', 'ckFr', 'ckClock'];
+  const keys = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'showCal', 'showPeople', 'clockMode', 'clockAlpha', 'clockScale', 'clockDark', 'alarmScale', 'alarmPos', 'foldScale', 'foldHScale', 'memoRound', 'sideDisplay', 'noticeOn', 'pinned', 'autoStart', 'foldDesk', 'foldDeskWhich', 'ckBg', 'ckPl', 'ckFr', 'ckClock'];
   if ('noticeOn' in patch) patch.noticeOn = !!patch.noticeOn;
   if ('sideDisplay' in patch) patch.sideDisplay = typeof patch.sideDisplay === 'number' && isFinite(patch.sideDisplay) ? patch.sideDisplay : null;
   if ('foldScale' in patch) patch.foldScale = clampFs(patch.foldScale);
+  if ('foldHScale' in patch) patch.foldHScale = clampFh(patch.foldHScale);
   if ('memoRound' in patch) patch.memoRound = Math.min(100, Math.max(0, Math.round(Number(patch.memoRound)))) || 0;
   if ('clockMode' in patch) patch.clockMode = [0, 30, 60].includes(Number(patch.clockMode)) ? Number(patch.clockMode) : 30;
   if ('clockAlpha' in patch) patch.clockAlpha = Math.min(100, Math.max(20, Number(patch.clockAlpha) || 75));
@@ -1431,10 +1434,11 @@ function updateSettings(patch) {
   if ('foldDesk' in patch) patch.foldDesk = !!patch.foldDesk;
   if ('foldDeskWhich' in patch) patch.foldDeskWhich = patch.foldDeskWhich === 'all' ? 'all' : 'peek';
   if ('fontScale' in patch) patch.fontScale = Math.min(170, Math.max(70, Number(patch.fontScale) || 100));
-  const oldFold = new Map(store.memos.filter((m) => m.folded && m.fs == null && m.x != null && !m.hidden && !m.deleting).map((m) => [m, [foldW(m), foldH(m)]]));
+  const fhChange = 'foldHScale' in patch && clampFh(patch.foldHScale) !== clampFh(prev.foldHScale);
+  const oldFold = new Map(store.memos.filter((m) => m.folded && (m.fs == null || fhChange) && m.x != null && !m.hidden && !m.deleting).map((m) => [m, [foldW(m), foldH(m)]]));
   for (const k of keys) if (k in patch) store.settings[k] = patch[k];
   const s = store.settings;
-  if (s.foldScale !== prev.foldScale) {
+  if (s.foldScale !== prev.foldScale || s.foldHScale !== prev.foldHScale) {
     // 전체 접은 크기 바뀜 → 접힌 메모 창 크기 맞추기
     for (const [m, [w0, h0]] of oldFold) {
       keepEdges(m, w0, h0, foldW(m), foldH(m));
@@ -2313,7 +2317,7 @@ async function cloudStart() {
 // ───────── 배치·꾸미기 맞추기 (같은 계정이면 어느 PC에서든 같은 배치) ─────────
 // 메모마다 배치 시각(lt)을 따로 두어, 한 PC에서 옮긴 메모만 다른 PC에 반영돼요.
 const LAYOUT_KEYS = ['x', 'y', 'w', 'h', 'folded', 'layer', 'hidden', 'group', 'ox', 'oy', 'fs'];
-const SYNC_SETTINGS = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha', 'foldScale', 'memoRound', 'ckBg', 'ckPl', 'ckFr', 'ckClock'];
+const SYNC_SETTINGS = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha', 'foldScale', 'foldHScale', 'memoRound', 'ckBg', 'ckPl', 'ckFr', 'ckClock'];
 let applyingLayout = false;
 function markLayout() {
   if (applyingLayout || !store.layoutSync) return;

@@ -13,7 +13,7 @@
   const FOLD_W = 180, FOLD_H = 32, MIN_W = 180, MIN_H = 110;
   // 접은 크기 (%) : 이 메모 값 → 없으면 전체 설정
   const foldPct = () => Math.min(250, Math.max(50, Math.round(Number((memo && memo.fs) || (settings && settings.foldScale) || 100))));
-  const foldW = () => (fLocalW != null ? fLocalW : Math.round(FOLD_W * foldPct() / 100)), foldH = () => FOLD_H;
+  const foldW = () => (fLocalW != null ? fLocalW : Math.round(FOLD_W * foldPct() / 100)), foldH = () => Math.round(FOLD_H * Math.min(150, Math.max(70, Math.round(Number(settings && settings.foldHScale) || 100))) / 100);
   let fLocalW = null;
 
   let memo = null, settings = null, sk = null, groups = [], lastFolded = null, arT = null;

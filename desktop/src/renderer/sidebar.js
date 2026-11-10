@@ -912,6 +912,9 @@
     const fdv = s.foldScale || 100;
     if (document.activeElement !== $('foldScale')) $('foldScale').value = fdv;
     $('foldScaleV').textContent = fdv + '%';
+    const fhv = s.foldHScale || 100;
+    if (document.activeElement !== $('foldHScale')) $('foldHScale').value = fhv;
+    $('foldHScaleV').textContent = fhv + '%';
     const own = (S.memos || []).filter((m) => m.fs && !m.deleting).length;
     $('fsClear').hidden = !own;
     $('fsClear').textContent = '따로 길이를 정한 메모 ' + own + '개도 이 길이로 맞추기';
@@ -964,6 +967,7 @@
   $('noticeOn').addEventListener('click', () => api.setSettings({ noticeOn: S.settings.noticeOn === false }));
   $('fontSel').addEventListener('change', (e) => api.setSettings({ font: e.target.value }));
   $('memoRound').addEventListener('input', (e) => { $('memoRoundV').textContent = e.target.value + '%'; api.setSettings({ memoRound: Number(e.target.value) }); });
+  $('foldHScale').addEventListener('input', (e) => { $('foldHScaleV').textContent = e.target.value + '%'; api.setSettings({ foldHScale: Number(e.target.value) }); });
   $('foldScale').addEventListener('input', (e) => { $('foldScaleV').textContent = e.target.value + '%'; api.setSettings({ foldScale: Number(e.target.value) }); });
   $('fsClear').addEventListener('click', () => api.foldSizeReset());
   $('titleScale').addEventListener('input', (e) => { $('titleScaleV').textContent = e.target.value + '%'; api.setSettings({ titleScale: Number(e.target.value) }); });

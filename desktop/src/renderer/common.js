@@ -269,7 +269,9 @@
     const ts = (settings.titleScale || 100) / 100;                 // 제목 크기 (본문과 따로)
     r.setProperty('--memo-title-size', Math.round(14 * tf * ts * 10) / 10 + 'px');
     r.setProperty('--ts', String(ts));
-    r.setProperty('--fold-title-size', Math.round(13 * tf * Math.min(ts, 1.25) * 10) / 10 + 'px');   // 접힌 바는 높이가 정해져 있어 조금만
+    const fh = Math.min(150, Math.max(70, Math.round(Number(settings.foldHScale) || 100))) / 100;
+    r.setProperty('--fold-h', Math.round(32 * fh) + 'px');
+    r.setProperty('--fold-title-size', Math.round(13 * tf * Math.min(ts, 1.25) * Math.min(1, fh + 0.15) * 10) / 10 + 'px');   // 접힌 바는 높이가 정해져 있어 조금만 (낮게 접으면 글자도 조금 작게)   // 접힌 바는 높이가 정해져 있어 조금만
     r.setProperty('--title-weight', settings.titleBold === false ? '400' : '700');
     return { sk, f };
   }
