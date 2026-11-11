@@ -166,6 +166,13 @@ public class CalendarWidget extends AppWidgetProvider {
         if (art != null) {
             android.graphics.Bitmap bgb = drawBg(art, wDp, hDp);
             if (bgb != null) { v.setImageViewBitmap(R.id.bg, bgb); v.setInt(R.id.bg, "setColorFilter", 0); }
+            // 달 넘기기 단추도 앱 단추처럼 카드색 유리로
+            if (Build.VERSION.SDK_INT >= 31) {
+                int cc = argb(art.optJSONArray("card"), Color.WHITE);
+                boolean dk = art.optBoolean("dark", false);
+                int nb = dk ? Color.argb(150, 90, 98, 120) : Color.argb(235, Math.min(255, Color.red(cc) + 4), Math.min(255, Color.green(cc) + 4), Math.min(255, Color.blue(cc) + 4));
+                for (int id : new int[] { R.id.today, R.id.prev, R.id.next }) v.setColorStateList(id, "setBackgroundTintList", ColorStateList.valueOf(nb));
+            }
             JSONObject heads = art.optJSONObject("heads");
             android.graphics.Bitmap hb = heads != null ? img(heads.optString(String.valueOf(off), "")) : null;
             if (hb != null) { v.setImageViewBitmap(R.id.mimg, hb); artHead = true; }
