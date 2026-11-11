@@ -377,10 +377,13 @@ public class CalendarWidget extends AppWidgetProvider {
             // 스티커: 칸 아래에 남는 자리가 넉넉하면 크게 (예시 앱처럼), 아니면 칸 모서리에 작게
             if (sb != null) {
                 float free = rowH - (numBox + 3) - lines * (chipH + 1) - 4;
-                float size = Math.min(Math.min(cellW - 8, free), 58);
-                if (big && !compact && size >= 24) {
+                // 너무 크지 않게 (칸 너비의 절반쯤), 칸 오른쪽 아래에 날마다 조금씩 다른 자리로 툭 붙인 느낌
+                float size = Math.min(Math.min(cellW * 0.58f, free - 2), 34);
+                if (big && !compact && size >= 20) {
                     v.setImageViewBitmap(kid, sb); v.setViewVisibility(kid, View.VISIBLE);
                     v.setViewLayoutWidth(kid, size, DIP); v.setViewLayoutHeight(kid, size, DIP);
+                    v.setViewLayoutMargin(kid, RemoteViews.MARGIN_END, 1 + (d * 7) % 9, DIP);
+                    v.setViewLayoutMargin(kid, RemoteViews.MARGIN_BOTTOM, 2 + (d * 5) % 7, DIP);
                 } else { v.setImageViewBitmap(sid, sb); v.setViewVisibility(sid, View.VISIBLE); }
             }
             v.setOnClickPendingIntent(cid, openApp(ctx, k, 100 + i));   // 그 날짜로 앱 열기

@@ -64,7 +64,7 @@
                     <TextView android:id="@+id/m0" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s0" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k0" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k0" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c1" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g1" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -80,7 +80,7 @@
                     <TextView android:id="@+id/m1" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s1" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k1" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k1" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c2" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g2" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -96,7 +96,7 @@
                     <TextView android:id="@+id/m2" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s2" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k2" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k2" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c3" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g3" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -112,7 +112,7 @@
                     <TextView android:id="@+id/m3" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s3" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k3" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k3" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c4" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g4" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -128,7 +128,7 @@
                     <TextView android:id="@+id/m4" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s4" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k4" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k4" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c5" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g5" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -144,7 +144,7 @@
                     <TextView android:id="@+id/m5" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s5" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k5" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k5" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c6" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g6" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -160,7 +160,7 @@
                     <TextView android:id="@+id/m6" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s6" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k6" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k6" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
         </LinearLayout>
         <FrameLayout android:id="@+id/d1" android:layout_width="match_parent" android:layout_height="1dp" android:background="#1F000000" />
@@ -179,7 +179,7 @@
                     <TextView android:id="@+id/m7" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s7" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k7" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k7" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c8" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g8" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -195,7 +195,7 @@
                     <TextView android:id="@+id/m8" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s8" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k8" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k8" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c9" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g9" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -211,7 +211,7 @@
                     <TextView android:id="@+id/m9" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s9" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k9" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k9" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c10" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g10" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -227,7 +227,7 @@
                     <TextView android:id="@+id/m10" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s10" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k10" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k10" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c11" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g11" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -243,7 +243,7 @@
                     <TextView android:id="@+id/m11" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s11" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k11" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k11" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c12" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g12" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -259,7 +259,7 @@
                     <TextView android:id="@+id/m12" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s12" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k12" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k12" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c13" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g13" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -275,7 +275,7 @@
                     <TextView android:id="@+id/m13" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s13" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k13" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k13" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
         </LinearLayout>
         <FrameLayout android:id="@+id/d2" android:layout_width="match_parent" android:layout_height="1dp" android:background="#1F000000" />
@@ -294,7 +294,7 @@
                     <TextView android:id="@+id/m14" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s14" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k14" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k14" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c15" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g15" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -310,7 +310,7 @@
                     <TextView android:id="@+id/m15" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s15" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k15" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k15" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c16" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g16" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -326,7 +326,7 @@
                     <TextView android:id="@+id/m16" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s16" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k16" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k16" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c17" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g17" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -342,7 +342,7 @@
                     <TextView android:id="@+id/m17" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s17" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k17" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k17" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c18" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g18" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -358,7 +358,7 @@
                     <TextView android:id="@+id/m18" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s18" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k18" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k18" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c19" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g19" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -374,7 +374,7 @@
                     <TextView android:id="@+id/m19" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s19" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k19" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k19" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c20" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g20" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -390,7 +390,7 @@
                     <TextView android:id="@+id/m20" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s20" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k20" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k20" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
         </LinearLayout>
         <FrameLayout android:id="@+id/d3" android:layout_width="match_parent" android:layout_height="1dp" android:background="#1F000000" />
@@ -409,7 +409,7 @@
                     <TextView android:id="@+id/m21" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s21" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k21" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k21" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c22" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g22" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -425,7 +425,7 @@
                     <TextView android:id="@+id/m22" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s22" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k22" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k22" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c23" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g23" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -441,7 +441,7 @@
                     <TextView android:id="@+id/m23" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s23" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k23" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k23" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c24" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g24" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -457,7 +457,7 @@
                     <TextView android:id="@+id/m24" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s24" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k24" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k24" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c25" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g25" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -473,7 +473,7 @@
                     <TextView android:id="@+id/m25" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s25" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k25" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k25" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c26" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g26" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -489,7 +489,7 @@
                     <TextView android:id="@+id/m26" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s26" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k26" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k26" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c27" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g27" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -505,7 +505,7 @@
                     <TextView android:id="@+id/m27" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s27" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k27" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k27" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
         </LinearLayout>
         <FrameLayout android:id="@+id/d4" android:layout_width="match_parent" android:layout_height="1dp" android:background="#1F000000" />
@@ -524,7 +524,7 @@
                     <TextView android:id="@+id/m28" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s28" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k28" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k28" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c29" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g29" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -540,7 +540,7 @@
                     <TextView android:id="@+id/m29" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s29" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k29" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k29" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c30" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g30" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -556,7 +556,7 @@
                     <TextView android:id="@+id/m30" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s30" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k30" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k30" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c31" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g31" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -572,7 +572,7 @@
                     <TextView android:id="@+id/m31" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s31" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k31" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k31" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c32" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g32" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -588,7 +588,7 @@
                     <TextView android:id="@+id/m32" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s32" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k32" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k32" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c33" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g33" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -604,7 +604,7 @@
                     <TextView android:id="@+id/m33" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s33" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k33" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k33" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c34" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g34" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -620,7 +620,7 @@
                     <TextView android:id="@+id/m34" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s34" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k34" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k34" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
         </LinearLayout>
         <FrameLayout android:id="@+id/d5" android:layout_width="match_parent" android:layout_height="1dp" android:background="#1F000000" />
@@ -639,7 +639,7 @@
                     <TextView android:id="@+id/m35" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s35" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k35" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k35" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c36" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g36" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -655,7 +655,7 @@
                     <TextView android:id="@+id/m36" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s36" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k36" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k36" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c37" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g37" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -671,7 +671,7 @@
                     <TextView android:id="@+id/m37" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s37" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k37" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k37" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c38" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g38" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -687,7 +687,7 @@
                     <TextView android:id="@+id/m38" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s38" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k38" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k38" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c39" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g39" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -703,7 +703,7 @@
                     <TextView android:id="@+id/m39" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s39" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k39" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k39" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c40" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g40" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -719,7 +719,7 @@
                     <TextView android:id="@+id/m40" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s40" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k40" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k40" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
             <FrameLayout android:id="@+id/c41" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
                 <ImageView android:id="@+id/g41" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="1dp" android:src="@drawable/cellbg" android:scaleType="fitXY" android:importantForAccessibility="no" android:visibility="gone" />
@@ -735,7 +735,7 @@
                     <TextView android:id="@+id/m41" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:textSize="8sp" android:includeFontPadding="false" android:visibility="gone" />
                 </LinearLayout>
                 <ImageView android:id="@+id/s41" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="top|end" android:layout_marginTop="-5dp" android:layout_marginEnd="-4dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
-                <ImageView android:id="@+id/k41" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/k41" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="bottom|end" android:layout_marginBottom="3dp" android:scaleType="fitCenter" android:importantForAccessibility="no" android:visibility="gone" />
             </FrameLayout>
         </LinearLayout>
         </LinearLayout>
