@@ -1,0 +1,23 @@
+plugins { id 'com.android.application' }
+
+// 테스트용 앱: 버전 번호는 빌드할 때 GitHub 실행 번호로 올라감
+def runNo = (System.getenv('GITHUB_RUN_NUMBER') ?: '1') as int
+
+android {
+    namespace 'com.woori.mallang'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'com.woori.mallang'
+        minSdk 26
+        targetSdk 34
+        versionCode runNo
+        versionName "0.1.${runNo}"
+    }
+    buildTypes {
+        debug { applicationIdSuffix '' }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

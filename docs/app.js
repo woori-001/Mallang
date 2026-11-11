@@ -43,7 +43,32 @@
   let prefs = Object.assign({ skin: 'lav', font: 'gowun' }, loadJSON(LS_PREFS, {}));
   let saveT = null;
   function saveState() { clearTimeout(saveT); saveT = setTimeout(saveStateNow, 200); }
-  function saveStateNow() { clearTimeout(saveT); try { localStorage.setItem(LS_STATE, JSON.stringify(st)); } catch (e) { toast('휴대폰 저장 공간이 부족해요'); } }
+  function saveStateNow() { clearTimeout(saveT); try { localStorage.setItem(LS_STATE, JSON.stringify(st)); } catch (e) { toast('휴대폰 저장 공간이 부족해요'); } pushWidget(); }
+
+  // 안드로이드 앱(말랑메모 위젯 앱) 안에서 열렸을 때만: 홈 화면 달력 위젯에 일정 요약을 넘겨줌
+  // (휴대폰 안에만 저장되고 어디로도 보내지 않음 · 웹 브라우저에서는 아무 일도 안 함)
+  let widgetT = 0;
+  function pushWidget() {
+    if (!window.MallangAndroid || !window.MallangAndroid.saveWidget) return;
+    clearTimeout(widgetT);
+    widgetT = setTimeout(() => {
+      try {
+        const sk = skin(), rec = window.M.recurring(st.events), now = new Date();
+        const days = {}, list = {};
+        for (let mo = -1; mo <= 3; mo++) {
+          const y = now.getFullYear(), m = now.getMonth() + mo, n = new Date(y, m + 1, 0).getDate();
+          for (let d = 1; d <= n; d++) {
+            const k = dateKey(new Date(y, m, d));
+            const evs = window.M.eventsOn(st.events, k, rec).map((x) => x.ev);
+            const hol = window.M.holiday(k);
+            if (evs.length || hol) days[k] = { c: evs.slice(0, 3).map((e) => EVENT_COLORS[e.c] || EVENT_COLORS.lav), h: hol || '' };
+            if (evs.length) list[k] = evs.slice().sort((a, b) => String(a.t || '').localeCompare(String(b.t || ''))).slice(0, 6).map((e) => ({ t: /^\d{2}:\d{2}$/.test(e.t) ? e.t : '', n: String(e.title || '(이름 없음)').slice(0, 40), c: EVENT_COLORS[e.c] || EVENT_COLORS.lav }));
+          }
+        }
+        window.MallangAndroid.saveWidget(JSON.stringify({ v: 1, at: Date.now(), skin: { bg: sk.base, ink: sk.ink, sub: sk.sub, a1: sk.a1, sun: sk.sun, sat: sk.sat }, days, list }));
+      } catch (e) { /* 위젯 갱신 실패는 앱 사용에 영향 없음 */ }
+    }, 400);
+  }
   const savePrefs = () => { try { localStorage.setItem(LS_PREFS, JSON.stringify(prefs)); } catch (e) { /* 무시 */ } };
 
   // 잠금 열쇠는 꺼낼 수 없는 형태로 IndexedDB에 보관
@@ -362,8 +387,10 @@
     r.setProperty('--memo-size', Math.round((t.f.size + 1) * (prefs.fontScale || 100) / 10) / 10 + 'px');
     document.querySelector('meta[name="theme-color"]').setAttribute('content', sk.base);
     setTimeout(() => window.M.syncRanges(), 0);
+    pushWidget();
     return t;
   }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) pushWidget(); });
   const skin = () => (SKINS[prefs.skin] && !SKINS[prefs.skin].pcOnly && SKINS[prefs.skin]) || SKINS.lav;
 
   function showApp() {
@@ -548,7 +575,7 @@
   const inApp = /KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|Line\/|DaumApps|everytimeApp|; wv\)/i.test(ua);
   const isKakao = /KAKAOTALK/i.test(ua);
   const iosNotSafari = isIOS && /CriOS|FxiOS|EdgiOS|Whale|NAVER/i.test(ua);
-  const standalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  const standalone = () => !!window.MallangAndroid || window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;   // 말랑메모 안드로이드 앱 안에서도 '설치하기' 안내 안 띄움
   let installed = false, installBusy = false;
   const evt = () => window.__installEvt;
 

@@ -1,0 +1,60 @@
+# 말랑메모 안드로이드 앱(테스트용, 홈 화면 달력 위젯 포함) APK를 만들어 'android-test' 미리보기 릴리스에 올립니다.
+# PC 자동 업데이트는 '최신(Latest)' 릴리스만 보니까, 미리보기(pre-release)인 이 릴리스와 섞이지 않아요.
+name: 안드로이드 앱 빌드 (테스트)
+
+on:
+  push:
+    branches: [main]
+    paths: ['android/**', '.github/workflows/android.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-test
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      # 서명 키를 계속 같은 걸로 써야 새 APK를 지우지 않고 덮어 설치할 수 있어서, 처음 만든 키를 보관해 둠
+      - name: 서명 키 가져오기
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: mallang-android-debug-keystore-v1
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: APK 만들기
+        working-directory: android
+        run: |
+          set -o pipefail
+          gradle --no-daemon assembleDebug 2>&1 | tee build.log
+          cp app/build/outputs/apk/debug/app-debug.apk ../MallangMemo-android-test.apk
+          ls -la ../MallangMemo-android-test.apk
+      - name: 미리보기 릴리스에 올리기
+        run: |
+          if gh release view android-test --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload android-test MallangMemo-android-test.apk --repo "$GITHUB_REPOSITORY" --clobber
+            gh release edit android-test --repo "$GITHUB_REPOSITORY" --prerelease --latest=false --notes "안드로이드 테스트 앱 (홈 화면 달력 위젯). 빌드 #${GITHUB_RUN_NUMBER}"
+          else
+            gh release create android-test MallangMemo-android-test.apk --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+              --title "말랑메모 안드로이드 (테스트)" --prerelease --latest=false \
+              --notes "안드로이드 테스트 앱 (홈 화면 달력 위젯). 빌드 #${GITHUB_RUN_NUMBER}"
+          fi
+      - name: 실패 원인 남기기
+        if: failure()
+        working-directory: android
+        run: |
+          [ -f build.log ] || exit 0
+          grep -E "error:|ERROR|FAILURE|What went wrong" -A3 build.log | head -40 | while IFS= read -r line; do echo "::error::$(echo "$line" | cut -c1-300)"; done
