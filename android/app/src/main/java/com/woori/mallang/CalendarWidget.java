@@ -169,7 +169,10 @@ public class CalendarWidget extends AppWidgetProvider {
             // 달 넘기기 단추: 스킨 글자색을 옅게 깐 단추 (흰 카드·어두운 카드 모두 잘 보이게)
             if (Build.VERSION.SDK_INT >= 31) {
                 int nb = (ink & 0x00FFFFFF) | 0x1C000000;
-                for (int id : new int[] { R.id.today, R.id.prev, R.id.next }) v.setColorStateList(id, "setBackgroundTintList", ColorStateList.valueOf(nb));
+                for (int id : new int[] { R.id.today, R.id.prev, R.id.next }) {
+                    v.setInt(id, "setBackgroundResource", R.drawable.navbtn_solid);   // 불투명 틀에 색을 입혀야 옅은 색이 제대로 보임
+                    v.setColorStateList(id, "setBackgroundTintList", ColorStateList.valueOf(nb));
+                }
             }
             JSONObject heads = art.optJSONObject("heads");
             android.graphics.Bitmap hb = heads != null ? img(heads.optString(String.valueOf(off), "")) : null;
