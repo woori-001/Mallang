@@ -153,7 +153,8 @@ public class CalendarWidget extends AppWidgetProvider {
         v.setInt(R.id.bg, "setColorFilter", bg);
         // 스킨 꾸밈: 앱과 같은 바탕(색 번짐)·같은 글꼴로 쓴 달 제목과 로고·요일
         JSONObject art = data.optJSONObject("art");
-        int[] wdCol = { sun, ink, ink, ink, ink, ink, sat };   // 갤럭시 캘린더처럼 평일 요일은 진하게
+        int[] wdCol = { sun, ink, ink, ink, ink, ink, sat };
+        boolean darkSkin = art != null && art.optBoolean("dark", false);   // 갤럭시 캘린더처럼 평일 요일은 진하게
         boolean artHead = false, artWd = false;
         if (art != null) {
             android.graphics.Bitmap bgb = drawBg(art, wDp, hDp);
@@ -345,8 +346,14 @@ public class CalendarWidget extends AppWidgetProvider {
                     v.setTextViewText(chips[j], e.optString("n", ""));
                     if (Build.VERSION.SDK_INT >= 31) {
                         // 갤럭시 캘린더처럼: 옅은 색 바탕 + 같은 계열 진한 글자
-                        v.setColorStateList(chips[j], "setBackgroundTintList", ColorStateList.valueOf((dc & 0x00FFFFFF) | 0x38000000));
-                        v.setTextColor(chips[j], Color.rgb(Color.red(dc) * 55 / 100, Color.green(dc) * 55 / 100, Color.blue(dc) * 55 / 100));
+                        if (darkSkin) {
+                            // 어두운 스킨(미드나잇): 조금 더 진한 색 바탕 + 밝은 글자 (진한 글자는 안 보임)
+                            v.setColorStateList(chips[j], "setBackgroundTintList", ColorStateList.valueOf((dc & 0x00FFFFFF) | 0x66000000));
+                            v.setTextColor(chips[j], Color.rgb(255 - (255 - Color.red(dc)) * 25 / 100, 255 - (255 - Color.green(dc)) * 25 / 100, 255 - (255 - Color.blue(dc)) * 25 / 100));
+                        } else {
+                            v.setColorStateList(chips[j], "setBackgroundTintList", ColorStateList.valueOf((dc & 0x00FFFFFF) | 0x38000000));
+                            v.setTextColor(chips[j], Color.rgb(Color.red(dc) * 55 / 100, Color.green(dc) * 55 / 100, Color.blue(dc) * 55 / 100));
+                        }
                     } else {
                         v.setInt(chips[j], "setBackgroundColor", (dc & 0x00FFFFFF) | 0x33000000);
                         v.setTextColor(chips[j], ink);
