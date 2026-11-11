@@ -887,3 +887,16 @@ html.g-halloween .calDeco .s3bat, html.g-halloween .calDeco .s3ghost, html.g-xma
 .dsGrid.tps { justify-content: flex-start; }
 .dsGrid.tps .dsw { width: 26px; height: 18px; border: none; border-radius: 3px; padding: 0; cursor: pointer; }
 .dsBox .scyes { background: var(--accent); color: var(--on); }
+
+/* 달력 탭: 알람·꾸미기 줄이 늘어도 일정 목록이 사라지지 않게 (최소 일정 3개 높이), 넘치면 탭 전체가 스크롤 */
+#vCal { overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; }
+#vCal > * { flex-shrink: 0; }
+#vCal .evlist { flex: 1 0 auto; min-height: 136px; }
+
+/* 일정 한 줄이 좁아 이름이 잘리던 것: 이름을 윗줄에 길게, 시간·반복은 아랫줄로 */
+.evlist .ev { flex-wrap: wrap; row-gap: 0; padding-top: 5px; padding-bottom: 5px; }
+.evlist .ev .evc { order: 0; }
+.evlist .ev .evn { order: 1; flex: 1 1 calc(100% - 60px); font-size: 14px; }
+.evlist .ev .ib { order: 2; }
+.evlist .ev .evt { order: 3; margin-left: 20px; height: 22px; }
+.evlist .ev .evr, .evlist .ev .evrep { order: 4; height: 22px; }

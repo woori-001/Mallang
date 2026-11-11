@@ -59,7 +59,7 @@
     const logoEl = document.querySelector('.brand img');
     const logoSrc = logoEl ? logoEl.getAttribute('src') : 'logo.png';
     const now = new Date();
-    const key = ['st6', prefs.skin, cn.fontFamily, cn.color, ce.color, logoSrc, now.getFullYear(), now.getMonth(), sk.sun, sk.sat, cw.color].join('|');
+    const key = ['st7', prefs.skin, cn.fontFamily, cn.color, ce.color, logoSrc, now.getFullYear(), now.getMonth(), sk.sun, sk.sat, cw.color].join('|');
     if (artCache.key === key) return artCache.art;
     try { await Promise.all([document.fonts.load('700 40px ' + cn.fontFamily, '0123456789'), document.fonts.load('600 20px ' + ce.fontFamily, 'NOVEMBER 2026'), document.fonts.load('600 20px ' + cw.fontFamily, '일월화수목금토')]); } catch (e) { /* 글꼴을 못 불러오면 기본 글꼴 */ }
     const logo0 = await loadImg(logoSrc);
@@ -69,32 +69,10 @@
     const LH = 25 * S;
     const logoSt = logo0 && logo0.naturalWidth ? stickerize(logo0, Math.round(logo0.naturalWidth / logo0.naturalHeight * LH), Math.round(LH), 2.2 * S, -3) : null;
     const logo = logoSt ? logoSt.cv : null;
-    const heads = {};
-    for (let mo = -1; mo <= 3; mo++) {
-      const d = new Date(now.getFullYear(), now.getMonth() + mo, 1);
-      const cv = document.createElement('canvas'), c = cv.getContext('2d');
-      const nf = cn.fontWeight + ' ' + 38 * S + 'px ' + cn.fontFamily, ef = ce.fontWeight + ' ' + 10.5 * S + 'px ' + ce.fontFamily;
-      const ns = String(d.getMonth() + 1), es = MONTH_EN[d.getMonth()] + ' ' + d.getFullYear();
-      c.font = nf; const nw = c.measureText(ns).width;
-      c.font = ef; if ('letterSpacing' in c) c.letterSpacing = 1 * S + 'px'; const ew = c.measureText(es).width;
-      const lw = logo ? logo.width : 0, lp = logoSt ? logoSt.pad : 0;   // 말랑 로고 크게 (스티커 테두리만큼 여백 포함)
-      const gap = 7 * S, H = 54 * S, W = Math.ceil(nw + gap + Math.max(ew, lw - lp) + 2 * S);
-      cv.width = W; cv.height = H;
-      c.textBaseline = 'alphabetic';
-      c.font = nf; c.fillStyle = cn.color; c.fillText(ns, 0, 48 * S);
-      if (logo) c.drawImage(logo, nw + gap - lp, 0);
-      c.font = ef; if ('letterSpacing' in c) c.letterSpacing = 1 * S + 'px'; c.fillStyle = ce.color; c.fillText(es, nw + gap, logo ? 49 * S : 34 * S);
-      heads[mo] = cv.toDataURL('image/png');
-    }
-    const wdays = WD.map((t, i) => {
-      const cv = document.createElement('canvas'), c = cv.getContext('2d');
-      cv.width = 16 * S; cv.height = 15 * S;
-      c.font = cw.fontWeight + ' ' + 11.5 * S + 'px ' + cw.fontFamily; c.textAlign = 'center'; c.textBaseline = 'middle';
-      const sp = document.querySelectorAll('.wdays span')[i];
-      c.fillStyle = sp ? getComputedStyle(sp).color : i === 0 ? sk.sun : i === 6 ? sk.sat : cw.color;   // 앱 요일 줄 글자색 그대로
-      c.fillText(t, 8 * S, 8 * S);
-      return cv.toDataURL('image/png');
-    });
+    // 요일 글자색 (앱 요일 줄 그대로) — 글씨는 위젯이 휴대폰 기본 글꼴로 씀 (갤럭시 캘린더처럼)
+    const px0 = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+    const toArr = (str) => { px0.clearRect(0, 0, 1, 1); px0.fillStyle = '#000'; px0.fillStyle = str; px0.fillRect(0, 0, 1, 1); const d = px0.getImageData(0, 0, 1, 1).data; return [d[0], d[1], d[2], 1]; };
+    const wdc = [...document.querySelectorAll('.wdays span')].slice(0, 7).map((sp) => toArr(getComputedStyle(sp).color));
     // 말랑이: 달 끝 빈 칸에 앉혀 둘 그림 (스킨 말랑이, 없으면 기본 말랑이)
     let bunny = null;
     const bim = await loadImg(sk.bunny || 'bunny-big.png');
@@ -123,7 +101,7 @@
       if (col && col[3] > 0.05 && nums.length >= 4 && nums[2] === 0 && nums[3] > 0) { line = { c: col, w: Math.min(3, nums[3]) }; break; }
     }
     const bgShown = getComputedStyle(document.querySelector('.bg')).display !== 'none';
-    const art = { base: rgba(sk.base) || [238, 240, 251, 1], b: bgShown ? sk.b : null, card: rgba(cc.backgroundColor) || [255, 255, 255, 0.6], line, dark: !!sk.dark, skin: prefs.skin || 'lav', wdBg: rgba(getComputedStyle(document.querySelector('.wdays')).backgroundColor), heads, wdays, bunny };
+    const art = { base: rgba(sk.base) || [238, 240, 251, 1], b: bgShown ? sk.b : null, card: rgba(cc.backgroundColor) || [255, 255, 255, 0.6], line, dark: !!sk.dark, skin: prefs.skin || 'lav', wdBg: rgba(getComputedStyle(document.querySelector('.wdays')).backgroundColor), wdc, logo: logo ? logo.toDataURL('image/png') : null, bunny };
     artCache = { key, art };
     return art;
   }

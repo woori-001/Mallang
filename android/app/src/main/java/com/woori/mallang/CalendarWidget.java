@@ -153,6 +153,7 @@ public class CalendarWidget extends AppWidgetProvider {
         v.setInt(R.id.bg, "setColorFilter", bg);
         // 스킨 꾸밈: 앱과 같은 바탕(색 번짐)·같은 글꼴로 쓴 달 제목과 로고·요일
         JSONObject art = data.optJSONObject("art");
+        int[] wdCol = { sun, sub, sub, sub, sub, sub, sat };
         boolean artHead = false, artWd = false;
         if (art != null) {
             android.graphics.Bitmap bgb = drawBg(art, wDp, hDp);
@@ -163,26 +164,18 @@ public class CalendarWidget extends AppWidgetProvider {
                 v.setInt(R.id.wrow, "setBackgroundResource", R.drawable.pill);
                 v.setColorStateList(R.id.wrow, "setBackgroundTintList", ColorStateList.valueOf(wdBg));
             }
-            JSONObject heads = art.optJSONObject("heads");
-            android.graphics.Bitmap hb = heads != null ? img(heads.optString(String.valueOf(off), "")) : null;
-            if (hb != null) { v.setImageViewBitmap(R.id.mimg, hb); artHead = true; }
-            JSONArray wa = art.optJSONArray("wdays");
-            if (wa != null && wa.length() == 7) {
-                artWd = true;
-                for (int i = 0; i < 7; i++) {
-                    android.graphics.Bitmap wb = img(wa.optString(i, ""));
-                    int wi = ctx.getResources().getIdentifier("wi" + i, "id", ctx.getPackageName());
-                    if (wb == null) { artWd = false; break; }
-                    v.setImageViewBitmap(wi, wb);
-                }
-            }
+            // 말랑 로고 스티커 (달 이름 옆)
+            android.graphics.Bitmap lb = img(art.optString("logo", ""));
+            if (lb != null) { v.setImageViewBitmap(R.id.mimg, lb); artHead = true; }
+            // 요일 글자색: 앱 요일 줄 색 그대로
+            JSONArray wc = art.optJSONArray("wdc");
+            if (wc != null && wc.length() == 7) for (int i = 0; i < 7; i++) wdCol[i] = argb(wc.optJSONArray(i), wdCol[i]) | 0xFF000000;
         }
         v.setViewVisibility(R.id.mimg, artHead ? View.VISIBLE : View.GONE);
-        v.setViewVisibility(R.id.mnum, artHead ? View.GONE : View.VISIBLE);
-        v.setViewVisibility(R.id.men, artHead ? View.GONE : View.VISIBLE);
+        v.setViewVisibility(R.id.men, View.GONE);
         for (int i = 0; i < 7; i++) {
-            v.setViewVisibility(ctx.getResources().getIdentifier("wi" + i, "id", ctx.getPackageName()), artWd ? View.VISIBLE : View.GONE);
-            v.setViewVisibility(ctx.getResources().getIdentifier("w" + i, "id", ctx.getPackageName()), artWd ? View.INVISIBLE : View.VISIBLE);
+            v.setViewVisibility(ctx.getResources().getIdentifier("wi" + i, "id", ctx.getPackageName()), View.GONE);
+            v.setViewVisibility(ctx.getResources().getIdentifier("w" + i, "id", ctx.getPackageName()), View.VISIBLE);
         }
         int alpha = Math.max(0, Math.min(100, data.optInt("alpha", 100)));   // 앱 설정 > 위젯 투명도
         v.setInt(R.id.bg, "setImageAlpha", Math.round(alpha * 255f / 100f));
@@ -194,8 +187,9 @@ public class CalendarWidget extends AppWidgetProvider {
         m.add(Calendar.MONTH, off);
         int y = m.get(Calendar.YEAR), mo = m.get(Calendar.MONTH);
 
-        v.setTextViewText(R.id.mnum, String.valueOf(mo + 1));
-        v.setTextColor(R.id.mnum, acc);
+        // 갤럭시 캘린더처럼 "11월" (해가 다르면 "2027년 1월")
+        v.setTextViewText(R.id.mnum, (y != today.get(Calendar.YEAR) ? y + "년 " : "") + (mo + 1) + "월");
+        v.setTextColor(R.id.mnum, ink);
         v.setTextViewText(R.id.men, MONTH_EN[mo] + " " + y);
         v.setTextColor(R.id.men, acc);
         // 갤럭시 캘린더처럼: ‹ 달 › 를 왼쪽에 모으고, 오른쪽엔 오늘 날짜가 든 네모 (누르면 오늘로)
@@ -203,7 +197,7 @@ public class CalendarWidget extends AppWidgetProvider {
         v.setTextViewText(R.id.today, String.valueOf(today.get(Calendar.DAY_OF_MONTH)));
         if (Build.VERSION.SDK_INT >= 31) v.setColorStateList(R.id.today, "setBackgroundTintList", ColorStateList.valueOf(ink));
         int[] wds = { R.id.w0, R.id.w1, R.id.w2, R.id.w3, R.id.w4, R.id.w5, R.id.w6 };
-        for (int i = 0; i < 7; i++) v.setTextColor(wds[i], i == 0 ? sun : i == 6 ? sat : sub);
+        for (int i = 0; i < 7; i++) v.setTextColor(wds[i], wdCol[i]);
 
         int start = m.get(Calendar.DAY_OF_WEEK) - 1;
         int n = m.getActualMaximum(Calendar.DAY_OF_MONTH);
@@ -223,15 +217,18 @@ public class CalendarWidget extends AppWidgetProvider {
         // 위젯이 크면 글자·일정·스티커도 같이 크게 (안드로이드 12 이상: 칸 크기를 바꿀 수 있음)
         boolean big = Build.VERSION.SDK_INT >= 31;
         float cellW = (wDp - 20) / 7f;
-        float sc = big ? Math.max(1f, Math.min(1.6f, Math.min(cellW / 40f, ((hDp - 90f) / rows) / 56f))) : 1f;
-        float sh = big ? Math.max(1f, Math.min(1.35f, wDp / 320f)) : 1f;
+        // 크기 비율은 갤럭시 기본 캘린더 기준 (칸 너비 54dp 일 때 날짜 15sp · 일정 11sp)
+        float sc = big ? Math.max(0.8f, Math.min(1.3f, Math.min(cellW / 54f, ((hDp - 90f) / rows) / 70f))) : 1f;
+        float sh = big ? Math.max(0.9f, Math.min(1.2f, wDp / 360f)) : 1f;
         final int DIP = android.util.TypedValue.COMPLEX_UNIT_DIP, SP = android.util.TypedValue.COMPLEX_UNIT_SP;
-        float numBox = 22 * sc, chipH = 14 * sc, tapeH = 13 * sc;
+        float numBox = big ? 27 * sc : 22, chipH = big ? 17 * sc : 14, tapeH = big ? 16 * sc : 13;
         if (big) {
-            v.setViewLayoutHeight(R.id.mimg, 54 * sh, DIP);
-            for (int i = 0; i < 7; i++) v.setViewLayoutHeight(ctx.getResources().getIdentifier("wi" + i, "id", ctx.getPackageName()), 15 * Math.min(sc, 1.3f), DIP);
+            v.setViewLayoutHeight(R.id.mimg, 32 * sh, DIP);
+            v.setTextViewTextSize(R.id.mnum, SP, 21 * sh);
+            v.setTextViewTextSize(R.id.prev, SP, 28 * sh); v.setTextViewTextSize(R.id.next, SP, 28 * sh);
+            for (int i = 0; i < 7; i++) v.setTextViewTextSize(ctx.getResources().getIdentifier("w" + i, "id", ctx.getPackageName()), SP, 14 * sc);
         }
-        float rowH = (hDp - 20 - 54 * sh - 20 * sc) / rows;
+        float rowH = (hDp - 20 - 42 * sh - 26 * sc) / rows;
         int slots = Math.max(0, Math.min(5, (int) ((rowH - numBox - 3) / (chipH + 1))));
         android.content.res.Resources res = ctx.getResources();
         // 스티커 그림 (같은 스티커는 그림 하나를 같이 씀)
@@ -244,13 +241,13 @@ public class CalendarWidget extends AppWidgetProvider {
             for (int ch : chips) v.setViewVisibility(ch, View.GONE);
             v.setViewVisibility(res.getIdentifier("o" + i, "id", pkg), View.GONE);
             if (big) {
-                v.setTextViewTextSize(nid, SP, 12.5f * sc);
+                v.setTextViewTextSize(nid, SP, 15f * sc);
                 v.setViewLayoutWidth(nid, numBox, DIP); v.setViewLayoutHeight(nid, numBox, DIP);
-                for (int ch : chips) { v.setTextViewTextSize(ch, SP, 9f * sc); v.setViewLayoutHeight(ch, chipH, DIP); }
+                for (int ch : chips) { v.setTextViewTextSize(ch, SP, 11f * sc); v.setViewLayoutHeight(ch, chipH, DIP); }
                 int pid0 = res.getIdentifier("p" + i, "id", pkg), sid0 = res.getIdentifier("s" + i, "id", pkg);
-                v.setTextViewTextSize(pid0, SP, 8.5f * sc); v.setViewLayoutHeight(pid0, tapeH, DIP);
-                v.setTextViewTextSize(res.getIdentifier("h" + i, "id", pkg), SP, 8.5f * sc);
-                v.setTextViewTextSize(res.getIdentifier("m" + i, "id", pkg), SP, 8.5f * sc);
+                v.setTextViewTextSize(pid0, SP, 10.5f * sc); v.setViewLayoutHeight(pid0, tapeH, DIP);
+                v.setTextViewTextSize(res.getIdentifier("h" + i, "id", pkg), SP, 10.5f * sc);
+                v.setTextViewTextSize(res.getIdentifier("m" + i, "id", pkg), SP, 10.5f * sc);
                 v.setViewLayoutWidth(sid0, 19 * sc, DIP); v.setViewLayoutHeight(sid0, 19 * sc, DIP);   // 날짜 숫자를 가리지 않게 칸 모서리에
             }
             int gid = res.getIdentifier("g" + i, "id", pkg), pid = res.getIdentifier("p" + i, "id", pkg), sid = res.getIdentifier("s" + i, "id", pkg);
