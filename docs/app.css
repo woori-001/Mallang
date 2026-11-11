@@ -557,8 +557,8 @@ html.sk-retro .tabs { border-radius: 0; background: var(--rt-face); box-shadow: 
 html.sk-retro .tab { border-radius: 0; }
 html.sk-retro .tab.on { background: var(--rt-paper); color: var(--rt-blue); box-shadow: 0 0 0 1px var(--rt-ink), inset 1px 1px 0 var(--rt-sh); }
 html.sk-retro .fab, html.sk-retro .primary, html.sk-retro .smallPrimary { border-radius: 0; background: var(--rt-blue); box-shadow: 0 0 0 1px var(--rt-ink), inset 1px 1px 0 #6F86F0, inset -1px -1px 0 #0F2296; }
-html.sk-retro .memo { border-radius: 0; padding: 0 5px 10px; box-shadow: 0 0 0 1.5px var(--rt-ink), inset 2px 2px 0 var(--rt-hi), inset -2px -2px 0 var(--rt-sh); overflow: hidden; }
-html.sk-retro .memo .mTitle { margin: 5px 0 0; padding: 7px 10px; border: none; background: var(--rt-blue); color: #fff; box-shadow: inset 0 -1px 0 #0F2296; }
+html.sk-retro .memo { border-radius: 0; padding: 0 1px 8px; box-shadow: 0 0 0 1.5px var(--rt-ink), inset 2px 2px 0 var(--rt-hi), inset -2px -2px 0 var(--rt-sh); overflow: hidden; }
+html.sk-retro .memo .mTitle { margin: 1px 0 0; padding: 7px 10px; border: none; background: var(--rt-blue); color: #fff; box-shadow: inset 0 -1px 0 #0F2296; }
 html.sk-retro .memo .mTitle span { font-family: 'Galmuri11', var(--memo-font); }
 html.sk-retro .memo .mBody, html.sk-retro .memo .mMeta { padding: 0 10px; }
 html.sk-retro .day { border-radius: 0; }
@@ -629,7 +629,7 @@ html.sk-retro .peopleGv .gvItem.picked { background: var(--rt-blue); color: #fff
 .memo.mFolded { padding-top: 13px; padding-bottom: 13px; }
 .memo.mFolded .mBody, .memo.mFolded .mMeta { display: none; }
 html.sk-excel .memo.mFolded, html.sk-retro .memo.mFolded { padding-top: 0; padding-bottom: 0; }
-html.sk-retro .memo.mFolded { padding-bottom: 5px; }
+html.sk-retro .memo.mFolded { padding-bottom: 1px; }
 html.sk-excel .memo.mFolded .mTitle { border-bottom: none; }
 html.sk-excel .memo .mFold, html.sk-retro .memo .mFold { color: inherit; }
 html.sk-excel .peopleGv { gap: 0 !important; }
