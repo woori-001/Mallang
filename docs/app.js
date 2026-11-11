@@ -59,11 +59,15 @@
     const logoEl = document.querySelector('.brand img');
     const logoSrc = logoEl ? logoEl.getAttribute('src') : 'logo.png';
     const now = new Date();
-    const key = [prefs.skin, cn.fontFamily, cn.color, ce.color, logoSrc, now.getFullYear(), now.getMonth(), sk.sun, sk.sat, cw.color].join('|');
+    const key = ['st2', prefs.skin, cn.fontFamily, cn.color, ce.color, logoSrc, now.getFullYear(), now.getMonth(), sk.sun, sk.sat, cw.color].join('|');
     if (artCache.key === key) return artCache.art;
     try { await Promise.all([document.fonts.load('700 40px ' + cn.fontFamily, '0123456789'), document.fonts.load('600 20px ' + ce.fontFamily, 'NOVEMBER 2026'), document.fonts.load('600 20px ' + cw.fontFamily, '일월화수목금토')]); } catch (e) { /* 글꼴을 못 불러오면 기본 글꼴 */ }
-    const logo = await loadImg(logoSrc);
+    const logo0 = await loadImg(logoSrc);
     const S = 2.5;   // 크게 그려서 위젯에서 또렷하게 (너무 크면 위젯이 못 받아서 2.5배)
+    // 로고도 스티커처럼 (조금 기울여 붙인 느낌)
+    const LH = 25 * S;
+    const logoSt = logo0 && logo0.naturalWidth ? stickerize(logo0, Math.round(logo0.naturalWidth / logo0.naturalHeight * LH), Math.round(LH), 2.2 * S, -3) : null;
+    const logo = logoSt ? logoSt.cv : null;
     const heads = {};
     for (let mo = -1; mo <= 3; mo++) {
       const d = new Date(now.getFullYear(), now.getMonth() + mo, 1);
@@ -72,13 +76,13 @@
       const ns = String(d.getMonth() + 1), es = MONTH_EN[d.getMonth()] + ' ' + d.getFullYear();
       c.font = nf; const nw = c.measureText(ns).width;
       c.font = ef; if ('letterSpacing' in c) c.letterSpacing = 1 * S + 'px'; const ew = c.measureText(es).width;
-      const lh = 25 * S, lw = logo ? logo.naturalWidth / logo.naturalHeight * lh : 0;   // 말랑 로고 크게
-      const gap = 7 * S, H = 46 * S, W = Math.ceil(nw + gap + Math.max(ew, lw) + 2 * S);
+      const lw = logo ? logo.width : 0, lp = logoSt ? logoSt.pad : 0;   // 말랑 로고 크게 (스티커 테두리만큼 여백 포함)
+      const gap = 7 * S, H = 50 * S, W = Math.ceil(nw + gap + Math.max(ew, lw - lp) + 2 * S);
       cv.width = W; cv.height = H;
       c.textBaseline = 'alphabetic';
-      c.font = nf; c.fillStyle = cn.color; c.fillText(ns, 0, 40 * S);
-      if (logo) c.drawImage(logo, nw + gap - 2 * S, 0, lw, lh);
-      c.font = ef; if ('letterSpacing' in c) c.letterSpacing = 1 * S + 'px'; c.fillStyle = ce.color; c.fillText(es, nw + gap, logo ? 39 * S : 30 * S);
+      c.font = nf; c.fillStyle = cn.color; c.fillText(ns, 0, 44 * S);
+      if (logo) c.drawImage(logo, nw + gap - lp, 0);
+      c.font = ef; if ('letterSpacing' in c) c.letterSpacing = 1 * S + 'px'; c.fillStyle = ce.color; c.fillText(es, nw + gap, logo ? 43 * S : 32 * S);
       heads[mo] = cv.toDataURL('image/png');
     }
     const wdays = WD.map((t, i) => {
@@ -93,10 +97,8 @@
     let bunny = null;
     const bim = await loadImg(sk.bunny || 'bunny-big.png');
     if (bim && bim.naturalWidth) {
-      const r = Math.min(1, 180 / Math.max(bim.naturalWidth, bim.naturalHeight));
-      const cv = document.createElement('canvas'); cv.width = Math.round(bim.naturalWidth * r); cv.height = Math.round(bim.naturalHeight * r);
-      cv.getContext('2d').drawImage(bim, 0, 0, cv.width, cv.height);
-      bunny = cv.toDataURL('image/png');
+      const r = Math.min(1, 160 / Math.max(bim.naturalWidth, bim.naturalHeight));
+      bunny = stickerize(bim, Math.round(bim.naturalWidth * r), Math.round(bim.naturalHeight * r), 7, -5).cv.toDataURL('image/png');   // 스티커처럼
     }
     // 달력 카드 모양 그대로: 카드 바탕색(유리면 반투명) · 테두리(종이 스킨) · 뒤 배경(색 번짐)
     const card = document.querySelector('.calCard');
@@ -123,29 +125,38 @@
     artCache = { key, art };
     return art;
   }
-  // 진짜 스티커처럼: 하얀 테두리로 오려 낸 모양 + 살짝 그림자 + 조금 기울임 (주간 플래너 스티커와 같은 느낌)
+  // 그림(이모지·말랑이·로고)을 진짜 스티커처럼: 하얀 테두리로 오려 낸 모양 + 그림자 + 기울임 + 코팅 반짝임
+  // src 를 w×h 크기로 그린 뒤 둘레 edge 만큼 하얀 테두리 → { cv, pad } (pad = 그림이 안쪽으로 들어간 만큼)
+  function stickerize(src, w, h, edge, tilt) {
+    const rad = tilt * Math.PI / 180;
+    const bw = w + edge * 2 + 8, bh = h + edge * 2 + 10;
+    const W = Math.ceil(Math.abs(bw * Math.cos(rad)) + Math.abs(bh * Math.sin(rad))), H = Math.ceil(Math.abs(bw * Math.sin(rad)) + Math.abs(bh * Math.cos(rad)));
+    const t = document.createElement('canvas'); t.width = bw; t.height = bh;
+    t.getContext('2d').drawImage(src, edge + 4, edge + 4, w, h);
+    const wm = document.createElement('canvas'); wm.width = bw; wm.height = bh;   // 하얀 오림 모양
+    const wc = wm.getContext('2d'); wc.drawImage(t, 0, 0); wc.globalCompositeOperation = 'source-in'; wc.fillStyle = '#fff'; wc.fillRect(0, 0, bw, bh);
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const c = cv.getContext('2d');
+    c.translate(W / 2, H / 2); c.rotate(rad); c.translate(-bw / 2, -bh / 2);
+    const ring = (n) => { for (let k = 0; k < n; k++) { const a = k / n * Math.PI * 2; c.drawImage(wm, Math.cos(a) * edge, Math.sin(a) * edge); } };
+    c.save(); c.shadowColor = 'rgba(40, 30, 60, .28)'; c.shadowBlur = Math.max(3, edge); c.shadowOffsetY = Math.max(2, edge / 2); ring(24); c.restore();
+    ring(24);
+    c.drawImage(t, 0, 0);
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.globalCompositeOperation = 'source-atop';
+    const g = c.createLinearGradient(0, 0, W, H); g.addColorStop(0, 'rgba(255,255,255,.26)'); g.addColorStop(0.45, 'rgba(255,255,255,0)'); c.fillStyle = g; c.fillRect(0, 0, W, H);
+    return { cv, pad: (W - w) / 2 };
+  }
   const stkCache = {};
   function stickerImg(em) {
     if (stkCache[em]) return stkCache[em];
-    const Z = 112, cv = document.createElement('canvas'); cv.width = Z; cv.height = Z;
-    const c = cv.getContext('2d');
-    const t = document.createElement('canvas'); t.width = Z; t.height = Z;
+    const Z = 84, t = document.createElement('canvas'); t.width = Z; t.height = Z;
     const tc = t.getContext('2d');
     tc.font = '72px "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif'; tc.textAlign = 'center'; tc.textBaseline = 'middle';
     tc.fillText(em, Z / 2, Z / 2 + 3);
-    const w = document.createElement('canvas'); w.width = Z; w.height = Z;   // 하얀 오림 모양
-    const wc = w.getContext('2d'); wc.drawImage(t, 0, 0); wc.globalCompositeOperation = 'source-in'; wc.fillStyle = '#fff'; wc.fillRect(0, 0, Z, Z);
     let h = 0; for (const ch of em) h = (h * 31 + ch.codePointAt(0)) | 0;
-    c.translate(Z / 2, Z / 2); c.rotate(((Math.abs(h) % 2 ? 1 : -1) * (6 + Math.abs(h) % 5)) * Math.PI / 180); c.translate(-Z / 2, -Z / 2);
-    c.save(); c.shadowColor = 'rgba(40, 30, 60, .28)'; c.shadowBlur = 6; c.shadowOffsetY = 3;
-    for (let k = 0; k < 20; k++) { const a = k / 20 * Math.PI * 2; c.drawImage(w, Math.cos(a) * 6, Math.sin(a) * 6); }
-    c.restore();
-    for (let k = 0; k < 20; k++) { const a = k / 20 * Math.PI * 2; c.drawImage(w, Math.cos(a) * 6, Math.sin(a) * 6); }
-    c.drawImage(t, 0, 0);
-    // 반짝이는 코팅 느낌 (위쪽 살짝 밝게)
-    c.globalCompositeOperation = 'source-atop';
-    const g = c.createLinearGradient(0, 0, Z, Z); g.addColorStop(0, 'rgba(255,255,255,.28)'); g.addColorStop(0.45, 'rgba(255,255,255,0)'); c.fillStyle = g; c.fillRect(0, 0, Z, Z);
-    return (stkCache[em] = cv.toDataURL('image/png'));
+    const st = stickerize(t, Z, Z, 6, (Math.abs(h) % 2 ? 1 : -1) * (6 + Math.abs(h) % 5));
+    return (stkCache[em] = st.cv.toDataURL('image/png'));
   }
   function pushWidget() {
     if (!window.MallangAndroid || !window.MallangAndroid.saveWidget) return;

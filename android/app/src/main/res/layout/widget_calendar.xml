@@ -8,7 +8,7 @@
     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="10dp">
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
             <LinearLayout android:id="@+id/mbox" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
-                <ImageView android:id="@+id/mimg" android:layout_width="wrap_content" android:layout_height="46dp" android:adjustViewBounds="true" android:scaleType="fitStart" android:importantForAccessibility="no" android:visibility="gone" />
+                <ImageView android:id="@+id/mimg" android:layout_width="wrap_content" android:layout_height="50dp" android:adjustViewBounds="true" android:scaleType="fitStart" android:importantForAccessibility="no" android:visibility="gone" />
                 <TextView android:id="@+id/mnum" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="24sp" android:textStyle="bold" android:textColor="#7466E4" android:includeFontPadding="false" />
                 <TextView android:id="@+id/men" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textStyle="bold" android:textColor="#7466E4" android:paddingStart="6dp" android:letterSpacing="0.08" />
             </LinearLayout>

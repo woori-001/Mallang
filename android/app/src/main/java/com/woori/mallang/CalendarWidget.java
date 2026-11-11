@@ -113,7 +113,7 @@ public class CalendarWidget extends AppWidgetProvider {
      *  (번짐이라 작게 그려 늘려도 티가 안 나서 절반 크기로 그림) */
     static android.graphics.Bitmap drawBg(JSONObject art, int wDp, int hDp) {
         try {
-            float k = 0.5f;
+            float k = 0.35f;   // 위젯이 한 번에 받을 수 있는 그림 양이 정해져 있어서 배경은 작게 (번짐이라 티 안 남)
             int W = Math.max(60, Math.round(wDp * k)), H = Math.max(60, Math.round(hDp * k));
             android.graphics.Bitmap bm = android.graphics.Bitmap.createBitmap(W, H, android.graphics.Bitmap.Config.ARGB_8888);
             android.graphics.Canvas c = new android.graphics.Canvas(bm);
@@ -228,10 +228,10 @@ public class CalendarWidget extends AppWidgetProvider {
         final int DIP = android.util.TypedValue.COMPLEX_UNIT_DIP, SP = android.util.TypedValue.COMPLEX_UNIT_SP;
         float numBox = 22 * sc, chipH = 14 * sc, tapeH = 13 * sc;
         if (big) {
-            v.setViewLayoutHeight(R.id.mimg, 46 * sh, DIP);
+            v.setViewLayoutHeight(R.id.mimg, 50 * sh, DIP);
             for (int i = 0; i < 7; i++) v.setViewLayoutHeight(ctx.getResources().getIdentifier("wi" + i, "id", ctx.getPackageName()), 15 * Math.min(sc, 1.3f), DIP);
         }
-        float rowH = (hDp - 20 - 46 * sh - 20 * sc) / rows;
+        float rowH = (hDp - 20 - 50 * sh - 20 * sc) / rows;
         int slots = Math.max(0, Math.min(5, (int) ((rowH - numBox - 3) / (chipH + 1))));
         android.content.res.Resources res = ctx.getResources();
         // 스티커 그림 (같은 스티커는 그림 하나를 같이 씀)
