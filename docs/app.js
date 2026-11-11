@@ -59,10 +59,11 @@
     const logoEl = document.querySelector('.brand img');
     const logoSrc = logoEl ? logoEl.getAttribute('src') : 'logo.png';
     const now = new Date();
-    const key = ['st4', prefs.skin, cn.fontFamily, cn.color, ce.color, logoSrc, now.getFullYear(), now.getMonth(), sk.sun, sk.sat, cw.color].join('|');
+    const key = ['st5', prefs.skin, cn.fontFamily, cn.color, ce.color, logoSrc, now.getFullYear(), now.getMonth(), sk.sun, sk.sat, cw.color].join('|');
     if (artCache.key === key) return artCache.art;
     try { await Promise.all([document.fonts.load('700 40px ' + cn.fontFamily, '0123456789'), document.fonts.load('600 20px ' + ce.fontFamily, 'NOVEMBER 2026'), document.fonts.load('600 20px ' + cw.fontFamily, '일월화수목금토')]); } catch (e) { /* 글꼴을 못 불러오면 기본 글꼴 */ }
     const logo0 = await loadImg(logoSrc);
+    setStickerShadow(sk.a1);   // 스킨 대표색으로 옅게
     const S = 2.5;   // 크게 그려서 위젯에서 또렷하게 (너무 크면 위젯이 못 받아서 2.5배)
     // 로고도 스티커처럼 (조금 기울여 붙인 느낌)
     const LH = 25 * S;
@@ -127,6 +128,14 @@
   }
   // 그림(이모지·말랑이·로고)을 진짜 스티커처럼: 하얀 테두리로 오려 낸 모양 + 그림자 + 기울임 + 코팅 반짝임
   // src 를 w×h 크기로 그린 뒤 둘레 edge 만큼 하얀 테두리 → { cv, pad } (pad = 그림이 안쪽으로 들어간 만큼)
+  // 그림자는 까만색 말고 스킨 대표색을 옅게 (스킨에 녹아드는 부드러운 그림자)
+  let stShadow = 'rgba(110, 96, 150, .2)';
+  function setStickerShadow(hex) {
+    const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+    if (!m) return;
+    const n = parseInt(m[1], 16);
+    stShadow = 'rgba(' + (n >> 16 & 255) + ', ' + (n >> 8 & 255) + ', ' + (n & 255) + ', .24)';
+  }
   function stickerize(src, w, h, edge, tilt) {
     const rad = tilt * Math.PI / 180;
     const bw = w + edge * 2 + 8, bh = h + edge * 2 + 10;
@@ -139,7 +148,7 @@
     const c = cv.getContext('2d');
     c.translate(W / 2, H / 2); c.rotate(rad); c.translate(-bw / 2, -bh / 2);
     const ring = (n) => { for (let k = 0; k < n; k++) { const a = k / n * Math.PI * 2; c.drawImage(wm, Math.cos(a) * edge, Math.sin(a) * edge); } };
-    c.save(); c.shadowColor = 'rgba(40, 30, 60, .28)'; c.shadowBlur = Math.max(3, edge); c.shadowOffsetY = Math.max(2, edge / 2); ring(24); c.restore();
+    c.save(); c.shadowColor = stShadow; c.shadowBlur = Math.max(4, edge * 1.4); c.shadowOffsetY = Math.max(1.5, edge / 3); ring(24); c.restore();
     ring(24);
     c.drawImage(t, 0, 0);
     c.setTransform(1, 0, 0, 1, 0, 0);
@@ -149,14 +158,15 @@
   }
   const stkCache = {};
   function stickerImg(em) {
-    if (stkCache[em]) return stkCache[em];
+    const ck = em + stShadow;
+    if (stkCache[ck]) return stkCache[ck];
     const Z = 84, t = document.createElement('canvas'); t.width = Z; t.height = Z;
     const tc = t.getContext('2d');
     tc.font = '72px "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif'; tc.textAlign = 'center'; tc.textBaseline = 'middle';
     tc.fillText(em, Z / 2, Z / 2 + 3);
     let h = 0; for (const ch of em) h = (h * 31 + ch.codePointAt(0)) | 0;
     const st = stickerize(t, Z, Z, 6, (Math.abs(h) % 2 ? 1 : -1) * (6 + Math.abs(h) % 5));
-    return (stkCache[em] = st.cv.toDataURL('image/png'));
+    return (stkCache[ck] = st.cv.toDataURL('image/png'));
   }
   function pushWidget() {
     if (!window.MallangAndroid || !window.MallangAndroid.saveWidget) return;
