@@ -13,8 +13,8 @@
                 <TextView android:id="@+id/men" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textStyle="bold" android:textColor="#7466E4" android:paddingStart="6dp" android:letterSpacing="0.08" />
             </LinearLayout>
             <TextView android:id="@+id/next" android:layout_width="30dp" android:layout_height="40dp" android:gravity="center" android:text="›" android:textSize="26sp" android:includeFontPadding="false" android:textColor="#4A3F6B" />
-            <ImageView android:id="@+id/mimg" android:layout_width="wrap_content" android:layout_height="30dp" android:layout_marginStart="4dp" android:adjustViewBounds="true" android:scaleType="fitStart" android:importantForAccessibility="no" android:visibility="gone" />
             <FrameLayout android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+            <ImageView android:id="@+id/mimg" android:layout_width="wrap_content" android:layout_height="30dp" android:layout_marginEnd="8dp" android:adjustViewBounds="true" android:scaleType="fitEnd" android:importantForAccessibility="no" android:visibility="gone" />
             <TextView android:id="@+id/today" android:layout_width="30dp" android:layout_height="30dp" android:layout_marginEnd="4dp" android:gravity="center" android:background="@drawable/todaybox" android:textSize="13sp" android:textStyle="bold" android:includeFontPadding="false" android:textColor="#4A3F6B" />
         </LinearLayout>
         <LinearLayout android:id="@+id/wrow" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:layout_marginBottom="2dp" android:orientation="horizontal" android:paddingTop="4dp" android:paddingBottom="5dp">
