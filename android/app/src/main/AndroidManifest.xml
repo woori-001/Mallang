@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- 앱 안에서 새 버전 받아 설치 (설치 확인은 사용자가 직접 누름) -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <application
         android:label="말랑메모"
         android:icon="@mipmap/ic_launcher"
@@ -20,6 +22,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".PreviewActivity" android:exported="true" android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+        <receiver android:name=".InstallResult" android:exported="false" />
         <receiver android:name=".CalendarWidget" android:exported="true" android:label="말랑 달력">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

@@ -28,10 +28,17 @@ jobs:
           java-version: 17
       # 서명 키를 계속 같은 걸로 써야 새 APK를 지우지 않고 덮어 설치할 수 있어서, 처음 만든 키를 보관해 둠
       - name: 서명 키 가져오기
+        id: ks
         uses: actions/cache@v4
         with:
           path: ~/.android/debug.keystore
           key: mallang-android-debug-keystore-v1
+      # 키가 바뀌면 이미 설치한 앱에 덮어 설치가 안 되므로, 키를 못 찾으면 새로 만들지 말고 멈춤
+      - name: 서명 키 확인
+        if: steps.ks.outputs.cache-hit != 'true'
+        run: |
+          echo "::error::보관해 둔 서명 키를 찾지 못했어요. 새 키로 만들면 휴대폰에 덮어 설치가 안 돼서 멈춥니다."
+          exit 1
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
@@ -39,6 +46,9 @@ jobs:
         working-directory: android
         run: |
           set -o pipefail
+          # 안드로이드 코드 지문 (앱 안 "새 버전" 알림은 이 값이 바뀐 빌드만)
+          export SRC_HASH=$(git ls-files -s app/src app/build.gradle | sha1sum | cut -c1-12)
+          echo "SRC_HASH=$SRC_HASH" >> "$GITHUB_ENV"
           gradle --no-daemon assembleDebug 2>&1 | tee build.log
           cp app/build/outputs/apk/debug/app-debug.apk ../MallangMemo-android-test.apk
           ls -la ../MallangMemo-android-test.apk
@@ -46,6 +56,9 @@ jobs:
         run: |
           if gh release view android-test --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload android-test MallangMemo-android-test.apk --repo "$GITHUB_REPOSITORY" --clobber
+            # APK 를 다 올린 뒤에 버전 표시를 바꿈 (앱이 새 버전을 보고 받으러 갔을 때 옛 APK 를 받지 않게)
+            printf '{"code":%s,"src":"%s","at":"%s"}' "$GITHUB_RUN_NUMBER" "$SRC_HASH" "$(date -u +%FT%TZ)" > android-version.json
+            gh release upload android-test android-version.json --repo "$GITHUB_REPOSITORY" --clobber
             gh release edit android-test --repo "$GITHUB_REPOSITORY" --prerelease --latest=false --notes "안드로이드 테스트 앱 (홈 화면 달력 위젯). 빌드 #${GITHUB_RUN_NUMBER}"
           else
             gh release create android-test MallangMemo-android-test.apk --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
@@ -89,10 +102,11 @@ jobs:
             adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es file lav.json --ei w 400 --ei h 680 ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-big.png
             adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es file peach.json --ei w 400 --ei h 680 ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-bigpeach.png
             adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es file lav.json --ei w 260 --ei h 300 ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-small.png
+            adb shell am start -S -W -n com.woori.mallang/.MainActivity --ez testUpdate true ; sleep 6 ; adb exec-out screencap -p > preview-update.png
             adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es file lav-a45.json --ei h 400 --es wall 3D6E9E ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-alpha.png
             ls -la preview-*.png
       - name: 캡처 올리기
-        run: gh release upload android-test preview-lav.png preview-next.png preview-midnight.png preview-draw.png preview-big.png preview-bigpeach.png preview-small.png preview-alpha.png --repo "$GITHUB_REPOSITORY" --clobber
+        run: gh release upload android-test preview-lav.png preview-next.png preview-midnight.png preview-draw.png preview-big.png preview-bigpeach.png preview-small.png preview-alpha.png preview-update.png --repo "$GITHUB_REPOSITORY" --clobber
       - name: 실패 원인 남기기
         if: failure()
         working-directory: android

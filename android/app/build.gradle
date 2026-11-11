@@ -12,7 +12,10 @@ android {
         targetSdk 34
         versionCode runNo
         versionName "0.1.${runNo}"
+        // 안드로이드 코드 지문: 위젯·앱 코드가 실제로 바뀐 빌드만 "새 버전" 알림을 띄우려고 (웹앱만 바뀐 빌드는 알림 안 함)
+        buildConfigField 'String', 'SRC_HASH', "\"${System.getenv('SRC_HASH') ?: 'dev'}\""
     }
+    buildFeatures { buildConfig true }
     buildTypes {
         debug { applicationIdSuffix '' }
     }

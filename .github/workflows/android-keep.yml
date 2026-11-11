@@ -1,0 +1,22 @@
+# 안드로이드 서명 키 보관 유지: GitHub 보관함(cache)은 7일 동안 안 쓰면 지워져서, 사흘마다 한 번씩 꺼내 봐서 지워지지 않게 함
+# (키가 지워지면 새 APK 를 휴대폰에 덮어 설치할 수 없음)
+name: 안드로이드 서명 키 보관 유지
+
+on:
+  schedule:
+    - cron: '17 3 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  keep:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 서명 키 꺼내 보기
+        id: ks
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: mallang-android-debug-keystore-v1
+      - name: 결과
+        run: |
+          if [ "${{ steps.ks.outputs.cache-hit }}" = "true" ]; then echo "서명 키 그대로 있어요"; else echo "::error::서명 키가 없어요"; exit 1; fi

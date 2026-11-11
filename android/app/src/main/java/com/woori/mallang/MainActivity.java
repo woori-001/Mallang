@@ -22,6 +22,7 @@ public class MainActivity extends Activity {
     static final String HOST = "woori-001.github.io";
     private WebView web;
     private boolean loaded;
+    private Updater updater;
 
     @Override
     protected void onCreate(Bundle saved) {
@@ -55,6 +56,9 @@ public class MainActivity extends Activity {
         });
         web.addJavascriptInterface(new Bridge(getApplicationContext()), "MallangAndroid");
 
+        updater = new Updater(this);
+        if (getIntent().getBooleanExtra("testUpdate", false)) updater.ask(0);   // 확인용: 새 버전 알림 창 모습
+
         String d = dateOf(getIntent());
         if (d != null) web.loadUrl(HOME + "#date=" + d);   // 위젯에서 누른 날짜로 시작
         else if (saved != null) web.restoreState(saved);
@@ -75,6 +79,13 @@ public class MainActivity extends Activity {
         if (d == null) return;
         if (loaded) web.evaluateJavascript("window.mallangOpenDate&&mallangOpenDate('" + d + "')", null);
         else web.loadUrl(HOME + "#date=" + d);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updater.onResume();
+        updater.check(false);   // 새 버전 확인 (30분에 한 번)
     }
 
     @Override
