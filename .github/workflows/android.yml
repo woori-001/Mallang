@@ -111,10 +111,12 @@ jobs:
             adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es file peach.json --ei w 400 --ei h 680 ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-bigpeach.png
             adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es file lav.json --ei w 260 --ei h 300 ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-small.png
             adb shell am start -S -W -n com.woori.mallang/.MainActivity --ez testUpdate true ; sleep 6 ; adb exec-out screencap -p > preview-update.png
+            adb shell appops set com.woori.mallang REQUEST_INSTALL_PACKAGES allow ; python3 android/preview/tap.py "지금 받기" ; sleep 25 ; adb exec-out screencap -p > preview-install.png
+            adb shell input keyevent KEYCODE_BACK ; sleep 1 ; adb shell input keyevent KEYCODE_BACK ; sleep 1
             adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es file lav-a45.json --ei h 400 --es wall 3D6E9E ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-alpha.png
             ls -la preview-*.png
       - name: 캡처 올리기
-        run: gh release upload android-test preview-lav.png preview-next.png preview-midnight.png preview-draw.png preview-big.png preview-bigpeach.png preview-small.png preview-alpha.png preview-update.png --repo "$GITHUB_REPOSITORY" --clobber
+        run: gh release upload android-test preview-lav.png preview-next.png preview-midnight.png preview-draw.png preview-big.png preview-bigpeach.png preview-small.png preview-alpha.png preview-update.png preview-install.png --repo "$GITHUB_REPOSITORY" --clobber
       - name: 실패 원인 남기기
         if: failure()
         working-directory: android
