@@ -50,11 +50,77 @@
   // 안드로이드 앱(말랑메모 위젯 앱) 안에서 열렸을 때만: 홈 화면 달력 위젯에 일정 요약을 넘겨줌
   // (휴대폰 안에만 저장되고 어디로도 보내지 않음 · 웹 브라우저에서는 아무 일도 안 함)
   let widgetT = 0;
+  // 위젯 꾸밈 그림: 앱과 같은 글꼴로 쓴 달 제목(로고 포함)·요일 글자를 그림으로 만들어 넘김 (위젯은 글꼴을 못 바꿔서)
+  let artCache = { key: '', art: null };
+  const loadImg = (src) => new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = src; });
+  async function widgetArt(sk) {
+    const num = $('calNum'), en = $('calEn'), wd = document.querySelector('.wdays span:nth-child(2)');
+    const cn = getComputedStyle(num), ce = getComputedStyle(en), cw = getComputedStyle(wd);
+    const logoEl = document.querySelector('.brand img');
+    const logoSrc = logoEl ? logoEl.getAttribute('src') : 'logo.png';
+    const now = new Date();
+    const key = [prefs.skin, cn.fontFamily, cn.color, ce.color, logoSrc, now.getFullYear(), now.getMonth(), sk.sun, sk.sat, cw.color].join('|');
+    if (artCache.key === key) return artCache.art;
+    try { await Promise.all([document.fonts.load('700 40px ' + cn.fontFamily, '0123456789'), document.fonts.load('600 20px ' + ce.fontFamily, 'NOVEMBER 2026'), document.fonts.load('600 20px ' + cw.fontFamily, '일월화수목금토')]); } catch (e) { /* 글꼴을 못 불러오면 기본 글꼴 */ }
+    const logo = await loadImg(logoSrc);
+    const S = 3;   // 3배로 그려서 위젯에서 또렷하게
+    const heads = {};
+    for (let mo = -1; mo <= 3; mo++) {
+      const d = new Date(now.getFullYear(), now.getMonth() + mo, 1);
+      const cv = document.createElement('canvas'), c = cv.getContext('2d');
+      const nf = cn.fontWeight + ' ' + 30 * S + 'px ' + cn.fontFamily, ef = ce.fontWeight + ' ' + 9.5 * S + 'px ' + ce.fontFamily;
+      const ns = String(d.getMonth() + 1), es = MONTH_EN[d.getMonth()] + ' ' + d.getFullYear();
+      c.font = nf; const nw = c.measureText(ns).width;
+      c.font = ef; if ('letterSpacing' in c) c.letterSpacing = 0.9 * S + 'px'; const ew = c.measureText(es).width;
+      const lh = 15 * S, lw = logo ? logo.naturalWidth / logo.naturalHeight * lh : 0;
+      const gap = 6 * S, H = 36 * S, W = Math.ceil(nw + gap + Math.max(ew, lw) + 2 * S);
+      cv.width = W; cv.height = H;
+      c.textBaseline = 'alphabetic';
+      c.font = nf; c.fillStyle = cn.color; c.fillText(ns, 0, 30 * S);
+      if (logo) c.drawImage(logo, nw + gap - 1 * S, 2 * S, lw, lh);
+      c.font = ef; if ('letterSpacing' in c) c.letterSpacing = 0.9 * S + 'px'; c.fillStyle = ce.color; c.fillText(es, nw + gap, logo ? 29 * S : 22 * S);
+      heads[mo] = cv.toDataURL('image/png');
+    }
+    const wdays = WD.map((t, i) => {
+      const cv = document.createElement('canvas'), c = cv.getContext('2d');
+      cv.width = 16 * S; cv.height = 15 * S;
+      c.font = cw.fontWeight + ' ' + 11.5 * S + 'px ' + cw.fontFamily; c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.fillStyle = i === 0 ? sk.sun : i === 6 ? sk.sat : cw.color;
+      c.fillText(t, 8 * S, 8 * S);
+      return cv.toDataURL('image/png');
+    });
+    // 달력 카드 모양 그대로: 카드 바탕색(유리면 반투명) · 테두리(종이 스킨) · 뒤 배경(색 번짐)
+    const card = document.querySelector('.calCard');
+    const tr = card.style.transition; card.style.transition = 'none';   // 스킨을 막 바꿨을 때 바뀌는 중간 색을 읽지 않게
+    const cc0 = getComputedStyle(card), cc = { boxShadow: cc0.boxShadow, backgroundColor: cc0.backgroundColor };
+    card.style.transition = tr;
+    // 어떤 모양의 CSS 색이든(color-mix 등) 1칸 그려서 [r, g, b, a] 로 읽기
+    const px = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+    const rgba = (str) => {
+      if (!str || str === 'none') return null;
+      px.clearRect(0, 0, 1, 1); px.fillStyle = '#000'; px.fillStyle = str; px.fillRect(0, 0, 1, 1);
+      const d = px.getImageData(0, 0, 1, 1).data;
+      return d[3] ? [d[0], d[1], d[2], Math.round(d[3] / 255 * 100) / 100] : [0, 0, 0, 0];
+    };
+    let line = null;
+    for (const sh of (cc.boxShadow || '').split(/,(?![^(]*\))/)) {
+      const m = /^\s*((?:[a-z-]+\((?:[^()]|\([^)]*\))*\))|#[0-9a-f]+)\s+(.*)$/i.exec(sh);
+      if (!m) continue;
+      const col = rgba(m[1]), nums = m[2].trim().split(/\s+/).filter((x) => /px$/.test(x)).map(parseFloat);
+      if (col && col[3] > 0.05 && nums.length >= 4 && nums[2] === 0 && nums[3] > 0) { line = { c: col, w: Math.min(3, nums[3]) }; break; }
+    }
+    const bgShown = getComputedStyle(document.querySelector('.bg')).display !== 'none';
+    const art = { base: rgba(sk.base) || [238, 240, 251, 1], b: bgShown ? sk.b : null, card: rgba(cc.backgroundColor) || [255, 255, 255, 0.6], line, dark: !!sk.dark, heads, wdays };
+    artCache = { key, art };
+    return art;
+  }
   function pushWidget() {
     if (!window.MallangAndroid || !window.MallangAndroid.saveWidget) return;
     clearTimeout(widgetT);
-    widgetT = setTimeout(() => {
+    widgetT = setTimeout(async () => {
       try {
+        let art = null;
+        try { art = await widgetArt(skin()); } catch (e) { art = null; }
         const sk = skin(), rec = window.M.recurring(st.events), now = new Date();
         const days = {}, list = {};
         for (let mo = -1; mo <= 3; mo++) {
@@ -70,7 +136,7 @@
         }
         const f0 = dateKey(new Date(now.getFullYear(), now.getMonth() - 1, 1)), t0 = dateKey(new Date(now.getFullYear(), now.getMonth() + 4, 0));
         const tapes = window.M.decoTapes(st.deco, f0, t0).slice(0, 60).map((t) => ({ s: t.s, e: t.e, t: t.t, c: window.M.DECO_TAPES[t.c] }));
-        window.MallangAndroid.saveWidget(JSON.stringify({ v: 1, tapes, at: Date.now(), alpha: prefs.widgetAlpha == null ? 100 : prefs.widgetAlpha, skin: { bg: sk.base, ink: sk.ink, sub: sk.sub, a1: sk.a1, sun: sk.sun, sat: sk.sat }, days, list }));
+        window.MallangAndroid.saveWidget(JSON.stringify({ v: 1, art, tapes, at: Date.now(), alpha: prefs.widgetAlpha == null ? 100 : prefs.widgetAlpha, skin: { bg: sk.base, ink: sk.ink, sub: sk.sub, a1: sk.a1, sun: sk.sun, sat: sk.sat }, days, list }));
       } catch (e) { /* 위젯 갱신 실패는 앱 사용에 영향 없음 */ }
     }, 400);
   }

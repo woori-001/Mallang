@@ -5,7 +5,7 @@ name: 안드로이드 앱 빌드 (테스트)
 on:
   push:
     branches: [main]
-    paths: ['android/**', '.github/workflows/android.yml']
+    paths: ['android/**', 'docs/app.js', '.github/workflows/android.yml']
   workflow_dispatch:
 
 permissions:
@@ -53,6 +53,15 @@ jobs:
               --notes "안드로이드 테스트 앱 (홈 화면 달력 위젯). 빌드 #${GITHUB_RUN_NUMBER}"
           fi
       # 확인용: 에뮬레이터에 설치해서 위젯 모습을 실제로 그려 캡처 (릴리스에 preview-*.png 로 같이 올림)
+      # 위젯 데이터는 진짜 모바일 앱(docs/)을 열어서 앱이 넘기는 그대로 받음 (스킨 글꼴로 그린 제목·배경 포함)
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: 모바일 앱에서 위젯 데이터 받기
+        run: |
+          mkdir -p /tmp/pw && cd /tmp/pw && npm init -y >/dev/null && npm i --no-save playwright@1.48.2 >/dev/null
+          npx playwright install --with-deps chromium >/dev/null
+          cd "$GITHUB_WORKSPACE" && NODE_PATH=/tmp/pw/node_modules node android/preview/art.js preview-out
       - name: KVM 켜기
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -71,13 +80,17 @@ jobs:
             adb shell pm disable-user --user 0 com.google.android.apps.nexuslauncher || true
             adb shell settings put global hide_error_dialogs 1 || true
             sleep 5
-            adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es b64 "$(python3 android/preview/sample.py lav)" --ei h 400 ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-lav.png
-            adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es b64 "$(python3 android/preview/sample.py peach)" --ei off 1 ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-next.png
-            adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es b64 "$(python3 android/preview/sample.py lav)" --ei w 260 --ei h 300 ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-small.png
-            adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es b64 "$(python3 android/preview/sample.py lav 45)" --ei h 400 --es wall 3D6E9E ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-alpha.png
+            adb shell run-as com.woori.mallang mkdir -p files
+            for f in preview-out/*.json; do n=$(basename $f); adb push $f /data/local/tmp/$n >/dev/null; adb shell "cat /data/local/tmp/$n | run-as com.woori.mallang sh -c 'cat > files/$n'"; done
+            adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es file lav.json --ei h 400 ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-lav.png
+            adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es file peach.json --ei off 1 --ei h 400 ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-next.png
+            adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es file office.json --ei h 400 ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-office.png
+            adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es file midnight.json --ei h 400 ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-midnight.png
+            adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es file lav.json --ei w 260 --ei h 300 ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-small.png
+            adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es file lav-a45.json --ei h 400 --es wall 3D6E9E ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-alpha.png
             ls -la preview-*.png
       - name: 캡처 올리기
-        run: gh release upload android-test preview-lav.png preview-next.png preview-small.png preview-alpha.png --repo "$GITHUB_REPOSITORY" --clobber
+        run: gh release upload android-test preview-lav.png preview-next.png preview-office.png preview-midnight.png preview-small.png preview-alpha.png --repo "$GITHUB_REPOSITORY" --clobber
       - name: 실패 원인 남기기
         if: failure()
         working-directory: android

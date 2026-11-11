@@ -96,7 +96,7 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public void saveWidget(String json) {
-            if (json == null || json.length() > 400000) return;
+            if (json == null || json.length() > 1500000) return;
             ctx.getSharedPreferences(CalendarWidget.PREFS, Context.MODE_PRIVATE).edit().putString("data", json).apply();
             CalendarWidget.refreshAll(ctx);
         }

@@ -16,11 +16,13 @@ public class PreviewActivity extends Activity {
         String json = getIntent().getStringExtra("data");
         String b64 = getIntent().getStringExtra("b64");
         if (b64 != null) json = new String(android.util.Base64.decode(b64, android.util.Base64.DEFAULT), java.nio.charset.StandardCharsets.UTF_8);
+        String file = getIntent().getStringExtra("file");   // 큰 예시(그림 포함)는 파일로 받음
+        if (file != null) try { json = new String(java.nio.file.Files.readAllBytes(new java.io.File(getFilesDir(), file).toPath()), java.nio.charset.StandardCharsets.UTF_8); } catch (Exception e) { /* 없으면 빈 화면 */ }
         int off = getIntent().getIntExtra("off", 0);
         int w = getIntent().getIntExtra("w", 330), h = getIntent().getIntExtra("h", 380);
         FrameLayout root = new FrameLayout(this);
         root.setBackgroundColor(Color.parseColor("#" + (getIntent().hasExtra("wall") ? getIntent().getStringExtra("wall") : "9FB7D9")));
-        View v = CalendarWidget.build(this, json == null ? "{}" : json, off, h).apply(this, root);
+        View v = CalendarWidget.build(this, json == null ? "{}" : json, off, w, h).apply(this, root);
         float dp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, getResources().getDisplayMetrics());
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams((int) (w * dp), (int) (h * dp), Gravity.CENTER);
         root.addView(v, lp);

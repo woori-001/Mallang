@@ -84,7 +84,8 @@ public class CalendarWidget extends AppWidgetProvider {
         SharedPreferences p = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         android.os.Bundle o = mgr.getAppWidgetOptions(wid);
         int hDp = o != null ? o.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 0) : 0;
-        mgr.updateAppWidget(wid, build(ctx, p.getString("data", "{}"), p.getInt("off", 0), hDp > 0 ? hDp : 380));
+        int wDp = o != null ? o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0) : 0;
+        mgr.updateAppWidget(wid, build(ctx, p.getString("data", "{}"), p.getInt("off", 0), wDp > 0 ? wDp : 330, hDp > 0 ? hDp : 380));
     }
 
     @Override
@@ -93,7 +94,59 @@ public class CalendarWidget extends AppWidgetProvider {
     }
 
     /** 위젯 화면 만들기 (홈 화면 위젯과 미리보기 화면이 같이 씀) */
-    static RemoteViews build(Context ctx, String json, int off, int hDp) {
+    /** 앱이 그려 보낸 그림 (data:image/png;base64,...) → 비트맵 */
+    static android.graphics.Bitmap img(String dataUrl) {
+        if (dataUrl == null || dataUrl.length() < 30) return null;
+        try {
+            byte[] b = android.util.Base64.decode(dataUrl.substring(dataUrl.indexOf(',') + 1), android.util.Base64.DEFAULT);
+            return android.graphics.BitmapFactory.decodeByteArray(b, 0, b.length);
+        } catch (Exception e) { return null; }
+    }
+
+    static int argb(JSONArray a, int def) {
+        if (a == null || a.length() < 3) return def;
+        int al = (int) Math.round(Math.max(0, Math.min(1, a.optDouble(3, 1))) * 255);
+        return Color.argb(al, a.optInt(0), a.optInt(1), a.optInt(2));
+    }
+
+    /** 앱 달력 카드 그대로: 스킨 바탕 + 몽글몽글 색 번짐 4개 + 카드 색(유리는 반투명) + 종이 스킨 테두리
+     *  (번짐이라 작게 그려 늘려도 티가 안 나서 절반 크기로 그림) */
+    static android.graphics.Bitmap drawBg(JSONObject art, int wDp, int hDp) {
+        try {
+            float k = 0.5f;
+            int W = Math.max(60, Math.round(wDp * k)), H = Math.max(60, Math.round(hDp * k));
+            android.graphics.Bitmap bm = android.graphics.Bitmap.createBitmap(W, H, android.graphics.Bitmap.Config.ARGB_8888);
+            android.graphics.Canvas c = new android.graphics.Canvas(bm);
+            c.drawColor(argb(art.optJSONArray("base"), Color.parseColor("#EEF0FB")) | 0xFF000000);
+            JSONArray b = art.optJSONArray("b");
+            boolean dark = art.optBoolean("dark", false);
+            float[][] pos = { { 0.08f, 0.04f, 0.62f }, { 1.02f, 0.58f, 0.55f }, { 0.45f, 1.06f, 0.7f }, { 0.96f, -0.04f, 0.5f } };   // 앱 화면 번짐 자리 (가로 비율, 세로 비율, 반지름)
+            if (b != null) for (int i = 0; i < Math.min(4, b.length()); i++) {
+                int col = Color.parseColor(b.optString(i, "#FFCADB"));
+                float cx = pos[i][0] * W, cy = pos[i][1] * H, r = pos[i][2] * Math.max(W, H);
+                int a0 = dark ? 140 : 225;
+                android.graphics.Paint p = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+                p.setShader(new android.graphics.RadialGradient(cx, cy, r,
+                    new int[] { (col & 0x00FFFFFF) | (a0 << 24), (col & 0x00FFFFFF) | ((a0 / 2) << 24), col & 0x00FFFFFF },
+                    new float[] { 0f, 0.5f, 1f }, android.graphics.Shader.TileMode.CLAMP));
+                c.drawCircle(cx, cy, r, p);
+            }
+            c.drawColor(argb(art.optJSONArray("card"), Color.argb(150, 255, 255, 255)));
+            JSONObject line = art.optJSONObject("line");
+            if (line != null) {
+                android.graphics.Paint p = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+                p.setStyle(android.graphics.Paint.Style.STROKE);
+                float lw = (float) Math.max(1, line.optDouble("w", 1) * k * 2);
+                p.setStrokeWidth(lw);
+                p.setColor(argb(line.optJSONArray("c"), Color.argb(40, 0, 0, 0)));
+                float rr = 22 * k;
+                c.drawRoundRect(new android.graphics.RectF(lw / 2, lw / 2, W - lw / 2, H - lw / 2), rr, rr, p);
+            }
+            return bm;
+        } catch (Exception e) { return null; }
+    }
+
+    static RemoteViews build(Context ctx, String json, int off, int wDp, int hDp) {
         boolean compact = hDp < 330;
         JSONObject data = null;
         try { data = new JSONObject(json); } catch (Exception e) { data = new JSONObject(); }
@@ -107,6 +160,33 @@ public class CalendarWidget extends AppWidgetProvider {
 
         RemoteViews v = new RemoteViews(ctx.getPackageName(), R.layout.widget_calendar);
         v.setInt(R.id.bg, "setColorFilter", bg);
+        // 스킨 꾸밈: 앱과 같은 바탕(색 번짐)·같은 글꼴로 쓴 달 제목과 로고·요일
+        JSONObject art = data.optJSONObject("art");
+        boolean artHead = false, artWd = false;
+        if (art != null) {
+            android.graphics.Bitmap bgb = drawBg(art, wDp, hDp);
+            if (bgb != null) { v.setImageViewBitmap(R.id.bg, bgb); v.setInt(R.id.bg, "setColorFilter", 0); }
+            JSONObject heads = art.optJSONObject("heads");
+            android.graphics.Bitmap hb = heads != null ? img(heads.optString(String.valueOf(off), "")) : null;
+            if (hb != null) { v.setImageViewBitmap(R.id.mimg, hb); artHead = true; }
+            JSONArray wa = art.optJSONArray("wdays");
+            if (wa != null && wa.length() == 7) {
+                artWd = true;
+                for (int i = 0; i < 7; i++) {
+                    android.graphics.Bitmap wb = img(wa.optString(i, ""));
+                    int wi = ctx.getResources().getIdentifier("wi" + i, "id", ctx.getPackageName());
+                    if (wb == null) { artWd = false; break; }
+                    v.setImageViewBitmap(wi, wb);
+                }
+            }
+        }
+        v.setViewVisibility(R.id.mimg, artHead ? View.VISIBLE : View.GONE);
+        v.setViewVisibility(R.id.mnum, artHead ? View.GONE : View.VISIBLE);
+        v.setViewVisibility(R.id.men, artHead ? View.GONE : View.VISIBLE);
+        for (int i = 0; i < 7; i++) {
+            v.setViewVisibility(ctx.getResources().getIdentifier("wi" + i, "id", ctx.getPackageName()), artWd ? View.VISIBLE : View.GONE);
+            v.setViewVisibility(ctx.getResources().getIdentifier("w" + i, "id", ctx.getPackageName()), artWd ? View.INVISIBLE : View.VISIBLE);
+        }
         int alpha = Math.max(0, Math.min(100, data.optInt("alpha", 100)));   // 앱 설정 > 위젯 투명도
         v.setInt(R.id.bg, "setImageAlpha", Math.round(alpha * 255f / 100f));
 
