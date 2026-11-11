@@ -22,184 +22,184 @@
         </LinearLayout>
         <LinearLayout android:id="@+id/gridbox" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="vertical">
         <LinearLayout android:id="@+id/r0" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal">
-            <LinearLayout android:id="@+id/c0" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n0" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c1" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n1" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c2" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n2" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c3" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n3" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c4" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n4" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c5" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n5" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c6" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n6" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
+            <FrameLayout android:id="@+id/c0" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n0" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c1" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n1" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c2" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n2" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c3" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n3" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c4" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n4" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c5" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n5" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c6" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n6" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
         </LinearLayout>
         <LinearLayout android:id="@+id/r1" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal">
-            <LinearLayout android:id="@+id/c7" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n7" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t7" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c8" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n8" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t8" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c9" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n9" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t9" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c10" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n10" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t10" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c11" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n11" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t11" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c12" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n12" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t12" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c13" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n13" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t13" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
+            <FrameLayout android:id="@+id/c7" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n7" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t7" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c8" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n8" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t8" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c9" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n9" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t9" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c10" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n10" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t10" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c11" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n11" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t11" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c12" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n12" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t12" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c13" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n13" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t13" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
         </LinearLayout>
         <LinearLayout android:id="@+id/r2" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal">
-            <LinearLayout android:id="@+id/c14" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n14" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t14" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c15" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n15" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t15" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c16" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n16" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t16" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c17" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n17" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t17" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c18" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n18" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t18" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c19" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n19" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t19" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c20" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n20" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t20" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
+            <FrameLayout android:id="@+id/c14" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n14" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t14" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c15" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n15" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t15" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c16" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n16" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t16" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c17" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n17" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t17" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c18" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n18" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t18" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c19" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n19" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t19" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c20" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n20" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t20" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
         </LinearLayout>
         <LinearLayout android:id="@+id/r3" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal">
-            <LinearLayout android:id="@+id/c21" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n21" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t21" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c22" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n22" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t22" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c23" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n23" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t23" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c24" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n24" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t24" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c25" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n25" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t25" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c26" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n26" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t26" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c27" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n27" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t27" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
+            <FrameLayout android:id="@+id/c21" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n21" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t21" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c22" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n22" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t22" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c23" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n23" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t23" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c24" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n24" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t24" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c25" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n25" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t25" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c26" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n26" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t26" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c27" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n27" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t27" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
         </LinearLayout>
         <LinearLayout android:id="@+id/r4" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal">
-            <LinearLayout android:id="@+id/c28" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n28" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t28" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c29" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n29" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t29" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c30" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n30" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t30" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c31" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n31" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t31" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c32" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n32" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t32" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c33" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n33" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t33" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c34" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n34" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t34" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
+            <FrameLayout android:id="@+id/c28" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n28" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t28" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c29" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n29" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t29" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c30" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n30" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t30" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c31" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n31" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t31" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c32" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n32" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t32" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c33" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n33" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t33" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c34" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n34" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t34" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
         </LinearLayout>
         <LinearLayout android:id="@+id/r5" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal">
-            <LinearLayout android:id="@+id/c35" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n35" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t35" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c36" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n36" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t36" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c37" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n37" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t37" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c38" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n38" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t38" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c39" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n39" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t39" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c40" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n40" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t40" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
-            <LinearLayout android:id="@+id/c41" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-                <TextView android:id="@+id/n41" android:layout_width="24dp" android:layout_height="24dp" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
-                <TextView android:id="@+id/t41" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="6sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
-            </LinearLayout>
+            <FrameLayout android:id="@+id/c35" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n35" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t35" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c36" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n36" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t36" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c37" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n37" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t37" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c38" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n38" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t38" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c39" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n39" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t39" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c40" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n40" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t40" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
+            <FrameLayout android:id="@+id/c41" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <TextView android:id="@+id/n41" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center" android:gravity="center" android:textSize="12.5sp" android:textColor="#4A3F6B" android:includeFontPadding="false" />
+                <TextView android:id="@+id/t41" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="27dp" android:textSize="5.5sp" android:includeFontPadding="false" android:letterSpacing="0.1" />
+            </FrameLayout>
         </LinearLayout>
         </LinearLayout>
         <FrameLayout android:id="@+id/line" android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginTop="4dp" android:layout_marginBottom="6dp" android:background="#1F000000" />
