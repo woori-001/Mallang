@@ -59,11 +59,10 @@
     const logoEl = document.querySelector('.brand img');
     const logoSrc = logoEl ? logoEl.getAttribute('src') : 'logo.png';
     const now = new Date();
-    const key = ['st7', prefs.skin, cn.fontFamily, cn.color, ce.color, logoSrc, now.getFullYear(), now.getMonth(), sk.sun, sk.sat, cw.color].join('|');
+    const key = ['st8', prefs.skin, cn.fontFamily, cn.color, ce.color, logoSrc, now.getFullYear(), now.getMonth(), sk.sun, sk.sat, cw.color].join('|');
     if (artCache.key === key) return artCache.art;
     try { await Promise.all([document.fonts.load('700 40px ' + cn.fontFamily, '0123456789'), document.fonts.load('600 20px ' + ce.fontFamily, 'NOVEMBER 2026'), document.fonts.load('600 20px ' + cw.fontFamily, '일월화수목금토')]); } catch (e) { /* 글꼴을 못 불러오면 기본 글꼴 */ }
     const logo0 = await loadImg(logoSrc);
-    setStickerShadow(sk.a1);   // 스킨 대표색으로 옅게
     const S = 2.5;   // 크게 그려서 위젯에서 또렷하게 (너무 크면 위젯이 못 받아서 2.5배)
     // 로고도 스티커처럼 (조금 기울여 붙인 느낌)
     const LH = 25 * S;
@@ -107,8 +106,8 @@
   }
   // 그림(이모지·말랑이·로고)을 진짜 스티커처럼: 하얀 테두리로 오려 낸 모양 + 그림자 + 기울임 + 코팅 반짝임
   // src 를 w×h 크기로 그린 뒤 둘레 edge 만큼 하얀 테두리 → { cv, pad } (pad = 그림이 안쪽으로 들어간 만큼)
-  // 그림자는 까만색 말고 스킨 대표색을 옅게 (스킨에 녹아드는 부드러운 그림자)
-  let stShadow = 'rgba(110, 96, 150, .2)';
+  // 그림자: 까만색 말고 옅은 회색 (모든 스킨 같음)
+  let stShadow = 'rgba(110, 110, 118, .32)';   // 모든 스킨 같은 옅은 회색 그림자
   function setStickerShadow(hex) {
     const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
     if (!m) return;
