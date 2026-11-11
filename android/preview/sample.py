@@ -16,7 +16,10 @@ ev = {
 }
 hol = {f'{t.year}-12-25': '크리스마스', f'{t.year + 1}-01-01': '신정'}
 for d in hol: ev.setdefault(d, [])
+for o in (1, 7, 12): ev.setdefault(k(o), [])
 days = {d: {'c': [C[x[2]] for x in v[:3]], 'h': hol.get(d, '')} for d, v in ev.items()}
+days[k(1)].update(bg='#FFE1E1', s='🎂'); days[k(7)].update(bg='#DDF3DA', s='✈️'); days[k(12)].update(s='⭐')
+tapes = [{'s': k(6), 'e': k(8), 't': '결산 기간', 'c': '#F8E07E'}, {'s': k(13), 'e': k(17), 't': '제주 출장', 'c': '#A7CFF5'}]
 alpha = int(sys.argv[2]) if len(sys.argv) > 2 else 100
 lst = {d: [{'t': a, 'n': b, 'c': C[c]} for a, b, c in sorted(v, key=lambda x: x[0])] for d, v in ev.items()}
-print(base64.b64encode(json.dumps({'v': 1, 'alpha': alpha, 'skin': SK, 'days': days, 'list': lst}, ensure_ascii=False).encode()).decode())
+print(base64.b64encode(json.dumps({'v': 1, 'alpha': alpha, 'tapes': tapes, 'skin': SK, 'days': days, 'list': lst}, ensure_ascii=False).encode()).decode())

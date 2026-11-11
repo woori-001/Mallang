@@ -32,7 +32,7 @@
 
   // ───────── 저장 ─────────
   function blankState() {
-    return { memos: [], trash: [], tombs: [], events: {}, evMeta: {}, contacts: null, shared: {}, cursor: null, planner: blankPlanner() };
+    return { memos: [], trash: [], tombs: [], events: {}, evMeta: {}, deco: {}, decoMeta: {}, contacts: null, shared: {}, cursor: null, planner: blankPlanner() };
   }
   function blankPlanner() { return { weeks: {}, meta: {}, std: { in: '09:00', out: '18:00', alpha: null }, stdMeta: { mt: 0, dirty: false } }; }
   function loadJSON(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v || d; } catch (e) { return d; } }
@@ -40,6 +40,8 @@
   if (st.contacts && window.M.fixContactRows(st.contacts.rows)) st.contacts = { rows: window.M.fixContactRows(st.contacts.rows), mt: Math.max(Date.now(), (st.contacts.mt || 0) + 1), dirty: true };
   // 주간 플래너가 생기기 전에 받은 기록은 플래너를 건너뛰었으므로, 처음 한 번은 처음부터 다시 받아요
   if (!st.planner || !st.planner.weeks) { st.planner = blankPlanner(); st.cursor = null; }
+  // 달력 꾸미기가 생기기 전에 받은 기록도 처음 한 번은 처음부터 다시 받아요 (다른 기기에서 붙인 꾸미기를 놓치지 않게)
+  if (!st.decoMeta || typeof st.decoMeta !== 'object' || !st.deco) { st.deco = {}; st.decoMeta = {}; st.cursor = null; }
   let prefs = Object.assign({ skin: 'lav', font: 'gowun' }, loadJSON(LS_PREFS, {}));
   let saveT = null;
   function saveState() { clearTimeout(saveT); saveT = setTimeout(saveStateNow, 200); }
@@ -61,11 +63,14 @@
             const k = dateKey(new Date(y, m, d));
             const evs = window.M.eventsOn(st.events, k, rec).map((x) => x.ev);
             const hol = window.M.holiday(k);
-            if (evs.length || hol) days[k] = { c: evs.slice(0, 3).map((e) => EVENT_COLORS[e.c] || EVENT_COLORS.lav), h: hol || '' };
+            const dd = window.M.decoDay(st.deco, k);
+            if (evs.length || hol || dd.bg || dd.stk) days[k] = { c: evs.slice(0, 3).map((e) => EVENT_COLORS[e.c] || EVENT_COLORS.lav), h: hol || '', bg: dd.bg, s: dd.stk };
             if (evs.length) list[k] = evs.slice().sort((a, b) => String(a.t || '').localeCompare(String(b.t || ''))).slice(0, 6).map((e) => ({ t: /^\d{2}:\d{2}$/.test(e.t) ? e.t : '', n: String(e.title || '(이름 없음)').slice(0, 40), c: EVENT_COLORS[e.c] || EVENT_COLORS.lav }));
           }
         }
-        window.MallangAndroid.saveWidget(JSON.stringify({ v: 1, at: Date.now(), alpha: prefs.widgetAlpha == null ? 100 : prefs.widgetAlpha, skin: { bg: sk.base, ink: sk.ink, sub: sk.sub, a1: sk.a1, sun: sk.sun, sat: sk.sat }, days, list }));
+        const f0 = dateKey(new Date(now.getFullYear(), now.getMonth() - 1, 1)), t0 = dateKey(new Date(now.getFullYear(), now.getMonth() + 4, 0));
+        const tapes = window.M.decoTapes(st.deco, f0, t0).slice(0, 60).map((t) => ({ s: t.s, e: t.e, t: t.t, c: window.M.DECO_TAPES[t.c] }));
+        window.MallangAndroid.saveWidget(JSON.stringify({ v: 1, tapes, at: Date.now(), alpha: prefs.widgetAlpha == null ? 100 : prefs.widgetAlpha, skin: { bg: sk.base, ink: sk.ink, sub: sk.sub, a1: sk.a1, sun: sk.sun, sat: sk.sat }, days, list }));
       } catch (e) { /* 위젯 갱신 실패는 앱 사용에 영향 없음 */ }
     }, 400);
   }
@@ -198,6 +203,7 @@
   function localTs(kind, id) {
     if (kind === 'planner') return id === 'std' ? (st.planner.stdMeta.mt || 0) : ((st.planner.meta[id] && st.planner.meta[id].mt) || 0);
     if (kind === 'event') return (st.evMeta[id] && st.evMeta[id].mt) || 0;
+    if (kind === 'deco') return (st.decoMeta[id] && st.decoMeta[id].mt) || 0;
     if (kind === 'contact') return (st.contacts && st.contacts.mt) || 0;
     const m = findMemo(id);
     if (m) return m.mt || 0;
@@ -218,6 +224,13 @@
   }
   function apply(item) {
     if (item.kind === 'planner') { applyPlanner(item); return; }
+    if (item.kind === 'deco') {
+      if (!/^\d{4}-\d{2}$/.test(item.id)) return;
+      const d = item.deleted ? null : window.M.cleanDeco(item.data);
+      if (d && !window.M.decoEmpty(d)) st.deco[item.id] = d; else delete st.deco[item.id];
+      st.decoMeta[item.id] = { mt: item.ts, dirty: false };
+      return;
+    }
     if (item.kind === 'contact') {
       if (item.id !== 'main') return;
       const rows = item.deleted ? null : window.M.cleanTable(item.data, window.M.CONTACT_HEAD).rows;
@@ -273,6 +286,7 @@
     for (const m of st.trash) if (m.dirty) out.push({ kind: 'memo', id: m.uid, ts: m.mt, data: payload(m, true) });
     for (const t of st.tombs) if (!t.done) out.push({ kind: 'memo', id: t.uid, ts: t.ts, deleted: true });
     for (const [k, meta] of Object.entries(st.evMeta)) if (meta && meta.dirty) out.push({ kind: 'event', id: k, ts: meta.mt, data: { list: st.events[k] || [] } });
+    for (const [k, meta] of Object.entries(st.decoMeta)) if (meta && meta.dirty) out.push({ kind: 'deco', id: k, ts: meta.mt, data: st.deco[k] || { bg: {}, stk: {}, tape: [] } });
     if (st.contacts && st.contacts.dirty) out.push({ kind: 'contact', id: 'main', ts: st.contacts.mt, data: { rows: st.contacts.rows } });
     for (const [k, pm] of Object.entries(st.planner.meta)) {
       if (!pm || !pm.dirty) continue;
@@ -286,6 +300,7 @@
     if (kind === 'planner') { const pm = id === 'std' ? st.planner.stdMeta : st.planner.meta[id]; if (pm && pm.mt === ts) pm.dirty = false; return; }
     if (kind === 'contact') { if (st.contacts && st.contacts.mt === ts) st.contacts.dirty = false; return; }
     if (kind === 'event') { const m = st.evMeta[id]; if (m && m.mt === ts) m.dirty = false; return; }
+    if (kind === 'deco') { const m = st.decoMeta[id]; if (m && m.mt === ts) m.dirty = false; return; }
     const m = findMemo(id);
     if (m && m.mt === ts) m.dirty = false;
     for (const t of st.tombs) if (t.uid === id && t.ts === ts) t.done = true;
@@ -349,6 +364,16 @@
     saveState();
     scheduleSync();
   }
+  // 달력 꾸미기 고친 달 표시 (mk = 'YYYY-MM')
+  function markDeco(mk) {
+    const d = st.deco[mk];
+    if (d && window.M.decoEmpty(d)) delete st.deco[mk];
+    const prev = st.decoMeta[mk] || {};
+    st.decoMeta[mk] = { mt: Math.max(Date.now(), (prev.mt || 0) + 1), dirty: true };
+    saveState();
+    scheduleSync();
+  }
+  const decoMonth = (mk) => st.deco[mk] || (st.deco[mk] = { bg: {}, stk: {}, tape: [] });
   function autoPurge() {
     const lim = Date.now() - TRASH_DAYS * DAY;
     const old = st.trash.filter((t) => (t.deletedAt || 0) < lim);
@@ -685,23 +710,110 @@
     const count = Math.ceil((start + days) / 7) * 7;
     let h = '';
     const rec = window.M.recurring(st.events);
+    let wk = [];
+    const lane = () => { h += window.M.tapeLane(st.deco, wk); wk = []; };
     for (let i = 0; i < count; i++) {
+      if (i && i % 7 === 0) lane();
       const d = new Date(calY, calM, i - start + 1);
-      if (d.getMonth() !== calM) { h += '<div class="cell"></div>'; continue; }
+      if (d.getMonth() !== calM) { h += '<div class="cell"></div>'; wk.push(null); continue; }
       const k = dateKey(d);
+      wk.push(k);
+      const dd = window.M.decoDay(st.deco, k);
       const evs = window.M.eventsOn(st.events, k, rec).map((x) => x.ev);
       const wd = d.getDay();
       const hol = window.M.holiday(k);
       const color = wd === 0 || hol ? 'var(--sun)' : wd === 6 ? 'var(--sat)' : 'var(--ink)';
-      h += '<div class="cell"><button class="day' + (k === todayK ? ' today' : '') + (k === sel ? ' sel' : '') + '" type="button" data-k="' + k + '" style="color:' + color + '" aria-pressed="' + (k === sel) + '" aria-label="' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일' + (evs.length ? ', 일정 ' + evs.length + '개' : '') + '">' +
+      h += '<div class="cell">' + (dd.stk ? '<span class="dstk" aria-hidden="true">' + esc(dd.stk) + '</span>' : '') + '<button class="day' + (k === todayK ? ' today' : '') + (k === sel ? ' sel' : '') + (dd.bg ? ' hasbg' : '') + '" type="button" data-k="' + k + '" style="color:' + color + (dd.bg ? ';--dbg:' + dd.bg : '') + '" aria-pressed="' + (k === sel) + '" aria-label="' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일' + (evs.length ? ', 일정 ' + evs.length + '개' : '') + '">' +
         '<span>' + d.getDate() + '</span>' + (hol ? '<span class="holn">' + esc(hol) + '</span>' : '') + '<span class="dots">' + evs.slice(0, 3).map((e) => '<i style="background:' + EVENT_COLORS[e.c] + '"></i>').join('') + '</span></button></div>';
     }
+    lane();
     $('grid').innerHTML = h;
+    renderDecoBar();
     const p = sel.split('-').map(Number);
     const sd = new Date(p[0], p[1] - 1, p[2]);
     const selHol = window.M.holiday(sel);
     $('selLabel').innerHTML = (sd.getMonth() + 1) + '월 ' + sd.getDate() + '일 ' + WD[sd.getDay()] + '요일' + (selHol ? '<span class="holtag">' + esc(selHol) + '</span>' : '');
     if (!$('evList').contains(document.activeElement)) renderEvents();
+  }
+  // ───────── 달력 꾸미기 (관리자 베타): 날짜 배경색 · 스티커 · 마스킹테이프 ─────────
+  const decoAllowed = () => !!(st.shared && st.shared.admin);
+  const md = (k) => { const p = k.split('-').map(Number); return p[1] + '/' + p[2]; };
+  function renderDecoBar() {
+    const bar = $('decoBar');
+    if (!decoAllowed()) { bar.hidden = true; return; }
+    bar.hidden = false;
+    const dd = window.M.decoDay(st.deco, sel);
+    const tapes = window.M.decoTapes(st.deco, sel, sel);
+    bar.innerHTML = '<button type="button" class="dchip" data-act="bg">' + (dd.bg ? '<i class="dsw" style="background:' + dd.bg + '"></i>' : '🎨') + ' 배경색</button>' +
+      '<button type="button" class="dchip" data-act="stk">' + (dd.stk ? esc(dd.stk) : '🌷') + ' 스티커</button>' +
+      '<button type="button" class="dchip" data-act="tape">🎀 테이프</button>' +
+      tapes.map((t) => '<button type="button" class="dtape" data-act="edit" data-mk="' + t.mk + '" data-i="' + t.i + '" style="background:' + window.M.DECO_TAPES[t.c] + '">' + esc(t.t || '테이프') + ' <small>' + md(t.s) + '~' + md(t.e) + '</small></button>').join('');
+  }
+  $('decoBar').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.act === 'bg') bgSheet();
+    if (b.dataset.act === 'stk') stkSheet();
+    if (b.dataset.act === 'tape') tapeSheet(null);
+    if (b.dataset.act === 'edit') tapeSheet({ mk: b.dataset.mk, i: Number(b.dataset.i) });
+  });
+  $('grid').addEventListener('click', (e) => {
+    const t = e.target.closest('.tp'); if (!t || !decoAllowed()) return;
+    e.stopPropagation(); tapeSheet({ mk: t.dataset.mk, i: Number(t.dataset.i) });
+  }, true);
+  function openSheet(title, body, btns) {
+    $('dsTitle').textContent = title; $('dsBody').innerHTML = body; $('dsBtns').innerHTML = btns;
+    $('decoSheet').hidden = false;
+  }
+  const closeSheet = () => { $('decoSheet').hidden = true; };
+  $('decoSheet').addEventListener('click', (e) => { if (e.target === $('decoSheet') || e.target.closest('[data-x]')) closeSheet(); });
+  function setDay(field, v) {
+    const mk = sel.slice(0, 7), m = decoMonth(mk);
+    if (v) m[field][sel] = v; else delete m[field][sel];
+    markDeco(mk); renderCal();
+  }
+  function bgSheet() {
+    const cur = window.M.decoDay(st.deco, sel).bg;
+    openSheet(md(sel) + ' 배경색', '<div class="dsGrid bgs">' + window.M.DECO_BGS.map((c) => '<button type="button" class="dsw big' + (c === cur ? ' on' : '') + '" data-c="' + c + '" style="background:' + c + '" aria-label="' + c + '"></button>').join('') +
+      '<label class="dsw big pick" aria-label="색 직접 고르기"><input type="color" id="dsPick" value="' + (cur || '#FFE1E1') + '">＋</label></div>' +
+      '<div class="dsTip">원하는 색이 없으면 ＋ 를 눌러 직접 골라요</div>',
+      '<button type="button" class="mNo" data-act="none">배경 없애기</button><button type="button" class="mNo" data-x>닫기</button>');
+    $('dsBody').onclick = (e) => { const b = e.target.closest('[data-c]'); if (b) { setDay('bg', b.dataset.c); closeSheet(); } };
+    $('dsPick').onchange = (e) => { setDay('bg', e.target.value.toUpperCase()); closeSheet(); };
+    $('dsBtns').querySelector('[data-act=none]').onclick = () => { setDay('bg', ''); closeSheet(); };
+  }
+  function stkSheet() {
+    const cur = window.M.decoDay(st.deco, sel).stk;
+    openSheet(md(sel) + ' 스티커', '<div class="dsGrid emos">' + window.M.DECO_EMOJI.map((em) => '<button type="button" class="' + (em === cur ? 'on' : '') + '" data-e="' + em + '">' + em + '</button>').join('') + '</div>',
+      '<button type="button" class="mNo" data-act="none">스티커 떼기</button><button type="button" class="mNo" data-x>닫기</button>');
+    $('dsBody').onclick = (e) => { const b = e.target.closest('[data-e]'); if (b) { setDay('stk', b.dataset.e); closeSheet(); } };
+    $('dsBtns').querySelector('[data-act=none]').onclick = () => { setDay('stk', ''); closeSheet(); };
+  }
+  function tapeSheet(ref) {
+    const old = ref && st.deco[ref.mk] && st.deco[ref.mk].tape[ref.i];
+    if (ref && !old) return;
+    const n = window.M.decoTapes(st.deco, '0000-00-00', '9999-99-99').length;
+    const t = old ? { ...old } : { s: sel, e: sel, t: '', c: Object.keys(window.M.DECO_TAPES)[n % 6] };
+    let c = t.c;
+    openSheet(old ? '테이프 고치기' : '🎀 마스킹테이프 붙이기',
+      '<label class="dsRow"><span>내용</span><input type="text" id="tpT" maxlength="60" placeholder="예: 제주 출장, 결산 기간" value="' + esc(t.t) + '"></label>' +
+      '<div class="dsRow"><span>기간</span><input type="date" id="tpS" value="' + t.s + '"><b>~</b><input type="date" id="tpE" value="' + t.e + '"></div>' +
+      '<div class="dsRow"><span>색</span><div class="dsGrid tps">' + Object.entries(window.M.DECO_TAPES).map(([k, v]) => '<button type="button" class="dsw' + (k === c ? ' on' : '') + '" data-c="' + k + '" style="background:' + v + '" aria-label="' + k + '"></button>').join('') + '</div></div>',
+      (old ? '<button type="button" class="mNo" data-act="del">떼기</button>' : '') + '<button type="button" class="mNo" data-x>취소</button><button type="button" class="mYes ok" data-act="ok">' + (old ? '저장' : '붙이기') + '</button>');
+    $('dsBody').onclick = (e) => { const b = e.target.closest('[data-c]'); if (b) { c = b.dataset.c; $('dsBody').querySelectorAll('.tps .dsw').forEach((x) => x.classList.toggle('on', x === b)); } };
+    const del = () => { const m = st.deco[ref.mk]; m.tape.splice(ref.i, 1); markDeco(ref.mk); };
+    $('dsBtns').querySelector('[data-act=ok]').onclick = () => {
+      let s0 = $('tpS').value, e0 = $('tpE').value;
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(s0)) s0 = sel;
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(e0)) e0 = s0;
+      if (e0 < s0) [s0, e0] = [e0, s0];
+      const nt = { s: s0, e: e0, t: $('tpT').value.trim(), c };
+      if (old) del();
+      const mk = s0.slice(0, 7), m = decoMonth(mk);
+      if (m.tape.length >= 40) { toast('한 달에 테이프는 40개까지 붙일 수 있어요'); return; }
+      m.tape.push(nt); markDeco(mk);
+      closeSheet(); renderCal();
+    };
+    if (old) $('dsBtns').querySelector('[data-act=del]').onclick = () => { del(); closeSheet(); renderCal(); };
   }
   function renderEvents(focusIdx) {
     const list = st.events[sel] || [];

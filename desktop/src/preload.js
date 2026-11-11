@@ -27,6 +27,7 @@ contextBridge.exposeInMainWorld('api', {
 
   setSettings: (p) => ipcRenderer.send('settings:update', p),
   setEvents: (key, list) => ipcRenderer.send('events:set', key, list),
+  setDeco: (mk, data) => ipcRenderer.send('deco:set', mk, data),
   skipEvent: (srcKey, idx, dayKey) => ipcRenderer.send('events:skip', srcKey, idx, dayKey),
   setContacts: (rows) => ipcRenderer.send('contacts:set', rows),
 

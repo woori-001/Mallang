@@ -84,6 +84,7 @@
       <div id="grid" class="grid"></div>
     </div>
     <div class="selRow"><div id="selLabel" class="selLabel"></div><button id="addEv" class="smallPrimary" type="button">+ 일정 추가</button></div>
+    <div id="decoBar" class="decoBar" hidden></div>
     <div id="evList" class="evList"></div>
   </section>
 
@@ -212,6 +213,14 @@
     <div id="cTitle" class="mTitle"></div>
     <div id="cDesc" class="mDesc"></div>
     <div class="mBtns"><button id="cNo" class="mNo" type="button">취소</button><button id="cYes" class="mYes" type="button"></button></div>
+  </div>
+</div>
+<!-- 달력 꾸미기 (배경색 · 스티커 · 마스킹테이프) -->
+<div id="decoSheet" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="dsTitle">
+  <div class="mbox dsBox">
+    <div id="dsTitle" class="mTitle"></div>
+    <div id="dsBody" class="dsBody"></div>
+    <div id="dsBtns" class="mBtns"></div>
   </div>
 </div>
 <div id="iosTip" class="iosTip" hidden role="dialog" aria-label="홈 화면에 추가">

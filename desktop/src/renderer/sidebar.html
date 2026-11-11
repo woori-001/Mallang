@@ -114,6 +114,7 @@
         <div id="selLabel" class="sellabel"></div>
         <button id="addEv" class="smallprimary soft" type="button"></button>
       </div>
+      <div id="decoBar" class="decoBar" hidden></div>
       <div id="evList" class="evlist"></div>
       <button id="todayToggle" class="toggle soft" type="button" aria-pressed="false">
         <span>바탕화면에 오늘 일정 띄우기</span><span class="track"><span class="knob"></span></span>
@@ -355,6 +356,13 @@
         <div class="aeLab">소리</div>
         <div id="aeSnd" class="aeSnd"></div>
         <div class="aeBtns"><button id="aeDel" class="scno aeDel" type="button">삭제</button><button id="aeTest" class="scno" type="button">미리보기</button><button id="aeSave" class="scyes" type="button">저장</button></div>
+      </div>
+    </div>
+    <div id="sDeco" class="sconfirm" hidden role="dialog" aria-modal="true" aria-labelledby="dsTitle">
+      <div class="scbox dsBox">
+        <div id="dsTitle" class="sctitle"></div>
+        <div id="dsBody" class="dsBody"></div>
+        <div id="dsBtns" class="scbtns"></div>
       </div>
     </div>
     <div id="sConfirm" class="sconfirm" hidden role="alertdialog" aria-modal="true" aria-labelledby="scTitle" aria-describedby="scDesc">

@@ -59,6 +59,8 @@ function defaults() {
     trash: [],
     tombs: [],
     evMeta: {},
+    deco: {},                           // 달력 꾸미기 { 'YYYY-MM': { bg, stk, tape } }
+    decoMeta: {},
     contacts: null,
     groups: [],
     shared: {},
@@ -115,6 +117,12 @@ function load() {
   }
   store.tombs = Array.isArray(store.tombs) ? store.tombs : [];
   store.evMeta = store.evMeta && typeof store.evMeta === 'object' ? store.evMeta : {};
+  // 달력 꾸미기: 이 기능 전에 받은 기록은 꾸미기를 건너뛰었으므로 처음 한 번은 처음부터 다시 받음
+  if (!store.decoMeta || typeof store.decoMeta !== 'object' || !store.deco || typeof store.deco !== 'object') {
+    store.deco = {}; store.decoMeta = {};
+    if (store.cloud && store.cloud.cursor) store.cloud.cursor = null;
+  }
+  for (const k of Object.keys(store.deco)) { if (!/^\d{4}-\d{2}$/.test(k)) delete store.deco[k]; else store.deco[k] = cleanDeco(store.deco[k]); }
   store.contacts = store.contacts && Array.isArray(store.contacts.rows) ? { ...store.contacts, rows: sanitizeTable(store.contacts).rows } : null;
   for (const m of [...store.memos, ...store.trash]) if (m.type === 'table') m.table = sanitizeTable(m.table);
   const fixed = store.contacts && fixContactRows(store.contacts.rows);
@@ -220,6 +228,7 @@ function snapshot() {
     settings: store.settings,
     memos: store.memos.filter((m) => !m.deleting),
     events: store.events,
+    deco: store.deco,
     contacts: store.shared.contacts || (store.contacts ? store.contacts.rows : null),
     contactsShared: !!store.shared.contacts,
     notices: store.shared.notices || [],
@@ -1756,6 +1765,14 @@ ipcMain.on('events:set', (e, key, list) => {
   save();
   broadcast();
 });
+ipcMain.on('deco:set', (e, mk, data) => {
+  if (typeof mk !== 'string' || !/^\d{4}-\d{2}$/.test(mk)) return;
+  const d = cleanDeco(data);
+  if (decoEmpty(d)) delete store.deco[mk]; else store.deco[mk] = d;
+  markDeco(mk);
+  save();
+  broadcast();
+});
 ipcMain.on('contacts:set', (e, rows) => {
   if (!Array.isArray(rows)) return;
   const clean = sanitizeTable({ rows }).rows;
@@ -2267,6 +2284,28 @@ const holder = {
   onSession: (s) => { Object.assign(store.cloud, { access: s.access, refresh: s.refresh, exp: s.exp, userId: s.userId }); save(); }
 };
 
+// 달력 꾸미기 정리 (renderer/common.js 의 cleanDeco 와 같은 규칙)
+const DECO_TAPE_NAMES = ['peach', 'mint', 'sky', 'lav', 'lemon', 'pink'];
+function cleanDeco(d) {
+  const out = { bg: {}, stk: {}, tape: [] };
+  if (!d || typeof d !== 'object') return out;
+  const DK = /^\d{4}-\d{2}-\d{2}$/;
+  if (d.bg && typeof d.bg === 'object') for (const [k, v] of Object.entries(d.bg)) if (DK.test(k) && /^#[0-9a-fA-F]{6}$/.test(v)) out.bg[k] = v;
+  if (d.stk && typeof d.stk === 'object') for (const [k, v] of Object.entries(d.stk)) if (DK.test(k) && typeof v === 'string' && v && v.length <= 16) out.stk[k] = v;
+  if (Array.isArray(d.tape)) for (const t of d.tape.slice(0, 40)) {
+    if (!t || !DK.test(t.s) || !DK.test(t.e)) continue;
+    const a = t.s <= t.e ? t.s : t.e, b = t.s <= t.e ? t.e : t.s;
+    out.tape.push({ s: a, e: b, t: String(t.t || '').slice(0, 60), c: DECO_TAPE_NAMES.includes(t.c) ? t.c : 'peach' });
+  }
+  return out;
+}
+const decoEmpty = (d) => !d || (!Object.keys(d.bg).length && !Object.keys(d.stk).length && !d.tape.length);
+function markDeco(mk) {
+  const prev = store.decoMeta[mk] || {};
+  store.decoMeta[mk] = { mt: Math.max(Date.now(), (prev.mt || 0) + 1), dirty: true };
+  scheduleSync();
+}
+
 function markEvent(k) {
   const prev = store.evMeta[k] || {};
   store.evMeta[k] = { ...prev, mt: Math.max(Date.now(), (prev.mt || 0) + 1), dirty: true };
@@ -2655,6 +2694,13 @@ function applyRemote(item) {
     }
     return;
   }
+  if (item.kind === 'deco') {
+    if (!/^\d{4}-\d{2}$/.test(item.id)) return;
+    const d = item.deleted ? null : cleanDeco(item.data);
+    if (d && !decoEmpty(d)) store.deco[item.id] = d; else delete store.deco[item.id];
+    store.decoMeta[item.id] = { mt: item.ts, dirty: false };
+    return;
+  }
   if (item.kind === 'layout') {
     if (item.id === 'pc' && !item.deleted) applyLayout(item.data);
     return;
@@ -2722,6 +2768,7 @@ function applyRemote(item) {
 function localTs(kind, id) {
   if (kind === 'event') return (store.evMeta[id] && !store.evMeta[id].merge && store.evMeta[id].mt) || 0;
   if (kind === 'contact') return (store.contacts && store.contacts.mt) || 0;
+  if (kind === 'deco') return (store.decoMeta[id] && store.decoMeta[id].mt) || 0;
   if (kind === 'planner') {
     if (id === 'std') return store.planner.stdMeta.mt || 0;
     const pm = store.planner.meta[id];
@@ -2742,6 +2789,7 @@ function dirtyList() {
   for (const [k, meta] of Object.entries(store.evMeta)) {
     if (meta && meta.dirty && !meta.merge) out.push({ kind: 'event', id: k, ts: meta.mt, data: { list: store.events[k] || [] } });
   }
+  for (const [k, meta] of Object.entries(store.decoMeta)) if (meta && meta.dirty) out.push({ kind: 'deco', id: k, ts: meta.mt, data: store.deco[k] || { bg: {}, stk: {}, tape: [] } });
   if (store.contacts && store.contacts.dirty) out.push({ kind: 'contact', id: 'main', ts: store.contacts.mt, data: { rows: store.contacts.rows } });
   if (store.layoutSync && store.layoutSync.dirty) out.push({ kind: 'layout', id: 'pc', ts: store.layoutSync.mt, data: layoutPayload() });
   for (const [k, pm] of Object.entries(store.planner.meta)) {
@@ -2761,6 +2809,7 @@ function markPushed(kind, id, ts) {
   }
   if (kind === 'contact') { if (store.contacts && store.contacts.mt === ts) store.contacts.dirty = false; return; }
   if (kind === 'layout') { if (store.layoutSync && store.layoutSync.mt === ts) store.layoutSync.dirty = false; return; }
+  if (kind === 'deco') { const dm = store.decoMeta[id]; if (dm && dm.mt === ts) dm.dirty = false; return; }
   if (kind === 'event') {
     const meta = store.evMeta[id];
     if (meta && meta.mt === ts) meta.dirty = false;
@@ -2825,6 +2874,7 @@ async function cloudSignIn(mode, username, password) {
     store.planner.meta = {};
     for (const k2 of Object.keys(store.planner.weeks)) store.planner.meta[k2] = { mt: 0, dirty: true, merge: true };
     store.planner.stdMeta = { mt: 1, dirty: true };
+    store.deco = {}; store.decoMeta = {};   // 꾸미기는 서버 것을 받음
     if (store.contacts) store.contacts.dirty = true;
     // 배치: 다른 PC에서 정한 배치를 먼저 받고, 이 PC에서 옮긴 메모는 그 뒤에 올림
     store.layoutSync = { mt: 0, dirty: false, groupsT: 0, settingsT: 0 };
@@ -2864,6 +2914,8 @@ async function cloudSignOut(force) {
   store.tombs = [];
   store.events = {};
   store.evMeta = {};
+  store.deco = {};
+  store.decoMeta = {};
   store.contacts = null;
   // 주간 플래너도 이 PC에서 지움 (다시 로그인하면 서버에서 돌아옴)
   if (plannerWin && !plannerWin.isDestroyed()) togglePlanner(false);

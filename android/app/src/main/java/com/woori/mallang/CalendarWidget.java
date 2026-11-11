@@ -100,6 +100,7 @@ public class CalendarWidget extends AppWidgetProvider {
         JSONObject skin = data.optJSONObject("skin");
         JSONObject days = data.optJSONObject("days");
         JSONObject list = data.optJSONObject("list");
+        JSONArray tapes = data.optJSONArray("tapes");   // 마스킹테이프 [{ s, e, t, c }]
 
         int bg = col(skin, "bg", "#F4F1FA"), ink = col(skin, "ink", "#4A3F6B"), sub = col(skin, "sub", "#8A80A8");
         int acc = col(skin, "a1", "#7466E4"), sun = col(skin, "sun", "#E0708A"), sat = col(skin, "sat", "#5B8DD6");
@@ -139,6 +140,10 @@ public class CalendarWidget extends AppWidgetProvider {
             int hid = res.getIdentifier("h" + i, "id", pkg), mid = res.getIdentifier("m" + i, "id", pkg), cid = res.getIdentifier("c" + i, "id", pkg);
             int[] chips = { res.getIdentifier("a" + i, "id", pkg), res.getIdentifier("b" + i, "id", pkg), res.getIdentifier("x" + i, "id", pkg) };
             for (int ch : chips) v.setViewVisibility(ch, View.GONE);
+            int gid = res.getIdentifier("g" + i, "id", pkg), pid = res.getIdentifier("p" + i, "id", pkg), sid = res.getIdentifier("s" + i, "id", pkg);
+            v.setViewVisibility(gid, View.GONE);
+            v.setViewVisibility(pid, View.GONE);
+            v.setViewVisibility(sid, View.GONE);
             v.setViewVisibility(hid, View.GONE);
             v.setViewVisibility(mid, View.GONE);
             v.setViewVisibility(tid, View.GONE);
@@ -173,6 +178,13 @@ public class CalendarWidget extends AppWidgetProvider {
                 dots.setSpan(new ForegroundColorSpan(dc), s0, dots.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
             v.setTextViewText(tid, dots);
+            // 날짜 배경색 · 스티커 (앱 달력에서 붙인 것)
+            String dbg = info != null ? info.optString("bg", "") : "";
+            if (dbg.length() > 0) {
+                try { v.setInt(gid, "setColorFilter", Color.parseColor(dbg)); v.setViewVisibility(gid, View.VISIBLE); } catch (Exception x) { /* 잘못된 색은 무시 */ }
+            }
+            String stk = info != null ? info.optString("s", "") : "";
+            if (stk.length() > 0) { v.setTextViewText(sid, stk); v.setViewVisibility(sid, View.VISIBLE); }
             String hn = info != null ? info.optString("h", "") : "";
             JSONArray ev = list != null ? list.optJSONArray(k) : null;
             int evn = ev != null ? ev.length() : 0;
@@ -181,6 +193,19 @@ public class CalendarWidget extends AppWidgetProvider {
                 if (dots.length() > 0) v.setViewVisibility(tid, View.VISIBLE);
             } else {
                 int room = slots;
+                // 마스킹테이프 (이 날에 걸친 첫 번째 것) — 칸마다 이어 붙여 그리고, 이름은 시작한 날·일요일 칸에만
+                JSONObject tp = null;
+                if (tapes != null) for (int j = 0; j < tapes.length(); j++) {
+                    JSONObject x = tapes.optJSONObject(j);
+                    if (x != null && x.optString("s").compareTo(k) <= 0 && x.optString("e").compareTo(k) >= 0) { tp = x; break; }
+                }
+                if (tp != null && room > 0) {
+                    int tc; try { tc = Color.parseColor(tp.optString("c", "#FFC0A3")); } catch (Exception x) { tc = Color.parseColor("#FFC0A3"); }
+                    v.setViewVisibility(pid, View.VISIBLE);
+                    v.setInt(pid, "setBackgroundColor", tc);
+                    v.setTextViewText(pid, k.equals(tp.optString("s")) || wd == 0 || d == 1 ? tp.optString("t", "") : "");
+                    room--;
+                }
                 if (hn.length() > 0 && room > 0) {
                     // 공휴일 이름을 칸에 바로 (예: 크리스마스)
                     v.setViewVisibility(hid, View.VISIBLE);

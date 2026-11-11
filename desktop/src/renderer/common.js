@@ -205,6 +205,55 @@
     const tail = count - filled;
     return tail >= 5 ? html : html + '<div class="ckTail ckRow" style="grid-column: 1 / -1"></div>';
   }
+  // ───────── 달력 꾸미기 (날짜 배경색 · 스티커 · 마스킹테이프) ─────────
+  // 서버에는 달마다 하나 (kind 'deco', id 'YYYY-MM'): { bg: {날짜: '#색'}, stk: {날짜: '이모지'}, tape: [{ s, e, t, c }] }
+  // 테이프는 시작한 날의 달에 들어가고, 다음 달로 넘어가도 이어서 그려짐
+  const DECO_TAPES = { peach: '#FFC0A3', mint: '#A6E3C9', sky: '#A7CFF5', lav: '#CBBCF5', lemon: '#F8E07E', pink: '#F8B7D2' };
+  const DECO_BGS = ['#FFE1E1', '#FFE8D1', '#FFF4BF', '#DDF3DA', '#D9EDFB', '#E6DFFB', '#FADDEE', '#E9E9EC'];
+  const DECO_EMOJI = '⭐ ❤️ 🎉 🎂 🎁 ✈️ 🏖️ 🏥 💊 💼 📌 ✅ ❗ 💰 🍰 ☕ 🍺 🎵 🌸 🍀 ☀️ 🌧️ ❄️ 🎄 🐰 🐻 🐱 🥳 😴 🔥'.split(' ');
+  const DKEY = /^\d{4}-\d{2}-\d{2}$/;
+  function cleanDeco(d) {
+    const out = { bg: {}, stk: {}, tape: [] };
+    if (!d || typeof d !== 'object') return out;
+    if (d.bg && typeof d.bg === 'object') for (const [k, v] of Object.entries(d.bg)) if (DKEY.test(k) && /^#[0-9a-fA-F]{6}$/.test(v)) out.bg[k] = v;
+    if (d.stk && typeof d.stk === 'object') for (const [k, v] of Object.entries(d.stk)) if (DKEY.test(k) && typeof v === 'string' && v && v.length <= 16) out.stk[k] = v;
+    if (Array.isArray(d.tape)) for (const t of d.tape.slice(0, 40)) {
+      if (!t || !DKEY.test(t.s) || !DKEY.test(t.e)) continue;
+      const s = t.s <= t.e ? t.s : t.e, e = t.s <= t.e ? t.e : t.s;
+      out.tape.push({ s, e, t: String(t.t || '').slice(0, 60), c: DECO_TAPES[t.c] ? t.c : 'peach' });
+    }
+    return out;
+  }
+  const decoEmpty = (d) => !d || (!Object.keys(d.bg || {}).length && !Object.keys(d.stk || {}).length && !(d.tape || []).length);
+  // 이 날 꾸미기 { bg, stk } (deco = { 'YYYY-MM': {...} })
+  function decoDay(deco, k) {
+    const m = deco && deco[k.slice(0, 7)];
+    return { bg: (m && m.bg[k]) || '', stk: (m && m.stk[k]) || '' };
+  }
+  // 테이프 목록 (어느 달에 들어 있든) → [{ s, e, t, c, mk, i }]
+  function decoTapes(deco, from, to) {
+    const out = [];
+    for (const [mk, m] of Object.entries(deco || {})) (m && m.tape || []).forEach((t, i) => { if (t.s <= to && t.e >= from) out.push({ ...t, mk, i }); });
+    return out.sort((a, b) => (a.s < b.s ? -1 : a.s > b.s ? 1 : a.e < b.e ? 1 : -1));
+  }
+  // 한 주(7칸, 빈칸은 null) 아래에 붙는 테이프 줄 HTML (테이프가 없으면 '')
+  function tapeLane(deco, keys) {
+    const real = keys.filter(Boolean);
+    if (!real.length) return '';
+    const ts = decoTapes(deco, real[0], real[real.length - 1]);
+    if (!ts.length) return '';
+    const rows = [];   // 겹치면 아래 줄로
+    const bars = ts.map((t) => {
+      let a = keys.findIndex((k) => k && k >= t.s), b = -1;
+      for (let i = 6; i >= 0; i--) if (keys[i] && keys[i] <= t.e) { b = i; break; }
+      if (a < 0 || b < a) return '';
+      let r = 0; while (rows[r] && rows[r].some((x) => !(b < x[0] || a > x[1]))) r++;
+      (rows[r] = rows[r] || []).push([a, b]);
+      const head = keys[a] === t.s || a === 0;
+      return '<span class="tp ' + t.c + (keys[a] === t.s ? ' st' : '') + (keys[b] === t.e ? ' en' : '') + '" data-mk="' + t.mk + '" data-i="' + t.i + '" style="grid-column:' + (a + 1) + ' / ' + (b + 2) + ';grid-row:' + (r + 1) + ';background:' + DECO_TAPES[t.c] + '" title="' + esc(t.t) + '">' + (head ? esc(t.t) : '') + '</span>';
+    }).join('');
+    return '<div class="tlane" style="grid-column:1 / -1">' + bars + '</div>';
+  }
   function applyTheme(settings) {
     const sk = SKINS[settings.skin] || SKINS.lav;
     const f = FONTS.find((x) => x.id === settings.font) || FONTS[0];
@@ -1046,5 +1095,5 @@
     burst(1200);
   }
   const SEASONS_ON = false;   // 계절 스킨 꺼내기: true 로 바꾸면 스킨 목록에 나타남
-  window.M = { holiday, HOLIDAYS, alarmSound, ALARM_SOUNDS, ALARM_PARTY, ALARM_ARROW, SEASONS_ON, fitShape, REPEATS, REPEAT_NAME, repeatsOn, recurring, eventsOn, GROUP_COLORS, syncRanges, TBL, CONTACT_HEAD, fixContactRows, contactView, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, calTail, markSvg };
+  window.M = { DECO_TAPES, DECO_BGS, DECO_EMOJI, cleanDeco, decoEmpty, decoDay, decoTapes, tapeLane, holiday, HOLIDAYS, alarmSound, ALARM_SOUNDS, ALARM_PARTY, ALARM_ARROW, SEASONS_ON, fitShape, REPEATS, REPEAT_NAME, repeatsOn, recurring, eventsOn, GROUP_COLORS, syncRanges, TBL, CONTACT_HEAD, fixContactRows, contactView, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, calTail, markSvg };
 })();

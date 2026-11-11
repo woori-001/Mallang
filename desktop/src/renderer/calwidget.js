@@ -25,17 +25,22 @@
     const start = new Date(y, m, 1).getDay();
     const count = Math.ceil((start + new Date(y, m + 1, 0).getDate()) / 7) * 7;
     const rec = window.M.recurring(S.events);
-    let h = '';
+    let h = '', wk = [];
+    const lane = () => { h += window.M.tapeLane(S.deco, wk); wk = []; };
     for (let i = 0; i < count; i++) {
+      if (i && i % 7 === 0) lane();
       const dt = new Date(y, m, i - start + 1);
-      if (dt.getMonth() !== m) { h += '<div class="cell"></div>'; continue; }
+      if (dt.getMonth() !== m) { h += '<div class="cell"></div>'; wk.push(null); continue; }
       const k = dateKey(dt), wd = dt.getDay();
+      wk.push(k);
+      const dd = window.M.decoDay(S.deco, k);
       const evs = window.M.eventsOn(S.events, k, rec).map((x) => x.ev);
       const hol = window.M.holiday(k);
       const color = wd === 0 || hol ? 'var(--sun)' : (wd === 6 ? 'var(--sat)' : 'var(--ink)');
-      h += '<div class="cell"><button type="button"' + (hol ? ' title="' + esc(hol) + '"' : '') + ' class="day' + (k === todayK ? ' today' : '') + (k === sel ? ' sel' : '') + '" data-k="' + k + '" style="color:' + color + '">' +
+      h += '<div class="cell">' + (dd.stk ? '<span class="dstk" aria-hidden="true">' + esc(dd.stk) + '</span>' : '') + '<button type="button"' + (hol ? ' title="' + esc(hol) + '"' : '') + ' class="day' + (k === todayK ? ' today' : '') + (k === sel ? ' sel' : '') + (dd.bg ? ' hasbg' : '') + '" data-k="' + k + '" style="color:' + color + (dd.bg ? ';--dbg:' + dd.bg : '') + '">' +
         '<span>' + dt.getDate() + '</span><span class="dots">' + evs.slice(0, 3).map((e) => '<i style="background:' + EVENT_COLORS[e.c] + '"></i>').join('') + '</span></button></div>';
     }
+    lane();
     $('grid').innerHTML = window.M.calTail(h, count, start + new Date(y, m + 1, 0).getDate());
     const p = sel.split('-').map(Number), sd = new Date(p[0], p[1] - 1, p[2]);
     const list = window.M.eventsOn(S.events, sel);

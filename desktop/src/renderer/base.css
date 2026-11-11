@@ -76,3 +76,13 @@ input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.2); }
 input[type="range"]:focus-visible { outline: none; }
 input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px color-mix(in srgb, var(--a1) 25%, transparent); }
 
+
+/* ───────── 달력 꾸미기 (목록바 달력 · 바탕화면 달력 공통): 날짜 배경색 · 스티커 · 마스킹테이프 ───────── */
+.grid .cell { position: relative; }
+.day.hasbg:not(.sel) { background: var(--dbg); }
+.dstk { position: absolute; top: -4px; right: 0; z-index: 2; font-size: 12px; line-height: 1; pointer-events: none; transform: rotate(8deg); filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .15)); }
+.tlane { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-auto-rows: 15px; row-gap: 2px; margin: 0 0 2px; }
+.tp { height: 15px; line-height: 15px; font-size: 10px; font-weight: 600; color: #4A3F5C; padding: 0 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: .92; margin: 0 -1px; cursor: pointer; }
+.tp.st { margin-left: 3px; clip-path: polygon(0 8%, 3px 0, 100% 0, 100% 100%, 2px 100%, 0 86%, 3px 70%, 0 52%, 3px 34%); }
+.tp.en { margin-right: 3px; clip-path: polygon(0 0, 100% 0, calc(100% - 3px) 18%, 100% 36%, calc(100% - 3px) 54%, 100% 72%, calc(100% - 2px) 100%, 0 100%); }
+.tp.st.en { clip-path: polygon(0 8%, 3px 0, 100% 0, calc(100% - 3px) 18%, 100% 36%, calc(100% - 3px) 54%, 100% 72%, calc(100% - 2px) 100%, 2px 100%, 0 86%, 3px 70%, 0 52%, 3px 34%); }

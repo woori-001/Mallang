@@ -681,3 +681,38 @@ html.sk-ninja .gvIco, html.sk-retro .gvIco { background: transparent; width: 30p
 .day .holn { font-size: calc(9px * var(--cs, 1)); line-height: 1; font-weight: 600; color: var(--sun); max-width: 100%; padding: 0 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -.02em; margin-top: -2px; }
 .day:has(.holn) { gap: 2px; }
 .day.sel .holn { color: inherit; opacity: .92; }
+
+/* ───────── 달력 꾸미기: 날짜 배경색 · 스티커 · 마스킹테이프 ───────── */
+.cell { position: relative; }
+.day.hasbg:not(.sel) { background: var(--dbg); }
+.dstk { position: absolute; top: -3px; right: 1px; z-index: 2; font-size: 14px; line-height: 1; pointer-events: none; transform: rotate(8deg); filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .15)); }
+.tlane { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-auto-rows: 17px; row-gap: 2px; margin: -1px 0 3px; }
+.tp { height: 17px; line-height: 17px; font-size: 11px; font-weight: 600; color: #4A3F5C; padding: 0 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: .92; margin: 0 -1px; position: relative;
+}
+.tp.st { margin-left: 3px; border-top-left-radius: 2px; border-bottom-left-radius: 2px; clip-path: polygon(0 8%, 3px 0, 100% 0, 100% 100%, 2px 100%, 0 86%, 3px 70%, 0 52%, 3px 34%); }
+.tp.en { margin-right: 3px; clip-path: polygon(0 0, 100% 0, calc(100% - 3px) 18%, 100% 36%, calc(100% - 3px) 54%, 100% 72%, calc(100% - 2px) 100%, 0 100%); }
+.tp.st.en { clip-path: polygon(0 8%, 3px 0, 100% 0, calc(100% - 3px) 18%, 100% 36%, calc(100% - 3px) 54%, 100% 72%, calc(100% - 2px) 100%, 2px 100%, 0 86%, 3px 70%, 0 52%, 3px 34%); }
+.decoBar { display: flex; flex-wrap: wrap; gap: 6px; margin: -2px 2px 10px; }
+.decoBar button { height: 30px; border: none; border-radius: 10px; padding: 0 10px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+.dchip { background: rgba(var(--glass), .7); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line-soft); }
+.dtape { color: #4A3F5C; border-radius: 3px !important; }
+.dtape small { font-weight: 500; opacity: .75; font-size: 11px; }
+.dsw { display: inline-block; width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12); }
+.dsBox { max-width: 360px; text-align: left; }
+.dsBox .mTitle { text-align: center; }
+.dsBody { margin-top: 14px; }
+.dsGrid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.dsw.big { width: 40px; height: 40px; border: none; border-radius: 12px; padding: 0; }
+.dsw.on { box-shadow: 0 0 0 2.5px var(--a1); }
+.dsw.pick { display: inline-flex; align-items: center; justify-content: center; font-size: 20px; color: var(--sub); background: rgba(80, 80, 140, .08); position: relative; overflow: hidden; }
+.dsw.pick input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; border: none; padding: 0; }
+.dsTip { margin-top: 10px; font-size: 12px; color: var(--sub); text-align: center; }
+.dsGrid.emos button { width: 42px; height: 42px; border: none; border-radius: 12px; background: rgba(80, 80, 140, .06); font-size: 22px; padding: 0; }
+.dsGrid.emos button.on { box-shadow: 0 0 0 2.5px var(--a1); }
+.dsRow { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 14px; }
+.dsRow > span { width: 34px; flex: none; color: var(--sub); font-weight: 600; }
+.dsRow input[type=text] { flex: 1; min-width: 0; height: 40px; border-radius: 12px; border: 1px solid var(--line-soft); padding: 0 10px; font-size: 15px; background: rgba(var(--glass), .8); color: var(--ink); }
+.dsRow input[type=date] { flex: 1; min-width: 0; height: 40px; border-radius: 12px; border: 1px solid var(--line-soft); padding: 0 6px; font-size: 14px; background: rgba(var(--glass), .8); color: var(--ink); }
+.dsGrid.tps { justify-content: flex-start; }
+.dsGrid.tps .dsw { width: 30px; height: 22px; border: none; border-radius: 3px; padding: 0; }
+.mBtns .mYes.ok { background: var(--accent); color: var(--on); }
