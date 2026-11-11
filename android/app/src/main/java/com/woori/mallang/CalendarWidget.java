@@ -46,7 +46,7 @@ public class CalendarWidget extends AppWidgetProvider {
         if (ACT_PREV.equals(a) || ACT_NEXT.equals(a) || ACT_TODAY.equals(a)) {
             SharedPreferences p = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
             int off = ACT_TODAY.equals(a) ? 0 : p.getInt("off", 0) + (ACT_NEXT.equals(a) ? 1 : -1);
-            off = Math.max(-1, Math.min(3, off));   // 웹앱이 넘겨주는 범위: 지난달 ~ 석 달 뒤
+            off = Math.max(-3, Math.min(12, off));   // 웹앱이 넘겨주는 범위: 석 달 전 ~ 1년 뒤
             p.edit().putInt("off", off).apply();
             refreshAll(ctx);
             return;
@@ -153,7 +153,7 @@ public class CalendarWidget extends AppWidgetProvider {
         v.setInt(R.id.bg, "setColorFilter", bg);
         // 스킨 꾸밈: 앱과 같은 바탕(색 번짐)·같은 글꼴로 쓴 달 제목과 로고·요일
         JSONObject art = data.optJSONObject("art");
-        int[] wdCol = { sun, sub, sub, sub, sub, sub, sat };
+        int[] wdCol = { sun, ink, ink, ink, ink, ink, sat };   // 갤럭시 캘린더처럼 평일 요일은 진하게
         boolean artHead = false, artWd = false;
         if (art != null) {
             android.graphics.Bitmap bgb = drawBg(art, wDp, hDp);
@@ -169,7 +169,8 @@ public class CalendarWidget extends AppWidgetProvider {
             if (lb != null) { v.setImageViewBitmap(R.id.mimg, lb); artHead = true; }
             // 요일 글자색: 앱 요일 줄 색 그대로
             JSONArray wc = art.optJSONArray("wdc");
-            if (wc != null && wc.length() == 7) for (int i = 0; i < 7; i++) wdCol[i] = argb(wc.optJSONArray(i), wdCol[i]) | 0xFF000000;
+            // 요일 줄 바탕이 있는 스킨(드로잉)만 앱 요일 글자색 그대로 (까만 바탕에 흰 글자)
+            if (wc != null && wc.length() == 7 && Color.alpha(argb(art.optJSONArray("wdBg"), 0)) > 10) for (int i = 0; i < 7; i++) wdCol[i] = argb(wc.optJSONArray(i), wdCol[i]) | 0xFF000000;
         }
         v.setViewVisibility(R.id.mimg, artHead ? View.VISIBLE : View.GONE);
         v.setViewVisibility(R.id.men, View.GONE);
@@ -193,7 +194,8 @@ public class CalendarWidget extends AppWidgetProvider {
         v.setTextViewText(R.id.men, MONTH_EN[mo] + " " + y);
         v.setTextColor(R.id.men, acc);
         // 갤럭시 캘린더처럼: ‹ 달 › 를 왼쪽에 모으고, 오른쪽엔 오늘 날짜가 든 네모 (누르면 오늘로)
-        for (int id : new int[] { R.id.today, R.id.prev, R.id.next }) v.setTextColor(id, ink);
+        v.setTextColor(R.id.today, ink);
+        v.setInt(R.id.prev, "setColorFilter", ink); v.setInt(R.id.next, "setColorFilter", ink);
         v.setTextViewText(R.id.today, String.valueOf(today.get(Calendar.DAY_OF_MONTH)));
         if (Build.VERSION.SDK_INT >= 31) v.setColorStateList(R.id.today, "setBackgroundTintList", ColorStateList.valueOf(ink));
         int[] wds = { R.id.w0, R.id.w1, R.id.w2, R.id.w3, R.id.w4, R.id.w5, R.id.w6 };
@@ -224,9 +226,8 @@ public class CalendarWidget extends AppWidgetProvider {
         float numBox = big ? 27 * sc : 22, chipH = big ? 17 * sc : 14, tapeH = big ? 16 * sc : 13;
         if (big) {
             v.setViewLayoutHeight(R.id.mimg, 32 * sh, DIP);
-            v.setTextViewTextSize(R.id.mnum, SP, 21 * sh);
-            v.setTextViewTextSize(R.id.prev, SP, 28 * sh); v.setTextViewTextSize(R.id.next, SP, 28 * sh);
-            for (int i = 0; i < 7; i++) v.setTextViewTextSize(ctx.getResources().getIdentifier("w" + i, "id", ctx.getPackageName()), SP, 14 * sc);
+            v.setTextViewTextSize(R.id.mnum, SP, 17 * sh);   // 갤럭시 캘린더: 달 이름은 날짜보다 조금만 크게
+            for (int i = 0; i < 7; i++) v.setTextViewTextSize(ctx.getResources().getIdentifier("w" + i, "id", ctx.getPackageName()), SP, 14.5f * sc);
         }
         float rowH = (hDp - 20 - 42 * sh - 26 * sc) / rows;
         int slots = Math.max(0, Math.min(5, (int) ((rowH - numBox - 3) / (chipH + 1))));
@@ -343,8 +344,9 @@ public class CalendarWidget extends AppWidgetProvider {
                     v.setViewVisibility(chips[j], View.VISIBLE);
                     v.setTextViewText(chips[j], e.optString("n", ""));
                     if (Build.VERSION.SDK_INT >= 31) {
-                        v.setColorStateList(chips[j], "setBackgroundTintList", ColorStateList.valueOf(dc));
-                        v.setTextColor(chips[j], Color.WHITE);
+                        // 갤럭시 캘린더처럼: 옅은 색 바탕 + 같은 계열 진한 글자
+                        v.setColorStateList(chips[j], "setBackgroundTintList", ColorStateList.valueOf((dc & 0x00FFFFFF) | 0x38000000));
+                        v.setTextColor(chips[j], Color.rgb(Color.red(dc) * 55 / 100, Color.green(dc) * 55 / 100, Color.blue(dc) * 55 / 100));
                     } else {
                         v.setInt(chips[j], "setBackgroundColor", (dc & 0x00FFFFFF) | 0x33000000);
                         v.setTextColor(chips[j], ink);
