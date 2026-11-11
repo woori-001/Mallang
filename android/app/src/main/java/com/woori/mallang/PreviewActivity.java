@@ -19,7 +19,7 @@ public class PreviewActivity extends Activity {
         int off = getIntent().getIntExtra("off", 0);
         int w = getIntent().getIntExtra("w", 330), h = getIntent().getIntExtra("h", 380);
         FrameLayout root = new FrameLayout(this);
-        root.setBackgroundColor(Color.parseColor(getIntent().hasExtra("wall") ? getIntent().getStringExtra("wall") : "#9FB7D9"));
+        root.setBackgroundColor(Color.parseColor("#" + (getIntent().hasExtra("wall") ? getIntent().getStringExtra("wall") : "9FB7D9")));
         View v = CalendarWidget.build(this, json == null ? "{}" : json, off, h).apply(this, root);
         float dp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, getResources().getDisplayMetrics());
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams((int) (w * dp), (int) (h * dp), Gravity.CENTER);
