@@ -13,7 +13,7 @@ const srv = http.createServer((q, r) => {
 }).listen(8765);
 (async () => {
   const b = await chromium.launch();
-  const runs = [['lav', 100], ['peach', 100], ['retro', 100], ['midnight', 100], ['lav', 45]];
+  const runs = [['lav', 100], ['peach', 100], ['retro', 100], ['draw', 100], ['lav', 45]];
   for (const [skin, alpha] of runs) {
     const p = await b.newPage({ viewport: { width: 400, height: 800 } });
     await p.route(/supabase/, (r) => r.abort());

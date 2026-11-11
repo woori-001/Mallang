@@ -122,7 +122,7 @@
       if (col && col[3] > 0.05 && nums.length >= 4 && nums[2] === 0 && nums[3] > 0) { line = { c: col, w: Math.min(3, nums[3]) }; break; }
     }
     const bgShown = getComputedStyle(document.querySelector('.bg')).display !== 'none';
-    const art = { base: rgba(sk.base) || [238, 240, 251, 1], b: bgShown ? sk.b : null, card: rgba(cc.backgroundColor) || [255, 255, 255, 0.6], line, dark: !!sk.dark, heads, wdays, bunny };
+    const art = { base: rgba(sk.base) || [238, 240, 251, 1], b: bgShown ? sk.b : null, card: rgba(cc.backgroundColor) || [255, 255, 255, 0.6], line, dark: !!sk.dark, skin: prefs.skin || 'lav', heads, wdays, bunny };
     artCache = { key, art };
     return art;
   }

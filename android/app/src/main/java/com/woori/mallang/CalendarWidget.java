@@ -157,14 +157,6 @@ public class CalendarWidget extends AppWidgetProvider {
         if (art != null) {
             android.graphics.Bitmap bgb = drawBg(art, wDp, hDp);
             if (bgb != null) { v.setImageViewBitmap(R.id.bg, bgb); v.setInt(R.id.bg, "setColorFilter", 0); }
-            // 달 넘기기 단추: 스킨 글자색을 옅게 깐 단추 (흰 카드·어두운 카드 모두 잘 보이게)
-            if (Build.VERSION.SDK_INT >= 31) {
-                int nb = (ink & 0x00FFFFFF) | 0x1C000000;
-                for (int id : new int[] { R.id.today, R.id.prev, R.id.next }) {
-                    v.setInt(id, "setBackgroundResource", R.drawable.navbtn_solid);   // 불투명 틀에 색을 입혀야 옅은 색이 제대로 보임
-                    v.setColorStateList(id, "setBackgroundTintList", ColorStateList.valueOf(nb));
-                }
-            }
             JSONObject heads = art.optJSONObject("heads");
             android.graphics.Bitmap hb = heads != null ? img(heads.optString(String.valueOf(off), "")) : null;
             if (hb != null) { v.setImageViewBitmap(R.id.mimg, hb); artHead = true; }
@@ -200,8 +192,10 @@ public class CalendarWidget extends AppWidgetProvider {
         v.setTextColor(R.id.mnum, acc);
         v.setTextViewText(R.id.men, MONTH_EN[mo] + " " + y);
         v.setTextColor(R.id.men, acc);
+        // 갤럭시 캘린더처럼: ‹ 달 › 를 왼쪽에 모으고, 오른쪽엔 오늘 날짜가 든 네모 (누르면 오늘로)
         for (int id : new int[] { R.id.today, R.id.prev, R.id.next }) v.setTextColor(id, ink);
-        v.setViewVisibility(R.id.today, off == 0 ? View.GONE : View.VISIBLE);
+        v.setTextViewText(R.id.today, String.valueOf(today.get(Calendar.DAY_OF_MONTH)));
+        if (Build.VERSION.SDK_INT >= 31) v.setColorStateList(R.id.today, "setBackgroundTintList", ColorStateList.valueOf(ink));
         int[] wds = { R.id.w0, R.id.w1, R.id.w2, R.id.w3, R.id.w4, R.id.w5, R.id.w6 };
         for (int i = 0; i < 7; i++) v.setTextColor(wds[i], i == 0 ? sun : i == 6 ? sat : sub);
 
@@ -209,7 +203,16 @@ public class CalendarWidget extends AppWidgetProvider {
         int n = m.getActualMaximum(Calendar.DAY_OF_MONTH);
         int rows = (start + n + 6) / 7;
         String pkg = ctx.getPackageName();
-        for (int r = 0; r < 6; r++) v.setViewVisibility(ctx.getResources().getIdentifier("r" + r, "id", pkg), r < rows ? View.VISIBLE : View.GONE);
+        // 주마다 구분선 (드로잉 스킨은 펜으로 그은 듯 진하게)
+        boolean drawSkin = art != null && "draw".equals(art.optString("skin"));
+        int lineC = (ink & 0x00FFFFFF) | (drawSkin ? 0x99000000 : 0x1F000000);
+        for (int r = 0; r < 6; r++) {
+            v.setViewVisibility(ctx.getResources().getIdentifier("r" + r, "id", pkg), r < rows ? View.VISIBLE : View.GONE);
+            int did = ctx.getResources().getIdentifier("d" + r, "id", pkg);
+            v.setViewVisibility(did, r < rows ? View.VISIBLE : View.GONE);
+            v.setInt(did, "setBackgroundColor", lineC);
+            if (Build.VERSION.SDK_INT >= 31) v.setViewLayoutHeight(did, drawSkin ? 1.6f : 1f, android.util.TypedValue.COMPLEX_UNIT_DIP);
+        }
         // 칸 하나에 들어갈 일정 줄 수: 위젯 높이에서 머리·요일 줄을 빼고 줄 수로 나눔 (숫자 22dp, 일정 한 줄 14dp)
         // 위젯이 크면 글자·일정·스티커도 같이 크게 (안드로이드 12 이상: 칸 크기를 바꿀 수 있음)
         boolean big = Build.VERSION.SDK_INT >= 31;
@@ -233,6 +236,7 @@ public class CalendarWidget extends AppWidgetProvider {
             int hid = res.getIdentifier("h" + i, "id", pkg), mid = res.getIdentifier("m" + i, "id", pkg), cid = res.getIdentifier("c" + i, "id", pkg);
             int[] chips = { res.getIdentifier("a" + i, "id", pkg), res.getIdentifier("b" + i, "id", pkg), res.getIdentifier("x" + i, "id", pkg) };
             for (int ch : chips) v.setViewVisibility(ch, View.GONE);
+            v.setViewVisibility(res.getIdentifier("o" + i, "id", pkg), View.GONE);
             if (big) {
                 v.setTextViewTextSize(nid, SP, 12.5f * sc);
                 v.setViewLayoutWidth(nid, numBox, DIP); v.setViewLayoutHeight(nid, numBox, DIP);
@@ -263,6 +267,10 @@ public class CalendarWidget extends AppWidgetProvider {
             int color = wd == 0 || hol ? sun : wd == 6 ? sat : ink;
             boolean isToday = k.equals(todayK);
             v.setTextViewText(nid, String.valueOf(d));
+            // 오늘 칸은 칸 전체를 둥근 테두리로 (갤럭시 캘린더처럼)
+            int oid = res.getIdentifier("o" + i, "id", pkg);
+            v.setViewVisibility(oid, isToday ? View.VISIBLE : View.GONE);
+            if (isToday) v.setInt(oid, "setColorFilter", (acc & 0x00FFFFFF) | 0xB3000000);
             if (isToday) {
                 v.setInt(nid, "setBackgroundResource", R.drawable.today);
                 if (Build.VERSION.SDK_INT >= 31) {
