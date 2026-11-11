@@ -65,7 +65,7 @@
             if (evs.length) list[k] = evs.slice().sort((a, b) => String(a.t || '').localeCompare(String(b.t || ''))).slice(0, 6).map((e) => ({ t: /^\d{2}:\d{2}$/.test(e.t) ? e.t : '', n: String(e.title || '(이름 없음)').slice(0, 40), c: EVENT_COLORS[e.c] || EVENT_COLORS.lav }));
           }
         }
-        window.MallangAndroid.saveWidget(JSON.stringify({ v: 1, at: Date.now(), skin: { bg: sk.base, ink: sk.ink, sub: sk.sub, a1: sk.a1, sun: sk.sun, sat: sk.sat }, days, list }));
+        window.MallangAndroid.saveWidget(JSON.stringify({ v: 1, at: Date.now(), alpha: prefs.widgetAlpha == null ? 100 : prefs.widgetAlpha, skin: { bg: sk.base, ink: sk.ink, sub: sk.sub, a1: sk.a1, sun: sk.sun, sat: sk.sat }, days, list }));
       } catch (e) { /* 위젯 갱신 실패는 앱 사용에 영향 없음 */ }
     }, 400);
   }
@@ -396,8 +396,19 @@
   function showApp() {
     $('auth').hidden = true;
     $('app').hidden = false;
+    const m = /^#date=(\d{4}-\d{2}-\d{2})$/.exec(location.hash);
+    if (m) { history.replaceState(null, '', location.pathname + location.search); openDate(m[1]); return; }
     render();
   }
+  // 홈 화면 위젯에서 누른 날짜(달)로 달력 열기 — 안드로이드 앱이 불러줌
+  function openDate(k) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(k)) return;
+    const p = k.split('-').map(Number);
+    calY = p[0]; calM = p[1] - 1; sel = k; view = 'cal';
+    if (editing) closeEditor(true);
+    render();
+  }
+  window.mallangOpenDate = (k) => { if (!$('app').hidden) openDate(k); else location.hash = 'date=' + k; };
   function renderSync() {
     const el = $('sync');
     if (!el) return;
@@ -683,7 +694,7 @@
       const hol = window.M.holiday(k);
       const color = wd === 0 || hol ? 'var(--sun)' : wd === 6 ? 'var(--sat)' : 'var(--ink)';
       h += '<div class="cell"><button class="day' + (k === todayK ? ' today' : '') + (k === sel ? ' sel' : '') + '" type="button" data-k="' + k + '" style="color:' + color + '" aria-pressed="' + (k === sel) + '" aria-label="' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일' + (evs.length ? ', 일정 ' + evs.length + '개' : '') + '">' +
-        '<span>' + d.getDate() + '</span><span class="dots">' + evs.slice(0, 3).map((e) => '<i style="background:' + EVENT_COLORS[e.c] + '"></i>').join('') + '</span></button></div>';
+        '<span>' + d.getDate() + '</span>' + (hol ? '<span class="holn">' + esc(hol) + '</span>' : '') + '<span class="dots">' + evs.slice(0, 3).map((e) => '<i style="background:' + EVENT_COLORS[e.c] + '"></i>').join('') + '</span></button></div>';
     }
     $('grid').innerHTML = h;
     const p = sel.split('-').map(Number);
@@ -956,6 +967,7 @@
 
   // 설정
   function renderSet() {
+    renderInstall();   // 달력에서 바로 설정으로 와도 설치 안내가 맞게
     $('acctName').textContent = (session && session.username) || '';
     $('bodyBg').setAttribute('aria-pressed', String(!!prefs.bodyBg));
     if (document.activeElement !== $('fontScale')) $('fontScale').value = prefs.fontScale || 100;
@@ -965,6 +977,10 @@
     $('titleBold').setAttribute('aria-pressed', String(prefs.titleBold !== false));
     $('calFont').innerHTML = window.M.calFontOptions(prefs).map((o) => '<option value="' + o.id + '"' + ((prefs.calFont || 'same') === o.id ? ' selected' : '') + '>' + esc(o.name) + '</option>').join('');
     if (document.activeElement !== $('calScale')) $('calScale').value = prefs.calScale || 100;
+    $('widgetSet').hidden = !window.MallangAndroid;
+    const wa = prefs.widgetAlpha == null ? 100 : prefs.widgetAlpha;
+    if (document.activeElement !== $('wAlpha')) $('wAlpha').value = wa;
+    $('wAlphaV').textContent = wa + '%';
     $('calScaleV').textContent = (prefs.calScale || 100) + '%';
     window.M.syncRanges();
     $('avatar').textContent = ((session && session.username) || '?').slice(0, 1).toUpperCase();
@@ -996,6 +1012,7 @@
   $('calFont').addEventListener('change', (e) => { prefs.calFont = e.target.value; savePrefs(); applyPrefs(); });
   const setCs = (v) => { prefs.calScale = Math.min(150, Math.max(70, v)); savePrefs(); applyPrefs(); $('calScale').value = prefs.calScale; $('calScaleV').textContent = prefs.calScale + '%'; };
   $('calScale').addEventListener('input', (e) => setCs(Number(e.target.value)));
+  $('wAlpha').addEventListener('input', (e) => { prefs.widgetAlpha = Math.min(100, Math.max(0, Number(e.target.value) || 0)); savePrefs(); $('wAlphaV').textContent = prefs.widgetAlpha + '%'; pushWidget(); });
   $('csDown').onclick = () => setCs((prefs.calScale || 100) - 10);
   $('csUp').onclick = () => setCs((prefs.calScale || 100) + 10);
   $('fonts').addEventListener('click', (e) => { const b = e.target.closest('[data-font]'); if (!b) return; prefs.font = b.dataset.font; savePrefs(); applyPrefs(); renderSet(); });

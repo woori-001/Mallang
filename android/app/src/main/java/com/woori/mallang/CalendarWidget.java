@@ -73,11 +73,18 @@ public class CalendarWidget extends AppWidgetProvider {
         return PendingIntent.getBroadcast(ctx, req, i, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
+    /** 앱 열기 (date 가 있으면 그 날짜 달력으로). 날짜마다 다른 data 를 붙여야 PendingIntent 가 섞이지 않음 */
+    static PendingIntent openApp(Context ctx, String date, int req) {
+        Intent i = new Intent(ctx, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        if (date != null) i.setAction("com.woori.mallang.OPEN_DATE").setData(android.net.Uri.parse("mallang://date/" + date)).putExtra("date", date);
+        return PendingIntent.getActivity(ctx, req, i, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+    }
+
     static void draw(Context ctx, AppWidgetManager mgr, int wid) {
         SharedPreferences p = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         android.os.Bundle o = mgr.getAppWidgetOptions(wid);
         int hDp = o != null ? o.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 0) : 0;
-        mgr.updateAppWidget(wid, build(ctx, p.getString("data", "{}"), p.getInt("off", 0), hDp > 0 && hDp < 330));
+        mgr.updateAppWidget(wid, build(ctx, p.getString("data", "{}"), p.getInt("off", 0), hDp > 0 ? hDp : 380));
     }
 
     @Override
@@ -86,7 +93,8 @@ public class CalendarWidget extends AppWidgetProvider {
     }
 
     /** 위젯 화면 만들기 (홈 화면 위젯과 미리보기 화면이 같이 씀) */
-    static RemoteViews build(Context ctx, String json, int off, boolean compact) {
+    static RemoteViews build(Context ctx, String json, int off, int hDp) {
+        boolean compact = hDp < 330;
         JSONObject data = null;
         try { data = new JSONObject(json); } catch (Exception e) { data = new JSONObject(); }
         JSONObject skin = data.optJSONObject("skin");
@@ -98,6 +106,8 @@ public class CalendarWidget extends AppWidgetProvider {
 
         RemoteViews v = new RemoteViews(ctx.getPackageName(), R.layout.widget_calendar);
         v.setInt(R.id.bg, "setColorFilter", bg);
+        int alpha = Math.max(0, Math.min(100, data.optInt("alpha", 100)));   // 앱 설정 > 위젯 투명도
+        v.setInt(R.id.bg, "setImageAlpha", Math.round(alpha * 255f / 100f));
 
         Calendar today = Calendar.getInstance();
         String todayK = key(today);
@@ -120,10 +130,20 @@ public class CalendarWidget extends AppWidgetProvider {
         int rows = (start + n + 6) / 7;
         String pkg = ctx.getPackageName();
         for (int r = 0; r < 6; r++) v.setViewVisibility(ctx.getResources().getIdentifier("r" + r, "id", pkg), r < rows ? View.VISIBLE : View.GONE);
+        // 칸 하나에 들어갈 일정 줄 수: 위젯 높이에서 머리·요일 줄을 빼고 줄 수로 나눔 (숫자 22dp, 일정 한 줄 14dp)
+        int rowH = (hDp - 72) / rows;
+        int slots = Math.max(0, Math.min(3, (rowH - 23) / 14));
+        android.content.res.Resources res = ctx.getResources();
         for (int i = 0; i < 42; i++) {
-            int nid = ctx.getResources().getIdentifier("n" + i, "id", pkg), tid = ctx.getResources().getIdentifier("t" + i, "id", pkg);
+            int nid = res.getIdentifier("n" + i, "id", pkg), tid = res.getIdentifier("t" + i, "id", pkg);
+            int hid = res.getIdentifier("h" + i, "id", pkg), mid = res.getIdentifier("m" + i, "id", pkg), cid = res.getIdentifier("c" + i, "id", pkg);
+            int[] chips = { res.getIdentifier("a" + i, "id", pkg), res.getIdentifier("b" + i, "id", pkg), res.getIdentifier("x" + i, "id", pkg) };
+            for (int ch : chips) v.setViewVisibility(ch, View.GONE);
+            v.setViewVisibility(hid, View.GONE);
+            v.setViewVisibility(mid, View.GONE);
+            v.setViewVisibility(tid, View.GONE);
             int d = i - start + 1;
-            if (d < 1 || d > n) { v.setTextViewText(nid, ""); v.setTextViewText(tid, ""); v.setInt(nid, "setBackgroundResource", 0); continue; }
+            if (d < 1 || d > n) { v.setTextViewText(nid, ""); v.setInt(nid, "setBackgroundResource", 0); v.setOnClickPendingIntent(cid, openApp(ctx, null, 0)); continue; }
             Calendar c = (Calendar) m.clone();
             c.set(Calendar.DAY_OF_MONTH, d);
             String k = key(c);
@@ -153,6 +173,47 @@ public class CalendarWidget extends AppWidgetProvider {
                 dots.setSpan(new ForegroundColorSpan(dc), s0, dots.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
             v.setTextViewText(tid, dots);
+            String hn = info != null ? info.optString("h", "") : "";
+            JSONArray ev = list != null ? list.optJSONArray(k) : null;
+            int evn = ev != null ? ev.length() : 0;
+            if (compact) {
+                // 작은 위젯: 점만
+                if (dots.length() > 0) v.setViewVisibility(tid, View.VISIBLE);
+            } else {
+                int room = slots;
+                if (hn.length() > 0 && room > 0) {
+                    // 공휴일 이름을 칸에 바로 (예: 크리스마스)
+                    v.setViewVisibility(hid, View.VISIBLE);
+                    v.setTextViewText(hid, hn);
+                    v.setTextColor(hid, sun);
+                    room--;
+                }
+                // 일정 이름 (칸에 다 안 들어가면 마지막 줄은 +N)
+                int showN = evn <= room ? evn : Math.max(0, room - 1);
+                for (int j = 0; j < showN; j++) {
+                    JSONObject e = ev.optJSONObject(j);
+                    if (e == null) continue;
+                    int dc; try { dc = Color.parseColor(e.optString("c", "#7466E4")); } catch (Exception x) { dc = acc; }
+                    v.setViewVisibility(chips[j], View.VISIBLE);
+                    v.setTextViewText(chips[j], e.optString("n", ""));
+                    if (Build.VERSION.SDK_INT >= 31) {
+                        v.setColorStateList(chips[j], "setBackgroundTintList", ColorStateList.valueOf(dc));
+                        v.setTextColor(chips[j], Color.WHITE);
+                    } else {
+                        v.setInt(chips[j], "setBackgroundColor", (dc & 0x00FFFFFF) | 0x33000000);
+                        v.setTextColor(chips[j], ink);
+                    }
+                }
+                if (evn > showN) {
+                    if (showN == 0 && room == 0) { if (dots.length() > 0) v.setViewVisibility(tid, View.VISIBLE); }
+                    else {
+                        v.setViewVisibility(mid, View.VISIBLE);
+                        v.setTextViewText(mid, "+" + (evn - showN));
+                        v.setTextColor(mid, sub);
+                    }
+                }
+            }
+            v.setOnClickPendingIntent(cid, openApp(ctx, k, 100 + i));   // 그 날짜로 앱 열기
         }
 
         // 아래: 오늘 일정 (오늘 칸이 보이는 달이면 오늘, 아니면 그 달 1일)
@@ -166,6 +227,7 @@ public class CalendarWidget extends AppWidgetProvider {
         v.setInt(R.id.line, "setBackgroundColor", (sub & 0x00FFFFFF) | 0x33000000);
         JSONArray evs = list != null ? list.optJSONArray(sk) : null;
         int[] eids = { R.id.e0, R.id.e1, R.id.e2 };
+        for (int id : new int[] { R.id.line, R.id.ehead, R.id.e0, R.id.e1, R.id.e2 }) v.setViewVisibility(id, compact ? View.VISIBLE : View.GONE);
         if (compact) {
             // 작은 위젯: 날짜 칸이 넉넉하도록 아래는 한 줄만 (예: 11월 11일 · 09:30 주간 회의 외 3개)
             v.setViewVisibility(R.id.ehead, View.GONE);
@@ -188,44 +250,15 @@ public class CalendarWidget extends AppWidgetProvider {
             }
             v.setTextViewText(R.id.e0, t);
             v.setTextColor(R.id.e0, e == null ? sub : ink);
-        } else for (int j = 0; j < 3; j++) {
-            JSONObject e = evs != null && j < evs.length() ? evs.optJSONObject(j) : null;
-            if (e == null) {
-                if (j == 0) {
-                    v.setViewVisibility(eids[0], View.VISIBLE);
-                    v.setTextViewText(eids[0], data.has("days") ? "일정이 없어요" : "말랑메모 앱을 한 번 열면 일정이 보여요");
-                    v.setTextColor(eids[0], sub);
-                } else v.setViewVisibility(eids[j], View.GONE);
-                continue;
-            }
-            if (j == 2 && evs.length() > 3) {
-                v.setViewVisibility(eids[2], View.VISIBLE);
-                v.setTextViewText(eids[2], "외 " + (evs.length() - 2) + "개");
-                v.setTextColor(eids[2], sub);
-                continue;
-            }
-            SpannableStringBuilder t = new SpannableStringBuilder();
-            t.append("● ");
-            int dc; try { dc = Color.parseColor(e.optString("c", "#7466E4")); } catch (Exception x) { dc = acc; }
-            t.setSpan(new ForegroundColorSpan(dc), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            String tm = e.optString("t", "");
-            int s0 = t.length();
-            t.append(tm.length() > 0 ? tm : "종일");
-            t.setSpan(new StyleSpan(Typeface.BOLD), s0, t.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            t.append("  ").append(e.optString("n", ""));
-            v.setViewVisibility(eids[j], View.VISIBLE);
-            v.setTextViewText(eids[j], t);
-            v.setTextColor(eids[j], ink);
         }
 
         // 누르기: 달 넘기기 / 오늘 / 그 외는 앱 열기
         v.setOnClickPendingIntent(R.id.prev, bcast(ctx, ACT_PREV, 1));
         v.setOnClickPendingIntent(R.id.next, bcast(ctx, ACT_NEXT, 2));
         v.setOnClickPendingIntent(R.id.today, bcast(ctx, ACT_TODAY, 3));
-        Intent open = new Intent(ctx, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent po = PendingIntent.getActivity(ctx, 0, open, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        v.setOnClickPendingIntent(R.id.gridbox, po);
-        v.setOnClickPendingIntent(R.id.root, po);
+        // 달 이름을 누르면 그 달로 (이번 달이면 오늘), 빈 곳은 그냥 앱 열기
+        v.setOnClickPendingIntent(R.id.mbox, openApp(ctx, off == 0 ? todayK : key(m), 99));
+        v.setOnClickPendingIntent(R.id.root, openApp(ctx, off == 0 ? null : key(m), 98));
         return v;
     }
 }

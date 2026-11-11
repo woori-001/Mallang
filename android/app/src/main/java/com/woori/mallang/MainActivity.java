@@ -21,6 +21,7 @@ public class MainActivity extends Activity {
     static final String HOME = "https://woori-001.github.io/Mallang/";
     static final String HOST = "woori-001.github.io";
     private WebView web;
+    private boolean loaded;
 
     @Override
     protected void onCreate(Bundle saved) {
@@ -41,6 +42,9 @@ public class MainActivity extends Activity {
         web.setWebChromeClient(new WebChromeClient());
         web.setWebViewClient(new WebViewClient() {
             @Override
+            public void onPageFinished(WebView v, String url) { loaded = true; }
+
+            @Override
             public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest req) {
                 Uri u = req.getUrl();
                 // 말랑메모 화면만 앱 안에서, 나머지 링크는 휴대폰 브라우저로
@@ -51,8 +55,26 @@ public class MainActivity extends Activity {
         });
         web.addJavascriptInterface(new Bridge(getApplicationContext()), "MallangAndroid");
 
-        if (saved != null) web.restoreState(saved);
+        String d = dateOf(getIntent());
+        if (d != null) web.loadUrl(HOME + "#date=" + d);   // 위젯에서 누른 날짜로 시작
+        else if (saved != null) web.restoreState(saved);
         else web.loadUrl(HOME);
+    }
+
+    /** 위젯에서 누른 날짜 (YYYY-MM-DD 만 받음) */
+    static String dateOf(Intent i) {
+        String d = i != null ? i.getStringExtra("date") : null;
+        return d != null && d.matches("\\d{4}-\\d{2}-\\d{2}") ? d : null;
+    }
+
+    @Override
+    protected void onNewIntent(Intent i) {
+        super.onNewIntent(i);
+        setIntent(i);
+        String d = dateOf(i);
+        if (d == null) return;
+        if (loaded) web.evaluateJavascript("window.mallangOpenDate&&mallangOpenDate('" + d + "')", null);
+        else web.loadUrl(HOME + "#date=" + d);
     }
 
     @Override

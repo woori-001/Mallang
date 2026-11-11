@@ -676,3 +676,8 @@ html.sk-ninja .skin .sn, html.sk-ninja .set h3, html.sk-ninja .secH, html.sk-nin
 html.sk-ninja .textBtn { color: var(--nj-or2); }
 html.sk-ninja .skins .skin .sn, html.sk-ninja .skins .skin.on .sn { color: #EEE6DA; } html.sk-ninja .skins .skin.on .sn { color: var(--nj-or2); } html.sk-ninja .view h2 { color: #EEE6DA; }
 html.sk-ninja .gvIco, html.sk-retro .gvIco { background: transparent; width: 30px; height: 30px; } html.sk-ninja .gvIco img, html.sk-retro .gvIco img { width: 28px; height: 28px; filter: none; }
+
+/* 달력 칸에 공휴일 이름 (눌러 보지 않아도 무슨 날인지) */
+.day .holn { font-size: calc(9px * var(--cs, 1)); line-height: 1; font-weight: 600; color: var(--sun); max-width: 100%; padding: 0 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -.02em; margin-top: -2px; }
+.day:has(.holn) { gap: 2px; }
+.day.sel .holn { color: inherit; opacity: .92; }

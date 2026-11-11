@@ -71,12 +71,13 @@ jobs:
             adb shell pm disable-user --user 0 com.google.android.apps.nexuslauncher || true
             adb shell settings put global hide_error_dialogs 1 || true
             sleep 5
-            adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es b64 "$(python3 android/preview/sample.py lav)" ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-lav.png
+            adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es b64 "$(python3 android/preview/sample.py lav)" --ei h 400 ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-lav.png
             adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es b64 "$(python3 android/preview/sample.py peach)" --ei off 1 ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-next.png
             adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es b64 "$(python3 android/preview/sample.py lav)" --ei w 260 --ei h 300 ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-small.png
+            adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es b64 "$(python3 android/preview/sample.py lav 45)" --ei h 400 --es wall "#3D6E9E" ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-alpha.png
             ls -la preview-*.png
       - name: 캡처 올리기
-        run: gh release upload android-test preview-lav.png preview-next.png preview-small.png --repo "$GITHUB_REPOSITORY" --clobber
+        run: gh release upload android-test preview-lav.png preview-next.png preview-small.png preview-alpha.png --repo "$GITHUB_REPOSITORY" --clobber
       - name: 실패 원인 남기기
         if: failure()
         working-directory: android
