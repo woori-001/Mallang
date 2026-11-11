@@ -34,7 +34,10 @@ const srv = http.createServer((q, r) => {
       localStorage.setItem('mallang.prefs.v1', JSON.stringify({ skin, widgetAlpha: alpha }));
     }, [skin, alpha]);
     await p.goto('http://localhost:8765/index.html');
-    await p.waitForFunction(() => window.__w.length && JSON.parse(window.__w[window.__w.length - 1]).art, null, { timeout: 30000 });
+    for (let i = 0; i < 60; i++) {   // 앱이 위젯 데이터를 넘길 때까지 (최대 30초)
+      if (await p.evaluate(() => window.__w.length > 0 && !!JSON.parse(window.__w[window.__w.length - 1]).art)) break;
+      await p.waitForTimeout(500);
+    }
     await p.waitForTimeout(1500);
     const j = await p.evaluate(() => window.__w[window.__w.length - 1]);
     const name = skin + (alpha !== 100 ? '-a' + alpha : '') + '.json';
