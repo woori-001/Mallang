@@ -26,19 +26,26 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      # 서명 키를 계속 같은 걸로 써야 새 APK를 지우지 않고 덮어 설치할 수 있어서, 처음 만든 키를 보관해 둠
+      # 서명 키를 계속 같은 걸로 써야 새 APK를 지우지 않고 덮어 설치할 수 있어서, 처음 만든 키를 GitHub 보관함에 보관해 둠
+      # (예전 설정은 보관이 실제로 안 되고 있었음: 키 파일 자리가 달라서 매번 새 키였음 → 직접 만든 키 파일로 고침)
       - name: 서명 키 가져오기
         id: ks
         uses: actions/cache@v4
         with:
-          path: ~/.android/debug.keystore
-          key: mallang-android-debug-keystore-v1
-      # 키가 바뀌면 이미 설치한 앱에 덮어 설치가 안 되므로, 키를 못 찾으면 새로 만들지 말고 멈춤
-      - name: 서명 키 확인
+          path: ~/mallang-sign/mallang.jks
+          key: mallang-android-sign-v2
+      - name: 서명 키 확인 (처음 한 번만 만들기)
         if: steps.ks.outputs.cache-hit != 'true'
         run: |
-          echo "::error::보관해 둔 서명 키를 찾지 못했어요. 새 키로 만들면 휴대폰에 덮어 설치가 안 돼서 멈춥니다."
-          exit 1
+          if [ -f android/SIGNING_KEY_CREATED ]; then
+            echo "::error::보관해 둔 서명 키를 찾지 못했어요. 새 키로 만들면 휴대폰에 덮어 설치가 안 돼서 멈춥니다."
+            exit 1
+          fi
+          mkdir -p ~/mallang-sign
+          keytool -genkeypair -keystore ~/mallang-sign/mallang.jks -storepass mallangtest -keypass mallangtest -alias mallang \
+            -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Mallang Memo Test, O=woori, C=KR"
+      - name: 서명 키 지문
+        run: keytool -list -keystore ~/mallang-sign/mallang.jks -storepass mallangtest | grep -i "SHA-256" || true
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
@@ -48,6 +55,7 @@ jobs:
           set -o pipefail
           # 안드로이드 코드 지문 (앱 안 "새 버전" 알림은 이 값이 바뀐 빌드만)
           export SRC_HASH=$(git ls-files -s app/src app/build.gradle | sha1sum | cut -c1-12)
+          export MALLANG_KEYSTORE=$HOME/mallang-sign/mallang.jks
           echo "SRC_HASH=$SRC_HASH" >> "$GITHUB_ENV"
           gradle --no-daemon assembleDebug 2>&1 | tee build.log
           cp app/build/outputs/apk/debug/app-debug.apk ../MallangMemo-android-test.apk

@@ -15,8 +15,8 @@ jobs:
         id: ks
         uses: actions/cache/restore@v4
         with:
-          path: ~/.android/debug.keystore
-          key: mallang-android-debug-keystore-v1
+          path: ~/mallang-sign/mallang.jks
+          key: mallang-android-sign-v2
       - name: 결과
         run: |
           if [ "${{ steps.ks.outputs.cache-hit }}" = "true" ]; then echo "서명 키 그대로 있어요"; else echo "::error::서명 키가 없어요"; exit 1; fi

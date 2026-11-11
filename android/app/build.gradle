@@ -16,8 +16,23 @@ android {
         buildConfigField 'String', 'SRC_HASH', "\"${System.getenv('SRC_HASH') ?: 'dev'}\""
     }
     buildFeatures { buildConfig true }
+    // 서명: 빌드 서버가 보관해 둔 같은 키로 (그래야 새 APK를 지우지 않고 덮어 설치 가능)
+    def ks = System.getenv('MALLANG_KEYSTORE')
+    signingConfigs {
+        if (ks) {
+            mallang {
+                storeFile file(ks)
+                storePassword 'mallangtest'
+                keyAlias 'mallang'
+                keyPassword 'mallangtest'
+            }
+        }
+    }
     buildTypes {
-        debug { applicationIdSuffix '' }
+        debug {
+            applicationIdSuffix ''
+            if (ks) signingConfig signingConfigs.mallang
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
