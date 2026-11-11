@@ -220,14 +220,38 @@ public class CalendarWidget extends AppWidgetProvider {
         String pkg = ctx.getPackageName();
         for (int r = 0; r < 6; r++) v.setViewVisibility(ctx.getResources().getIdentifier("r" + r, "id", pkg), r < rows ? View.VISIBLE : View.GONE);
         // 칸 하나에 들어갈 일정 줄 수: 위젯 높이에서 머리·요일 줄을 빼고 줄 수로 나눔 (숫자 22dp, 일정 한 줄 14dp)
-        int rowH = (hDp - 72) / rows;
-        int slots = Math.max(0, Math.min(3, (rowH - 23) / 14));
+        // 위젯이 크면 글자·일정·스티커도 같이 크게 (안드로이드 12 이상: 칸 크기를 바꿀 수 있음)
+        boolean big = Build.VERSION.SDK_INT >= 31;
+        float cellW = (wDp - 20) / 7f;
+        float sc = big ? Math.max(1f, Math.min(1.6f, Math.min(cellW / 40f, ((hDp - 90f) / rows) / 56f))) : 1f;
+        float sh = big ? Math.max(1f, Math.min(1.35f, wDp / 320f)) : 1f;
+        final int DIP = android.util.TypedValue.COMPLEX_UNIT_DIP, SP = android.util.TypedValue.COMPLEX_UNIT_SP;
+        float numBox = 22 * sc, chipH = 14 * sc, tapeH = 13 * sc;
+        if (big) {
+            v.setViewLayoutHeight(R.id.mimg, 46 * sh, DIP);
+            for (int i = 0; i < 7; i++) v.setViewLayoutHeight(ctx.getResources().getIdentifier("wi" + i, "id", ctx.getPackageName()), 15 * Math.min(sc, 1.3f), DIP);
+        }
+        float rowH = (hDp - 20 - 46 * sh - 20 * sc) / rows;
+        int slots = Math.max(0, Math.min(5, (int) ((rowH - numBox - 3) / (chipH + 1))));
         android.content.res.Resources res = ctx.getResources();
+        // 스티커 그림 (같은 스티커는 그림 하나를 같이 씀)
+        JSONObject stkArt = art != null ? art.optJSONObject("stk") : null;
+        java.util.HashMap<String, android.graphics.Bitmap> stkBm = new java.util.HashMap<>();
         for (int i = 0; i < 42; i++) {
             int nid = res.getIdentifier("n" + i, "id", pkg), tid = res.getIdentifier("t" + i, "id", pkg);
             int hid = res.getIdentifier("h" + i, "id", pkg), mid = res.getIdentifier("m" + i, "id", pkg), cid = res.getIdentifier("c" + i, "id", pkg);
             int[] chips = { res.getIdentifier("a" + i, "id", pkg), res.getIdentifier("b" + i, "id", pkg), res.getIdentifier("x" + i, "id", pkg) };
             for (int ch : chips) v.setViewVisibility(ch, View.GONE);
+            if (big) {
+                v.setTextViewTextSize(nid, SP, 12.5f * sc);
+                v.setViewLayoutWidth(nid, numBox, DIP); v.setViewLayoutHeight(nid, numBox, DIP);
+                for (int ch : chips) { v.setTextViewTextSize(ch, SP, 9f * sc); v.setViewLayoutHeight(ch, chipH, DIP); }
+                int pid0 = res.getIdentifier("p" + i, "id", pkg), sid0 = res.getIdentifier("s" + i, "id", pkg);
+                v.setTextViewTextSize(pid0, SP, 8.5f * sc); v.setViewLayoutHeight(pid0, tapeH, DIP);
+                v.setTextViewTextSize(res.getIdentifier("h" + i, "id", pkg), SP, 8.5f * sc);
+                v.setTextViewTextSize(res.getIdentifier("m" + i, "id", pkg), SP, 8.5f * sc);
+                v.setViewLayoutWidth(sid0, 24 * sc, DIP); v.setViewLayoutHeight(sid0, 24 * sc, DIP);
+            }
             int gid = res.getIdentifier("g" + i, "id", pkg), pid = res.getIdentifier("p" + i, "id", pkg), sid = res.getIdentifier("s" + i, "id", pkg);
             v.setViewVisibility(gid, View.GONE);
             v.setViewVisibility(pid, View.GONE);
@@ -272,7 +296,11 @@ public class CalendarWidget extends AppWidgetProvider {
                 try { v.setInt(gid, "setColorFilter", Color.parseColor(dbg)); v.setViewVisibility(gid, View.VISIBLE); } catch (Exception x) { /* 잘못된 색은 무시 */ }
             }
             String stk = info != null ? info.optString("s", "") : "";
-            if (stk.length() > 0) { v.setTextViewText(sid, stk); v.setViewVisibility(sid, View.VISIBLE); }
+            if (stk.length() > 0 && stkArt != null) {
+                android.graphics.Bitmap sb = stkBm.get(stk);
+                if (sb == null && !stkBm.containsKey(stk)) { sb = img(stkArt.optString(stk, "")); stkBm.put(stk, sb); }
+                if (sb != null) { v.setImageViewBitmap(sid, sb); v.setViewVisibility(sid, View.VISIBLE); }
+            }
             String hn = info != null ? info.optString("h", "") : "";
             JSONArray ev = list != null ? list.optJSONArray(k) : null;
             int evn = ev != null ? ev.length() : 0;
@@ -302,7 +330,7 @@ public class CalendarWidget extends AppWidgetProvider {
                     room--;
                 }
                 // 일정 이름 (칸에 다 안 들어가면 마지막 줄은 +N)
-                int showN = evn <= room ? evn : Math.max(0, room - 1);
+                int showN = Math.min(3, evn <= room ? evn : Math.max(0, room - 1));
                 for (int j = 0; j < showN; j++) {
                     JSONObject e = ev.optJSONObject(j);
                     if (e == null) continue;
@@ -328,6 +356,19 @@ public class CalendarWidget extends AppWidgetProvider {
             }
             v.setOnClickPendingIntent(cid, openApp(ctx, k, 100 + i));   // 그 날짜로 앱 열기
         }
+        // 말랑이: 달 끝에 빈 칸이 2칸 이상 있으면 거기에 앉아 있음
+        int trail = rows * 7 - (start + n);
+        android.graphics.Bitmap bun = art != null && !compact && trail >= 2 ? img(art.optString("bunny", "")) : null;
+        if (bun != null && (big || trail >= 3)) {
+            v.setImageViewBitmap(R.id.bun, bun);
+            v.setViewVisibility(R.id.bun, View.VISIBLE);
+            if (big) {
+                float ratio = bun.getWidth() / (float) bun.getHeight();
+                float bh = Math.min(rowH * 0.82f, trail * cellW * 0.8f / ratio);
+                v.setViewLayoutHeight(R.id.bun, bh, DIP);
+                v.setViewLayoutWidth(R.id.bun, bh * ratio, DIP);
+            }
+        } else v.setViewVisibility(R.id.bun, View.GONE);
 
         // 아래: 오늘 일정 (오늘 칸이 보이는 달이면 오늘, 아니면 그 달 1일)
         Calendar show = off == 0 ? today : m;

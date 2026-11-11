@@ -63,22 +63,22 @@
     if (artCache.key === key) return artCache.art;
     try { await Promise.all([document.fonts.load('700 40px ' + cn.fontFamily, '0123456789'), document.fonts.load('600 20px ' + ce.fontFamily, 'NOVEMBER 2026'), document.fonts.load('600 20px ' + cw.fontFamily, '일월화수목금토')]); } catch (e) { /* 글꼴을 못 불러오면 기본 글꼴 */ }
     const logo = await loadImg(logoSrc);
-    const S = 3;   // 3배로 그려서 위젯에서 또렷하게
+    const S = 2.5;   // 크게 그려서 위젯에서 또렷하게 (너무 크면 위젯이 못 받아서 2.5배)
     const heads = {};
     for (let mo = -1; mo <= 3; mo++) {
       const d = new Date(now.getFullYear(), now.getMonth() + mo, 1);
       const cv = document.createElement('canvas'), c = cv.getContext('2d');
-      const nf = cn.fontWeight + ' ' + 30 * S + 'px ' + cn.fontFamily, ef = ce.fontWeight + ' ' + 9.5 * S + 'px ' + ce.fontFamily;
+      const nf = cn.fontWeight + ' ' + 38 * S + 'px ' + cn.fontFamily, ef = ce.fontWeight + ' ' + 10.5 * S + 'px ' + ce.fontFamily;
       const ns = String(d.getMonth() + 1), es = MONTH_EN[d.getMonth()] + ' ' + d.getFullYear();
       c.font = nf; const nw = c.measureText(ns).width;
-      c.font = ef; if ('letterSpacing' in c) c.letterSpacing = 0.9 * S + 'px'; const ew = c.measureText(es).width;
-      const lh = 15 * S, lw = logo ? logo.naturalWidth / logo.naturalHeight * lh : 0;
-      const gap = 6 * S, H = 36 * S, W = Math.ceil(nw + gap + Math.max(ew, lw) + 2 * S);
+      c.font = ef; if ('letterSpacing' in c) c.letterSpacing = 1 * S + 'px'; const ew = c.measureText(es).width;
+      const lh = 25 * S, lw = logo ? logo.naturalWidth / logo.naturalHeight * lh : 0;   // 말랑 로고 크게
+      const gap = 7 * S, H = 46 * S, W = Math.ceil(nw + gap + Math.max(ew, lw) + 2 * S);
       cv.width = W; cv.height = H;
       c.textBaseline = 'alphabetic';
-      c.font = nf; c.fillStyle = cn.color; c.fillText(ns, 0, 30 * S);
-      if (logo) c.drawImage(logo, nw + gap - 1 * S, 2 * S, lw, lh);
-      c.font = ef; if ('letterSpacing' in c) c.letterSpacing = 0.9 * S + 'px'; c.fillStyle = ce.color; c.fillText(es, nw + gap, logo ? 29 * S : 22 * S);
+      c.font = nf; c.fillStyle = cn.color; c.fillText(ns, 0, 40 * S);
+      if (logo) c.drawImage(logo, nw + gap - 2 * S, 0, lw, lh);
+      c.font = ef; if ('letterSpacing' in c) c.letterSpacing = 1 * S + 'px'; c.fillStyle = ce.color; c.fillText(es, nw + gap, logo ? 39 * S : 30 * S);
       heads[mo] = cv.toDataURL('image/png');
     }
     const wdays = WD.map((t, i) => {
@@ -89,6 +89,15 @@
       c.fillText(t, 8 * S, 8 * S);
       return cv.toDataURL('image/png');
     });
+    // 말랑이: 달 끝 빈 칸에 앉혀 둘 그림 (스킨 말랑이, 없으면 기본 말랑이)
+    let bunny = null;
+    const bim = await loadImg(sk.bunny || 'bunny-big.png');
+    if (bim && bim.naturalWidth) {
+      const r = Math.min(1, 180 / Math.max(bim.naturalWidth, bim.naturalHeight));
+      const cv = document.createElement('canvas'); cv.width = Math.round(bim.naturalWidth * r); cv.height = Math.round(bim.naturalHeight * r);
+      cv.getContext('2d').drawImage(bim, 0, 0, cv.width, cv.height);
+      bunny = cv.toDataURL('image/png');
+    }
     // 달력 카드 모양 그대로: 카드 바탕색(유리면 반투명) · 테두리(종이 스킨) · 뒤 배경(색 번짐)
     const card = document.querySelector('.calCard');
     const tr = card.style.transition; card.style.transition = 'none';   // 스킨을 막 바꿨을 때 바뀌는 중간 색을 읽지 않게
@@ -110,9 +119,33 @@
       if (col && col[3] > 0.05 && nums.length >= 4 && nums[2] === 0 && nums[3] > 0) { line = { c: col, w: Math.min(3, nums[3]) }; break; }
     }
     const bgShown = getComputedStyle(document.querySelector('.bg')).display !== 'none';
-    const art = { base: rgba(sk.base) || [238, 240, 251, 1], b: bgShown ? sk.b : null, card: rgba(cc.backgroundColor) || [255, 255, 255, 0.6], line, dark: !!sk.dark, heads, wdays };
+    const art = { base: rgba(sk.base) || [238, 240, 251, 1], b: bgShown ? sk.b : null, card: rgba(cc.backgroundColor) || [255, 255, 255, 0.6], line, dark: !!sk.dark, heads, wdays, bunny };
     artCache = { key, art };
     return art;
+  }
+  // 진짜 스티커처럼: 하얀 테두리로 오려 낸 모양 + 살짝 그림자 + 조금 기울임 (주간 플래너 스티커와 같은 느낌)
+  const stkCache = {};
+  function stickerImg(em) {
+    if (stkCache[em]) return stkCache[em];
+    const Z = 72, cv = document.createElement('canvas'); cv.width = Z; cv.height = Z;
+    const c = cv.getContext('2d');
+    const t = document.createElement('canvas'); t.width = Z; t.height = Z;
+    const tc = t.getContext('2d');
+    tc.font = '40px "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif'; tc.textAlign = 'center'; tc.textBaseline = 'middle';
+    tc.fillText(em, Z / 2, Z / 2 + 2);
+    const w = document.createElement('canvas'); w.width = Z; w.height = Z;   // 하얀 오림 모양
+    const wc = w.getContext('2d'); wc.drawImage(t, 0, 0); wc.globalCompositeOperation = 'source-in'; wc.fillStyle = '#fff'; wc.fillRect(0, 0, Z, Z);
+    let h = 0; for (const ch of em) h = (h * 31 + ch.codePointAt(0)) | 0;
+    c.translate(Z / 2, Z / 2); c.rotate(((Math.abs(h) % 2 ? 1 : -1) * (6 + Math.abs(h) % 5)) * Math.PI / 180); c.translate(-Z / 2, -Z / 2);
+    c.save(); c.shadowColor = 'rgba(40, 30, 60, .28)'; c.shadowBlur = 4; c.shadowOffsetY = 2;
+    for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2; c.drawImage(w, Math.cos(a) * 4, Math.sin(a) * 4); }
+    c.restore();
+    for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2; c.drawImage(w, Math.cos(a) * 4, Math.sin(a) * 4); }
+    c.drawImage(t, 0, 0);
+    // 반짝이는 코팅 느낌 (위쪽 살짝 밝게)
+    c.globalCompositeOperation = 'source-atop';
+    const g = c.createLinearGradient(0, 0, Z, Z); g.addColorStop(0, 'rgba(255,255,255,.28)'); g.addColorStop(0.45, 'rgba(255,255,255,0)'); c.fillStyle = g; c.fillRect(0, 0, Z, Z);
+    return (stkCache[em] = cv.toDataURL('image/png'));
   }
   function pushWidget() {
     if (!window.MallangAndroid || !window.MallangAndroid.saveWidget) return;
@@ -136,6 +169,9 @@
         }
         const f0 = dateKey(new Date(now.getFullYear(), now.getMonth() - 1, 1)), t0 = dateKey(new Date(now.getFullYear(), now.getMonth() + 4, 0));
         const tapes = window.M.decoTapes(st.deco, f0, t0).slice(0, 60).map((t) => ({ s: t.s, e: t.e, t: t.t, c: window.M.DECO_TAPES[t.c] }));
+        const stk = {};
+        for (const v of Object.values(days)) if (v.s && !stk[v.s] && Object.keys(stk).length < 16) { try { stk[v.s] = stickerImg(v.s); } catch (e) { /* 그림 못 만들면 글자 스티커 */ } }
+        if (art) art = { ...art, stk };
         window.MallangAndroid.saveWidget(JSON.stringify({ v: 1, art, tapes, at: Date.now(), alpha: prefs.widgetAlpha == null ? 100 : prefs.widgetAlpha, skin: { bg: sk.base, ink: sk.ink, sub: sk.sub, a1: sk.a1, sun: sk.sun, sat: sk.sat }, days, list }));
       } catch (e) { /* 위젯 갱신 실패는 앱 사용에 영향 없음 */ }
     }, 400);

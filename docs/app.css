@@ -685,7 +685,8 @@ html.sk-ninja .gvIco, html.sk-retro .gvIco { background: transparent; width: 30p
 /* ───────── 달력 꾸미기: 날짜 배경색 · 스티커 · 마스킹테이프 ───────── */
 .cell { position: relative; }
 .day.hasbg:not(.sel) { background: var(--dbg); }
-.dstk { position: absolute; top: -3px; right: 1px; z-index: 2; font-size: 14px; line-height: 1; pointer-events: none; transform: rotate(8deg); filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .15)); }
+.dstk { position: absolute; top: -6px; right: -2px; z-index: 2; font-size: 18px; line-height: 1; pointer-events: none; transform: rotate(9deg);
+  filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff) drop-shadow(0 2px 2px rgba(40, 30, 60, .25)); }   /* 진짜 스티커처럼 하얀 테두리 + 그림자 */
 .tlane { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-auto-rows: 17px; row-gap: 2px; margin: -1px 0 3px; }
 .tp { height: 17px; line-height: 17px; font-size: 11px; font-weight: 600; color: #4A3F5C; padding: 0 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: .92; margin: 0 -1px; position: relative;
 }
