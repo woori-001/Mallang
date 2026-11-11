@@ -543,7 +543,7 @@ html.g-lemon .plTtl b, html.g-lemon .calTtl { color: #B8860B; }
 .sbeta { font-style: normal; font-size: 9.5px; font-weight: 700; color: var(--a1); }
 html.sk-retro {
   --rt-ink: #2E2238; --rt-face: #DCD8E6; --rt-hi: #FFFFFF; --rt-sh: #A39CB6; --rt-blue: #1A33C9; --rt-paper: #FBF9FD;
-  --rt-bevel: inset 2px 2px 0 var(--rt-hi), inset -2px -2px 0 var(--rt-sh);
+  --rt-bevel: inset 1px 1px 0 var(--rt-hi), inset -1px -1px 0 var(--rt-sh);
   --paper-line: rgba(46, 34, 56, .22); --paper-dot: rgba(26, 51, 201, .35);
 }
 html.sk-retro body, html.sk-retro button, html.sk-retro input, html.sk-retro textarea, html.sk-retro select { font-family: 'Galmuri11', 'Gowun Dodum', sans-serif; }
@@ -551,21 +551,21 @@ html.sk-retro body { background: var(--rt-face); }
 html.sk-retro img[src^="skin/rt"] { image-rendering: auto; }
 html.sk-retro .brand img { height: 54px; filter: none; }
 html.sk-retro .search, html.sk-retro .calCard, html.sk-retro .card, html.sk-retro .evList > *, html.sk-retro .toggleRow, html.sk-retro .install, html.sk-retro .pDay {
-  border-radius: 0 !important; background: var(--rt-paper); box-shadow: 0 0 0 2px var(--rt-ink), inset 2px 2px 0 var(--rt-sh) !important; border: none; }
-html.sk-retro .iconBtn { border-radius: 0; background: var(--rt-face); box-shadow: 0 0 0 2px var(--rt-ink), var(--rt-bevel); }
-html.sk-retro .tabs { border-radius: 0; background: var(--rt-face); box-shadow: 0 0 0 3px var(--rt-ink), var(--rt-bevel); }
+  border-radius: 0 !important; background: var(--rt-paper); box-shadow: 0 0 0 1px var(--rt-ink), inset 1px 1px 0 var(--rt-sh) !important; border: none; }
+html.sk-retro .iconBtn { border-radius: 0; background: var(--rt-face); box-shadow: 0 0 0 1px var(--rt-ink), var(--rt-bevel); }
+html.sk-retro .tabs { border-radius: 0; background: var(--rt-face); box-shadow: 0 0 0 1.5px var(--rt-ink), var(--rt-bevel); }
 html.sk-retro .tab { border-radius: 0; }
-html.sk-retro .tab.on { background: var(--rt-paper); color: var(--rt-blue); box-shadow: 0 0 0 2px var(--rt-ink), inset 2px 2px 0 var(--rt-sh); }
-html.sk-retro .fab, html.sk-retro .primary, html.sk-retro .smallPrimary { border-radius: 0; background: var(--rt-blue); box-shadow: 0 0 0 2px var(--rt-ink), inset 2px 2px 0 #6F86F0, inset -2px -2px 0 #0F2296; }
-html.sk-retro .memo { border-radius: 0; padding: 0 5px 10px; box-shadow: 0 0 0 3px var(--rt-ink), inset 4px 4px 0 var(--rt-hi), inset -4px -4px 0 var(--rt-sh); overflow: hidden; }
-html.sk-retro .memo .mTitle { margin: 5px 0 0; padding: 7px 10px; border: none; background: var(--rt-blue); color: #fff; box-shadow: inset 0 -2px 0 #0F2296; }
+html.sk-retro .tab.on { background: var(--rt-paper); color: var(--rt-blue); box-shadow: 0 0 0 1px var(--rt-ink), inset 1px 1px 0 var(--rt-sh); }
+html.sk-retro .fab, html.sk-retro .primary, html.sk-retro .smallPrimary { border-radius: 0; background: var(--rt-blue); box-shadow: 0 0 0 1px var(--rt-ink), inset 1px 1px 0 #6F86F0, inset -1px -1px 0 #0F2296; }
+html.sk-retro .memo { border-radius: 0; padding: 0 5px 10px; box-shadow: 0 0 0 1.5px var(--rt-ink), inset 2px 2px 0 var(--rt-hi), inset -2px -2px 0 var(--rt-sh); overflow: hidden; }
+html.sk-retro .memo .mTitle { margin: 5px 0 0; padding: 7px 10px; border: none; background: var(--rt-blue); color: #fff; box-shadow: inset 0 -1px 0 #0F2296; }
 html.sk-retro .memo .mTitle span { font-family: 'Galmuri11', var(--memo-font); }
 html.sk-retro .memo .mBody, html.sk-retro .memo .mMeta { padding: 0 10px; }
 html.sk-retro .day { border-radius: 0; }
-html.sk-retro .day.today { box-shadow: inset 0 0 0 2px var(--rt-blue); }
+html.sk-retro .day.today { box-shadow: inset 0 0 0 1.5px var(--rt-blue); }
 html.sk-retro .day.sel { background: var(--rt-blue); box-shadow: none; }
 html.sk-retro .skin .sw { border-radius: 0; }
-html.sk-retro .editor .edTop { background: var(--rt-blue); color: #fff; border-bottom: 3px solid var(--rt-ink); }
+html.sk-retro .editor .edTop { background: var(--rt-blue); color: #fff; border-bottom: 1.5px solid var(--rt-ink); }
 html.sk-retro .editor .edTop .edTitle { color: #fff; }
 html.sk-retro .editor .edTop .iconBtn { color: var(--rt-ink); }
 
@@ -605,10 +605,10 @@ html.sk-excel .pIt:focus-within { box-shadow: inset 0 0 0 2px var(--xl-g); }
 html.sk-excel .pCb { border-radius: 4px; border-color: var(--xl-g2); }
 html.sk-excel .pIt.done .pCb { background: var(--xl-g); border-color: var(--xl-g); }
 html.sk-retro .pDay { padding-top: 0; overflow: hidden; }
-html.sk-retro .pDay .pdH { margin: 0 -14px 6px; padding: 7px 14px; background: var(--rt-face); border-bottom: 2px solid var(--rt-ink); }
+html.sk-retro .pDay .pdH { margin: 0 -14px 6px; padding: 7px 14px; background: var(--rt-face); border-bottom: 1px solid var(--rt-ink); }
 html.sk-retro .pDay.today .pdH { background: var(--rt-blue); color: #fff; }
 html.sk-retro .pDay.today .pdH b, html.sk-retro .pDay.today .pdH > span { color: #fff !important; }
-html.sk-retro .pCb { border-radius: 0; border: 2px solid var(--rt-ink); background: #fff; }
+html.sk-retro .pCb { border-radius: 0; border: 1px solid var(--rt-ink); background: #fff; }
 html.sk-retro .pIt.done .pCb { background: var(--rt-blue); }
 html.sk-retro .pOt { border-radius: 0; }
 html.sk-excel .peopleGv .gvSec { border-radius: 4px; background: #fff; box-shadow: 0 0 0 1px var(--xl-line); overflow: hidden; }
@@ -616,8 +616,8 @@ html.sk-excel .peopleGv .gvHead { background: var(--xl-hd); box-shadow: inset 3p
 html.sk-excel .peopleGv .gvGrid { gap: 0; padding: 0; }
 html.sk-excel .peopleGv .gvItem { border-radius: 0; background: #fff; box-shadow: inset -1px -1px 0 var(--xl-line); }
 html.sk-excel .peopleGv .gvItem.picked, html.sk-excel .peopleGv .gvItem:active { background: var(--xl-gl); box-shadow: inset 0 0 0 2px var(--xl-g); }
-html.sk-retro .peopleGv .gvSec { border-radius: 0; background: var(--rt-paper); box-shadow: 0 0 0 2px var(--rt-ink), inset 2px 2px 0 var(--rt-sh); }
-html.sk-retro .peopleGv .gvHead { background: var(--rt-face); border-bottom: 2px solid var(--rt-ink); }
+html.sk-retro .peopleGv .gvSec { border-radius: 0; background: var(--rt-paper); box-shadow: 0 0 0 1px var(--rt-ink), inset 1px 1px 0 var(--rt-sh); }
+html.sk-retro .peopleGv .gvHead { background: var(--rt-face); border-bottom: 1px solid var(--rt-ink); }
 html.sk-retro .peopleGv .gvItem { border-radius: 0; background: #fff; box-shadow: inset 0 0 0 1.5px var(--rt-sh); }
 html.sk-retro .peopleGv .gvItem.picked { background: var(--rt-blue); color: #fff; }
 .peopleTop .textBtn { white-space: nowrap; flex: none; }
@@ -685,7 +685,7 @@ html.sk-ninja .gvIco, html.sk-retro .gvIco { background: transparent; width: 30p
 /* ───────── 달력 꾸미기: 날짜 배경색 · 스티커 · 마스킹테이프 ───────── */
 .cell { position: relative; }
 .day.hasbg:not(.sel) { background: var(--dbg); }
-.dstk { position: absolute; top: -6px; right: -2px; z-index: 2; font-size: 18px; line-height: 1; pointer-events: none; transform: rotate(9deg);
+.dstk { position: absolute; top: -3px; right: -2px; z-index: 2; font-size: 18px; line-height: 1; pointer-events: none; transform: rotate(9deg);
   filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff) drop-shadow(0 2px 2px rgba(40, 30, 60, .25)); }   /* 진짜 스티커처럼 하얀 테두리 + 그림자 */
 .tlane { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-auto-rows: 17px; row-gap: 2px; margin: -1px 0 3px; }
 .tp { height: 17px; line-height: 17px; font-size: 11px; font-weight: 600; color: #4A3F5C; padding: 0 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: .92; margin: 0 -1px; position: relative;

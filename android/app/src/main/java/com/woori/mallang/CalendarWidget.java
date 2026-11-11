@@ -132,16 +132,7 @@ public class CalendarWidget extends AppWidgetProvider {
                 c.drawCircle(cx, cy, r, p);
             }
             c.drawColor(argb(art.optJSONArray("card"), Color.argb(150, 255, 255, 255)));
-            JSONObject line = art.optJSONObject("line");
-            if (line != null) {
-                android.graphics.Paint p = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
-                p.setStyle(android.graphics.Paint.Style.STROKE);
-                float lw = (float) Math.max(1, line.optDouble("w", 1) * k * 2);
-                p.setStrokeWidth(lw);
-                p.setColor(argb(line.optJSONArray("c"), Color.argb(40, 0, 0, 0)));
-                float rr = 22 * k;
-                c.drawRoundRect(new android.graphics.RectF(lw / 2, lw / 2, W - lw / 2, H - lw / 2), rr, rr, p);
-            }
+            // 테두리는 그리지 않음: 작게 그린 배경을 늘리면 선이 두껍고 흐려져서 지저분해 보임
             return bm;
         } catch (Exception e) { return null; }
     }
