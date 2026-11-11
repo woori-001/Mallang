@@ -127,20 +127,20 @@
   const stkCache = {};
   function stickerImg(em) {
     if (stkCache[em]) return stkCache[em];
-    const Z = 72, cv = document.createElement('canvas'); cv.width = Z; cv.height = Z;
+    const Z = 112, cv = document.createElement('canvas'); cv.width = Z; cv.height = Z;
     const c = cv.getContext('2d');
     const t = document.createElement('canvas'); t.width = Z; t.height = Z;
     const tc = t.getContext('2d');
-    tc.font = '40px "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif'; tc.textAlign = 'center'; tc.textBaseline = 'middle';
-    tc.fillText(em, Z / 2, Z / 2 + 2);
+    tc.font = '72px "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif'; tc.textAlign = 'center'; tc.textBaseline = 'middle';
+    tc.fillText(em, Z / 2, Z / 2 + 3);
     const w = document.createElement('canvas'); w.width = Z; w.height = Z;   // 하얀 오림 모양
     const wc = w.getContext('2d'); wc.drawImage(t, 0, 0); wc.globalCompositeOperation = 'source-in'; wc.fillStyle = '#fff'; wc.fillRect(0, 0, Z, Z);
     let h = 0; for (const ch of em) h = (h * 31 + ch.codePointAt(0)) | 0;
     c.translate(Z / 2, Z / 2); c.rotate(((Math.abs(h) % 2 ? 1 : -1) * (6 + Math.abs(h) % 5)) * Math.PI / 180); c.translate(-Z / 2, -Z / 2);
-    c.save(); c.shadowColor = 'rgba(40, 30, 60, .28)'; c.shadowBlur = 4; c.shadowOffsetY = 2;
-    for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2; c.drawImage(w, Math.cos(a) * 4, Math.sin(a) * 4); }
+    c.save(); c.shadowColor = 'rgba(40, 30, 60, .28)'; c.shadowBlur = 6; c.shadowOffsetY = 3;
+    for (let k = 0; k < 20; k++) { const a = k / 20 * Math.PI * 2; c.drawImage(w, Math.cos(a) * 6, Math.sin(a) * 6); }
     c.restore();
-    for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2; c.drawImage(w, Math.cos(a) * 4, Math.sin(a) * 4); }
+    for (let k = 0; k < 20; k++) { const a = k / 20 * Math.PI * 2; c.drawImage(w, Math.cos(a) * 6, Math.sin(a) * 6); }
     c.drawImage(t, 0, 0);
     // 반짝이는 코팅 느낌 (위쪽 살짝 밝게)
     c.globalCompositeOperation = 'source-atop';

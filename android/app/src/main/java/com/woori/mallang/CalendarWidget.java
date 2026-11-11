@@ -256,6 +256,8 @@ public class CalendarWidget extends AppWidgetProvider {
             v.setViewVisibility(gid, View.GONE);
             v.setViewVisibility(pid, View.GONE);
             v.setViewVisibility(sid, View.GONE);
+            int kid = res.getIdentifier("k" + i, "id", pkg);
+            v.setViewVisibility(kid, View.GONE);
             v.setViewVisibility(hid, View.GONE);
             v.setViewVisibility(mid, View.GONE);
             v.setViewVisibility(tid, View.GONE);
@@ -296,11 +298,12 @@ public class CalendarWidget extends AppWidgetProvider {
                 try { v.setInt(gid, "setColorFilter", Color.parseColor(dbg)); v.setViewVisibility(gid, View.VISIBLE); } catch (Exception x) { /* 잘못된 색은 무시 */ }
             }
             String stk = info != null ? info.optString("s", "") : "";
+            android.graphics.Bitmap sb = null;
             if (stk.length() > 0 && stkArt != null) {
-                android.graphics.Bitmap sb = stkBm.get(stk);
+                sb = stkBm.get(stk);
                 if (sb == null && !stkBm.containsKey(stk)) { sb = img(stkArt.optString(stk, "")); stkBm.put(stk, sb); }
-                if (sb != null) { v.setImageViewBitmap(sid, sb); v.setViewVisibility(sid, View.VISIBLE); }
             }
+            int lines = 0;   // 날짜 아래에 쓴 줄 수 (스티커 자리 계산용)
             String hn = info != null ? info.optString("h", "") : "";
             JSONArray ev = list != null ? list.optJSONArray(k) : null;
             int evn = ev != null ? ev.length() : 0;
@@ -320,14 +323,14 @@ public class CalendarWidget extends AppWidgetProvider {
                     v.setViewVisibility(pid, View.VISIBLE);
                     v.setInt(pid, "setBackgroundColor", tc);
                     v.setTextViewText(pid, k.equals(tp.optString("s")) || wd == 0 || d == 1 ? tp.optString("t", "") : "");
-                    room--;
+                    room--; lines++;
                 }
                 if (hn.length() > 0 && room > 0) {
                     // 공휴일 이름을 칸에 바로 (예: 크리스마스)
                     v.setViewVisibility(hid, View.VISIBLE);
                     v.setTextViewText(hid, hn);
                     v.setTextColor(hid, sun);
-                    room--;
+                    room--; lines++;
                 }
                 // 일정 이름 (칸에 다 안 들어가면 마지막 줄은 +N)
                 int showN = Math.min(3, evn <= room ? evn : Math.max(0, room - 1));
@@ -345,7 +348,9 @@ public class CalendarWidget extends AppWidgetProvider {
                         v.setTextColor(chips[j], ink);
                     }
                 }
+                lines += showN;
                 if (evn > showN) {
+                    if (showN > 0 || room > 0) lines++;
                     if (showN == 0 && room == 0) { if (dots.length() > 0) v.setViewVisibility(tid, View.VISIBLE); }
                     else {
                         v.setViewVisibility(mid, View.VISIBLE);
@@ -353,6 +358,15 @@ public class CalendarWidget extends AppWidgetProvider {
                         v.setTextColor(mid, sub);
                     }
                 }
+            }
+            // 스티커: 칸 아래에 남는 자리가 넉넉하면 크게 (예시 앱처럼), 아니면 칸 모서리에 작게
+            if (sb != null) {
+                float free = rowH - (numBox + 3) - lines * (chipH + 1) - 4;
+                float size = Math.min(Math.min(cellW - 8, free), 58);
+                if (big && !compact && size >= 24) {
+                    v.setImageViewBitmap(kid, sb); v.setViewVisibility(kid, View.VISIBLE);
+                    v.setViewLayoutWidth(kid, size, DIP); v.setViewLayoutHeight(kid, size, DIP);
+                } else { v.setImageViewBitmap(sid, sb); v.setViewVisibility(sid, View.VISIBLE); }
             }
             v.setOnClickPendingIntent(cid, openApp(ctx, k, 100 + i));   // 그 날짜로 앱 열기
         }
