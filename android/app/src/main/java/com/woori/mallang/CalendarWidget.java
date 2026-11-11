@@ -163,7 +163,7 @@ public class CalendarWidget extends AppWidgetProvider {
             if (Color.alpha(wdBg) > 10 && Build.VERSION.SDK_INT >= 31) {
                 v.setInt(R.id.wrow, "setBackgroundResource", R.drawable.pill);
                 v.setColorStateList(R.id.wrow, "setBackgroundTintList", ColorStateList.valueOf(wdBg));
-            }
+            } else v.setInt(R.id.wrow, "setBackgroundResource", 0);   // 위젯은 화면을 다시 쓰지 않고 고칠 것만 덧칠하므로, 드로잉 스킨에서 바꾸면 까만 줄을 꼭 지워야 함
             // 말랑 로고 스티커 (달 이름 옆)
             android.graphics.Bitmap lb = img(art.optString("logo", ""));
             if (lb != null) { v.setImageViewBitmap(R.id.mimg, lb); artHead = true; }
