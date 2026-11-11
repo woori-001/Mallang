@@ -59,7 +59,7 @@
     const logoEl = document.querySelector('.brand img');
     const logoSrc = logoEl ? logoEl.getAttribute('src') : 'logo.png';
     const now = new Date();
-    const key = ['st2', prefs.skin, cn.fontFamily, cn.color, ce.color, logoSrc, now.getFullYear(), now.getMonth(), sk.sun, sk.sat, cw.color].join('|');
+    const key = ['st3', prefs.skin, cn.fontFamily, cn.color, ce.color, logoSrc, now.getFullYear(), now.getMonth(), sk.sun, sk.sat, cw.color].join('|');
     if (artCache.key === key) return artCache.art;
     try { await Promise.all([document.fonts.load('700 40px ' + cn.fontFamily, '0123456789'), document.fonts.load('600 20px ' + ce.fontFamily, 'NOVEMBER 2026'), document.fonts.load('600 20px ' + cw.fontFamily, '일월화수목금토')]); } catch (e) { /* 글꼴을 못 불러오면 기본 글꼴 */ }
     const logo0 = await loadImg(logoSrc);
@@ -77,12 +77,12 @@
       c.font = nf; const nw = c.measureText(ns).width;
       c.font = ef; if ('letterSpacing' in c) c.letterSpacing = 1 * S + 'px'; const ew = c.measureText(es).width;
       const lw = logo ? logo.width : 0, lp = logoSt ? logoSt.pad : 0;   // 말랑 로고 크게 (스티커 테두리만큼 여백 포함)
-      const gap = 7 * S, H = 50 * S, W = Math.ceil(nw + gap + Math.max(ew, lw - lp) + 2 * S);
+      const gap = 7 * S, H = 54 * S, W = Math.ceil(nw + gap + Math.max(ew, lw - lp) + 2 * S);
       cv.width = W; cv.height = H;
       c.textBaseline = 'alphabetic';
-      c.font = nf; c.fillStyle = cn.color; c.fillText(ns, 0, 44 * S);
+      c.font = nf; c.fillStyle = cn.color; c.fillText(ns, 0, 48 * S);
       if (logo) c.drawImage(logo, nw + gap - lp, 0);
-      c.font = ef; if ('letterSpacing' in c) c.letterSpacing = 1 * S + 'px'; c.fillStyle = ce.color; c.fillText(es, nw + gap, logo ? 43 * S : 32 * S);
+      c.font = ef; if ('letterSpacing' in c) c.letterSpacing = 1 * S + 'px'; c.fillStyle = ce.color; c.fillText(es, nw + gap, logo ? 49 * S : 34 * S);
       heads[mo] = cv.toDataURL('image/png');
     }
     const wdays = WD.map((t, i) => {

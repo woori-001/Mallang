@@ -228,10 +228,10 @@ public class CalendarWidget extends AppWidgetProvider {
         final int DIP = android.util.TypedValue.COMPLEX_UNIT_DIP, SP = android.util.TypedValue.COMPLEX_UNIT_SP;
         float numBox = 22 * sc, chipH = 14 * sc, tapeH = 13 * sc;
         if (big) {
-            v.setViewLayoutHeight(R.id.mimg, 50 * sh, DIP);
+            v.setViewLayoutHeight(R.id.mimg, 54 * sh, DIP);
             for (int i = 0; i < 7; i++) v.setViewLayoutHeight(ctx.getResources().getIdentifier("wi" + i, "id", ctx.getPackageName()), 15 * Math.min(sc, 1.3f), DIP);
         }
-        float rowH = (hDp - 20 - 50 * sh - 20 * sc) / rows;
+        float rowH = (hDp - 20 - 54 * sh - 20 * sc) / rows;
         int slots = Math.max(0, Math.min(5, (int) ((rowH - numBox - 3) / (chipH + 1))));
         android.content.res.Resources res = ctx.getResources();
         // 스티커 그림 (같은 스티커는 그림 하나를 같이 씀)
