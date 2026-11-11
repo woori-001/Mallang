@@ -52,6 +52,27 @@ jobs:
               --title "말랑메모 안드로이드 (테스트)" --prerelease --latest=false \
               --notes "안드로이드 테스트 앱 (홈 화면 달력 위젯). 빌드 #${GITHUB_RUN_NUMBER}"
           fi
+      # 확인용: 에뮬레이터에 설치해서 위젯 모습을 실제로 그려 캡처 (릴리스에 preview-*.png 로 같이 올림)
+      - name: KVM 켜기
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules && sudo udevadm trigger --name-match=kvm
+      - name: 위젯 화면 캡처
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: |
+            adb install -r MallangMemo-android-test.apk
+            adb shell am start -W -n com.woori.mallang/.PreviewActivity --es b64 "$(python3 android/preview/sample.py lav)" ; sleep 4 ; adb exec-out screencap -p > preview-lav.png
+            adb shell am start -W -n com.woori.mallang/.PreviewActivity --es b64 "$(python3 android/preview/sample.py peach)" --ei off 1 ; sleep 4 ; adb exec-out screencap -p > preview-next.png
+            adb shell am start -W -n com.woori.mallang/.PreviewActivity --es b64 "$(python3 android/preview/sample.py lav)" --ei w 260 --ei h 300 ; sleep 4 ; adb exec-out screencap -p > preview-small.png
+            ls -la preview-*.png
+      - name: 캡처 올리기
+        run: gh release upload android-test preview-lav.png preview-next.png preview-small.png --repo "$GITHUB_REPOSITORY" --clobber
       - name: 실패 원인 남기기
         if: failure()
         working-directory: android

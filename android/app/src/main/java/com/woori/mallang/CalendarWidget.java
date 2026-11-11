@@ -75,12 +75,16 @@ public class CalendarWidget extends AppWidgetProvider {
 
     static void draw(Context ctx, AppWidgetManager mgr, int wid) {
         SharedPreferences p = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        mgr.updateAppWidget(wid, build(ctx, p.getString("data", "{}"), p.getInt("off", 0)));
+    }
+
+    /** 위젯 화면 만들기 (홈 화면 위젯과 미리보기 화면이 같이 씀) */
+    static RemoteViews build(Context ctx, String json, int off) {
         JSONObject data = null;
-        try { data = new JSONObject(p.getString("data", "{}")); } catch (Exception e) { data = new JSONObject(); }
+        try { data = new JSONObject(json); } catch (Exception e) { data = new JSONObject(); }
         JSONObject skin = data.optJSONObject("skin");
         JSONObject days = data.optJSONObject("days");
         JSONObject list = data.optJSONObject("list");
-        int off = p.getInt("off", 0);
 
         int bg = col(skin, "bg", "#F4F1FA"), ink = col(skin, "ink", "#4A3F6B"), sub = col(skin, "sub", "#8A80A8");
         int acc = col(skin, "a1", "#7466E4"), sun = col(skin, "sun", "#E0708A"), sat = col(skin, "sat", "#5B8DD6");
@@ -193,7 +197,6 @@ public class CalendarWidget extends AppWidgetProvider {
         PendingIntent po = PendingIntent.getActivity(ctx, 0, open, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         v.setOnClickPendingIntent(R.id.gridbox, po);
         v.setOnClickPendingIntent(R.id.root, po);
-
-        mgr.updateAppWidget(wid, v);
+        return v;
     }
 }
