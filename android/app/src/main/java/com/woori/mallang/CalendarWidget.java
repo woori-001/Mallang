@@ -299,7 +299,11 @@ public class CalendarWidget extends AppWidgetProvider {
             // 날짜 배경색 · 스티커 (앱 달력에서 붙인 것)
             String dbg = info != null ? info.optString("bg", "") : "";
             if (dbg.length() > 0) {
-                try { v.setInt(gid, "setColorFilter", Color.parseColor(dbg)); v.setViewVisibility(gid, View.VISIBLE); } catch (Exception x) { /* 잘못된 색은 무시 */ }
+                try {
+                    v.setInt(gid, "setColorFilter", Color.parseColor(dbg));
+                    v.setInt(gid, "setImageAlpha", darkSkin ? 80 : 255);   // 어두운 스킨: 밝은 배경색이면 흰 숫자가 안 보여서 옅게
+                    v.setViewVisibility(gid, View.VISIBLE);
+                } catch (Exception x) { /* 잘못된 색은 무시 */ }
             }
             String stk = info != null ? info.optString("s", "") : "";
             android.graphics.Bitmap sb = null;
