@@ -664,6 +664,34 @@
     const t = e.target.closest('.tp'); if (!t || !S.isAdmin) return;
     e.stopPropagation(); tapeSheet({ mk: t.dataset.mk, i: Number(t.dataset.i) });
   }, true);
+  // 마우스로 여러 날을 끌어서 마스킹테이프 붙이기 (주간 플래너처럼): 날짜를 누른 채 다른 날짜까지 끌고 놓으면 테이프 창이 열림
+  let tDrag = null;
+  const dayAt = (x, y) => { const el = document.elementFromPoint(x, y); const d = el && el.closest('#grid .day[data-k]'); return d ? d.dataset.k : null; };
+  const paintDrag = () => {
+    const [a, b] = tDrag.a <= tDrag.b ? [tDrag.a, tDrag.b] : [tDrag.b, tDrag.a];
+    $('grid').querySelectorAll('.day[data-k]').forEach((d) => d.classList.toggle('tdrag', tDrag.on && d.dataset.k >= a && d.dataset.k <= b));
+  };
+  $('grid').addEventListener('pointerdown', (e) => {
+    if (!S.isAdmin || e.button !== 0) return;
+    const k = dayAt(e.clientX, e.clientY); if (!k) return;
+    tDrag = { a: k, b: k, on: false, id: e.pointerId };
+  });
+  window.addEventListener('pointermove', (e) => {
+    if (!tDrag || e.pointerId !== tDrag.id) return;
+    const k = dayAt(e.clientX, e.clientY);
+    if (k && k !== tDrag.b) { tDrag.b = k; if (k !== tDrag.a) tDrag.on = true; paintDrag(); }
+  });
+  window.addEventListener('pointerup', (e) => {
+    if (!tDrag || e.pointerId !== tDrag.id) return;
+    const d = tDrag; tDrag = null;
+    if (!d.on) return;   // 그냥 누른 거면 평소처럼 날짜 고르기
+    $('grid').querySelectorAll('.day.tdrag').forEach((x) => x.classList.remove('tdrag'));
+    const [a, b] = d.a <= d.b ? [d.a, d.b] : [d.b, d.a];
+    skipClick = true; setTimeout(() => { skipClick = false; }, 0);
+    tapeSheet(null, { s: a, e: b });
+  });
+  let skipClick = false;
+  $('grid').addEventListener('click', (e) => { if (skipClick) { e.stopPropagation(); e.preventDefault(); } }, true);
   function openSheet(title, body, btns) {
     $('dsTitle').textContent = title; $('dsBody').innerHTML = body; $('dsBtns').innerHTML = btns;
     $('sDeco').hidden = false; api.sideFocus();
@@ -694,11 +722,11 @@
     $('dsBody').onclick = (e) => { const b = e.target.closest('[data-e]'); if (b) { setDay('stk', b.dataset.e); closeSheet(); } };
     $('dsBtns').querySelector('[data-act=none]').onclick = () => { setDay('stk', ''); closeSheet(); };
   }
-  function tapeSheet(ref) {
+  function tapeSheet(ref, range) {
     const old = ref && S.deco && S.deco[ref.mk] && S.deco[ref.mk].tape[ref.i];
     if (ref && !old) return;
     const n = window.M.decoTapes(S.deco, '0000-00-00', '9999-99-99').length;
-    const t = old ? { ...old } : { s: sel, e: sel, t: '', c: Object.keys(window.M.DECO_TAPES)[n % 6] };
+    const t = old ? { ...old } : { s: range ? range.s : sel, e: range ? range.e : sel, t: '', c: Object.keys(window.M.DECO_TAPES)[n % 6] };
     let c = t.c;
     openSheet(old ? '테이프 고치기' : '🎀 마스킹테이프 붙이기',
       '<label class="dsRow"><span>내용</span><input type="text" id="tpT" maxlength="60" placeholder="예: 제주 출장, 결산 기간" spellcheck="false" value="' + esc(t.t) + '"></label>' +

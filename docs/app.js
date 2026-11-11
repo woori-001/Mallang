@@ -156,7 +156,7 @@
         try { art = await widgetArt(skin()); } catch (e) { art = null; }
         const sk = skin(), rec = window.M.recurring(st.events), now = new Date();
         const days = {}, list = {};
-        for (let mo = -3; mo <= 12; mo++) {   // 위젯에서 석 달 전 ~ 1년 뒤까지 넘겨 볼 수 있게
+        for (let mo = -12; mo <= 36; mo++) {   // 위젯에서 1년 전 ~ 3년 뒤까지 넘겨 볼 수 있게
           const y = now.getFullYear(), m = now.getMonth() + mo, n = new Date(y, m + 1, 0).getDate();
           for (let d = 1; d <= n; d++) {
             const k = dateKey(new Date(y, m, d));
@@ -167,8 +167,8 @@
             if (evs.length) list[k] = evs.slice().sort((a, b) => String(a.t || '').localeCompare(String(b.t || ''))).slice(0, 6).map((e) => ({ t: /^\d{2}:\d{2}$/.test(e.t) ? e.t : '', n: String(e.title || '(이름 없음)').slice(0, 40), c: EVENT_COLORS[e.c] || EVENT_COLORS.lav }));
           }
         }
-        const f0 = dateKey(new Date(now.getFullYear(), now.getMonth() - 3, 1)), t0 = dateKey(new Date(now.getFullYear(), now.getMonth() + 13, 0));
-        const tapes = window.M.decoTapes(st.deco, f0, t0).slice(0, 150).map((t) => ({ s: t.s, e: t.e, t: t.t, c: window.M.DECO_TAPES[t.c] }));
+        const f0 = dateKey(new Date(now.getFullYear(), now.getMonth() - 12, 1)), t0 = dateKey(new Date(now.getFullYear(), now.getMonth() + 37, 0));
+        const tapes = window.M.decoTapes(st.deco, f0, t0).slice(0, 400).map((t) => ({ s: t.s, e: t.e, t: t.t, c: window.M.DECO_TAPES[t.c] }));
         const stk = {};
         for (const v of Object.values(days)) if (v.s && !stk[v.s] && Object.keys(stk).length < 30) { try { stk[v.s] = stickerImg(v.s); } catch (e) { /* 그림 못 만들면 글자 스티커 */ } }
         if (art) art = { ...art, stk };

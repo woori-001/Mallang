@@ -46,7 +46,7 @@ public class CalendarWidget extends AppWidgetProvider {
         if (ACT_PREV.equals(a) || ACT_NEXT.equals(a) || ACT_TODAY.equals(a)) {
             SharedPreferences p = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
             int off = ACT_TODAY.equals(a) ? 0 : p.getInt("off", 0) + (ACT_NEXT.equals(a) ? 1 : -1);
-            off = Math.max(-3, Math.min(12, off));   // 웹앱이 넘겨주는 범위: 석 달 전 ~ 1년 뒤
+            off = Math.max(-12, Math.min(36, off));   // 웹앱이 넘겨주는 범위: 1년 전 ~ 3년 뒤
             p.edit().putInt("off", off).apply();
             refreshAll(ctx);
             return;
