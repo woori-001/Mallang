@@ -75,11 +75,18 @@ public class CalendarWidget extends AppWidgetProvider {
 
     static void draw(Context ctx, AppWidgetManager mgr, int wid) {
         SharedPreferences p = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        mgr.updateAppWidget(wid, build(ctx, p.getString("data", "{}"), p.getInt("off", 0)));
+        android.os.Bundle o = mgr.getAppWidgetOptions(wid);
+        int hDp = o != null ? o.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 0) : 0;
+        mgr.updateAppWidget(wid, build(ctx, p.getString("data", "{}"), p.getInt("off", 0), hDp > 0 && hDp < 330));
+    }
+
+    @Override
+    public void onAppWidgetOptionsChanged(Context ctx, AppWidgetManager mgr, int wid, android.os.Bundle opts) {
+        draw(ctx, mgr, wid);   // 위젯 크기를 바꾸면 다시 그림
     }
 
     /** 위젯 화면 만들기 (홈 화면 위젯과 미리보기 화면이 같이 씀) */
-    static RemoteViews build(Context ctx, String json, int off) {
+    static RemoteViews build(Context ctx, String json, int off, boolean compact) {
         JSONObject data = null;
         try { data = new JSONObject(json); } catch (Exception e) { data = new JSONObject(); }
         JSONObject skin = data.optJSONObject("skin");
@@ -159,7 +166,29 @@ public class CalendarWidget extends AppWidgetProvider {
         v.setInt(R.id.line, "setBackgroundColor", (sub & 0x00FFFFFF) | 0x33000000);
         JSONArray evs = list != null ? list.optJSONArray(sk) : null;
         int[] eids = { R.id.e0, R.id.e1, R.id.e2 };
-        for (int j = 0; j < 3; j++) {
+        if (compact) {
+            // 작은 위젯: 날짜 칸이 넉넉하도록 아래는 한 줄만 (예: 11월 11일 · 09:30 주간 회의 외 3개)
+            v.setViewVisibility(R.id.ehead, View.GONE);
+            v.setViewVisibility(R.id.e1, View.GONE);
+            v.setViewVisibility(R.id.e2, View.GONE);
+            v.setViewVisibility(R.id.e0, View.VISIBLE);
+            SpannableStringBuilder t = new SpannableStringBuilder();
+            t.append((show.get(Calendar.MONTH) + 1) + "/" + show.get(Calendar.DAY_OF_MONTH) + "  ");
+            t.setSpan(new StyleSpan(Typeface.BOLD), 0, t.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            JSONObject e = evs != null && evs.length() > 0 ? evs.optJSONObject(0) : null;
+            if (e == null) t.append(data.has("days") ? "일정이 없어요" : "앱을 한 번 열면 일정이 보여요");
+            else {
+                int s0 = t.length();
+                t.append("● ");
+                int dc; try { dc = Color.parseColor(e.optString("c", "#7466E4")); } catch (Exception x) { dc = acc; }
+                t.setSpan(new ForegroundColorSpan(dc), s0, s0 + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                String tm = e.optString("t", "");
+                t.append(tm.length() > 0 ? tm + " " : "").append(e.optString("n", ""));
+                if (evs.length() > 1) t.append(" 외 " + (evs.length() - 1) + "개");
+            }
+            v.setTextViewText(R.id.e0, t);
+            v.setTextColor(R.id.e0, e == null ? sub : ink);
+        } else for (int j = 0; j < 3; j++) {
             JSONObject e = evs != null && j < evs.length() ? evs.optJSONObject(j) : null;
             if (e == null) {
                 if (j == 0) {
