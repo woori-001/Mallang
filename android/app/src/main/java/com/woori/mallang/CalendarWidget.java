@@ -157,6 +157,12 @@ public class CalendarWidget extends AppWidgetProvider {
         if (art != null) {
             android.graphics.Bitmap bgb = drawBg(art, wDp, hDp);
             if (bgb != null) { v.setImageViewBitmap(R.id.bg, bgb); v.setInt(R.id.bg, "setColorFilter", 0); }
+            // 요일 줄 바탕 (앱에서 요일 줄에 바탕색이 있는 스킨만, 예: 드로잉 스킨의 까만 줄)
+            int wdBg = argb(art.optJSONArray("wdBg"), 0);
+            if (Color.alpha(wdBg) > 10 && Build.VERSION.SDK_INT >= 31) {
+                v.setInt(R.id.wrow, "setBackgroundResource", R.drawable.pill);
+                v.setColorStateList(R.id.wrow, "setBackgroundTintList", ColorStateList.valueOf(wdBg));
+            }
             JSONObject heads = art.optJSONObject("heads");
             android.graphics.Bitmap hb = heads != null ? img(heads.optString(String.valueOf(off), "")) : null;
             if (hb != null) { v.setImageViewBitmap(R.id.mimg, hb); artHead = true; }

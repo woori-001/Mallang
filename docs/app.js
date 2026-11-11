@@ -59,7 +59,7 @@
     const logoEl = document.querySelector('.brand img');
     const logoSrc = logoEl ? logoEl.getAttribute('src') : 'logo.png';
     const now = new Date();
-    const key = ['st5', prefs.skin, cn.fontFamily, cn.color, ce.color, logoSrc, now.getFullYear(), now.getMonth(), sk.sun, sk.sat, cw.color].join('|');
+    const key = ['st6', prefs.skin, cn.fontFamily, cn.color, ce.color, logoSrc, now.getFullYear(), now.getMonth(), sk.sun, sk.sat, cw.color].join('|');
     if (artCache.key === key) return artCache.art;
     try { await Promise.all([document.fonts.load('700 40px ' + cn.fontFamily, '0123456789'), document.fonts.load('600 20px ' + ce.fontFamily, 'NOVEMBER 2026'), document.fonts.load('600 20px ' + cw.fontFamily, '일월화수목금토')]); } catch (e) { /* 글꼴을 못 불러오면 기본 글꼴 */ }
     const logo0 = await loadImg(logoSrc);
@@ -90,7 +90,8 @@
       const cv = document.createElement('canvas'), c = cv.getContext('2d');
       cv.width = 16 * S; cv.height = 15 * S;
       c.font = cw.fontWeight + ' ' + 11.5 * S + 'px ' + cw.fontFamily; c.textAlign = 'center'; c.textBaseline = 'middle';
-      c.fillStyle = i === 0 ? sk.sun : i === 6 ? sk.sat : cw.color;
+      const sp = document.querySelectorAll('.wdays span')[i];
+      c.fillStyle = sp ? getComputedStyle(sp).color : i === 0 ? sk.sun : i === 6 ? sk.sat : cw.color;   // 앱 요일 줄 글자색 그대로
       c.fillText(t, 8 * S, 8 * S);
       return cv.toDataURL('image/png');
     });
@@ -122,7 +123,7 @@
       if (col && col[3] > 0.05 && nums.length >= 4 && nums[2] === 0 && nums[3] > 0) { line = { c: col, w: Math.min(3, nums[3]) }; break; }
     }
     const bgShown = getComputedStyle(document.querySelector('.bg')).display !== 'none';
-    const art = { base: rgba(sk.base) || [238, 240, 251, 1], b: bgShown ? sk.b : null, card: rgba(cc.backgroundColor) || [255, 255, 255, 0.6], line, dark: !!sk.dark, skin: prefs.skin || 'lav', heads, wdays, bunny };
+    const art = { base: rgba(sk.base) || [238, 240, 251, 1], b: bgShown ? sk.b : null, card: rgba(cc.backgroundColor) || [255, 255, 255, 0.6], line, dark: !!sk.dark, skin: prefs.skin || 'lav', wdBg: rgba(getComputedStyle(document.querySelector('.wdays')).backgroundColor), heads, wdays, bunny };
     artCache = { key, art };
     return art;
   }
