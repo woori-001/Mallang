@@ -250,7 +250,7 @@ public class CalendarWidget extends AppWidgetProvider {
                 v.setTextViewTextSize(pid0, SP, 8.5f * sc); v.setViewLayoutHeight(pid0, tapeH, DIP);
                 v.setTextViewTextSize(res.getIdentifier("h" + i, "id", pkg), SP, 8.5f * sc);
                 v.setTextViewTextSize(res.getIdentifier("m" + i, "id", pkg), SP, 8.5f * sc);
-                v.setViewLayoutWidth(sid0, 24 * sc, DIP); v.setViewLayoutHeight(sid0, 24 * sc, DIP);
+                v.setViewLayoutWidth(sid0, 19 * sc, DIP); v.setViewLayoutHeight(sid0, 19 * sc, DIP);   // 날짜 숫자를 가리지 않게 칸 모서리에
             }
             int gid = res.getIdentifier("g" + i, "id", pkg), pid = res.getIdentifier("p" + i, "id", pkg), sid = res.getIdentifier("s" + i, "id", pkg);
             v.setViewVisibility(gid, View.GONE);
