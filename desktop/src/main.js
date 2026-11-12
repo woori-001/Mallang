@@ -899,9 +899,14 @@ function sidePlanner(open) { if (side && !side.isDestroyed()) side.webContents.s
 function setupPlanner(win) {
   plannerWin = win;
   win.once('ready-to-show', () => { if (!win.isDestroyed()) { win.show(); win.focus(); sidePlanner(true); } });
-  win.on('closed', () => { if (plannerWin === win) plannerWin = null; sidePlanner(false); });
+  win.on('closed', () => {
+    if (plannerWin === win) plannerWin = null;
+    sidePlanner(false);
+    if (plwBack && !quitting) { plwBack = false; if (store.settings.showPlan) openPlW(); }   // 위젯에서 '크게'로 왔으면 접을 때 위젯으로 돌아감
+  });
 }
 let plannerGoKey = null;   // 위젯에서 날짜를 눌러 열 때 보여 줄 주
+let plwBack = false;        // 위젯 → 큰 플래너로 바꿨는지 (접으면 다시 위젯으로)
 function togglePlanner(force) {
   const isOpen = plannerWin && !plannerWin.isDestroyed();
   const want = force == null ? !isOpen : !!force;
@@ -927,9 +932,16 @@ function cleanWeek(w) {
 ipcMain.on('planner:toggle', (e, force) => togglePlanner(force));
 ipcMain.on('planner:openAt', (e, key) => {
   if (typeof key !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(key)) return;
+  if (plW && !plW.isDestroyed()) { plwBack = true; closePlW(); }   // 위젯은 잠깐 넣어 둠 (설정은 켜진 채로)
   if (plannerWin && !plannerWin.isDestroyed()) { plannerWin.webContents.send('cmd', { type: 'plGo', key }); plannerWin.focus(); return; }
   plannerGoKey = key;
   togglePlanner(true);
+});
+// 큰 플래너 → 바탕화면 위젯으로 작게 띄우기
+ipcMain.on('planner:float', () => {
+  plwBack = false;
+  if (store.settings.showPlan) openPlW(); else updateSettings({ showPlan: true });
+  togglePlanner(false);
 });
 ipcMain.handle('planner:get', (e, key) => {
   if (typeof key !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(key)) return null;

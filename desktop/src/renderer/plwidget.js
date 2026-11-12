@@ -7,7 +7,7 @@
   const MAX_SHOW = 6;   // 칸마다 보여 줄 할 일 수 (넘으면 +N)
   const w = $('w');
   window.M.guardHTML($('hdr'), $('tl'), $('body'));
-  $('prev').innerHTML = ICONS.left; $('next').innerHTML = ICONS.right;
+  $('prev').innerHTML = ICONS.left; $('next').innerHTML = ICONS.right; $('hide').innerHTML = ICONS.x;
   let S = null, W = null, adding = -1, saveT = 0;
   const mondayOf = (d) => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
   let monday = mondayOf(new Date());
@@ -105,6 +105,7 @@
   $('open').addEventListener('click', () => api.plannerOpenAt(dateKey(monday)));
   const go = (n) => { if (saveT) { clearTimeout(saveT); saveT = 0; api.plannerSet(dateKey(monday), W); } adding = -1; monday.setDate(monday.getDate() + n * 7); monday = new Date(monday); load(); };
   $('prev').addEventListener('click', () => go(-1));
+  $('hide').addEventListener('click', () => api.setSettings({ showPlan: false }));
   $('next').addEventListener('click', () => go(1));
   $('thisWeek').addEventListener('click', () => { adding = -1; monday = mondayOf(new Date()); load(); });
 

@@ -454,6 +454,7 @@
   $('next').addEventListener('click', () => { const d = new Date(monday); d.setDate(d.getDate() + 7); go(d); });
   $('today').addEventListener('click', () => go(mondayOf(new Date())));
   $('close').addEventListener('click', () => { if (saveT) flush(); api.plannerToggle(false); });
+  $('tFloat').addEventListener('click', () => { if (saveT) flush(); api.plannerFloat(); });
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
     if (placing) { stopPlace(); return; }

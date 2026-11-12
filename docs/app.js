@@ -852,7 +852,7 @@
     const sd = new Date(p[0], p[1] - 1, p[2]);
     const selHol = window.M.holiday(sel);
     $('selLabel').innerHTML = (sd.getMonth() + 1) + '월 ' + sd.getDate() + '일 ' + WD[sd.getDay()] + '요일' + (selHol ? '<span class="holtag">' + esc(selHol) + '</span>' : '');
-    if (!$('evList').contains(document.activeElement)) renderEvents();
+    if (!$('evList').contains(document.activeElement) && palI < 0) renderEvents();   // 색 판이 열려 있으면 목록은 그대로 (깜빡임 방지)
   }
   // ───────── 달력 꾸미기 (관리자 베타): 날짜 배경색 · 스티커 · 마스킹테이프 ─────────
   const decoAllowed = () => !!(st.shared && st.shared.admin);
@@ -977,7 +977,11 @@
     const b = e.target.closest('.sw'); if (!b) return;
     const ev = (st.events[sel] || [])[palI];
     if (!ev || !EVENT_COLORS[b.dataset.c]) return;
-    ev.c = b.dataset.c; markEvent(sel); renderCal(); renderEvents();
+    ev.c = b.dataset.c; markEvent(sel); renderCal();
+    // 다시 그리지 않고 바뀐 곳만 고침 (깜빡임 방지)
+    colorSheet.querySelectorAll('.sw.on').forEach((x) => x.classList.remove('on')); b.classList.add('on');
+    const dot = colorSheet.querySelector('.csDot'); if (dot) dot.style.background = EVENT_COLORS[ev.c];
+    const rowDot = $('evList').querySelector('.ev[data-i="' + palI + '"] .evc'); if (rowDot) rowDot.style.background = EVENT_COLORS[ev.c];
   });
   document.addEventListener('pointerdown', (e) => {
     if (palI < 0 || e.target.closest('.evSheet, .evc')) return;

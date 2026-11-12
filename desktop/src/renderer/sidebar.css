@@ -155,7 +155,8 @@ body.open .tabArrow { transform: rotate(180deg); }
 .ev { display: flex; align-items: center; gap: 6px; padding: 6px 4px 6px 10px; border-radius: 14px; background: rgba(var(--glass), .55); animation: fade .35s var(--ease); flex: none; }
 .evc { width: 14px; height: 14px; border-radius: 50%; border: none; padding: 0; flex: none; transition: transform .25s var(--spring), background .3s ease; }
 .evc:hover { transform: scale(1.2); }
-.evpal { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 12px; background: rgba(var(--glass), .78); box-shadow: 0 3px 10px rgba(70, 60, 150, .10); animation: pop .3s var(--ease); }
+.evpal { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 12px; background: rgba(var(--glass), .78); box-shadow: 0 3px 10px rgba(70, 60, 150, .10); }
+.evpal.pop { animation: pop .3s var(--ease); }
 .evpal .sws { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; justify-items: center; }
 .evpal .sw { width: 100%; max-width: 20px; aspect-ratio: 1; height: auto; border-radius: 50%; border: none; padding: 0; box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .12), inset 0 2px 0 rgba(255, 255, 255, .28); transition: transform .2s var(--spring); }
 .evpal .sw:hover { transform: scale(1.15); }

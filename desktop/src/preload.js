@@ -62,6 +62,7 @@ contextBridge.exposeInMainWorld('api', {
   plwSize: (h) => ipcRenderer.send('plw:size', h),
   plwFocus: () => ipcRenderer.send('plw:focus'),
   plannerOpenAt: (key) => ipcRenderer.send('planner:openAt', key),
+  plannerFloat: () => ipcRenderer.send('planner:float'),
   hideAll: () => ipcRenderer.send('memo:hideAll'),
   arrangePlan: (mode) => ipcRenderer.invoke('arrange:plan', mode),
   arrangeDo: (mode, fold) => ipcRenderer.invoke('arrange:do', mode, !!fold),

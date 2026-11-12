@@ -631,10 +631,9 @@
     const selHol = window.M.holiday(sel);
     $('selLabel').innerHTML = (sd.getMonth() + 1) + '월 ' + sd.getDate() + '일 ' + WD[sd.getDay()] + '요일' + (selHol ? '<span class="holtag">' + esc(selHol) + '</span>' : '');
     $('calToggle').setAttribute('aria-pressed', String(!!S.settings.showCal));
-    $('plToggle').setAttribute('aria-pressed', String(!!S.settings.showPlan));
     const tt = $('todayToggle');
     tt.setAttribute('aria-pressed', String(!!S.settings.showToday));
-    if (evKey !== sel || !$('evList').contains(document.activeElement)) {
+    if (evKey !== sel || (!$('evList').contains(document.activeElement) && palI < 0)) {
       evKey = sel;
       evList = (S.events[sel] || []).map((x) => ({ ...x }));
       renderEvents();
@@ -835,11 +834,15 @@
       return;
     }
     if (b.dataset.act === 'pick') {
-      if (palK === sel && evList[palI] && EVENT_COLORS[b.dataset.c]) evList[palI].c = b.dataset.c;
-      renderEvents(); saveEvents(true); return;
+      if (!(palK === sel && evList[palI] && EVENT_COLORS[b.dataset.c])) return;
+      evList[palI].c = b.dataset.c;
+      // 다시 그리지 않고 바뀐 곳만 고침 (깜빡임 방지)
+      b.parentNode.querySelectorAll('.sw.on').forEach((x) => x.classList.remove('on')); b.classList.add('on');
+      const rowDot = $('evList').querySelector('.ev[data-i="' + palI + '"] .evc'); if (rowDot) rowDot.style.background = EVENT_COLORS[evList[palI].c];
+      saveEvents(true); return;
     }
     const i = Number(b.closest('.ev').dataset.i);
-    if (b.dataset.act === 'color') { palI = palI === i && palK === sel ? -1 : i; palK = sel; renderEvents(); const pal = document.querySelector('.evpal'); if (pal) pal.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); return; }
+    if (b.dataset.act === 'color') { palI = palI === i && palK === sel ? -1 : i; palK = sel; renderEvents(); const pal = document.querySelector('.evpal'); if (pal) { pal.classList.add('pop'); pal.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } return; }
     if (b.dataset.act === 'del') {
       const del = () => { palI = -1; evList.splice(i, 1); renderEvents(); saveEvents(true); };
       if (evList[i].r) askConfirm('반복 일정을 지울까요?', '"' + (evList[i].title || '이름 없음') + '" ' + window.M.REPEAT_NAME[evList[i].r] + ' 반복이 모두 지워져요.', '모두 지우기').then((ok) => { if (ok) del(); });
@@ -863,7 +866,6 @@
   $('evList').addEventListener('focusout', () => { if (evSaveT) saveEvents(true); });
   $('todayToggle').addEventListener('click', () => api.setSettings({ showToday: !S.settings.showToday }));
   $('calToggle').addEventListener('click', () => api.setSettings({ showCal: !S.settings.showCal }));
-  $('plToggle').addEventListener('click', () => api.setSettings({ showPlan: !S.settings.showPlan }));
 
 
   // ───────── 알람 (관리자 미리보기) ─────────
