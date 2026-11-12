@@ -114,13 +114,14 @@ jobs:
             adb shell content insert --uri content://com.android.calendar/events --bind calendar_id:i:1 --bind title:s:팀회의 --bind dtstart:l:$(( ($(date +%s) + 86400) * 1000 )) --bind dtend:l:$(( ($(date +%s) + 90000) * 1000 )) --bind eventTimezone:s:Asia/Seoul ; adb shell content insert --uri content://com.android.calendar/events --bind calendar_id:i:1 --bind title:s:종일행사 --bind allDay:i:1 --bind dtstart:l:$(( ($(date -u -d 'today 00:00' +%s) + 172800) * 1000 )) --bind dtend:l:$(( ($(date -u -d 'today 00:00' +%s) + 345600) * 1000 )) --bind eventTimezone:s:UTC ; echo ev-added
             adb shell content query --uri content://com.android.calendar/calendars --projection _id:calendar_displayName 2>&1 | head -5 ; adb shell content query --uri content://com.android.calendar/events --projection _id:title:calendar_id 2>&1 | head -5 ; adb shell dumpsys package com.woori.mallang | grep -i "READ_CALENDAR" | head -3
             adb logcat -c ; adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --ez calTest true ; sleep 3 ; adb logcat -d -s MallangCal | tail -5
+            adb logcat -c ; adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es b64 e30= --ei h 400 ; sleep 3 ; adb exec-out screencap -p > preview-empty.png ; if adb logcat -d | grep -q "FATAL EXCEPTION"; then echo "::error::빈 데이터에서 위젯이 멈춤"; adb logcat -d | grep -A15 "FATAL EXCEPTION" | head -30; exit 1; fi
             adb shell am start -S -W -n com.woori.mallang/.MainActivity --ez testUpdate true ; sleep 6 ; adb exec-out screencap -p > preview-update.png
             adb shell appops set com.woori.mallang REQUEST_INSTALL_PACKAGES allow ; python3 android/preview/tap.py "지금 받기" ; sleep 25 ; adb exec-out screencap -p > preview-install.png
             adb shell input keyevent KEYCODE_BACK ; sleep 1 ; adb shell input keyevent KEYCODE_BACK ; sleep 1
             adb shell am start -S -W -n com.woori.mallang/.PreviewActivity --es file lav-a45.json --ei h 400 --es wall 3D6E9E ; sleep 4 ; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null ; sleep 1 ; adb exec-out screencap -p > preview-alpha.png
             ls -la preview-*.png
       - name: 캡처 올리기
-        run: gh release upload android-test preview-lav.png preview-next.png preview-midnight.png preview-draw.png preview-big.png preview-bigpeach.png preview-small.png preview-alpha.png preview-update.png preview-install.png --repo "$GITHUB_REPOSITORY" --clobber
+        run: gh release upload android-test preview-lav.png preview-next.png preview-midnight.png preview-draw.png preview-big.png preview-bigpeach.png preview-small.png preview-alpha.png preview-update.png preview-install.png preview-empty.png --repo "$GITHUB_REPOSITORY" --clobber
       - name: 실패 원인 남기기
         if: failure()
         working-directory: android

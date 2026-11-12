@@ -795,7 +795,11 @@
   $('grid').addEventListener('click', (e) => {
     const b = e.target.closest('.day');
     if (!b) return;
-    if (evSaveT) saveEvents(true);
+    // 이름도 시간도 없이 빈 채로 남은 일정(＋만 누르고 안 쓴 것)은 다른 날로 옮겨 가면 치움
+    if (b.dataset.k !== sel && evKey === sel && evList.some((x) => !String(x.title || '').trim() && !x.t && !x.r)) {
+      evList = evList.filter((x) => String(x.title || '').trim() || x.t || x.r);
+      saveEvents(true);
+    } else if (evSaveT) saveEvents(true);
     sel = b.dataset.k;
     renderCal();
   });

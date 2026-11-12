@@ -2863,6 +2863,8 @@ async function cloudSignIn(mode, username, password) {
     const k = await Cloud.deriveKeys(username, password);
     if (mode === 'signup') await Cloud.signup(username, k.secret);
     const session = await Cloud.login(username, k.secret);
+    // 로그인이 풀린 뒤 다른 아이디로 들어오면: 앞 사람 메모가 새 아이디 서버로 올라가지 않게 이 PC 기록부터 비움
+    if (store.cloud && store.cloud.username && store.cloud.username !== username) clearLocalUserData();
     const box = boxKey(k.keyRaw);
     store.cloud = { username, access: session.access, refresh: session.refresh, exp: session.exp, userId: session.userId, keyBox: box.box, keyType: box.type, cursor: null };
     holder.session = session;
@@ -2874,7 +2876,8 @@ async function cloudSignIn(mode, username, password) {
     store.planner.meta = {};
     for (const k2 of Object.keys(store.planner.weeks)) store.planner.meta[k2] = { mt: 0, dirty: true, merge: true };
     store.planner.stdMeta = { mt: 1, dirty: true };
-    store.deco = {}; store.decoMeta = {};   // 꾸미기는 서버 것을 받음
+    // 꾸미기: 이 PC에 남은 것도 올려 봄 (서버가 더 새것이면 서버가 받아 주지 않고 새것을 돌려줌)
+    for (const mk of Object.keys(store.decoMeta)) store.decoMeta[mk] = { mt: store.decoMeta[mk].mt || 1, dirty: true };
     if (store.contacts) store.contacts.dirty = true;
     // 배치: 다른 PC에서 정한 배치를 먼저 받고, 이 PC에서 옮긴 메모는 그 뒤에 올림
     store.layoutSync = { mt: 0, dirty: false, groupsT: 0, settingsT: 0 };
@@ -2908,6 +2911,15 @@ async function cloudSignOut(force) {
     if (!m.uid || m.deleting) continue;
     store.layoutCache[m.uid] = { x: m.x, y: m.y, w: m.w, h: m.h, folded: !!m.folded, layer: m.layer, hidden: !!m.hidden, ox: m.ox, oy: m.oy, group: m.group };
   }
+  clearLocalUserData();
+  cloudLogout(true);
+  saveSecure();
+  broadcast();
+  return { ok: true };
+}
+
+// 이 PC에 있는 사람별 기록(메모·일정·꾸미기·플래너) 비우기 — 서버 기록은 그대로
+function clearLocalUserData() {
   for (const m of store.memos) closeMemoWin(m.id);
   store.memos = [];
   store.trash = [];
@@ -2921,10 +2933,6 @@ async function cloudSignOut(force) {
   if (plannerWin && !plannerWin.isDestroyed()) togglePlanner(false);
   store.planner.weeks = {};
   store.planner.meta = {};
-  cloudLogout(true);
-  saveSecure();
-  broadcast();
-  return { ok: true };
 }
 
 function cloudLogout(keepName) {

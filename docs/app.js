@@ -6,6 +6,8 @@
   const $ = (id) => document.getElementById(id);
   const TRASH_DAYS = 7, DAY = 86400000;
   const LS_STATE = 'mallang.state.v1', LS_SESSION = 'mallang.session.v1', LS_PREFS = 'mallang.prefs.v1';
+  // 로그인이 저절로 풀렸을 때(세션 만료) 아직 못 올린 변경을 지우지 않고 남겨 둔 주인 아이디
+  const LS_KEEP = 'mallang.keep.v1';
   const MONTH_EN = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
   const WD = ['일', '월', '화', '수', '목', '금', '토'];
   const EV_ORDER = ['lav', 'mint', 'pink', 'sky'];
@@ -108,12 +110,6 @@
   // src 를 w×h 크기로 그린 뒤 둘레 edge 만큼 하얀 테두리 → { cv, pad } (pad = 그림이 안쪽으로 들어간 만큼)
   // 그림자: 까만색 말고 옅은 회색 (모든 스킨 같음)
   let stShadow = 'rgba(110, 110, 118, .32)';   // 모든 스킨 같은 옅은 회색 그림자
-  function setStickerShadow(hex) {
-    const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
-    if (!m) return;
-    const n = parseInt(m[1], 16);
-    stShadow = 'rgba(' + (n >> 16 & 255) + ', ' + (n >> 8 & 255) + ', ' + (n & 255) + ', .24)';
-  }
   function stickerize(src, w, h, edge, tilt) {
     const rad = tilt * Math.PI / 180;
     const bw = w + edge * 2 + 8, bh = h + edge * 2 + 10;
@@ -257,7 +253,11 @@
       session = { username: u, ...s };
       localStorage.setItem(LS_SESSION, JSON.stringify(session));
       holder.session = s;
-      st = blankState();
+      // 로그인이 저절로 풀렸던 같은 사람이 다시 들어오면, 남겨 둔 변경을 그대로 이어서 올림 (다른 사람이면 새로 시작)
+      let kept = null;
+      try { kept = localStorage.getItem(LS_KEEP); } catch (e2) { kept = null; }
+      st = kept === u ? Object.assign(blankState(), loadJSON(LS_STATE, {})) : blankState();
+      try { localStorage.removeItem(LS_KEEP); } catch (e2) { /* 무시 */ }
       saveStateNow();
       view = 'memos';
       $('aPw').value = ''; $('aPw2').value = '';
@@ -285,9 +285,22 @@
     const name = session && session.username;
     session = null;
     clearTimeout(saveT);
+    // 로그인이 저절로 풀린 경우(silent): 아직 서버에 못 올린 변경이 있으면 지우지 않고 남겨 둠 → 같은 아이디로 다시 로그인하면 이어서 올라감
+    if (silent && name && dirtyList().length) {
+      saveStateNow();
+      try { localStorage.setItem(LS_KEEP, name); } catch (e) { /* 무시 */ }
+      localStorage.removeItem(LS_SESSION);
+      st = blankState();
+      view = 'memos';
+      $('aUser').value = name;
+      showAuth();
+      $('aMsg').textContent = '로그인이 풀렸어요. 다시 로그인하면 아직 못 올린 변경도 그대로 올라가요.';
+      return;
+    }
     st = blankState();
     localStorage.removeItem(LS_SESSION);
     localStorage.removeItem(LS_STATE);
+    try { localStorage.removeItem(LS_KEEP); } catch (e) { /* 무시 */ }
     view = 'memos';
     $('aUser').value = name || '';
     showAuth();
@@ -939,7 +952,16 @@
       '</div>').join('');
     if (focusIdx != null) { const inp = $('evList').querySelector('.ev[data-i="' + focusIdx + '"] .evn'); if (inp) inp.focus(); }
   }
-  $('grid').addEventListener('click', (e) => { const b = e.target.closest('.day'); if (!b) return; sel = b.dataset.k; renderCal(); });
+  // 이름도 시간도 없이 빈 채로 남은 일정(＋만 누르고 안 쓴 것)은 다른 날로 옮겨 가면 치움
+  function pruneBlank(k) {
+    const l = st.events[k];
+    if (!l) return;
+    const n = l.filter((e) => String(e.title || '').trim() || e.t || e.r);
+    if (n.length === l.length) return;
+    if (n.length) st.events[k] = n; else delete st.events[k];
+    markEvent(k);
+  }
+  $('grid').addEventListener('click', (e) => { const b = e.target.closest('.day'); if (!b) return; if (b.dataset.k !== sel) pruneBlank(sel); sel = b.dataset.k; renderCal(); });
   $('calPrev').onclick = () => { if (calM === 0) { calM = 11; calY--; } else calM--; renderCal(); };
   $('calNext').onclick = () => { if (calM === 11) { calM = 0; calY++; } else calM++; renderCal(); };
   $('calToday').onclick = () => { const d = new Date(); calY = d.getFullYear(); calM = d.getMonth(); sel = dateKey(d); renderCal(); };
@@ -1545,7 +1567,7 @@
   let toastT = null;
   function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2200); }
 
-  document.querySelectorAll('.tab').forEach((b) => { b.querySelector('.ti').innerHTML = I[b.querySelector('.ti').dataset.icon]; b.onclick = () => { view = b.dataset.view; render(); window.scrollTo({ top: 0 }); }; });
+  document.querySelectorAll('.tab').forEach((b) => { b.querySelector('.ti').innerHTML = I[b.querySelector('.ti').dataset.icon]; b.onclick = () => { if (view === 'cal' && b.dataset.view !== 'cal') pruneBlank(sel); view = b.dataset.view; render(); window.scrollTo({ top: 0 }); }; });
   $('fab').innerHTML = I.plus;
   $('syncBtn').innerHTML = I.sync;
   $('syncBtn').onclick = () => scheduleSync(0);
