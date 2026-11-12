@@ -142,6 +142,14 @@
     const st = stickerize(t, Z, Z, 6, (Math.abs(h) % 2 ? 1 : -1) * (6 + Math.abs(h) % 5));
     return (stkCache[ck] = st.cv.toDataURL('image/png'));
   }
+  // 위젯 칸 글자: 시간 있는 일정은 앞에 '19시30분'처럼 (제목에 이미 시간이 있으면 그대로)
+  function widgetName(e) {
+    const n = String(e.title || '(이름 없음)');
+    const m = /^(\d{2}):(\d{2})$/.exec(e.t || '');
+    if (!m || /^\s*\d{1,2}\s*(시|:)/.test(n)) return n.slice(0, 40);
+    const h = +m[1], mi = +m[2];
+    return (h + '시' + (mi ? mi + '분' : '') + ' ' + n).slice(0, 40);
+  }
   function pushWidget() {
     if (!window.MallangAndroid || !window.MallangAndroid.saveWidget) return;
     clearTimeout(widgetT);
@@ -159,7 +167,7 @@
             const hol = window.M.holiday(k);
             const dd = window.M.decoDay(st.deco, k);
             if (evs.length || hol || dd.bg || dd.stk) days[k] = { c: evs.slice(0, 3).map((e) => EVENT_COLORS[e.c] || EVENT_COLORS.lav), h: hol || '', bg: dd.bg, s: dd.stk };
-            if (evs.length) list[k] = evs.slice().sort((a, b) => String(a.t || '').localeCompare(String(b.t || ''))).slice(0, 6).map((e) => ({ t: /^\d{2}:\d{2}$/.test(e.t) ? e.t : '', n: String(e.title || '(이름 없음)').slice(0, 40), c: EVENT_COLORS[e.c] || EVENT_COLORS.lav }));
+            if (evs.length) list[k] = evs.slice().sort((a, b) => String(a.t || '').localeCompare(String(b.t || ''))).slice(0, 6).map((e) => ({ t: '', n: widgetName(e), c: EVENT_COLORS[e.c] || EVENT_COLORS.lav }));
           }
         }
         const f0 = dateKey(new Date(now.getFullYear(), now.getMonth() - 12, 1)), t0 = dateKey(new Date(now.getFullYear(), now.getMonth() + 37, 0));
