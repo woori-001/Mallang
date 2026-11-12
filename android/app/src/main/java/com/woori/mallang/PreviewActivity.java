@@ -13,6 +13,13 @@ public class PreviewActivity extends Activity {
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
+        if (getIntent().getBooleanExtra("calTest", false)) {   // 확인용: 휴대폰 캘린더 읽기 결과를 로그로
+            android.util.Log.i("MallangCal", "cals " + PhoneCalendar.calendars(this));
+            long now = System.currentTimeMillis();
+            android.util.Log.i("MallangCal", "events " + PhoneCalendar.events(this, "", now - 40L * 86400000, now + 400L * 86400000));
+            finish();
+            return;
+        }
         String json = getIntent().getStringExtra("data");
         String b64 = getIntent().getStringExtra("b64");
         if (b64 != null) json = new String(android.util.Base64.decode(b64, android.util.Base64.DEFAULT), java.nio.charset.StandardCharsets.UTF_8);
