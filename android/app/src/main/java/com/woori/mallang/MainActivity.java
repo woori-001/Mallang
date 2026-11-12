@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
                 return true;
             }
         });
-        web.addJavascriptInterface(new Bridge(getApplicationContext()), "MallangAndroid");
+        web.addJavascriptInterface(new Bridge(this), "MallangAndroid");
 
         updater = new Updater(this);
         if (getIntent().getBooleanExtra("testUpdate", false)) updater.ask(0);   // 확인용: 새 버전 알림 창 모습
@@ -100,10 +100,37 @@ public class MainActivity extends Activity {
         else super.onBackPressed();
     }
 
+    /** 휴대폰 캘린더 읽기 허락 요청 → 결과를 웹앱에 알려줌 */
+    void askCalendar() {
+        if (checkSelfPermission(android.Manifest.permission.READ_CALENDAR) == android.content.pm.PackageManager.PERMISSION_GRANTED) { calResult(true); return; }
+        requestPermissions(new String[] { android.Manifest.permission.READ_CALENDAR }, 7);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int req, String[] perms, int[] res) {
+        super.onRequestPermissionsResult(req, perms, res);
+        if (req == 7) calResult(res.length > 0 && res[0] == android.content.pm.PackageManager.PERMISSION_GRANTED);
+    }
+
+    void calResult(boolean ok) { web.evaluateJavascript("window.mallangCalPerm&&mallangCalPerm(" + ok + ")", null); }
+
     /** 웹앱 → 위젯: 일정 요약(JSON)을 휴대폰 안에만 저장하고 위젯을 다시 그림 */
     static class Bridge {
         private final Context ctx;
-        Bridge(Context c) { ctx = c; }
+        private final MainActivity act;
+        Bridge(MainActivity a) { act = a; ctx = a.getApplicationContext(); }
+
+        /** 휴대폰 캘린더: 허락 요청 (결과는 window.mallangCalPerm(true/false) 로) */
+        @JavascriptInterface
+        public void askCalendar() { act.runOnUiThread(act::askCalendar); }
+
+        /** 휴대폰 캘린더 목록 (JSON) */
+        @JavascriptInterface
+        public String calendars() { return PhoneCalendar.calendars(ctx); }
+
+        /** 휴대폰 캘린더 일정 (반복 일정은 날짜마다 펼쳐서, JSON) */
+        @JavascriptInterface
+        public String calendarEvents(String ids, double from, double to) { return PhoneCalendar.events(ctx, ids, (long) from, (long) to); }
 
         @JavascriptInterface
         public void saveWidget(String json) {

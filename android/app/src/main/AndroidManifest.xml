@@ -3,6 +3,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- 앱 안에서 새 버전 받아 설치 (설치 확인은 사용자가 직접 누름) -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- 갤럭시(휴대폰) 캘린더 일정을 말랑메모로 가져오기 (읽기만, 사용자가 버튼을 눌렀을 때만) -->
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
     <application
         android:label="말랑메모"
         android:icon="@mipmap/ic_launcher"

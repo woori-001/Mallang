@@ -744,6 +744,7 @@
     $('installGo').disabled = installBusy;
     const card = $('installSet').closest('.card');
     card.hidden = mode === 'none' && !installed;
+    if (card.previousElementSibling && card.previousElementSibling.tagName === 'H2') card.previousElementSibling.hidden = card.hidden;   // 제목만 남지 않게
     $('installSet').textContent = installed || mode === 'installed' ? '이미 설치돼 있어요' : '설치하기';
     $('installSet').disabled = installed || mode === 'installed';
   }
@@ -1225,6 +1226,64 @@
   $('calFont').addEventListener('change', (e) => { prefs.calFont = e.target.value; savePrefs(); applyPrefs(); });
   const setCs = (v) => { prefs.calScale = Math.min(150, Math.max(70, v)); savePrefs(); applyPrefs(); $('calScale').value = prefs.calScale; $('calScaleV').textContent = prefs.calScale + '%'; };
   $('calScale').addEventListener('input', (e) => setCs(Number(e.target.value)));
+  // ───────── 갤럭시(휴대폰) 캘린더 일정 가져오기 (안드로이드 앱에서만): 읽어서 복사만 함, 휴대폰 캘린더는 안 바꿈 ─────────
+  $('calImport').addEventListener('click', () => {
+    const A = window.MallangAndroid;
+    if (!A || !A.askCalendar) { toast('앱을 최신 버전으로 업데이트하면 쓸 수 있어요'); return; }
+    window.mallangCalPerm = (ok) => { if (ok) calImportSheet(); else toast('캘린더 읽기를 허락해야 가져올 수 있어요'); };
+    A.askCalendar();
+  });
+  const hexRgb = (h) => { const n = parseInt(String(h).replace('#', ''), 16) || 0; return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+  // 휴대폰 일정 색 → 말랑메모 일정 색 4가지 중 가장 가까운 것
+  function nearEvColor(hex) {
+    const [r, g, b] = hexRgb(hex);
+    let best = 'lav', bd = 1e9;
+    for (const k of EV_ORDER) { const [R, G, B] = hexRgb(EVENT_COLORS[k]); const d = (r - R) ** 2 + (g - G) ** 2 + (b - B) ** 2; if (d < bd) { bd = d; best = k; } }
+    return best;
+  }
+  function calImportSheet() {
+    let cals = [];
+    try { cals = JSON.parse(window.MallangAndroid.calendars()) || []; } catch (e) { cals = []; }
+    if (!cals.length) { toast('휴대폰 캘린더를 찾지 못했어요'); return; }
+    const skip = (c) => /공휴일|holiday|대한민국|korea/i.test(c.name);   // 공휴일은 말랑메모가 이미 보여줘서 빼 둠
+    openSheet('📅 갤럭시 캘린더 일정 가져오기',
+      '<div class="ciList">' + cals.map((c) => '<label class="ciRow"><input type="checkbox" value="' + c.id + '"' + (c.visible && !skip(c) ? ' checked' : '') + '><i class="dsw" style="background:' + esc(c.color) + '"></i><span>' + esc(c.name || '(이름 없음)') + '<small>' + esc(c.account) + '</small></span></label>').join('') + '</div>' +
+      '<div class="dsRow"><span>기간</span><select id="ciRange"><option value="1,12">지난 1달 ~ 앞으로 1년</option><option value="0,12">오늘부터 앞으로 1년</option><option value="12,24">지난 1년 ~ 앞으로 2년</option></select></div>' +
+      '<div class="dsTip">이미 같은 날·같은 시간·같은 이름 일정이 있으면 건너뛰어요. 여러 번 눌러도 겹치지 않아요.</div>',
+      '<button type="button" class="mNo" data-x>취소</button><button type="button" class="mYes ok" data-act="ok">가져오기</button>');
+    $('dsBody').onclick = null;
+    $('dsBtns').querySelector('[data-act=ok]').onclick = () => {
+      const ids = [...$('dsBody').querySelectorAll('.ciList input:checked')].map((x) => x.value);
+      if (!ids.length) { toast('가져올 캘린더를 골라 주세요'); return; }
+      const [back, ahead] = $('ciRange').value.split(',').map(Number);
+      const now = new Date();
+      const from = new Date(now.getFullYear(), now.getMonth() - back, back ? 1 : now.getDate()).getTime();
+      const to = new Date(now.getFullYear(), now.getMonth() + ahead + 1, 1).getTime();
+      let evs = [];
+      try { evs = JSON.parse(window.MallangAndroid.calendarEvents(ids.join(','), from, to)) || []; } catch (e) { evs = []; }
+      let added = 0, dup = 0;
+      const touched = new Set();
+      for (const e of evs) {
+        const title = String(e.title || '').trim().slice(0, 200) || '(이름 없음)';
+        const c = nearEvColor(e.color);
+        // 여러 날 일정은 날마다 (최대 31일)
+        const d0 = new Date(e.d + 'T00:00:00'), d1 = new Date((e.e && e.e >= e.d ? e.e : e.d) + 'T00:00:00');
+        for (let d = new Date(d0), n = 0; d <= d1 && n < 31; d.setDate(d.getDate() + 1), n++) {
+          const k = dateKey(d);
+          const list = st.events[k] || [];
+          if (list.some((x) => x.title === title && (x.t || '') === (n ? '' : e.t || ''))) { dup++; continue; }
+          if (list.length >= 50) continue;
+          list.push({ t: n ? '' : e.t || '', title, c });
+          st.events[k] = list; touched.add(k); added++;
+        }
+      }
+      const t0 = Date.now();
+      for (const k of touched) { const prev = st.evMeta[k] || {}; st.evMeta[k] = { mt: Math.max(t0, (prev.mt || 0) + 1), dirty: true }; }
+      saveState(); scheduleSync();
+      closeSheet(); renderCal(); pushWidget();
+      toast(added ? '일정 ' + added + '개를 가져왔어요' + (dup ? ' (이미 있던 ' + dup + '개는 건너뛰었어요)' : '') : (dup ? '새로 가져올 일정이 없어요 (모두 이미 있어요)' : '이 기간에 일정이 없어요'));
+    };
+  }
   $('wAlpha').addEventListener('input', (e) => { prefs.widgetAlpha = Math.min(100, Math.max(0, Number(e.target.value) || 0)); savePrefs(); $('wAlphaV').textContent = prefs.widgetAlpha + '%'; pushWidget(); });
   $('csDown').onclick = () => setCs((prefs.calScale || 100) - 10);
   $('csUp').onclick = () => setCs((prefs.calScale || 100) + 10);
