@@ -22,7 +22,7 @@
     document.getElementById('list').innerHTML = evs.length
       ? evs.map((e) => '<div class="ev"><span class="dot" style="background:' + EVENT_COLORS[e.c] + '"></span><span class="t">' + esc(e.t || '종일') + '</span><span class="n">' + esc(e.title || '(이름 없음)') + '</span></div>').join('')
       : '<div class="none">오늘은 일정이 없어요</div>';
-    requestAnimationFrame(() => api.widgetSize(w.getBoundingClientRect().height + 28));
+    requestAnimationFrame(() => api.widgetSize(w.offsetHeight + 34));
   }
 
   // 끌어서 옮기기

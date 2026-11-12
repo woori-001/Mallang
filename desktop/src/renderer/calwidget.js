@@ -49,7 +49,7 @@
     $('list').innerHTML = list.length
       ? list.map((x) => '<div class="ev"><span class="dot" style="background:' + EVENT_COLORS[x.ev.c] + '"></span><span class="t">' + esc(/^\d{2}:\d{2}$/.test(x.ev.t) ? x.ev.t : '종일') + '</span><span class="n">' + esc(x.ev.title || '(이름 없음)') + '</span>' + (x.ev.r ? '<span class="rep">↻ ' + window.M.REPEAT_NAME[x.ev.r] + '</span>' : '') + '</div>').join('')
       : '<div class="none">일정이 없어요</div>';
-    requestAnimationFrame(() => api.calwSize(w.getBoundingClientRect().height + 28));
+    requestAnimationFrame(() => api.calwSize(w.offsetHeight + 34));
   }
   $('grid').addEventListener('click', (e) => { const b = e.target.closest('[data-k]'); if (b) { sel = b.dataset.k; render(); } });
   $('prev').addEventListener('click', () => { m--; if (m < 0) { m = 11; y--; } render(); });

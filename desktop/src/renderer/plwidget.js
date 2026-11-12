@@ -72,8 +72,17 @@
     }).join('');
     const inp = w.querySelector('.addIn');
     if (inp) inp.focus();
-    requestAnimationFrame(() => api.plwSize(w.getBoundingClientRect().height + 28));
+    fit();
   }
+  // 창 높이를 내용에 맞춤 (글꼴·스티커 그림이 늦게 그려져 높이가 바뀌어도 따라감, 그림자 자리까지)
+  let lastH = 0;
+  function fit() {
+    const h = w.offsetHeight + 40;   // offsetHeight: 처음 뜰 때 커지는 효과(scale) 중에도 실제 높이
+    if (Math.abs(h - lastH) < 1) return;
+    lastH = h; api.plwSize(h);
+  }
+  new ResizeObserver(() => fit()).observe(w);
+  if (document.fonts) document.fonts.ready.then(fit);
   // 할 일 체크
   $('body').addEventListener('click', (e) => {
     const it = e.target.closest('.it');
