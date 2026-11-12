@@ -170,7 +170,9 @@ function saveNow() {
   try {
     fs.mkdirSync(dataDir, { recursive: true });
     const tmp = dataFile + '.tmp';
-    fs.writeFileSync(tmp, serialize());
+    // 임시 파일에 다 쓰고 디스크에 확실히 내려쓴 뒤(fsync) 바꿔 끼움: 저장 중 전원이 꺼져도 빈 파일이 남지 않게
+    const fd = fs.openSync(tmp, 'w');
+    try { fs.writeSync(fd, serialize()); fs.fsyncSync(fd); } finally { fs.closeSync(fd); }
     if (fs.existsSync(dataFile)) fs.copyFileSync(dataFile, dataFile + '.bak');
     fs.renameSync(tmp, dataFile);
   } catch (e) {
