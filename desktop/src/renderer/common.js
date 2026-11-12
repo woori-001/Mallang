@@ -187,7 +187,13 @@
   ];
   // 그룹 색 (그룹마다 하나씩)
   const GROUP_COLORS = ['#E8456B', '#F08C2E', '#2FA57C', '#3A7FD4', '#8E6FE6', '#C9A400'];
-  const EVENT_COLORS = { lav: '#7466E4', mint: '#2A9D74', pink: '#D4508A', sky: '#3A7FD4' };
+  // 일정 색 (lav·mint·pink·sky는 예전부터 쓰던 색 — 이름 바꾸지 말 것, 팔레트에는 안 보임)
+  const EVENT_COLORS = { lav: '#7466E4', mint: '#2A9D74', pink: '#D4508A', sky: '#3A7FD4', h1p: '#FFE6E4', h2p: '#FEE8DC', h3p: '#FEE9D3', h4p: '#F6EDCC', h5p: '#E7F2D1', h6p: '#D9F6DC', h7p: '#CEF7ED', h8p: '#CBF6FF', h9p: '#E0EFFF', h10p: '#E8ECFE', h11p: '#F3E7FE', h12p: '#FFE4F1', h1l: '#FEC6C0', h2l: '#FFC8AD', h3l: '#FFD09F', h4l: '#F3DF95', h5l: '#D0E69F', h6l: '#ABE8B3', h7l: '#8DEBD6', h8l: '#86E7FA', h9l: '#B3D7FE', h10l: '#C4CCFE', h11l: '#E2C3FF', h12l: '#FEC1DF', h1b: '#FF958E', h2b: '#FE9A65', h3b: '#FFB052', h4b: '#F1D14D', h5b: '#B6D65F', h6b: '#6DD17F', h7b: '#0FD4B7', h8b: '#12CDE9', h9b: '#6CB5FF', h10b: '#909AFE', h11b: '#C690F4', h12b: '#FC8DC8', h1v: '#FF4044', h2v: '#E56806', h3v: '#E48E00', h4v: '#DFBB02', h5v: '#99BB08', h6v: '#05B047', h7v: '#0BAA92', h8v: '#08A4BB', h9v: '#0589E9', h10v: '#5E53FC', h11v: '#A845EB', h12v: '#F239AB', h1d: '#B63132', h2d: '#A74A04', h3d: '#A86807', h4d: '#A78C03', h5d: '#708A06', h6d: '#017F31', h7d: '#087A69', h8d: '#037687', h9d: '#0261A8', h10d: '#403CAA', h11d: '#7435A1', h12d: '#AA337A', h1k: '#6E2826', h2k: '#6B2E04', h3k: '#6E4201', h4k: '#6E5C00', h5k: '#48590B', h6k: '#0F5021', h7k: '#054E42', h8k: '#014B57', h9k: '#023C6B', h10k: '#262861', h11k: '#46265E', h12k: '#67284C', g1: '#EEF2F9', g2: '#D9DCE3', g3: '#C4C7CE', g4: '#AFB2B9', g5: '#9B9EA4', g6: '#878A90', g7: '#74777D', g8: '#61646A', g9: '#4F5257', g10: '#3D4045', g11: '#2D2F34', g12: '#1D1F24' };
+  // 일정 색 고르기 판 (모바일·PC 같이 씀) — 위에 묶음 탭, 아래 16색
+  // 색상환 12색(가로) × 톤(세로: 페일 → 라이트 → 브라이트 → 비비드 → 딥 → 다크) + 무채색 한 줄
+  const EVENT_PALETTE = ['p', 'l', 'b', 'v', 'd', 'k'].flatMap((t) => Array.from({ length: 12 }, (_, i) => 'h' + (i + 1) + t)).concat(Array.from({ length: 12 }, (_, i) => 'g' + (i + 1)));
+  const evPaletteHTML = (cur) => '<div class="evpal" role="group" aria-label="일정 색"><div class="sws">' +
+    EVENT_PALETTE.map((c) => '<button type="button" class="sw' + (c === cur ? ' on' : '') + '" data-act="pick" data-c="' + c + '" style="background:' + EVENT_COLORS[c] + '" aria-label="색 ' + c + '"></button>').join('') + '</div></div>';
 
   const rgba = (c, a) => 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')';
   const grad = (skin, slot, a) => {
@@ -1095,5 +1101,5 @@
     burst(1200);
   }
   const SEASONS_ON = false;   // 계절 스킨 꺼내기: true 로 바꾸면 스킨 목록에 나타남
-  window.M = { DECO_TAPES, DECO_BGS, DECO_EMOJI, cleanDeco, decoEmpty, decoDay, decoTapes, tapeLane, holiday, HOLIDAYS, alarmSound, ALARM_SOUNDS, ALARM_PARTY, ALARM_ARROW, SEASONS_ON, fitShape, REPEATS, REPEAT_NAME, repeatsOn, recurring, eventsOn, GROUP_COLORS, syncRanges, TBL, CONTACT_HEAD, fixContactRows, contactView, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, calTail, markSvg };
+  window.M = { DECO_TAPES, DECO_BGS, DECO_EMOJI, cleanDeco, decoEmpty, decoDay, decoTapes, tapeLane, holiday, HOLIDAYS, alarmSound, ALARM_SOUNDS, ALARM_PARTY, ALARM_ARROW, SEASONS_ON, fitShape, REPEATS, REPEAT_NAME, repeatsOn, recurring, eventsOn, GROUP_COLORS, syncRanges, TBL, CONTACT_HEAD, fixContactRows, contactView, cleanTable, tableToText, textToTable, parseTSV, toTSV, rowMatches, tableEditor, DIVIDER, lineEditor, previewHTML, stripDividers, calFontOptions, guardHTML, memoOrder, SKINS, FONTS, MARKS, MARK_NAMES, MARK_COLORS, EVENT_COLORS, EVENT_PALETTE, evPaletteHTML, ICONS, rgba, grad, esc, pad, dateKey, applyTheme, calTail, markSvg };
 })();

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:">
+<title>주간 플래너</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="skins.css">
+<style>
+/* 바탕화면 '주간 플래너' 위젯: 월~일 7칸, 할 일 바로 체크·추가 */
+body { padding: 14px; }
+.w {
+  border-radius: 22px; box-shadow: 0 6px 14px rgba(70, 60, 150, .16); padding: 12px 12px 12px;
+  display: flex; flex-direction: column; gap: 6px; font-family: var(--cal-font); animation: pop .5s var(--ease);
+  transition: opacity .32s var(--ease), transform .4s var(--ease), background .6s ease; position: relative;
+}
+.w.leaving { opacity: 0; transform: translateY(10px) scale(.92); }
+.hd { display: flex; align-items: center; gap: 6px; padding: 0 4px 2px; cursor: grab; }
+.hd:active { cursor: grabbing; }
+.ttl { display: flex; align-items: baseline; gap: 8px; flex: 1; min-width: 0; color: var(--a1); }
+.ttl b { font-size: calc(17px * var(--cs, 1)); font-weight: 700; }
+.ttl span { font-size: calc(11.5px * var(--cs, 1)); color: var(--sub); font-weight: 600; }
+.nav { width: 26px; height: 26px; border-radius: 9px; background: rgba(var(--glass), .6); }
+.tb { border: none; background: transparent; font-size: 12px; color: var(--sub); padding: 4px 7px; border-radius: 8px; font-family: inherit; }
+.tb:hover { background: rgba(var(--glass), .7); color: var(--ink); }
+.cols { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.dh { display: flex; align-items: baseline; gap: 5px; padding: 5px 8px 6px; border-radius: 10px; border: none; background: transparent; color: var(--ink); font-family: inherit; min-width: 0; text-align: left; }
+.dh:hover { background: rgba(var(--glass), .7); }
+.hdr .dh { border-radius: 0; box-shadow: inset -1px 0 0 var(--line-soft); }
+.hdr .dh:last-child { box-shadow: none; }
+.dh .n { font-size: calc(17px * var(--cs, 1)); font-weight: 800; line-height: 1.15; }
+.dh .k { font-size: calc(10px * var(--cs, 1)); font-weight: 700; color: var(--sub); letter-spacing: .4px; }
+.dh .h { font-size: 9.5px; color: var(--sun); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dh.sat .k, .dh.sat .n { color: var(--sat); }
+.dh.sun .k, .dh.sun .n { color: var(--sun); }
+.dh.cur .n { background: color-mix(in srgb, var(--accent) 30%, #fff); color: var(--ink); border-radius: 8px; padding: 0 5px; box-shadow: inset 0 0 0 1.5px var(--ink); }
+.tl { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-auto-rows: 17px; row-gap: 2px; }
+.tape { height: 17px; line-height: 17px; font-size: 10.5px; font-weight: 600; color: #4A3F5C; padding: 0 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0 2px; border-radius: 2px; opacity: .92; }
+.tape.peach { background: rgba(255, 183, 150, .82); } .tape.mint { background: rgba(150, 222, 192, .82); } .tape.sky { background: rgba(150, 200, 245, .82); }
+.tape.lav { background: rgba(196, 178, 245, .85); } .tape.lemon { background: rgba(250, 226, 120, .86); } .tape.pink { background: rgba(250, 172, 204, .82); }
+.tape.stripe { background: repeating-linear-gradient(-45deg, rgba(250, 172, 204, .9) 0 6px, rgba(255, 250, 250, .9) 6px 12px); }
+.tape.dot { background: radial-gradient(circle, rgba(255, 255, 255, .95) 2px, transparent 2.5px) 0 0 / 10px 10px, rgba(150, 200, 245, .86); }
+.body { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-top: 1px solid var(--line-soft); padding-top: 4px; }
+.day { min-width: 0; padding: 2px 3px 4px; display: flex; flex-direction: column; gap: 2px; border-right: 1px dashed var(--line-soft); min-height: calc(96px * var(--cs, 1)); position: relative; }
+.day:last-child { border-right: none; }
+.day.cur { background: color-mix(in srgb, var(--a1) 7%, transparent); border-radius: 8px; }
+.wt { font-size: calc(10px * var(--cs, 1)); color: var(--sub); text-align: center; letter-spacing: -.2px; white-space: nowrap; overflow: hidden; }
+.it { display: flex; align-items: flex-start; gap: 4px; font-size: calc(11.5px * var(--cs, 1)); line-height: 1.3; cursor: pointer; border-radius: 6px; padding: 1px 2px; }
+.it:hover { background: rgba(var(--glass), .7); }
+.cb { width: 12px; height: 12px; border-radius: 4px; box-shadow: inset 0 0 0 1.5px var(--sub); flex: none; margin-top: 2px; position: relative; }
+.it.done .cb { background: var(--a1); box-shadow: none; }
+.it.done .cb::after { content: ''; position: absolute; left: 3.5px; top: 1px; width: 3px; height: 6px; border: solid #fff; border-width: 0 1.6px 1.6px 0; transform: rotate(45deg); }
+.it .tx { min-width: 0; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-all; }
+.it.done .tx { color: var(--sub); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--sub) 70%, transparent); }
+.more { font-size: 10.5px; color: var(--sub); padding-left: 18px; }
+.add { opacity: 0; font-size: 11px; color: var(--sub); border: none; background: transparent; text-align: left; padding: 1px 2px; border-radius: 6px; font-family: inherit; transition: opacity .15s ease; }
+.day:hover .add, .add:focus { opacity: 1; }
+.add:hover { background: rgba(var(--glass), .7); color: var(--ink); }
+.addIn { width: 100%; font-size: calc(11.5px * var(--cs, 1)); border: none; border-radius: 6px; padding: 2px 4px; background: rgba(var(--glass), .9); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--a1); font-family: inherit; outline: none; }
+.stks { display: flex; flex-wrap: wrap; gap: 0 2px; margin-top: auto; padding-top: 2px; justify-content: flex-end; }
+.stks span { font-size: calc(16px * var(--cs, 1)); line-height: 1; transform: rotate(var(--r, 0deg)); filter: drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) drop-shadow(0 -1px 0 #fff) drop-shadow(0 1.2px 1.5px rgba(40, 30, 60, .2)); }
+.stks img { width: calc(26px * var(--cs, 1)); height: calc(26px * var(--cs, 1)); object-fit: contain; transform: rotate(var(--r, 0deg)); }
+.empty { font-size: 11px; color: var(--sub); text-align: center; padding: 6px 0 2px; }
+.tape.stripe span, .tape.dot span { background: rgba(255, 255, 255, .88); border-radius: 3px; padding: 0 4px; }
+/* 레트로·엑셀 스킨 */
+html.sk-retro .w .dh, html.sk-retro .w .day.cur, html.sk-retro .w .tape { border-radius: 0; }
+html.sk-retro .w .dh.cur .n { border-radius: 0; background: var(--rt-blue); color: #fff; }
+html.sk-retro .w .day.cur { background: rgba(255, 255, 255, .35); box-shadow: inset 0 0 0 2px var(--rt-blue); }
+html.sk-retro .w .cb { border-radius: 0; box-shadow: inset 0 0 0 2px var(--rt-ink); background: #fff; }
+html.sk-retro .w .it.done .cb { background: var(--rt-blue); }
+html.sk-excel .w .dh, html.sk-excel .w .day.cur, html.sk-excel .w .tape { border-radius: 0; }
+html.sk-excel .w .dh.cur .n { background: none; color: var(--xl-g); padding: 0; }
+html.sk-excel .w .dh.cur { box-shadow: inset 0 -2px 0 var(--xl-g); }
+html.sk-excel .w .day.cur { background: rgba(234, 245, 227, .5); }
+html.sk-excel .w .it.done .cb { background: var(--xl-g); }
+/* 말랑이친구들: 구름은 제목 앞에 작게, 한 줄로 */
+html.sk-friends .w .hd { flex-wrap: nowrap; }
+html.sk-friends .w .hd::before { order: 0; margin-right: 2px; }
+html.sk-friends .w .ttl { order: 1; flex: 1 1 auto; min-height: 0; align-items: baseline; padding: 0; }
+html.sk-friends .w .hd .tb, html.sk-friends .w .hd .nav { order: 2; }
+html.sk-friends .w .hd::after, html.sk-friends .w .ttl::after { display: none; }
+/* 말랑 드로잉 스킨 */
+html.draw .w { background: var(--paper-bg, #FBFAF5) !important; box-shadow: inset 0 0 0 2.2px var(--ink), 0 2px 5px rgba(0, 0, 0, .10); border-radius: 16px; }
+html.draw .ttl { color: var(--ink); }
+html.draw .cols.hdr { background: var(--ink); border-radius: 999px; }
+html.draw .dh .k, html.draw .dh .n, html.draw .dh.sat .k, html.draw .dh.sat .n, html.draw .dh.sun .k, html.draw .dh.sun .n { color: var(--paper-bg, #FBFAF5); }
+html.draw .dh.cur .n { background: var(--paper-bg, #FBFAF5); color: var(--ink); box-shadow: none; }
+html.draw .hdr .dh { box-shadow: none; }
+html.draw .body { border-top: 2px solid var(--ink); }
+html.draw .day { border-right: 1.5px dashed color-mix(in srgb, var(--ink) 40%, transparent); }
+html.draw .it.done .cb { background: var(--ink); }
+html.draw .nav { background: transparent; box-shadow: inset 0 0 0 2px var(--ink); border-radius: 50%; }
+</style>
+</head>
+<body>
+<div id="w" class="w">
+  <div id="hd" class="hd" title="끌어서 옮길 수 있어요">
+    <div class="ttl"><b id="wk"></b><span id="rg"></span></div>
+    <button id="thisWeek" class="tb" type="button">이번 주</button>
+    <button id="prev" class="ib nav" type="button" aria-label="지난주"></button>
+    <button id="next" class="ib nav" type="button" aria-label="다음 주"></button>
+    <button id="open" class="tb" type="button" title="큰 플래너로 열기">크게 ↗</button>
+  </div>
+  <div id="hdr" class="cols hdr"></div>
+  <div id="tl" class="tl"></div>
+  <div id="body" class="body"></div>
+</div>
+<script src="common.js"></script>
+<script src="plwidget.js"></script>
+</body>
+</html>

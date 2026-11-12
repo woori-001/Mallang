@@ -37,6 +37,7 @@
 
   let S = null, std = { in: '09:00', out: '18:00', alpha: null };
   let monday = mondayOf(new Date());
+  { const q = new URLSearchParams(location.search).get('week'); if (q && /^\d{4}-\d{2}-\d{2}$/.test(q)) monday = mondayOf(new Date(+q.slice(0, 4), +q.slice(5, 7) - 1, +q.slice(8, 10))); }   // 위젯에서 연 주
   let W = blank();
   let saveT = 0, placing = null;
 
@@ -531,6 +532,7 @@
   }
   window.addEventListener('blur', () => { if (reloadT) remoteReload(); });
   api.onCmd((c) => { if (c.type === 'plReload') remoteReload(); });
+  api.onCmd((c) => { if (c.type === 'plGo' && /^\d{4}-\d{2}-\d{2}$/.test(c.key)) go(mondayOf(new Date(+c.key.slice(0, 4), +c.key.slice(5, 7) - 1, +c.key.slice(8, 10)))); });
   api.onCmd((c) => { if (c.type === 'leave') { if (saveT) flush(); closePop(); stopPlace(); api.plannerShape(false); slider.classList.remove('in'); } });
   slider.addEventListener('transitionend', (e) => { if (e.target === slider && slider.classList.contains('in')) api.plannerShape(true); });
   $('ptab').addEventListener('click', () => { if (saveT) flush(); api.plannerToggle(false); });

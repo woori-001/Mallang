@@ -7,6 +7,7 @@
   const MONTH_EN = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
   const WD = ['일', '월', '화', '수', '목', '금', '토'];
   const EV_ORDER = ['lav', 'mint', 'pink', 'sky'];
+  let palI = -1, palK = '';   // 색 팔레트를 펼친 일정 (그 날짜에서만)
 
   let S = null, sk = null;
   let view = 'memo', q = '';
@@ -630,6 +631,7 @@
     const selHol = window.M.holiday(sel);
     $('selLabel').innerHTML = (sd.getMonth() + 1) + '월 ' + sd.getDate() + '일 ' + WD[sd.getDay()] + '요일' + (selHol ? '<span class="holtag">' + esc(selHol) + '</span>' : '');
     $('calToggle').setAttribute('aria-pressed', String(!!S.settings.showCal));
+    $('plToggle').setAttribute('aria-pressed', String(!!S.settings.showPlan));
     const tt = $('todayToggle');
     tt.setAttribute('aria-pressed', String(!!S.settings.showToday));
     if (evKey !== sel || !$('evList').contains(document.activeElement)) {
@@ -777,13 +779,19 @@
         '<input class="evn" type="text" data-f="title" value="' + esc(ev.title) + '" placeholder="일정 이름" spellcheck="false" aria-label="일정 이름">' +
         repSel(ev) +
         '<button class="ib" type="button" data-act="del" aria-label="일정 삭제" title="삭제">' + ICONS.x + '</button>' +
-      '</div>'
+      '</div>' + (palI === i && palK === sel ? window.M.evPaletteHTML(ev.c) : '')
     ).join('');
     if (focusIdx != null) {
       const inp = el.querySelector('.ev[data-i="' + focusIdx + '"] .evn');
       if (inp) inp.focus();
     }
   }
+  // 팔레트 바깥(다른 곳·일정 이름·시간 칸)을 누르면 닫힘 — 안에서는 여러 색을 눌러 봐도 그대로
+  document.addEventListener('pointerdown', (e) => {
+    if (palI < 0 || e.target.closest('.evpal, .evc')) return;
+    palI = -1;
+    const pal = document.querySelector('.evpal'); if (pal) pal.remove();
+  }, true);
   let evSaveT = null;
   const saveEvents = (now) => {
     clearTimeout(evSaveT);
@@ -826,14 +834,14 @@
       }
       return;
     }
-    const i = Number(b.closest('.ev').dataset.i);
-    if (b.dataset.act === 'color') {
-      evList[i].c = EV_ORDER[(EV_ORDER.indexOf(evList[i].c) + 1) % 4];
-      b.style.background = EVENT_COLORS[evList[i].c];
-      saveEvents(true);
+    if (b.dataset.act === 'pick') {
+      if (palK === sel && evList[palI] && EVENT_COLORS[b.dataset.c]) evList[palI].c = b.dataset.c;
+      renderEvents(); saveEvents(true); return;
     }
+    const i = Number(b.closest('.ev').dataset.i);
+    if (b.dataset.act === 'color') { palI = palI === i && palK === sel ? -1 : i; palK = sel; renderEvents(); const pal = document.querySelector('.evpal'); if (pal) pal.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); return; }
     if (b.dataset.act === 'del') {
-      const del = () => { evList.splice(i, 1); renderEvents(); saveEvents(true); };
+      const del = () => { palI = -1; evList.splice(i, 1); renderEvents(); saveEvents(true); };
       if (evList[i].r) askConfirm('반복 일정을 지울까요?', '"' + (evList[i].title || '이름 없음') + '" ' + window.M.REPEAT_NAME[evList[i].r] + ' 반복이 모두 지워져요.', '모두 지우기').then((ok) => { if (ok) del(); });
       else del();
     }
@@ -855,6 +863,7 @@
   $('evList').addEventListener('focusout', () => { if (evSaveT) saveEvents(true); });
   $('todayToggle').addEventListener('click', () => api.setSettings({ showToday: !S.settings.showToday }));
   $('calToggle').addEventListener('click', () => api.setSettings({ showCal: !S.settings.showCal }));
+  $('plToggle').addEventListener('click', () => api.setSettings({ showPlan: !S.settings.showPlan }));
 
 
   // ───────── 알람 (관리자 미리보기) ─────────

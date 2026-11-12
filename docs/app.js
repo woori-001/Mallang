@@ -357,7 +357,7 @@
     if (item.kind === 'event') {
       const list = item.deleted ? [] : (item.data && Array.isArray(item.data.list) ? item.data.list : []);
       if (list.length) st.events[item.id] = list.map((e) => {
-        const o = { t: String(e.t || ''), title: String(e.title || ''), c: EV_ORDER.includes(e.c) ? e.c : 'lav' };
+        const o = { t: String(e.t || ''), title: String(e.title || ''), c: EVENT_COLORS[e.c] ? e.c : 'lav' };
         if (['d', 'wd', 'w', 'm', 'y'].includes(e.r)) { o.r = e.r; if (Array.isArray(e.x)) o.x = e.x.filter((k) => typeof k === 'string'); }
         return o;
       });
@@ -514,6 +514,10 @@
   let view = 'memos', q = '';
   const now = new Date();
   let calY = now.getFullYear(), calM = now.getMonth(), sel = dateKey(now);
+  let palI = -1, palK = '';   // 색 팔레트를 펼친 일정 (그 날짜에서만)
+  const colorSheet = document.createElement('div');
+  colorSheet.className = 'evSheet'; colorSheet.setAttribute('role', 'dialog'); colorSheet.setAttribute('aria-label', '일정 색 고르기');
+  document.body.appendChild(colorSheet);
 
   function applyPrefs() {
     const t = applyTheme(SKINS[prefs.skin] && SKINS[prefs.skin].pcOnly ? Object.assign({}, prefs, { skin: 'lav' }) : prefs);
@@ -950,8 +954,35 @@
         repSel(e) +
         '<button class="idel" type="button" data-act="del" aria-label="일정 삭제">' + I.x + '</button>' +
       '</div>').join('');
+    renderColorSheet();
     if (focusIdx != null) { const inp = $('evList').querySelector('.ev[data-i="' + focusIdx + '"] .evn'); if (inp) inp.focus(); }
   }
+  // 일정 색: 점을 누르면 화면 아래에서 팔레트 판이 올라옴
+  // 판 안에서는 여러 색을 눌러 봐도 그대로, 바깥(달력·일정 이름·시간 칸 등)을 누르면 내려감
+  function renderColorSheet() {
+    const ev = palK === sel && palI >= 0 ? (st.events[sel] || [])[palI] : null;
+    if (!ev) { palI = -1; if (colorSheet.classList.contains('in')) { colorSheet.classList.remove('in'); document.body.style.paddingBottom = ''; } return; }
+    const wasIn = colorSheet.classList.contains('in');
+    colorSheet.innerHTML = '<div class="grab"></div><div class="csHead"><span class="csDot" style="background:' + EVENT_COLORS[ev.c] + '"></span><b>' + esc(ev.title || '이름 없는 일정') + '</b><span>색 고르기</span></div>' + window.M.evPaletteHTML(ev.c);
+    colorSheet.classList.add('in');
+    if (!wasIn) {
+      // 판에 가리지 않게: 아래 여백을 판 높이만큼 주고, 고르는 일정 줄이 판 바로 위에 보이게 올림
+      const hgt = colorSheet.offsetHeight;
+      document.body.style.paddingBottom = hgt + 'px';
+      const row = $('evList').querySelector('.ev[data-i="' + palI + '"]');
+      if (row) { const lim = innerHeight - hgt - 14, bt = row.getBoundingClientRect().bottom; if (bt > lim) window.scrollBy({ top: bt - lim, behavior: 'smooth' }); }
+    }
+  }
+  colorSheet.addEventListener('click', (e) => {
+    const b = e.target.closest('.sw'); if (!b) return;
+    const ev = (st.events[sel] || [])[palI];
+    if (!ev || !EVENT_COLORS[b.dataset.c]) return;
+    ev.c = b.dataset.c; markEvent(sel); renderCal(); renderEvents();
+  });
+  document.addEventListener('pointerdown', (e) => {
+    if (palI < 0 || e.target.closest('.evSheet, .evc')) return;
+    palI = -1; renderColorSheet();
+  }, true);
   // 이름도 시간도 없이 빈 채로 남은 일정(＋만 누르고 안 쓴 것)은 다른 날로 옮겨 가면 치움
   function pruneBlank(k) {
     const l = st.events[k];
@@ -985,12 +1016,12 @@
       }
       return;
     }
-    const i = Number(b.closest('.ev').dataset.i);
     const list = st.events[sel] || [];
-    if (b.dataset.act === 'color') { list[i].c = EV_ORDER[(EV_ORDER.indexOf(list[i].c) + 1) % 4]; b.style.background = EVENT_COLORS[list[i].c]; }
+    const i = Number(b.closest('.ev').dataset.i);
+    if (b.dataset.act === 'color') { palI = palI === i && palK === sel ? -1 : i; palK = sel; renderEvents(); return; }
     if (b.dataset.act === 'del') {
       if (list[i].r && !(await ask('반복 일정을 지울까요?', '"' + (list[i].title || '이름 없음') + '" ' + window.M.REPEAT_NAME[list[i].r] + ' 반복이 모두 지워져요.', '모두 지우기'))) return;
-      list.splice(i, 1); if (!list.length) delete st.events[sel]; renderEvents();
+      palI = -1; list.splice(i, 1); if (!list.length) delete st.events[sel]; renderEvents();
     }
     markEvent(sel);
     renderCal();
@@ -1260,7 +1291,7 @@
   function nearEvColor(hex) {
     const [r, g, b] = hexRgb(hex);
     let best = 'lav', bd = 1e9;
-    for (const k of EV_ORDER) { const [R, G, B] = hexRgb(EVENT_COLORS[k]); const d = (r - R) ** 2 + (g - G) ** 2 + (b - B) ** 2; if (d < bd) { bd = d; best = k; } }
+    for (const k of Object.keys(EVENT_COLORS)) { const [R, G, B] = hexRgb(EVENT_COLORS[k]); const d = (r - R) ** 2 + (g - G) ** 2 + (b - B) ** 2; if (d < bd) { bd = d; best = k; } }
     return best;
   }
   function calImportSheet() {

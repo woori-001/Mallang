@@ -27,6 +27,8 @@ const foldH = () => Math.round(FOLD_H * clampFh(store && store.settings && store
 const SIDE_W = 370;            // 목록 패널 340 + 탭 30
 const WIDGET_W = 284;
 const CALW_W = 300;   // 달력 위젯
+const PLW_W = 860;    // 주간 플래너 위젯
+const EV_COLOR_KEYS = ['lav', 'mint', 'pink', 'sky', 'h1p', 'h2p', 'h3p', 'h4p', 'h5p', 'h6p', 'h7p', 'h8p', 'h9p', 'h10p', 'h11p', 'h12p', 'h1l', 'h2l', 'h3l', 'h4l', 'h5l', 'h6l', 'h7l', 'h8l', 'h9l', 'h10l', 'h11l', 'h12l', 'h1b', 'h2b', 'h3b', 'h4b', 'h5b', 'h6b', 'h7b', 'h8b', 'h9b', 'h10b', 'h11b', 'h12b', 'h1v', 'h2v', 'h3v', 'h4v', 'h5v', 'h6v', 'h7v', 'h8v', 'h9v', 'h10v', 'h11v', 'h12v', 'h1d', 'h2d', 'h3d', 'h4d', 'h5d', 'h6d', 'h7d', 'h8d', 'h9d', 'h10d', 'h11d', 'h12d', 'h1k', 'h2k', 'h3k', 'h4k', 'h5k', 'h6k', 'h7k', 'h8k', 'h9k', 'h10k', 'h11k', 'h12k', 'g1', 'g2', 'g3', 'g4', 'g5', 'g6', 'g7', 'g8', 'g9', 'g10', 'g11', 'g12'];   // common.js EVENT_COLORS와 같게
 const MIN_W = 180, MIN_H = 110, MAX_W = 1400, MAX_H = 1200;
 const R = (f) => path.join(__dirname, 'renderer', f);
 const PRELOAD = path.join(__dirname, 'preload.js');
@@ -48,7 +50,7 @@ let dataDir, dataFile, store, saveTimer, quitting = false;
 function defaults() {
   return {
     version: 1,
-    settings: { skin: 'lav', font: 'gowun', fontScale: 100, titleScale: 100, titleBold: true, calFont: 'same', calScale: 100, peopleFont: 'same', peopleScale: 100, bodyBg: false, alpha: 60, sideAlpha: 55, showToday: true, showCal: false, showPeople: false, clockMode: 30, clockAlpha: 75, clockScale: 100, clockDark: false, alarmScale: 80, alarmPos: 'tc', foldScale: 100, foldHScale: 100, memoRound: 100, noticeOn: true, pinned: false, autoStart: false, foldDesk: false, foldDeskWhich: 'peek', ckBg: 'sky', ckPl: 'trio', ckFr: 'picnic', ckClock: 'bubble' },
+    settings: { skin: 'lav', font: 'gowun', fontScale: 100, titleScale: 100, titleBold: true, calFont: 'same', calScale: 100, peopleFont: 'same', peopleScale: 100, bodyBg: false, alpha: 60, sideAlpha: 55, showToday: true, showCal: false, showPlan: false, showPeople: false, clockMode: 30, clockAlpha: 75, clockScale: 100, clockDark: false, alarmScale: 80, alarmPos: 'tc', foldScale: 100, foldHScale: 100, memoRound: 100, noticeOn: true, pinned: false, autoStart: false, foldDesk: false, foldDeskWhich: 'peek', ckBg: 'sky', ckPl: 'trio', ckFr: 'picnic', ckClock: 'bubble' },
     nextId: 2,
     memos: [{
       id: 1, slot: 0, x: null, y: null, w: 290, h: 240, type: 'text', title: '말랑메모 시작하기',
@@ -67,6 +69,7 @@ function defaults() {
     cloud: {},
     widget: { x: null, y: null },
     calWidget: { x: null, y: null },
+    planWidget: { x: null, y: null },
     planner: { weeks: {}, std: { in: '09:00', out: '18:00' } },   // 주간 플래너 (관리자 베타)
     peopleWin: { x: null, y: null, w: 400, h: 400, top: false },
     deptWins: {},                       // 떼어 띄운 부서 창 { id: { g, x, y, w, h, top, folded } }
@@ -88,7 +91,7 @@ function load() {
   }
   const d = defaults();
   store = s
-    ? { ...d, ...s, settings: { ...d.settings, ...(s.settings || {}) }, widget: { ...d.widget, ...(s.widget || {}) }, calWidget: { ...d.calWidget, ...(s.calWidget || {}) }, planner: { weeks: {}, std: { in: '09:00', out: '18:00' }, ...(s.planner || {}) }, peopleWin: { ...d.peopleWin, ...(s.peopleWin || {}) }, deptWins: (s.deptWins && typeof s.deptWins === 'object') ? s.deptWins : {}, peopleOrder: cleanOrder(s.peopleOrder), events: s.events || {} }
+    ? { ...d, ...s, settings: { ...d.settings, ...(s.settings || {}) }, widget: { ...d.widget, ...(s.widget || {}) }, calWidget: { ...d.calWidget, ...(s.calWidget || {}) }, planWidget: { ...d.planWidget, ...(s.planWidget || {}) }, planner: { weeks: {}, std: { in: '09:00', out: '18:00' }, ...(s.planner || {}) }, peopleWin: { ...d.peopleWin, ...(s.peopleWin || {}) }, deptWins: (s.deptWins && typeof s.deptWins === 'object') ? s.deptWins : {}, peopleOrder: cleanOrder(s.peopleOrder), events: s.events || {} }
     : d;
   store.memos = store.memos.filter((m) => m && typeof m.id === 'number').map((m) => ({
     slot: 0, w: 260, h: 220, type: 'text', title: '', text: '', items: [], layer: 'normal', hidden: false, folded: false, ...m, deleting: false
@@ -446,6 +449,12 @@ function createHost() {
       const cy = store.calWidget.y != null ? store.calWidget.y : wa.y + wa.height - 520;
       return { action: 'allow', overrideBrowserWindowOptions: { ...baseWinOpts, x: Math.round(cx), y: Math.round(cy), width: CALW_W, height: 420 } };
     }
+    if (kind === 'plw') {
+      const wa = workArea();
+      const px = store.planWidget.x != null ? store.planWidget.x : wa.x + Math.max(20, (wa.width - PLW_W) / 2);
+      const py = store.planWidget.y != null ? store.planWidget.y : wa.y + 40;
+      return { action: 'allow', overrideBrowserWindowOptions: { ...baseWinOpts, x: Math.round(px), y: Math.round(py), width: Math.min(PLW_W, wa.width), height: 360 } };
+    }
     if (kind === 'notice') {
       const detail = u.searchParams.get('view') === '1';
       return { action: 'allow', overrideBrowserWindowOptions: { ...baseWinOpts, ...(detail ? noticeDetailBounds() : noticeToastBounds()), alwaysOnTop: true } };
@@ -477,6 +486,7 @@ function createHost() {
     if (kind === 'memo') setupMemoWin(win, Number(u.searchParams.get('id')));
     if (kind === 'widget') setupWidget(win);
     if (kind === 'calw') setupCalW(win);
+    if (kind === 'plw') setupPlW(win);
     if (kind === 'planner') setupPlanner(win);
     if (kind === 'people') setupPeople(win, u.searchParams.get('dept') || 'main');
     if (kind === 'search') setupSearch(win);
@@ -891,11 +901,13 @@ function setupPlanner(win) {
   win.once('ready-to-show', () => { if (!win.isDestroyed()) { win.show(); win.focus(); sidePlanner(true); } });
   win.on('closed', () => { if (plannerWin === win) plannerWin = null; sidePlanner(false); });
 }
+let plannerGoKey = null;   // 위젯에서 날짜를 눌러 열 때 보여 줄 주
 function togglePlanner(force) {
   const isOpen = plannerWin && !plannerWin.isDestroyed();
   const want = force == null ? !isOpen : !!force;
   if (want && !plannerAllowed()) return;
-  if (want && !isOpen) hostOpen('planner.html?kind=planner', 'planner-' + Date.now());
+  if (want && !isOpen) hostOpen('planner.html?kind=planner' + (plannerGoKey ? '&week=' + plannerGoKey : ''), 'planner-' + Date.now());
+  plannerGoKey = null;
   if (!want && isOpen) { const w = plannerWin; plannerWin = null; w.webContents.send('cmd', { type: 'leave' }); setTimeout(() => { if (!w.isDestroyed()) w.close(); }, 430); }
 }
 const PL_COLORS = ['peach', 'mint', 'sky', 'lav', 'lemon', 'pink', 'stripe', 'dot'];
@@ -913,6 +925,12 @@ function cleanWeek(w) {
   return o;
 }
 ipcMain.on('planner:toggle', (e, force) => togglePlanner(force));
+ipcMain.on('planner:openAt', (e, key) => {
+  if (typeof key !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(key)) return;
+  if (plannerWin && !plannerWin.isDestroyed()) { plannerWin.webContents.send('cmd', { type: 'plGo', key }); plannerWin.focus(); return; }
+  plannerGoKey = key;
+  togglePlanner(true);
+});
 ipcMain.handle('planner:get', (e, key) => {
   if (typeof key !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(key)) return null;
   return { week: cleanWeek(store.planner.weeks[key]), std: store.planner.std };
@@ -932,6 +950,7 @@ ipcMain.on('planner:set', (e, key, w) => {
   plannerTouch(key);
   save();
   scheduleSync();
+  plannerReload(e.sender);   // 큰 플래너 ↔ 위젯 서로 알려 줌
 });
 function plannerTouch(key) {
   const old = store.planner.meta[key];
@@ -950,7 +969,9 @@ function mergeWeek(a, b) {
     habits: a.habits.length ? a.habits : b.habits
   });
 }
-function plannerReload() { if (plannerWin && !plannerWin.isDestroyed()) plannerWin.webContents.send('cmd', { type: 'plReload' }); }
+function plannerReload(from) {
+  for (const w of [plannerWin, plW]) if (w && !w.isDestroyed() && w.webContents !== from) w.webContents.send('cmd', { type: 'plReload' });
+}
 ipcMain.on('planner:std', (e, std) => {
   const t = (v, d) => (/^\d{2}:\d{2}$/.test(v) ? v : d);
   const al = num(std && std.alpha);
@@ -1008,6 +1029,29 @@ function setupCalW(win) {
     if (calW === win) calW = null;
     if (!win.__intentional && !quitting && store.settings.showCal) { store.settings.showCal = false; save(); broadcast(); }
   });
+}
+// 바탕화면 '주간 플래너' 위젯 (월~일 7칸)
+let plW = null;
+function openPlW() {
+  if (plW && !plW.isDestroyed()) return;
+  hostOpen('plwidget.html?kind=plw', 'plw-' + Date.now());
+}
+function setupPlW(win) {
+  plW = win;
+  win.once('ready-to-show', () => { if (!win.isDestroyed()) { win.showInactive(); sendToBottom(win); } });
+  win.on('blur', () => sendToBottom(win));
+  win.on('closed', () => {
+    if (plW === win) plW = null;
+    if (!win.__intentional && !quitting && store.settings.showPlan) { store.settings.showPlan = false; save(); broadcast(); }
+  });
+}
+function closePlW() {
+  if (!plW || plW.isDestroyed()) return;
+  const w = plW;
+  w.__intentional = true;
+  plW = null;
+  w.webContents.send('cmd', { type: 'leave' });
+  setTimeout(() => { if (!w.isDestroyed()) w.close(); }, 330);
 }
 function closeCalW() {
   if (!calW || calW.isDestroyed()) return;
@@ -1430,7 +1474,7 @@ function updateSettings(patch) {
   if ('bodyBg' in patch) patch.bodyBg = !!patch.bodyBg;
   if ('titleBold' in patch) patch.titleBold = !!patch.titleBold;
   if ('titleScale' in patch) patch.titleScale = Math.min(170, Math.max(70, Number(patch.titleScale) || 100));
-  const keys = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'showCal', 'showPeople', 'clockMode', 'clockAlpha', 'clockScale', 'clockDark', 'alarmScale', 'alarmPos', 'foldScale', 'foldHScale', 'memoRound', 'sideDisplay', 'noticeOn', 'pinned', 'autoStart', 'foldDesk', 'foldDeskWhich', 'ckBg', 'ckPl', 'ckFr', 'ckClock'];
+  const keys = ['skin', 'font', 'fontScale', 'titleScale', 'titleBold', 'calFont', 'calScale', 'peopleFont', 'peopleScale', 'bodyBg', 'alpha', 'sideAlpha', 'showToday', 'showCal', 'showPlan', 'showPeople', 'clockMode', 'clockAlpha', 'clockScale', 'clockDark', 'alarmScale', 'alarmPos', 'foldScale', 'foldHScale', 'memoRound', 'sideDisplay', 'noticeOn', 'pinned', 'autoStart', 'foldDesk', 'foldDeskWhich', 'ckBg', 'ckPl', 'ckFr', 'ckClock'];
   if ('noticeOn' in patch) patch.noticeOn = !!patch.noticeOn;
   if ('sideDisplay' in patch) patch.sideDisplay = typeof patch.sideDisplay === 'number' && isFinite(patch.sideDisplay) ? patch.sideDisplay : null;
   if ('foldScale' in patch) patch.foldScale = clampFs(patch.foldScale);
@@ -1464,6 +1508,7 @@ function updateSettings(patch) {
   if (s.sideDisplay !== prev.sideDisplay && side && !side.isDestroyed()) setB(side, sideBounds());
   if (s.showToday !== prev.showToday) { if (s.showToday) openWidget(); else closeWidget(); }
   if (s.showCal !== prev.showCal) { if (s.showCal) openCalW(); else closeCalW(); }
+  if (s.showPlan !== prev.showPlan) { if (s.showPlan) openPlW(); else closePlW(); }
   if (s.showPeople !== prev.showPeople) { if (s.showPeople) openPeople(); else closePeople(); buildTrayMenu(); }
   save();
   broadcast();
@@ -1568,6 +1613,7 @@ function buildTrayMenu() {
     { type: 'separator' },
     { label: '오늘 일정 위젯', type: 'checkbox', checked: !!store.settings.showToday, click: (i) => updateSettings({ showToday: i.checked }) },
     { label: '달력 위젯', type: 'checkbox', checked: !!store.settings.showCal, click: (i) => updateSettings({ showCal: i.checked }) },
+    { label: '주간 플래너 위젯', type: 'checkbox', checked: !!store.settings.showPlan, click: (i) => updateSettings({ showPlan: i.checked }) },
     { label: '연락망 띄우기', type: 'checkbox', checked: !!store.settings.showPeople, click: (i) => updateSettings({ showPeople: i.checked }) },
     { label: '윈도우 시작 시 자동 실행', type: 'checkbox', checked: !!store.settings.autoStart, click: (i) => updateSettings({ autoStart: i.checked }) },
     { label: '메모 저장 폴더 열기', click: () => shell.openPath(dataDir) },
@@ -1598,6 +1644,7 @@ ipcMain.on('host:ready', () => {
   for (const m of store.memos) if (!m.hidden && !m.deleting) openMemoWin(m);
   if (store.settings.showToday) openWidget();
   if (store.settings.showCal) openCalW();
+  if (store.settings.showPlan) openPlW();
   if (store.settings.showPeople) openPeople();
   for (const id of Object.keys(store.deptWins)) openDept(id);   // 떼어 띄운 부서 창도 다시
 });
@@ -1816,6 +1863,19 @@ ipcMain.on('calw:size', (e, h) => {
   const b = calW.getBounds();
   calW.setBounds({ x: b.x, y: b.y, width: CALW_W, height: Math.round(Math.min(760, Math.max(200, h))) });
 });
+ipcMain.on('plw:move', (e, x, y, done) => {
+  x = num(x); y = num(y);
+  if (!plW || plW.isDestroyed() || x == null || y == null) return;
+  plW.setPosition(Math.round(x), Math.round(y));
+  if (done) { store.planWidget = { x: Math.round(x), y: Math.round(y) }; save(); }
+});
+ipcMain.on('plw:size', (e, h) => {
+  h = num(h);
+  if (!plW || plW.isDestroyed() || h == null) return;
+  const b = plW.getBounds();
+  plW.setBounds({ x: b.x, y: b.y, width: b.width, height: Math.round(Math.min(900, Math.max(200, h))) });
+});
+ipcMain.on('plw:focus', () => { if (plW && !plW.isDestroyed()) plW.focus(); });
 ipcMain.on('widget:size', (e, h) => {
   h = num(h);
   if (!widget || widget.isDestroyed() || h == null) return;
@@ -2622,7 +2682,7 @@ const sanitizeItems = (a) => (Array.isArray(a) ? a.slice(0, 500).map((x) => ({ t
 const cleanEvent = (ev) => {
   const o = {
     t: String((ev && ev.t) || '').slice(0, 10), title: String((ev && ev.title) || '').slice(0, 200),
-    c: ['lav', 'mint', 'pink', 'sky'].includes(ev && ev.c) ? ev.c : 'lav'
+    c: EV_COLOR_KEYS.includes(ev && ev.c) ? ev.c : 'lav'
   };
   if (ev && ['d', 'wd', 'w', 'm', 'y'].includes(ev.r)) {
     o.r = ev.r;
